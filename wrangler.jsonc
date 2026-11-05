@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "roomremix",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./public" },
+  "ai": { "binding": "AI" },
+  "ratelimits": [
+    { "name": "GEN_LIMITER", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
+  ],
+  "vars": { "TURNSTILE_SITE_KEY": "1x00000000000000000000AA" },
+  "observability": { "enabled": true }
+}
