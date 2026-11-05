@@ -8,6 +8,6 @@
   "ratelimits": [
     { "name": "GEN_LIMITER", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
   ],
-  "vars": { "TURNSTILE_SITE_KEY": "1x00000000000000000000AA" },
+  "vars": { "TURNSTILE_SITE_KEY": "0x4AAAAAAF1bh5K2zSVbvctP" },
   "observability": { "enabled": true }
 }
