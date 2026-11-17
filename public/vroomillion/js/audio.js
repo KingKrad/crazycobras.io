@@ -83,6 +83,21 @@ export const sfx = {
   bump: () => { noise(0.2, { vol: 0.3, hp: 300 }); tone(90, 0.2, { type: "square", vol: 0.2, slide: 0.5 }); },
   win: () => [N.C5, N.C5, N.C5, N.E5, N.G5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f, i === 7 ? 0.5 : 0.11, { vol: 0.18, at: i * 0.12 })),
   lose: () => [N.G4, N.F4, N.E4, N.C4].forEach((f, i) => tone(f, 0.25, { type: "triangle", vol: 0.22, at: i * 0.22 })),
+  // Engine screaming up before a launch.
+  rev: () => {
+    tone(70, 0.55, { type: "sawtooth", vol: 0.16, slide: 3.2 });
+    tone(140, 0.55, { type: "square", vol: 0.06, slide: 3 });
+    noise(0.4, { vol: 0.05, hp: 2500, at: 0.15 });
+  },
+  // Off the line: a thump, a tyre screech and a whoosh, bigger for rarer answers.
+  launch: (t) => {
+    if (t === 0) { tone(90, 0.35, { type: "sawtooth", vol: 0.18, slide: 0.4 }); return; }
+    tone(60, 0.3, { type: "square", vol: 0.25 + t * 0.03, slide: 0.5 });
+    noise(0.25 + t * 0.12, { vol: 0.12 + t * 0.03, hp: 3500 });
+    noise(0.5 + t * 0.15, { vol: 0.06 + t * 0.02, hp: 600, at: 0.1 });
+    if (t >= 4) tone(220, 0.8, { type: "sawtooth", vol: 0.1, slide: 4, at: 0.05 });
+  },
+  shift: () => { noise(0.05, { vol: 0.12, hp: 1200 }); tone(320, 0.05, { vol: 0.06 }); },
   // Reveal jingle gets grander with each rarity tier.
   tier: (t) => {
     if (t === 0) { tone(110, 0.3, { type: "sawtooth", vol: 0.18, slide: 0.5 }); noise(0.25, { vol: 0.1, hp: 200 }); return; }

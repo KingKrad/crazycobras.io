@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   TIERS, ROUNDS, LEAGUES, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout,
+  pickQuestions, payout, deckQuestions,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -104,4 +104,57 @@ test("pickQuestions returns distinct questions", () => {
 test("payout rewards winning and niche answers", () => {
   assert.deepEqual(payout(1000, true, [1, 2, 3]), { base: 1000, bonus: 0, total: 1000 });
   assert.deepEqual(payout(1000, false, [4, 5]), { base: 200, bonus: 280, total: 480 });
+});
+
+const q = (text) => buildIndex(QUESTIONS.find((x) => x.q === text));
+
+test("extra words in front of a real answer still count", () => {
+  const parts = q("Name a part of a car");
+  assert.equal(judge(parts, "air intake").tier, 2);
+  const r = judge(parts, "front bumper");
+  assert.equal(r.tier, 2);
+  assert.equal(r.display, "front bumper", "shows what the player typed");
+  assert.equal(r.key, "bumper", "but matches on the real answer for fender benders");
+  assert.ok(judge(q("Name a car model"), "Ford Mustang").tier > 0);
+  assert.ok(judge(q("Name a colour"), "dark green").tier > 0);
+  assert.equal(judge(fruit, "apple pie").tier, 0, "the last word has to be the answer");
+  assert.equal(judge(fruit, "purple passion fruit").key, "passion fruit", "answers ending in a category word still work");
+  // every answer in the bank still works with an extra word in front
+  for (const x of QUESTIONS) {
+    const idx = buildIndex(x);
+    for (const e of x.a.flat()) {
+      const d = e.split("|")[0];
+      if (normalize(d).length < 2) continue; // single letters ("C", "R") only count on their own
+      assert.ok(judge(idx, "super " + d).tier > 0, `${x.q}: "super ${d}"`);
+    }
+  }
+});
+
+test("a trailing category word is ignored", () => {
+  assert.equal(judge(q("Name a river"), "Nile River").display, "nile");
+  assert.equal(judge(q("Name a famous race track"), "Monza Circuit").display, "monza");
+  assert.equal(judge(q("Name an engine type or layout"), "V8 engine").display, "v8");
+  assert.equal(judge(q("Name a tree"), "oak tree").display, "oak");
+});
+
+test("GEARHEAD and CLASSIC decks each have enough questions", () => {
+  const car = deckQuestions(QUESTIONS, "car");
+  const classic = deckQuestions(QUESTIONS, "classic");
+  assert.ok(car.length >= ROUNDS * 2, "car deck " + car.length);
+  assert.ok(classic.length >= ROUNDS * 2);
+  assert.ok(car.every((x) => x.deck === "car" || x.deck === "both"));
+  assert.ok(classic.every((x) => x.deck !== "car"));
+  assert.equal(car.length + classic.length - QUESTIONS.filter((x) => x.deck === "both").length, QUESTIONS.length);
+});
+
+test("no answer appears in two tiers of the same question", () => {
+  for (const x of QUESTIONS) {
+    const seen = new Map();
+    x.a.forEach((list, t) => list.forEach((e) => e.split("|").forEach((f) => {
+      const k = normalize(f);
+      if (!k) return;
+      assert.ok(!seen.has(k) || seen.get(k) === t, `${x.q}: "${f}" in tiers ${seen.get(k) + 1} and ${t + 1}`);
+      seen.set(k, t);
+    })));
+  }
 });

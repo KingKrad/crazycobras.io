@@ -75,18 +75,55 @@ export function editDistance(a, b, max, subCost = 1) {
 // How many typos to forgive for an answer of this length.
 export const typoAllowance = (len) => (len >= 9 ? 2 : len >= 4 ? 1 : 0);
 
+// Words that just name the category, so "nile river" means "nile".
+const FILLER = new Set(["river", "tree", "cheese", "pasta", "dog", "bird", "fish", "game", "language", "city", "circuit", "raceway", "speedway", "superspeedway", "racetrack", "track", "engine", "racing", "team", "car", "breed", "spice", "herb", "colour", "color", "fruit", "plant", "flag"]);
+
+function lookup(index, key, addPlural = true) {
+  const variants = [key];
+  if (key.endsWith("es") && key.length > 4) variants.push(key.slice(0, -2));
+  if (key.endsWith("s") && key.length > 3) variants.push(key.slice(0, -1));
+  if (addPlural) variants.push(key + "s");
+  for (const v of variants) {
+    const hit = index.get(v);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// GEARHEAD = car questions only; CLASSIC = everything except the car-only ones.
+export function deckQuestions(all, deck) {
+  return deck === "car" ? all.filter((q) => q.deck === "car" || q.deck === "both") : all.filter((q) => q.deck !== "car");
+}
+
 // Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
 // corrected is true when a typo was snapped to the nearest real answer.
 export function judge(index, raw) {
   const key = normalize(raw);
   if (!key) return { tier: 0, display: "", key: "" };
-  const variants = [key];
-  if (key.endsWith("es") && key.length > 4) variants.push(key.slice(0, -2));
-  if (key.endsWith("s") && key.length > 3) variants.push(key.slice(0, -1));
-  variants.push(key + "s");
-  for (const v of variants) {
-    const hit = index.get(v);
+  const exact = lookup(index, key);
+  if (exact) return { ...exact, key: normalize(exact.display) };
+
+  // "pine apple" -> "pineapple"
+  const joined = key.includes(" ") && lookup(index, key.replace(/ /g, ""));
+  if (joined) return { ...joined, key: normalize(joined.display), corrected: true };
+
+  // "nile river", "monza circuit", "v8 engine": drop a trailing category word.
+  const words = key.split(" ");
+  const trimmed = words.length > 1 && FILLER.has(words[words.length - 1]) ? words.slice(0, -1) : words;
+  if (trimmed !== words) {
+    const hit = lookup(index, trimmed.join(" "));
     if (hit) return { ...hit, key: normalize(hit.display) };
+  }
+
+  // "front bumper", "ford mustang", "dark green": extra words in front of a real answer.
+  // Longest matching ending wins; the player's own words are shown.
+  for (const ws of trimmed === words ? [words] : [words, trimmed]) {
+    for (let i = 1; i < ws.length; i++) {
+      const tail = ws.slice(i).join(" ");
+      if (tail.length < 2) continue;
+      const hit = lookup(index, tail, false);
+      if (hit) return { ...hit, key: normalize(hit.display), display: String(raw).trim().replace(/\s+/g, " ").slice(0, 40) };
+    }
   }
   // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
   // People rarely fumble the first letter, so it must match; short words can't have a wrong letter.
@@ -97,7 +134,8 @@ export function judge(index, raw) {
     for (const [cand, hit] of index) {
       if (cand[0] !== key[0] || cand.length < 4) continue;
       if (key.length < 6 && cand.length < key.length) continue; // short words: only a missing letter, never an extra one
-      const d = Math.min(editDistance(key, cand, max, subCost), editDistance(key.replace(/ /g, ""), cand.replace(/ /g, ""), max, subCost));
+      const joinedD = editDistance(key.replace(/ /g, ""), cand.replace(/ /g, ""), 1, subCost);
+      const d = Math.min(editDistance(key, cand, max, subCost), joinedD <= 1 ? joinedD : Infinity);
       if (d <= max && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
     }
     if (best) return { ...best.hit, key: normalize(best.hit.display), corrected: true };

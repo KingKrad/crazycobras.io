@@ -199,7 +199,10 @@ const BODIES = {
   },
 };
 
-const WHEEL = [".KKK.", "KKHKK", "KHHHK", "KKHKK", ".KKK."];
+const WHEELS = [
+  [".KKK.", "KKHKK", "KHHHK", "KKHKK", ".KKK."],
+  [".KKK.", "KHKHK", "KKHKK", "KHKHK", ".KKK."],
+];
 
 function shade(hex, f) {
   const n = parseInt(hex.slice(1), 16);
@@ -210,8 +213,10 @@ function shade(hex, f) {
 const cache = new Map();
 
 // Returns an offscreen canvas holding the car at 1 pixel per cell.
-export function carSprite(car) {
-  if (cache.has(car.id)) return cache.get(car.id);
+// frame 0/1 draws the wheel spokes in two positions so they can spin.
+export function carSprite(car, frame = 0) {
+  const ck = car.id + ":" + frame;
+  if (cache.has(ck)) return cache.get(ck);
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
   const wheelTop = tpl.rows.length - 2;
@@ -241,7 +246,7 @@ export function carSprite(car) {
   tpl.rows.forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === "B" && (y === 0 || tpl.rows[y - 1][x] === "." )) g.fillRect(x, y, 1, 1);
   }));
-  for (const wx of tpl.wheels) WHEEL.forEach((row, y) => [...row].forEach((ch, x) => put(ch, wx + x, wheelTop + y)));
-  cache.set(car.id, cv);
+  for (const wx of tpl.wheels) WHEELS[frame].forEach((row, y) => [...row].forEach((ch, x) => put(ch, wx + x, wheelTop + y)));
+  cache.set(ck, cv);
   return cv;
 }

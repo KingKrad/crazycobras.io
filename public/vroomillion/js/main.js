@@ -2,7 +2,7 @@ import { QUESTIONS } from "./data.js";
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, LEAGUES, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, exampleAnswer,
+  pickQuestions, payout, exampleAnswer, deckQuestions,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -26,7 +26,7 @@ function h(tag, attrs = {}, ...kids) {
 
 // ---------- save data ----------
 const SAVE_KEY = "vroomillion.v1";
-const fresh = () => ({ cash: 0, owned: ["rustbucket"], car: "rustbucket", league: 0, muted: false, races: 0, wins: 0, vrooms: 0, deep: 0 });
+const fresh = () => ({ cash: 0, owned: ["rustbucket"], car: "rustbucket", league: 0, deck: "classic", muted: false, races: 0, wins: 0, vrooms: 0, deep: 0 });
 let save = fresh();
 try {
   const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
@@ -89,12 +89,16 @@ function show(name) {
   for (const s of document.querySelectorAll(".screen")) s.classList.toggle("active", s.id === "s-" + name);
   $("title-art").classList.toggle("hidden", name !== "title");
   document.body.dataset.screen = name;
+  if (name !== "race") {
+    $("pops").textContent = "";
+    document.querySelector(".stage").classList.remove("launch", ...[0, 1, 2, 3, 4, 5].map((t) => "launch-t" + t));
+  }
   if (name === "title") {
     raceToken++;
     audio.engineStop();
     attract();
     $("stats").textContent = save.races
-      ? `RACES ${save.races} · WINS ${save.wins} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
+      ? `MODE ${modeName(save.deck)} · RACES ${save.races} · WINS ${save.wins} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "leagues") renderLeagues();
@@ -150,7 +154,21 @@ function carPicker(mount, getId, setId) {
 }
 
 // ---------- menus ----------
+const MODES = [
+  { id: "classic", name: "CLASSIC", info: "ALL TOPICS" },
+  { id: "car", name: "GEARHEAD", info: "CARS & RACING ONLY" },
+];
+const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
+
+function modeSwitch(mount) {
+  mount.textContent = "";
+  mount.append(...MODES.map((m) => h("button", {
+    class: "mode mode-" + m.id, type: "button", "aria-pressed": String(save.deck === m.id),
+    onclick: () => { save.deck = m.id; persist(); audio.sfx.move(); modeSwitch(mount); },
+  }, h("span", { class: "mode-name", text: m.name }), h("span", { class: "mode-info", text: m.info }))));
+}
 function renderLeagues() {
+  modeSwitch($("mode-solo"));
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   const list = $("league-list");
   list.textContent = "";
@@ -168,6 +186,7 @@ function renderLeagues() {
 
 const versus = { p1: save.car, p2: save.car };
 function renderVersus() {
+  modeSwitch($("mode-2p"));
   versus.p1 = save.car;
   versus.p2 = save.car;
   carPicker($("picker-p1"), () => versus.p1, (id) => { versus.p1 = id; });
@@ -239,12 +258,26 @@ function hudCard(r, i) {
   r.elDist = h("span", { class: "dist", text: "0 M" });
   r.elTier = h("span", { class: "badge t0 ghost", text: "READY" });
   r.elNitro = h("span", { class: "n2o", text: "N2O " + r.nitro });
+  r.elSpeed = h("span", { class: "speedo", text: "READY" });
   return h("div", { class: "hud-card p" + (i + 1) },
     h("div", { class: "hud-name", text: r.name }),
     h("div", { class: "hud-car", text: r.car.name }),
-    r.elDist,
+    h("div", { class: "dist-row" }, r.elDist, r.elSpeed),
     race.solo ? goalBar(r) : null,
     h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
+}
+
+// "+720 M" bursting up from a car, sized by how rare the answer was.
+function popGain(i, metres, tier, nitro) {
+  const at = scene.anchor(i);
+  const el = h("div", { class: `gain-pop gp${tier}` },
+    h("span", { class: "gain-m", text: tier ? `+${metres.toLocaleString("en-US")} M` : "STALLED" }),
+    tier >= 4 ? h("span", { class: "gain-tag", text: tier === 5 ? "VROOMILLION!" : "DEEP CUT!" }) : null,
+    nitro ? h("span", { class: "gain-tag nitro", text: "NITRO!" }) : null);
+  el.style.left = (at.x * 100).toFixed(1) + "%";
+  el.style.top = (at.y * 100).toFixed(1) + "%";
+  $("pops").append(el);
+  setTimeout(() => el.remove(), 1800);
 }
 
 function goalBar(r) {
@@ -270,7 +303,7 @@ function startRace(setup) {
   const racers = solo
     ? [mk("YOU", carById(save.car))]
     : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
-  race = { token, solo, setup, racers, round: 0, questions: pickQuestions(QUESTIONS, ROUNDS) };
+  race = { token, solo, setup, racers, round: 0, questions: pickQuestions(deckQuestions(QUESTIONS, save.deck), ROUNDS), deck: save.deck };
 
   scene.setRacers(solo
     ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
@@ -287,6 +320,8 @@ function startRace(setup) {
   $("hint").textContent = "";
   $("question").textContent = "GET READY…";
   $("round-label").textContent = `ROUND 1/${ROUNDS}`;
+  $("mode-label").textContent = modeName(save.deck);
+  $("mode-label").className = "mode-tag mode-" + save.deck;
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
   show("race");
@@ -359,15 +394,37 @@ async function runRace(token) {
     // burst down the road
     const from = race.racers.map((r) => r.dist);
     const gain = race.racers.map((r, i) => metresFor(final[i].tier, r.power, r.useNitro));
+    const topTier = Math.max(...final.map((f) => f.tier));
     race.racers.forEach((r, i) => {
       r.tiers.push(final[i].tier);
       r.log.push({ q: q.q, answer: final[i].display || "—", tier: final[i].tier, gain: gain[i], nitro: r.useNitro, bump: !!final[i].bump });
       r.elTier.className = "badge t" + final[i].tier;
       r.elTier.textContent = TIERS[final[i].tier].short;
-      scene.racers[i].nitro = r.useNitro && final[i].tier > 0;
-      if (scene.racers[i].nitro) audio.sfx.nitro();
     });
-    const dur = 2300;
+
+    // rev up...
+    if (topTier > 0) {
+      scene.rev(0.55);
+      audio.sfx.rev();
+      audio.engineSet(0.85);
+      race.racers.forEach((r) => { r.elSpeed.textContent = "REV!"; });
+      await sleep(550);
+      if (!alive()) return;
+    }
+    // ...and launch
+    const stage = document.querySelector(".stage");
+    stage.classList.add("launch", "launch-t" + topTier);
+    race.racers.forEach((r, i) => {
+      const nitro = r.useNitro && final[i].tier > 0;
+      scene.racers[i].nitro = nitro;
+      scene.launch(i, final[i].tier, nitro);
+      popGain(i, gain[i], final[i].tier, nitro);
+      if (nitro) audio.sfx.nitro();
+    });
+    audio.sfx.launch(topTier);
+    const dur = 2300 + topTier * 180;
+    const gears = 2 + topTier;
+    let gear = 0;
     const t0 = performance.now();
     await new Promise((done) => {
       const step = (now) => {
@@ -382,17 +439,24 @@ async function runRace(token) {
           scene.racers[i].boost = (gain[i] / 1500) * v;
           top = Math.max(top, scene.racers[i].boost);
           r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
+          r.elSpeed.textContent = Math.round(40 + Math.min(4.5, scene.racers[i].boost) * 85 * r.power) + " KM/H";
           drawGoal(r);
         });
         scene.speed = 0.25 + Math.min(0.75, top * 0.9);
-        audio.engineSet(scene.speed);
+        // climb through the gears: rpm rises, then drops on each shift
+        const g = Math.min(gears - 1, Math.floor(e * gears));
+        if (g > gear && top > 0.3) { gear = g; audio.sfx.shift(); }
+        const rpm = topTier > 0 ? 0.35 + 0.65 * ((e * gears) % 1) : 0.2;
+        audio.engineSet(Math.max(scene.speed * 0.6, rpm * Math.min(1, top + 0.3)));
         if (k < 1) requestAnimationFrame(step);
         else done();
       };
       requestAnimationFrame(step);
     });
+    stage.classList.remove("launch", "launch-t" + topTier);
     if (!alive()) return;
     race.racers.forEach((r, i) => {
+      r.elSpeed.textContent = "CRUISING";
       r.useNitro = false;
       scene.racers[i].nitro = false;
       scene.racers[i].boost = 0;
@@ -652,6 +716,7 @@ document.addEventListener("click", (e) => {
 });
 $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
+$("btn-gearhead").addEventListener("click", () => { audio.sfx.click(); save.deck = "car"; persist(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
