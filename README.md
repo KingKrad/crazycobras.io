@@ -13,7 +13,10 @@ The game lives in `public/vroomillion/`; the site's home page (`/`) redirects th
 - **Question modes:** CLASSIC (all topics) or GEARHEAD (cars and racing only), picked on the race setup screen.
 - **Answers:** close typos are fixed silently; extra words in front still count ("front bumper" counts as bumper); wrong answers can be retried until the timer runs out.
 - **Rarity tiers:** Stalled → Traffic → Cruising → Fast Lane → Deep Cut → One in a Vroomillion.
-- **Daily free run:** one race per day per browser (1P or 2P). The first race each day uses the same 7 prompts for everyone, picked from the date.
+- **Free play (for now):** `FREE_PLAY = true` in `public/vroomillion/js/logic.js` lets everyone race as much as they like and hides the $5 prompts. **Set it to `false` at launch** to bring back the limit below.
+- **Daily free run:** one race per day per browser (1P or 2P) when free play is off.
+- **No repeats:** each browser remembers which questions it has seen and skips them until every question in that mode has been played, then starts a new cycle.
+- **One in a Vroomillion:** each question has only its rarest few answers in the top tier, and they must be spelled exactly; a typo that gets autocorrected scores as a Deep Cut. The end-of-round hint shows a Deep Cut, never a Vroomillion answer.
 - **Unlimited ($5, one-time, non-refundable):** removes the daily limit. Buyers must create an account (email + password) first; Unlimited belongs to the account and works on any device they log in on. Paid through Stripe Checkout; see setup below.
 - **Accounts:** stored in a Cloudflare D1 database (`DB` binding, created automatically on the first deploy). Passwords are salted PBKDF2-SHA256 hashes; sessions are HttpOnly cookies. Accounts are for players 13+. Each account gets a one-time **recovery code** at sign-up (stored only as a hash) that resets a forgotten password from the log-in screen; players can make a new code from the ACCOUNT screen. Players can delete their account in the game. Terms: `public/vroomillion/terms.html`; privacy notice: `public/vroomillion/privacy.html`.
 - **Sound:** sound effects only, no music.

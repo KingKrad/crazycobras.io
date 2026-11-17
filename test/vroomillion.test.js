@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, isDailyRun, seededRng,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -29,6 +29,8 @@ test("judge ranks obvious answers low and niche answers high", () => {
   assert.equal(judge(fruit, "kiwi").tier, 2);
   assert.equal(judge(fruit, "durian").tier, 4);
   assert.equal(judge(fruit, "Jabuticaba").tier, 5);
+  assert.equal(judge(fruit, "jabuticba").tier, 4, "a typo of a Vroomillion answer only scores a Deep Cut");
+  assert.equal(judge(fruit, "jabuticba").capped, true);
   assert.equal(judge(fruit, "spanner").tier, 0);
   assert.equal(judge(fruit, "").tier, 0);
 });
@@ -88,25 +90,42 @@ test("matching answers cause a fender bender", () => {
   assert.equal(n.bump, undefined);
 });
 
-test("one free race per day, unlimited races after paying", () => {
+test("one free race per day, unlimited races after paying, everything during free play", () => {
   const today = dayKey(new Date(2026, 10, 17, 9, 30));
   assert.equal(today, "2026-11-17");
   assert.equal(dayKey(new Date(2026, 0, 5)), "2026-01-05");
-  assert.ok(canRace({}, today), "never raced");
-  assert.ok(canRace({ lastRunDay: "2026-11-16" }, today), "raced yesterday");
-  assert.ok(!canRace({ lastRunDay: today }, today), "already raced today");
-  assert.ok(canRace({ lastRunDay: today, unlimited: true }, today), "unlimited");
-  assert.ok(isDailyRun({ lastRunDay: "2026-11-16" }, today));
-  assert.ok(!isDailyRun({ lastRunDay: today, unlimited: true }, today));
+  assert.ok(canRace({}, today, false), "never raced");
+  assert.ok(canRace({ lastRunDay: "2026-11-16" }, today, false), "raced yesterday");
+  assert.ok(!canRace({ lastRunDay: today }, today, false), "already raced today");
+  assert.ok(canRace({ lastRunDay: today, unlimited: true }, today, false), "unlimited");
+  assert.ok(canRace({ lastRunDay: today }, today, true), "free play");
   assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
 });
 
-test("the daily prompts are the same for everyone on a given day", () => {
-  const pick = (seed) => pickQuestions(QUESTIONS, ROUNDS, seededRng(seed)).map((x) => x.q).join("|");
-  assert.equal(pick("2026-11-17:classic"), pick("2026-11-17:classic"));
-  assert.notEqual(pick("2026-11-17:classic"), pick("2026-11-18:classic"));
-  const r = seededRng("x");
-  for (let i = 0; i < 1000; i++) { const v = r(); assert.ok(v >= 0 && v < 1); }
+test("no question repeats until every question in the mode has been played", () => {
+  const deck = deckQuestions(QUESTIONS, "classic");
+  let seen = [];
+  const shown = [];
+  const races = Math.floor(deck.length / ROUNDS);
+  for (let r = 0; r < races; r++) {
+    const out = pickFresh(deck, seen, ROUNDS);
+    assert.equal(out.questions.length, ROUNDS);
+    shown.push(...out.questions.map((q) => q.q));
+    seen = out.seen;
+  }
+  assert.equal(new Set(shown).size, shown.length, "no repeats across races");
+  // the next race uses up the leftovers first, then starts a new cycle
+  const leftovers = deck.filter((q) => !shown.includes(q.q)).map((q) => q.q);
+  const next = pickFresh(deck, seen, ROUNDS);
+  assert.equal(new Set(next.questions.map((q) => q.q)).size, ROUNDS, "no repeats within a race");
+  for (const t of leftovers) assert.ok(next.questions.some((q) => q.q === t), "unseen question shown before any repeat: " + t);
+  assert.ok(next.seen.length <= deck.length);
+});
+
+test("seen questions in one mode carry over to shared questions in the other", () => {
+  const both = QUESTIONS.filter((q) => q.deck === "both").map((q) => q.q);
+  const out = pickFresh(deckQuestions(QUESTIONS, "car"), both, ROUNDS);
+  assert.ok(out.questions.every((q) => !both.includes(q.q)));
 });
 
 test("solo prize money grows with the car and niche answers", () => {

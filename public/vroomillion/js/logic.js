@@ -26,27 +26,34 @@ export function msUntilTomorrow(now = new Date()) {
   return next - now;
 }
 
+// FREE PLAY: while true, everyone races as often as they like and the $5 prompts are
+// hidden. Set to false at launch to bring back one free race a day + Unlimited.
+export const FREE_PLAY = true;
+
 // Free players get one race per day; unlimited players race as often as they like.
-export const canRace = (save, today) => !!save.unlimited || save.lastRunDay !== today;
+export const canRace = (save, today, freePlay = FREE_PLAY) => freePlay || !!save.unlimited || save.lastRunDay !== today;
 
-// The first race of the day uses the same 7 prompts for everyone, so friends can compare.
-export const isDailyRun = (save, today) => save.lastRunDay !== today;
-
-// Small seeded random generator (cyrb53-style hash into mulberry32).
-export function seededRng(text) {
-  let h = 1779033703 ^ text.length;
-  for (let i = 0; i < text.length; i++) {
-    h = Math.imul(h ^ text.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
+// No repeats: questions this browser has seen are skipped until every question in the
+// mode has been played; then that mode starts a fresh cycle. Returns the race's
+// questions and the updated list of seen question texts.
+export function pickFresh(deckQs, seen, n, rng = Math.random) {
+  const seenSet = new Set(seen);
+  const unseen = deckQs.filter((q) => !seenSet.has(q.q));
+  let picked;
+  let nextSeen = [...seen];
+  if (unseen.length >= n) {
+    picked = pickQuestions(unseen, n, rng);
+  } else {
+    // finish the cycle with what's left, then top up from the rest of the mode
+    const inDeck = new Set(deckQs.map((q) => q.q));
+    nextSeen = nextSeen.filter((t) => !inDeck.has(t));
+    const rest = deckQs.filter((q) => !unseen.includes(q));
+    picked = [...pickQuestions(unseen, unseen.length, rng), ...pickQuestions(rest, n - unseen.length, rng)];
   }
-  let a = h >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+  for (const q of picked) nextSeen.push(q.q);
+  return { questions: picked, seen: nextSeen };
 }
+
 
 export function normalize(s) {
   return String(s)
@@ -121,6 +128,10 @@ export function deckQuestions(all, deck) {
   return deck === "car" ? all.filter((q) => q.deck === "car" || q.deck === "both") : all.filter((q) => q.deck !== "car");
 }
 
+// ONE IN A VROOMILLION only counts when the answer is spelled exactly right;
+// a corrected typo scores as a DEEP CUT instead.
+const capped = (res) => (res.tier === 5 ? { ...res, tier: 4, capped: true } : res);
+
 // Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
 // corrected is true when a typo was snapped to the nearest real answer.
 export function judge(index, raw) {
@@ -131,7 +142,7 @@ export function judge(index, raw) {
 
   // "pine apple" -> "pineapple"
   const joined = key.includes(" ") && lookup(index, key.replace(/ /g, ""));
-  if (joined) return { ...joined, key: normalize(joined.display), corrected: true };
+  if (joined) return capped({ ...joined, key: normalize(joined.display), corrected: true });
 
   // "nile river", "monza circuit", "v8 engine": drop a trailing category word.
   const words = key.split(" ");
@@ -164,7 +175,7 @@ export function judge(index, raw) {
       const d = Math.min(editDistance(key, cand, max, subCost), joinedD <= 1 ? joinedD : Infinity);
       if (d <= max && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
     }
-    if (best) return { ...best.hit, key: normalize(best.hit.display), corrected: true };
+    if (best) return capped({ ...best.hit, key: normalize(best.hit.display), corrected: true });
   }
   return { tier: 0, display: String(raw).trim().slice(0, 40), key };
 }

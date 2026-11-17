@@ -3,7 +3,7 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, isDailyRun, seededRng,
+  dayKey, msUntilTomorrow, canRace, pickFresh, FREE_PLAY,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -30,7 +30,7 @@ function h(tag, attrs = {}, ...kids) {
 const SAVE_KEY = "vroomillion.v1";
 const fresh = () => ({
   cash: 0, owned: ["rustbucket"], car: "rustbucket", deck: "classic", muted: false,
-  races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null,
+  races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null, seen: [],
 });
 let save = fresh();
 try {
@@ -137,7 +137,9 @@ function renderDaily() {
   const box = $("daily");
   box.textContent = "";
   const today = dayKey();
-  if (unlimitedNow()) {
+  if (FREE_PLAY) {
+    box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
+  } else if (unlimitedNow()) {
     box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
   } else if (canRace(me(), today)) {
     box.append(h("div", { class: "daily-line good", text: "1 FREE RUN READY TODAY" }));
@@ -321,7 +323,7 @@ function renderAccount() {
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
     h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? "★ UNLIMITED" : "FREE PLAYER — ONE RUN A DAY" }),
-    account.unlimited ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }),
+    account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
     newCodeForm(),
     deleteAccountForm(),
@@ -470,7 +472,7 @@ function renderLeagues() {
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
   const ok = canRace(me(), dayKey());
-  $("btn-start-1p").textContent = ok ? (unlimitedNow() ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
+  $("btn-start-1p").textContent = ok ? (FREE_PLAY || unlimitedNow() ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
 }
 
 const versus = { p1: save.car, p2: save.car };
@@ -577,19 +579,19 @@ function startRace(setup) {
     show("paywall");
     return;
   }
-  // The first race of the day uses the shared daily prompts.
-  const daily = isDailyRun(save, today);
   save.lastRunDay = today;
+  // never repeat a question until every question in this mode has been played
+  const picked = pickFresh(deckQuestions(QUESTIONS, save.deck), Array.isArray(save.seen) ? save.seen : [], ROUNDS);
+  const questions = picked.questions;
+  save.seen = picked.seen;
   persist();
-  const deckQs = deckQuestions(QUESTIONS, save.deck);
-  const questions = pickQuestions(deckQs, ROUNDS, daily ? seededRng(`${today}:${save.deck}`) : Math.random);
   const token = ++raceToken;
   const solo = setup.mode === "solo";
   const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
   const racers = solo
     ? [mk("YOU", carById(save.car))]
     : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
-  race = { token, solo, setup, racers, round: 0, questions, deck: save.deck, daily };
+  race = { token, solo, setup, racers, round: 0, questions };
 
   scene = chaseScene; // races use the behind-the-car view
   scene.setRacers(solo
@@ -606,8 +608,8 @@ function startRace(setup) {
   $("hint").textContent = "";
   $("question").textContent = "GET READY…";
   $("round-label").textContent = `ROUND 1 OF ${ROUNDS}`;
-  $("q-kicker").textContent = daily ? "TODAY'S RUN" : "GET READY";
-  $("mode-label").textContent = modeName(save.deck) + (daily ? " · DAILY" : "");
+  $("q-kicker").textContent = "GET READY";
+  $("mode-label").textContent = modeName(save.deck);
   $("mode-label").className = "mode-tag mode-" + save.deck;
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
@@ -765,7 +767,7 @@ async function runRace(token) {
     const best = Math.max(...final.map((f) => f.tier));
     $("hint").textContent = (bumped ? "FENDER BENDER — BOTH DROPPED A TIER. " : "") + (best >= 5
       ? "THAT'S AS NICHE AS IT GETS."
-      : `A VROOMILLION ANSWER: ${exampleAnswer(q, 5).toUpperCase()}`);
+      : `A DEEP CUT HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
     await waitNext(round === ROUNDS - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
@@ -965,7 +967,7 @@ function finish(token) {
       h("div", { class: "note", text: race.solo
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
-    unlimitedNow() ? null : h("div", { class: "daily-next" },
+    FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
       h("div", { text: `NEXT FREE RUN IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } })),
     h("div", { class: "log" },
