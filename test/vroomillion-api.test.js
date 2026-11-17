@@ -142,20 +142,20 @@ test("hashing is deterministic for the same salt and different for another", asy
 // ---------- buying Unlimited ----------
 
 test("checkout needs an account", async () => {
-  const res = await worker.fetch(post("checkout"), env());
+  const res = await worker.fetch(post("checkout", { acceptNoRefunds: true }), env());
   assert.equal(res.status, 401);
   assert.equal(stripeCalls.length, 0);
 });
 
 test("checkout without a Stripe key fails closed", async () => {
   const { cookie } = await signup();
-  assert.equal((await worker.fetch(post("checkout", null, { cookie }), env({ STRIPE_SECRET_KEY: undefined }))).status, 503);
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env({ STRIPE_SECRET_KEY: undefined }))).status, 503);
 });
 
 test("checkout creates a $5 session tied to the account", async () => {
   const { cookie } = await signup();
   stripeReply = { body: { id: ID, url: "https://checkout.stripe.com/c/pay/" + ID } };
-  const res = await worker.fetch(post("checkout", null, { cookie }), env());
+  const res = await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env());
   assert.equal(res.status, 200);
   assert.equal((await res.json()).url, "https://checkout.stripe.com/c/pay/" + ID);
   const call = stripeCalls[0];
@@ -173,12 +173,12 @@ test("checkout creates a $5 session tied to the account", async () => {
 
 test("checkout refuses other sites, rate limits, non-Stripe URLs and accounts that already paid", async () => {
   const { cookie } = await signup();
-  assert.equal((await worker.fetch(post("checkout", null, { cookie, origin: "https://evil.test" }), env())).status, 403);
-  assert.equal((await worker.fetch(post("checkout", null, { cookie }), env({ PAY_LIMITER: { limit: async () => ({ success: false }) } }))).status, 429);
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie, origin: "https://evil.test" }), env())).status, 403);
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env({ PAY_LIMITER: { limit: async () => ({ success: false }) } }))).status, 429);
   stripeReply = { body: { url: "https://evil.test/pay" } };
-  assert.equal((await worker.fetch(post("checkout", null, { cookie }), env())).status, 502);
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env())).status, 502);
   db.sql.prepare("UPDATE users SET unlimited = 1").run();
-  assert.equal((await worker.fetch(post("checkout", null, { cookie }), env())).status, 409);
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env())).status, 409);
 });
 
 test("a paid checkout upgrades the account that bought it", async () => {
@@ -307,4 +307,18 @@ test("a database from before recovery codes gets the new columns", async () => {
   assert.ok(body.recoveryCode);
   const cols = db.sql.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
   assert.ok(cols.includes("recovery_hash") && cols.includes("pending_checked_at"));
+});
+
+test("checkout requires ticking the no-refunds box and records when it was ticked", async () => {
+  const { cookie } = await signup();
+  for (const body of [null, {}, { acceptNoRefunds: "yes" }, { acceptNoRefunds: false }]) {
+    const res = await worker.fetch(post("checkout", body, { cookie }), env());
+    assert.equal(res.status, 400, JSON.stringify(body));
+  }
+  assert.equal(stripeCalls.length, 0);
+  stripeReply = { body: { id: ID, url: "https://checkout.stripe.com/c/pay/" + ID } };
+  const before = Date.now();
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env())).status, 200);
+  const at = Date.parse(new URLSearchParams(stripeCalls[0].init.body).get("metadata[no_refund_accepted_at]"));
+  assert.ok(at >= before - 1000 && at <= Date.now() + 1000);
 });

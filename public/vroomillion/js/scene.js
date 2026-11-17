@@ -35,7 +35,8 @@ export class Scene {
   resize(w, h, roadTop = h - ROAD_DEPTH) {
     w = Math.max(160, Math.round(w));
     h = Math.max(110, Math.round(h));
-    if (w === this.W && h === this.H && roadTop === this.ROAD_TOP) return;
+    // the canvas is shared with the race view, so only skip when it really is this size already
+    if (w === this.W && h === this.H && roadTop === this.ROAD_TOP && this.canvas.width === w && this.canvas.height === h) return;
     this.W = w;
     this.H = h;
     this.ROAD_TOP = Math.round(roadTop);
@@ -381,7 +382,7 @@ const FONT = {
   P: ["111", "101", "111", "100", "100"], C: ["111", "100", "100", "100", "111"], U: ["101", "101", "101", "101", "111"],
   1: ["010", "110", "010", "010", "111"], 2: ["111", "001", "111", "100", "111"],
 };
-function pixelText(g, text, x, y) {
+export function pixelText(g, text, x, y) {
   g.fillStyle = "#0b0618";
   [...text].forEach((ch, i) => {
     const glyph = FONT[ch];

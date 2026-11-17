@@ -15,7 +15,7 @@
 Weighting: Security 35%, Legal 25%, AI-Slop 25%, Craft 15%. No Critical findings, so no cap.
 
 ## Status (after fixes, 17 Nov 2026)
-- **L1 fixed (partly):** Terms with the $5 one-time price, a 14-day refund policy and account rules (`terms.html`), linked from the footer, sign-up and the buy button. The site still shows no contact email by the owner's choice; the Terms send buyers to the support contact on their Stripe receipt.
+- **L1 fixed (partly):** Terms with the $5 one-time price, a no-refunds policy (buyers tick to accept it before paying) and account rules (`terms.html`), linked from the footer, sign-up and the buy button. The site still shows no contact email by the owner's choice; the Terms send buyers to the support contact on their Stripe receipt.
 - **L2 fixed:** all 51 branded shop cars renamed to made-up names; the paywall says "hypercars". Brands remain only as trivia answers.
 - **S1 fixed:** `/verify` is rate-limited and `/me` re-checks Stripe at most once a minute per account. S7 fixed too: `/verify` no longer returns the email.
 - **L4 fixed:** "Accounts are for players 13 and over" on the sign-up form, Terms and Privacy. L6 fixed: Privacy now mentions Cloudflare request logs.

@@ -67,6 +67,12 @@ export async function handleCheckout(request, env) {
   if (!user) return json({ error: "Create an account or log in first." }, 401);
   if (user.unlimited === 1) return json({ error: "This account already has Unlimited." }, 409);
 
+  // All sales are final: the buyer must tick that they understand before paying.
+  const body = await request.json().catch(() => ({}));
+  if (!body || body.acceptNoRefunds !== true) {
+    return json({ error: "Tick the box to confirm you understand Unlimited is non-refundable." }, 400);
+  }
+
   const form = new URLSearchParams({
     mode: "payment",
     "line_items[0][quantity]": "1",
@@ -78,6 +84,8 @@ export async function handleCheckout(request, env) {
     client_reference_id: user.id,
     "metadata[product]": PRODUCT,
     "metadata[user_id]": user.id,
+    // when the buyer agreed that Unlimited starts right away and is non-refundable
+    "metadata[no_refund_accepted_at]": new Date().toISOString(),
     success_url: `${origin}/vroomillion/unlocked.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/vroomillion/`,
   });

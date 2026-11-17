@@ -7,6 +7,7 @@ import {
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
+import { ChaseScene } from "./chase.js";
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -45,7 +46,10 @@ const persist = () => {
 };
 
 // ---------- scene loop ----------
-const scene = new Scene($("scene"));
+// Menus show a side-on banner; races use the behind-the-car road. Both draw on one canvas.
+const sideScene = new Scene($("scene"));
+const chaseScene = new ChaseScene($("scene"));
+let scene = sideScene;
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
@@ -58,7 +62,12 @@ requestAnimationFrame(frame);
 
 // Menus show the scene as a banner; races fill the whole window.
 function fitScene() {
-  if (current !== "race") { scene.resize(384, 150); return; }
+  if (current !== "race") {
+    scene = sideScene;
+    scene.resize(384, 150);
+    return;
+  }
+  scene = chaseScene;
   const vw = window.innerWidth;
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   document.documentElement.style.setProperty("--vvh", vh + "px");
@@ -66,8 +75,7 @@ function fitScene() {
   const k = vw / iw;
   const ih = Math.round(vh / k);
   const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
-  const roadTop = Math.max(Math.round(ih * 0.42), ih - dock - 58 - 4);
-  scene.resize(iw, ih, roadTop);
+  scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
   requestAnimationFrame(fitCard);
 }
 
@@ -76,7 +84,7 @@ function fitCard() {
   if (current !== "race") return;
   const card = $("q-card");
   const k = window.innerWidth / scene.W;
-  const carsTop = (scene.ROAD_TOP - 22) * k; // car roofs + name tags in the far lane
+  const carsTop = scene.coverTop() * k; // roof + name tag of the nearest car
   const top = card.parentElement.getBoundingClientRect().top;
   card.style.maxHeight = Math.max(140, Math.floor(carsTop - top - 6)) + "px";
 }
@@ -295,8 +303,10 @@ function renderPaywall() {
     step.append(
       h("div", { class: "step-label", text: "STEP 2 OF 2 · PAY" }),
       h("div", { class: "signed-in", text: `LOGGED IN AS ${account.email.toUpperCase()}` }),
-      h("button", { class: "btn big", id: "btn-buy", type: "button", text: "UNLOCK UNLIMITED — $5", onclick: () => { audio.sfx.click(); buyUnlimited(); } }),
-      h("p", { class: "note" }, "By paying you agree to the ", h("a", { href: "terms.html", text: "Terms" }), ", including the 14-day refund policy."),
+      h("label", { class: "agree" },
+        h("input", { type: "checkbox", id: "agree-no-refunds", onchange: (e) => { $("btn-buy").disabled = !e.target.checked; } }),
+        h("span", {}, "I understand Unlimited starts right away and is non-refundable. I agree to the ", h("a", { href: "terms.html", text: "Terms" }), ".")),
+      h("button", { class: "btn big", id: "btn-buy", type: "button", disabled: true, text: "UNLOCK UNLIMITED — $5", onclick: () => { audio.sfx.click(); buyUnlimited(); } }),
       h("button", { class: "link", type: "button", text: "Not you? Log out", onclick: logOut }));
   }
 }
@@ -352,7 +362,7 @@ async function buyUnlimited() {
   msg.className = "pay-msg";
   msg.textContent = "Opening secure checkout…";
   try {
-    const { res, body } = await api("checkout", { method: "POST" });
+    const { res, body } = await api("checkout", { method: "POST", body: JSON.stringify({ acceptNoRefunds: $("agree-no-refunds")?.checked === true }) });
     if (res.ok && typeof body.url === "string" && body.url.startsWith("https://checkout.stripe.com/")) {
       window.location.assign(body.url);
       return;
@@ -581,6 +591,7 @@ function startRace(setup) {
     : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
   race = { token, solo, setup, racers, round: 0, questions, deck: save.deck, daily };
 
+  scene = chaseScene; // races use the behind-the-car view
   scene.setRacers(solo
     ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
     : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }]);
@@ -632,6 +643,7 @@ async function runRace(token) {
     $("q-kicker").textContent = `ROUND ${round + 1} OF ${ROUNDS}`;
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing");
+    requestAnimationFrame(fitCard);
     [...$("pips").children].forEach((p, i) => p.classList.toggle("on", i === round));
     $("reveal").textContent = "";
     $("hint").textContent = "";
