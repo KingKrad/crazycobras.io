@@ -54,9 +54,9 @@ Nothing here is a builder fingerprint: no Lovable/v0 leftovers, no default title
 
 #### S5 · Low · No bot check on sign-up
 - **Where:** `src/accounts.js:127` (only `AUTH_LIMITER`, 10/min per IP)
-- **Evidence:** the site already uses Cloudflare Turnstile for RoomRemix, but not for VROOMILLION accounts.
+- **Evidence:** sign-up has no human check (Cloudflare Turnstile is free and was used by the site's earlier RoomRemix app, since removed).
 - **Why it matters:** a botnet can fill your D1 database with junk accounts within the free-tier write limits.
-- **Fix:** add the Turnstile widget to the sign-up form and verify it in `handleSignup` with the existing `verifyTurnstile`.
+- **Fix:** add the Turnstile widget to the sign-up form and verify the token in `handleSignup` against Turnstile's siteverify API.
 
 #### S6 · Low · Body-size check trusts `Content-Length`
 - **Where:** `src/accounts.js:132`

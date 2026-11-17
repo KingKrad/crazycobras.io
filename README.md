@@ -1,31 +1,14 @@
-# RoomRemix
-
-## What it is
-A mobile-first web app where anyone can redesign a room with AI. Pick a room, size, budget and style, and get an AI image, a color palette, and a shopping list with Budget and Recommended options.
-
-## Costs
-- Runs on the Cloudflare **Workers Free** plan: $0.
-- The free AI allowance is about 80 designs per day across all users. Past that, designs fail with a friendly message; you are never billed.
-- **Never add a payment method** to the Cloudflare account.
-- The limit resets at midnight UTC.
-
-## Deploy from your phone
-- **H4.** dash.cloudflare.com → Workers & Pages → Create application → Import a repository → connect GitHub → pick `crazycobras.io` → leave project name `crazycobras-io`, deploy command `npx wrangler deploy` → Save and Deploy. Note the URL (`https://crazycobras-io.<your-subdomain>.workers.dev`).
-- **H5.** Dashboard → Turnstile → Add widget → name RoomRemix → hostname: your workers.dev hostname from H4 → Widget mode Managed → Create. Copy the **Site key** and **Secret key**.
-- **H6.** Workers & Pages → crazycobras-io → Settings → Variables and Secrets → Add → type **Secret**, name `TURNSTILE_SECRET`, value = Secret key → Save/Deploy. Then paste the **Site key** (never the secret) into this Claude Code chat.
-
-## Safety notes
-- No secrets in the repo. The Turnstile secret lives only in the Cloudflare dashboard as `TURNSTILE_SECRET`; without it the app refuses to generate.
-- Cloudflare Turnstile checks every request is from a human.
-- Rate limit: 3 designs per minute per visitor.
-- Nothing is stored: no database, no accounts, no saved photos.
-
----
-
 # VROOMILLION
 
-An 8-bit trivia racer that lives at `/vroomillion/` on the same site. Every question has lots of right answers; the more niche yours is, the further your car goes. Earn cash, buy faster cars.
+An 8-bit trivia racer. Every question has lots of right answers; the more niche yours is, the further your car goes. Earn cash, buy faster cars.
 
+The game lives in `public/vroomillion/`; the site's home page (`/`) redirects there. `src/` is the Cloudflare Worker that handles accounts and payments.
+
+## Deploy from your phone
+- dash.cloudflare.com → Workers & Pages → Create application → Import a repository → connect GitHub → pick `crazycobras.io` → project name `crazycobras-io`, deploy command `npx wrangler deploy` → Save and Deploy. Cloudflare redeploys on every push to `main`.
+- Runs on the Cloudflare **Workers Free** plan.
+
+## How it works
 - **Modes:** 1P is a solo run — your distance is your score; or 2P on one screen (answers are hidden while typing).
 - **Question modes:** CLASSIC (all topics) or GEARHEAD (cars and racing only), picked on the race setup screen.
 - **Answers:** close typos are fixed silently; extra words in front still count ("front bumper" counts as bumper); wrong answers can be retried until the timer runs out.
