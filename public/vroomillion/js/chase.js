@@ -431,7 +431,7 @@ export class ChaseScene {
   drawCar(r, p, rel) {
     const { g } = this;
     if (!p || p.hidden) { r.box = null; return; }
-    const frame = r.frames[Math.floor(r.wheel) % 2];
+    const frame = r.frames[Math.abs(Math.floor(r.wheel || 0)) % 2];
     const s = Math.max(0.5, this.carPx * rel);
     const w = frame.width * s;
     const h = frame.height * s;

@@ -321,7 +321,7 @@ export class Scene {
       const lunge = Math.min(40, r.boost * 16);
       const jitter = this.revT > 0 && !this.calm ? Math.round((Math.random() - 0.5) * 2) : 0;
       const cx = Math.round(Math.min(W - sw - 2, x + lunge));
-      const frame = r.frames[Math.floor(r.wheel) % 2];
+      const frame = r.frames[Math.abs(Math.floor(r.wheel || 0)) % 2];
       g.fillStyle = "rgba(0,0,0,0.35)";
       g.fillRect(cx + 4, LANES[r.lane] - 2, sw - 8, 3);
       // ghost trail

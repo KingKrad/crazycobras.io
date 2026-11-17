@@ -33,12 +33,63 @@ export const FREE_PLAY = true;
 // Free players get one race per day; unlimited players race as often as they like.
 export const canRace = (save, today, freePlay = FREE_PLAY) => freePlay || !!save.unlimited || save.lastRunDay !== today;
 
-// No repeats: a prompt this browser has seen never comes back. Picks up to n
-// prompts from the ones not seen yet; fewer (or none) once the mode runs low.
+// ---- endless prompts ----
+// Besides the hand-written prompts, every category also makes "starting with M",
+// "ending in A" and "with exactly 6 letters" prompts from its own answer lists,
+// keeping the same rarity tiers. Only variants with enough answers (and some rare
+// ones) are used, so there are about a thousand prompts.
+const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+const VARIANT_MIN = 8;
+
+function filterQuestion(q, test) {
+  return q.a.map((list) => list.flatMap((entry) => {
+    const forms = entry.split("|").filter((f) => { const k = normalize(f); return k && test(k); });
+    return forms.length ? [forms.join("|")] : [];
+  }));
+}
+
+function goodVariant(a) {
+  const count = a.flat().length;
+  const rare = a[2].length + a[3].length + a[4].length;
+  const easier = a[0].length + a[1].length + a[2].length;
+  return count >= VARIANT_MIN && rare >= 3 && easier >= 2;
+}
+
+export function makeVariants(questions) {
+  const out = [];
+  for (const q of questions) {
+    const make = (kind, label, test) => {
+      const a = filterQuestion(q, test);
+      if (goodVariant(a)) out.push({ q: `${q.q} ${label}`, a, deck: q.deck, base: q.q, variant: kind });
+    };
+    for (const L of LETTERS) make("start", `starting with "${L.toUpperCase()}"`, (k) => k[0] === L);
+    for (const L of LETTERS) make("end", `ending in "${L.toUpperCase()}"`, (k) => k[k.length - 1] === L);
+    for (let n = 3; n <= 14; n++) make("length", `with exactly ${n} letters`, (k) => !k.includes(" ") && k.length === n);
+  }
+  return out;
+}
+
+// No repeats: a prompt this browser has seen never comes back. Hand-written prompts
+// come first; a race never uses two prompts built from the same category if it can help it.
 export function pickFresh(deckQs, seen, n, rng = Math.random) {
   const seenSet = new Set(seen);
   const unseen = deckQs.filter((q) => !seenSet.has(q.q));
-  return pickQuestions(unseen, Math.min(n, unseen.length), rng);
+  const shuffled = pickQuestions(unseen, unseen.length, rng);
+  shuffled.sort((x, y) => (x.variant ? 1 : 0) - (y.variant ? 1 : 0)); // stable: hand-written first
+  const picked = [];
+  const bases = new Set();
+  for (const q of shuffled) {
+    if (picked.length >= n) break;
+    const base = q.base || q.q;
+    if (bases.has(base)) continue;
+    bases.add(base);
+    picked.push(q);
+  }
+  for (const q of shuffled) { // top up if a mode has too few categories left
+    if (picked.length >= n) break;
+    if (!picked.includes(q)) picked.push(q);
+  }
+  return picked;
 }
 
 export const promptsLeft = (deckQs, seen) => {
@@ -64,6 +115,7 @@ export function normalize(s) {
 // the more common tier wins, so a typo in the data can never over-reward.
 export function buildIndex(question) {
   const index = new Map();
+  index.strict = !!question.variant; // generated prompts must match the letter / length rule exactly
   question.a.forEach((list, i) => {
     for (const entry of list) {
       const forms = entry.split("|");
@@ -137,7 +189,7 @@ export function judge(index, raw) {
   if (joined) return capped({ ...joined, key: normalize(joined.display), corrected: true });
 
   // "nile river", "monza circuit", "v8 engine": drop a trailing category word.
-  const words = key.split(" ");
+  const words = index.strict ? [key] : key.split(" ");
   const trimmed = words.length > 1 && FILLER.has(words[words.length - 1]) ? words.slice(0, -1) : words;
   if (trimmed !== words) {
     const hit = lookup(index, trimmed.join(" "));
@@ -214,7 +266,11 @@ export function soloPayout(distance, car, tiers) {
   return { base, bonus, total: base + bonus, rate };
 }
 
-export function exampleAnswer(question, tier, rng = Math.random) {
-  const list = question.a[tier - 1];
-  return list[Math.floor(rng() * list.length)].split("|")[0];
+// A rare-but-not-top answer to show after a round (never a Vroomillion answer).
+export function exampleAnswer(question, tier = 4, rng = Math.random) {
+  for (let t = tier; t >= 1; t--) {
+    const list = question.a[t - 1];
+    if (list.length) return list[Math.floor(rng() * list.length)].split("|")[0];
+  }
+  return "";
 }

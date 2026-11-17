@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -198,4 +198,55 @@ test("no answer appears in two tiers of the same question", () => {
       seen.set(k, t);
     })));
   }
+});
+
+// ---------- endless prompts ----------
+const VARIANTS = makeVariants(QUESTIONS);
+const ALL = [...QUESTIONS, ...VARIANTS];
+
+test("there are about a thousand prompts, each with a unique text", () => {
+  const classic = deckQuestions(ALL, "classic").length;
+  const car = deckQuestions(ALL, "car").length;
+  assert.ok(classic >= 800, "classic " + classic);
+  assert.ok(car >= 300, "gearhead " + car);
+  assert.equal(new Set(ALL.map((q) => q.q)).size, ALL.length);
+});
+
+test("every generated prompt has enough answers and every answer fits its rule", () => {
+  for (const v of VARIANTS) {
+    assert.ok(v.a.flat().length >= 8, v.q);
+    assert.ok(v.a[2].length + v.a[3].length + v.a[4].length >= 3, v.q);
+    const letter = (v.q.match(/"([A-Z])"$/) || [])[1]?.toLowerCase();
+    const n = Number((v.q.match(/exactly (\d+) letters$/) || [])[1]);
+    for (const entry of v.a.flat()) for (const f of entry.split("|")) {
+      const k = normalize(f);
+      if (v.variant === "start") assert.equal(k[0], letter, `${v.q}: ${f}`);
+      if (v.variant === "end") assert.equal(k.at(-1), letter, `${v.q}: ${f}`);
+      if (v.variant === "length") assert.ok(!k.includes(" ") && k.length === n, `${v.q}: ${f}`);
+    }
+  }
+});
+
+test("generated prompts judge strictly and keep rarity tiers", () => {
+  const fruitA = VARIANTS.find((v) => v.q === 'Name a fruit starting with "A"');
+  assert.ok(fruitA, "fruit / A exists");
+  const idx = buildIndex(fruitA);
+  assert.equal(judge(idx, "apple").tier, 1);
+  assert.equal(judge(idx, "red apple").tier, 0, "no extra words in front for generated prompts");
+  assert.equal(judge(idx, "banana").tier, 0, "a fruit that doesn't start with A is not on the list");
+  assert.equal(judge(idx, "araza").tier, 5, "rarity carries over");
+  // a person can be named by surname when it fits the letter
+  const champs = VARIANTS.find((v) => v.base === "Name a famous racing driver (any series)" && v.variant === "start" && v.q.endsWith('"H"'));
+  if (champs) assert.ok(judge(buildIndex(champs), "hamilton").tier > 0);
+});
+
+test("races use hand-written prompts first and don't repeat a category", () => {
+  const deck = deckQuestions(ALL, "classic");
+  const race = pickFresh(deck, [], ROUNDS);
+  assert.ok(race.every((q) => !q.variant), "hand-written first");
+  const hand = deck.filter((q) => !q.variant).map((q) => q.q);
+  const later = pickFresh(deck, hand, ROUNDS);
+  assert.equal(later.length, ROUNDS);
+  assert.ok(later.every((q) => q.variant));
+  assert.equal(new Set(later.map((q) => q.base)).size, ROUNDS, "one prompt per category in a race");
 });

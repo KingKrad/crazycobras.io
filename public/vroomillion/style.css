@@ -612,6 +612,7 @@ body[data-screen="race"] .stage.launch-t5::after { animation: inner-rainbow 0.6s
 .account-box { max-width: 460px; margin: 0 auto 18px; display: grid; gap: 14px; text-align: center; }
 .prompts-left { font-size: 8px; color: var(--green); margin: -4px 0 14px; line-height: 1.8; }
 .prompts-left.none { color: var(--yellow); }
+.prompts-left .restart { display: block; width: auto; margin-top: 10px; }
 .agree { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; text-align: left; font-size: 8px; line-height: 1.8; color: var(--ink); }
 .agree input { width: 22px; height: 22px; margin: 0; accent-color: var(--orange); }
 .agree a { color: var(--cyan); }

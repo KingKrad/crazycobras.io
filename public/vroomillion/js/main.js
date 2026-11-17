@@ -1,13 +1,16 @@
-import { QUESTIONS } from "./data.js";
+import { QUESTIONS as HAND_WRITTEN } from "./data.js";
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, FREE_PLAY,
+  dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants, FREE_PLAY,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
 import { ChaseScene } from "./chase.js";
+
+// hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
+const QUESTIONS = [...HAND_WRITTEN, ...makeVariants(HAND_WRITTEN)];
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -52,7 +55,8 @@ const chaseScene = new ChaseScene($("scene"));
 let scene = sideScene;
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.05, (now - last) / 1000);
+  // the first frame's timestamp can be a hair before `last`; never step time backwards
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
   last = now;
   scene.update(dt);
   scene.draw();
@@ -475,8 +479,15 @@ function renderPromptsLeft(el, startBtn, ready) {
   const left = leftInMode();
   el.className = "prompts-left" + (left ? "" : " none");
   el.textContent = left
-    ? `${left} NEW PROMPT${left === 1 ? "" : "S"} LEFT IN ${modeName(save.deck)}${left < ROUNDS ? ` · LAST RACE IS ${left} ROUND${left === 1 ? "" : "S"}` : ""}`
-    : `YOU'VE PLAYED EVERY ${modeName(save.deck)} PROMPT. TRY THE OTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
+    ? `${left.toLocaleString("en-US")} NEW PROMPT${left === 1 ? "" : "S"} LEFT IN ${modeName(save.deck)}${left < ROUNDS ? ` · LAST RACE IS ${left} ROUND${left === 1 ? "" : "S"}` : ""}`
+    : `YOU'VE PLAYED ALL ${deckQuestions(QUESTIONS, save.deck).length.toLocaleString("en-US")} ${modeName(save.deck)} PROMPTS! START THEM OVER, TRY THE OTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
+  el.append(...(left ? [] : [h("button", { class: "btn small restart", type: "button", text: "START THE PROMPTS OVER", onclick: () => {
+    audio.sfx.click();
+    const mode = new Set(deckQuestions(QUESTIONS, save.deck).map((q) => q.q));
+    save.seen = seenList().filter((t) => !mode.has(t));
+    persist();
+    show(current);
+  } })]));
   startBtn.disabled = !left;
   if (!left) startBtn.textContent = "NO NEW PROMPTS";
   else ready();
@@ -793,7 +804,7 @@ async function runRace(token) {
     const best = Math.max(...final.map((f) => f.tier));
     $("hint").textContent = (bumped ? "FENDER BENDER — BOTH DROPPED A TIER. " : "") + (best >= 5
       ? "THAT'S AS NICHE AS IT GETS."
-      : `A DEEP CUT HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
+      : `A RARE ONE HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
     await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
