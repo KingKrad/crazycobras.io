@@ -37,7 +37,22 @@ test("judge accepts aliases, plurals and small typos", () => {
   assert.equal(judge(fruit, "dragonfruit").display, "dragon fruit");
   assert.equal(judge(fruit, "bananas").tier, 1);
   assert.equal(judge(fruit, "pomegranite").display, "pomegranate");
-  assert.equal(judge(fruit, "fog").tier, 0, "short words get no typo forgiveness");
+  assert.equal(judge(fruit, "fgi").tier, 0, "three-letter words get no typo forgiveness");
+});
+
+test("autocorrect snaps close misspellings to the real answer", () => {
+  const cases = { banan: "banana", durain: "durian", jabuticba: "jabuticaba", rasberry: "raspberry", passionfrut: "passion fruit", "pine apple": "pineapple", strawbery: "strawberry" };
+  for (const [typed, want] of Object.entries(cases)) {
+    const r = judge(fruit, typed);
+    assert.equal(r.display, want, typed);
+    assert.equal(r.corrected, true, typed);
+  }
+  assert.equal(judge(fruit, "apple").corrected, undefined, "exact answers are not marked corrected");
+  for (const junk of ["spanner", "zzzz", "keyboard", "car", "bread", "honey"]) assert.equal(judge(fruit, junk).tier, 0, junk);
+  const music = buildIndex(QUESTIONS.find((q) => q.q === "Name a musical instrument"));
+  assert.equal(judge(music, "hello").tier, 0, "a different first letter is not a typo");
+  assert.equal(judge(music, "flate").tier, 0, "short words don't forgive a wrong letter");
+  assert.equal(judge(music, "violn").display, "violin");
 });
 
 test("a duplicated answer keeps its most common tier", () => {

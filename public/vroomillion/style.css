@@ -359,7 +359,13 @@ h3 { font-weight: normal; }
 #answer::placeholder { color: #3d6a4c; }
 .btn.go { background: #0d7a3a; border-color: #b8ffd0; font-size: 14px; }
 .btn.go:hover { background: #12a04c; }
-.btn.nitro { margin-top: 10px; width: 100%; background: #10325c; border-color: var(--cyan); color: var(--cyan); font-size: 10px; }
+.feedback { min-height: 1.6em; margin: 8px 0 0; font-size: 9px; overflow-wrap: anywhere; }
+.feedback.bad { color: var(--red); }
+.feedback.good { color: var(--green); }
+.feedback.pop { animation: slam 0.25s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+#answer.shake { animation: shake 0.35s steps(6) both; border-color: var(--red); }
+.reveal-fixed { font-size: 7px; color: var(--green); margin: -4px 0 8px; }
+.btn.nitro { margin-top: 4px; width: 100%; background: #10325c; border-color: var(--cyan); color: var(--cyan); font-size: 10px; }
 .btn.nitro.armed { background: var(--orange); border-color: #fff; color: #000; animation: throb 0.4s steps(2) infinite; }
 
 .reveal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -415,6 +421,7 @@ h3 { font-weight: normal; }
 footer { margin-top: 28px; text-align: center; font-size: 7px; color: #5d5488; }
 
 /* ---------- motion ---------- */
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
 @keyframes blink { 50% { opacity: 0.15; } }
 @keyframes slam { from { transform: scale(1.6); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes logo-in { from { transform: translateX(-120%) skewX(-20deg); } to { transform: none; } }

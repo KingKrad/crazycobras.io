@@ -328,9 +328,8 @@ async function runRace(token) {
     // collect answers
     const results = [];
     for (let i = 0; i < race.racers.length; i++) {
-      const raw = await askAnswer(race.racers[i], i, token);
+      results[i] = await askAnswer(race.racers[i], i, token, index);
       if (!alive()) return;
-      results[i] = judge(index, raw);
     }
     const final = race.solo ? results : applyFenderBender(results[0], results[1]);
     const bumped = final.some((f) => f.bump);
@@ -430,12 +429,14 @@ function revealCard(r, res, i) {
   return h("div", { class: `reveal-card p${i + 1} tier${res.tier}` },
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
+    res.corrected ? h("div", { class: "reveal-fixed", text: "(AUTOCORRECTED)" }) : null,
     h("div", { class: "badge t" + res.tier, text: t.name }),
     h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
 }
 
 // Shows the input for one human and resolves with what they typed.
-function askAnswer(r, i, token) {
+// Only a right answer (or the timer running out) ends the turn.
+function askAnswer(r, i, token, index) {
   return new Promise((resolve) => {
     const zone = $("answer-zone");
     const input = $("answer");
@@ -445,6 +446,9 @@ function askAnswer(r, i, token) {
     zone.classList.remove("hidden");
     zone.dataset.player = String(i + 1);
     input.value = "";
+    const feedback = $("feedback");
+    feedback.textContent = "";
+    feedback.className = "feedback";
     input.type = hidden ? "password" : "text";
     input.autocomplete = hidden ? "new-password" : "off";
     $("turn").textContent = race.solo ? "YOUR ANSWER" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
@@ -467,19 +471,52 @@ function askAnswer(r, i, token) {
       cancelAnimationFrame(raf);
       input.removeEventListener("keydown", onKey);
       input.removeEventListener("input", onInput);
-      $("btn-go").removeEventListener("click", submit);
+      $("btn-go").removeEventListener("click", onGo);
       nitroBtn.removeEventListener("click", toggleNitro);
     };
-    const submit = () => {
-      if (finished) return;
-      if (token !== raceToken) { end(); return resolve(""); }
-      const value = input.value;
+    const stalled = { tier: 0, display: "OUT OF TIME", key: "" };
+    const say = (text, cls) => {
+      feedback.textContent = text;
+      feedback.className = "feedback " + cls;
+      void feedback.offsetWidth;
+      feedback.classList.add("pop");
+    };
+    const lockIn = (res) => {
       end();
       audio.sfx.lock();
+      if (res.corrected) {
+        // show the fix for a moment, like a phone keyboard would
+        say(hidden ? "AUTOCORRECTED!" : `AUTOCORRECTED: ${res.display.toUpperCase()}`, "good");
+        if (!hidden) input.value = res.display.toUpperCase();
+        setTimeout(() => { input.value = ""; resolve(res); }, 650);
+      } else {
+        input.value = "";
+        resolve(res);
+      }
+    };
+    const submit = (timedOut = false) => {
+      if (finished) return;
+      if (token !== raceToken) { end(); return resolve(stalled); }
+      const value = input.value;
+      const res = judge(index, value);
+      if (res.tier > 0) return lockIn(res);
+      if (timedOut) {
+        end();
+        input.value = "";
+        return resolve(stalled);
+      }
+      // Wrong: keep the clock running and let them try again.
+      audio.sfx.deny();
+      input.classList.remove("shake");
+      void input.offsetWidth;
+      input.classList.add("shake");
+      if (!value.trim()) say("TYPE SOMETHING!", "bad");
+      else say(hidden ? "NOT ON THE LIST — TRY AGAIN!" : `"${value.trim().toUpperCase().slice(0, 24)}" ISN'T ON THE LIST — TRY AGAIN!`, "bad");
       input.value = "";
-      resolve(value);
+      input.focus({ preventScroll: true });
     };
     const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
+    const onGo = () => submit();
     const onInput = () => audio.sfx.key();
     const toggleNitro = () => {
       if (!r.useNitro && r.nitro < 1) return;
@@ -491,19 +528,19 @@ function askAnswer(r, i, token) {
     };
     let raf = 0;
     const tick = (now) => {
-      if (token !== raceToken) { end(); return resolve(""); }
+      if (token !== raceToken) { end(); return resolve(stalled); }
       const left = ANSWER_SECONDS - (now - t0) / 1000;
       fill.style.transform = `scaleX(${Math.max(0, left / ANSWER_SECONDS)})`;
       fill.classList.toggle("low", left < 6);
       const whole = Math.ceil(left);
       if (whole < lastTick && whole <= 5 && whole > 0) audio.sfx.tick();
       lastTick = whole;
-      if (left <= 0) return submit();
+      if (left <= 0) return submit(true);
       raf = requestAnimationFrame(tick);
     };
     input.addEventListener("keydown", onKey);
     input.addEventListener("input", onInput);
-    $("btn-go").addEventListener("click", submit);
+    $("btn-go").addEventListener("click", onGo);
     nitroBtn.addEventListener("click", toggleNitro);
     raf = requestAnimationFrame(tick);
   });

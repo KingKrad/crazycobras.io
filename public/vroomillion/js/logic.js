@@ -51,23 +51,32 @@ export function buildIndex(question) {
   return index;
 }
 
-function editDistance(a, b, max) {
+// Typo distance: insert, delete, substitute, or swap two neighbouring letters each cost 1.
+// subCost 2 means a wrong letter isn't forgiven, only missing / extra / swapped ones.
+export function editDistance(a, b, max, subCost = 1) {
   if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev2 = null;
   let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
   for (let i = 1; i <= a.length; i++) {
     const cur = [i];
     let best = i;
     for (let j = 1; j <= b.length; j++) {
-      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : subCost));
+      if (prev2 && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) cur[j] = Math.min(cur[j], prev2[j - 2] + 1);
       if (cur[j] < best) best = cur[j];
     }
     if (best > max) return max + 1;
+    prev2 = prev;
     prev = cur;
   }
   return prev[b.length];
 }
 
-// Returns { tier, display, key }. tier 0 means the answer isn't on the list.
+// How many typos to forgive for an answer of this length.
+export const typoAllowance = (len) => (len >= 9 ? 2 : len >= 4 ? 1 : 0);
+
+// Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
+// corrected is true when a typo was snapped to the nearest real answer.
 export function judge(index, raw) {
   const key = normalize(raw);
   if (!key) return { tier: 0, display: "", key: "" };
@@ -79,15 +88,19 @@ export function judge(index, raw) {
     const hit = index.get(v);
     if (hit) return { ...hit, key: normalize(hit.display) };
   }
-  // Forgive small typos on longer answers.
-  const max = key.length >= 10 ? 2 : key.length >= 6 ? 1 : 0;
+  // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
+  // People rarely fumble the first letter, so it must match; short words can't have a wrong letter.
+  const max = typoAllowance(key.length);
+  const subCost = key.length < 6 ? 2 : 1;
   if (max) {
     let best = null;
     for (const [cand, hit] of index) {
-      const d = editDistance(key, cand, max);
+      if (cand[0] !== key[0] || cand.length < 4) continue;
+      if (key.length < 6 && cand.length < key.length) continue; // short words: only a missing letter, never an extra one
+      const d = Math.min(editDistance(key, cand, max, subCost), editDistance(key.replace(/ /g, ""), cand.replace(/ /g, ""), max, subCost));
       if (d <= max && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
     }
-    if (best) return { ...best.hit, key: normalize(best.hit.display) };
+    if (best) return { ...best.hit, key: normalize(best.hit.display), corrected: true };
   }
   return { tier: 0, display: String(raw).trim().slice(0, 40), key };
 }
