@@ -6,7 +6,8 @@
   "assets": { "directory": "./public" },
   "ai": { "binding": "AI" },
   "ratelimits": [
-    { "name": "GEN_LIMITER", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
+    { "name": "GEN_LIMITER", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } },
+    { "name": "PAY_LIMITER", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }
   ],
   "vars": { "TURNSTILE_SITE_KEY": "1x00000000000000000000AA" },
   "observability": { "enabled": true }

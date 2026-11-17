@@ -40,6 +40,7 @@
           <button class="btn" id="btn-garage" type="button">GARAGE</button>
           <button class="btn" id="btn-how" type="button">HOW TO PLAY</button>
         </div>
+        <div class="daily" id="daily"></div>
         <p class="stats" id="stats"></p>
       </section>
 
@@ -48,10 +49,10 @@
         <ol class="how">
           <li>Every race is 7 questions. Each one has lots of right answers.</li>
           <li>Type one. The <b>more niche</b> your answer, the further your car blasts down the road.</li>
-          <li>Small typos get <b>autocorrected</b>. Not on the list? <b>Try again</b> — keep guessing until the timer runs out.</li>
-          <li>Win prize money and spend it on faster cars.</li>
+          <li>Small typos are fixed for you. Not on the list? <b>Try again</b> — keep guessing until the timer runs out.</li>
+          <li>Your distance is your score. Prize money grows with how far you go and how fancy your car is — spend it on faster cars.</li>
+          <li><b>One free run a day.</b> The first run each day uses the same 7 prompts for everyone, so you can compare with friends. <b>UNLIMITED</b> lets you race as often as you like.</li>
           <li><b>GEARHEAD MODE:</b> every question is about cars and racing. Pick it on the race setup screen.</li>
-          <li><b>1P:</b> just you and the road. Reach the track's goal distance in 7 answers to win.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
           <li>Hit <b>NITRO</b> before you answer for 1.5× distance. Charges depend on your car.</li>
         </ol>
@@ -60,10 +61,30 @@
       </section>
 
       <section class="screen" id="s-leagues">
-        <h2>1P RACE — PICK A TRACK</h2>
+        <h2>1P RACE</h2>
+        <p class="note">Seven prompts. Go as far as you can. Your best: <span id="best-solo">—</span></p>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
         <div class="picker" id="picker-solo"></div>
-        <div class="leagues" id="league-list"></div>
+        <div class="menu row">
+          <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
+          <button class="btn" data-go="title" type="button">BACK</button>
+        </div>
+      </section>
+
+      <section class="screen" id="s-paywall">
+        <h2 class="pay-title">GO UNLIMITED</h2>
+        <p class="pay-lead" id="pay-lead">You've used today's free run.</p>
+        <div class="pay-card">
+          <div class="pay-price">$5 <span>ONE-TIME</span></div>
+          <ul class="pay-perks">
+            <li>Unlimited races, every day</li>
+            <li>1P, 2P versus, CLASSIC and GEARHEAD</li>
+            <li>Earn cash faster for the Bugattis and Koenigseggs</li>
+          </ul>
+          <button class="btn big" id="btn-buy" type="button">UNLOCK UNLIMITED — $5</button>
+          <p class="pay-msg" id="pay-msg" role="status" aria-live="polite"></p>
+          <p class="note">Secure checkout by Stripe. Unlocks this browser on this device.</p>
+        </div>
         <button class="btn" data-go="title" type="button">BACK</button>
       </section>
 
@@ -95,27 +116,44 @@
       </section>
 
       <section class="screen" id="s-race">
-        <div class="hud" id="hud"></div>
-        <div class="round-row">
-          <span id="round-label">ROUND 1/7</span>
-          <span class="mode-tag" id="mode-label"></span>
-          <span class="pips" id="pips"></span>
-          <button class="link" id="btn-quit" type="button">QUIT</button>
-        </div>
-        <div class="question" id="question"></div>
-        <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
-        <div class="answer-zone" id="answer-zone">
-          <p class="turn" id="turn"></p>
-          <div class="answer-row">
-            <input id="answer" type="text" maxlength="40" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="TYPE AN ANSWER" aria-label="Your answer">
-            <button class="btn go" id="btn-go" type="button">GO!</button>
+        <div class="race-top">
+          <div class="hud" id="hud"></div>
+          <div class="round-box">
+            <span class="pips" id="pips"></span>
+            <span class="round-label" id="round-label">ROUND 1 OF 7</span>
+            <span class="mode-tag" id="mode-label"></span>
           </div>
-          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
-          <button class="btn nitro" id="btn-nitro" type="button">NITRO</button>
+          <div class="race-buttons">
+            <button class="icon-btn" id="btn-sound-race" type="button" aria-pressed="true">SND</button>
+            <button class="icon-btn" id="btn-quit" type="button">QUIT</button>
+          </div>
         </div>
-        <div class="reveal" id="reveal"></div>
-        <p class="hint" id="hint"></p>
-        <button class="btn big hidden" id="btn-next" type="button">NEXT ▶</button>
+        <div class="race-mid">
+          <div class="q-card" id="q-card">
+            <div class="q-kicker" id="q-kicker">ROUND 1 OF 7</div>
+            <div class="question" id="question"></div>
+            <div class="q-hint" id="q-hint">▼ rarer answers go further ▼</div>
+            <div class="reveal" id="reveal"></div>
+            <p class="hint" id="hint"></p>
+          </div>
+        </div>
+        <div class="race-dock">
+          <div class="answer-zone" id="answer-zone">
+            <p class="turn" id="turn"></p>
+            <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+            <div class="answer-row">
+              <div class="ring" aria-hidden="true">
+                <svg viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="19"></circle><circle class="ring-fg" id="ring-fg" cx="22" cy="22" r="19" pathLength="100"></circle></svg>
+                <span id="secs">25</span>
+              </div>
+              <input id="answer" type="text" maxlength="40" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="type one answer…" aria-label="Your answer">
+              <button class="btn go" id="btn-go" type="button">GO!</button>
+              <button class="btn nitro" id="btn-nitro" type="button">NITRO</button>
+            </div>
+            <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
+          </div>
+          <button class="btn big hidden" id="btn-next" type="button">NEXT ▶</button>
+        </div>
       </section>
 
       <section class="screen" id="s-results">

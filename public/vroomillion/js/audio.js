@@ -1,10 +1,8 @@
-// Chiptune sound, synthesised with Web Audio. No audio files.
+// Chiptune sound effects, synthesised with Web Audio. No audio files, no music.
 
 let ctx = null;
 let master = null;
-let musicGain = null;
 let muted = false;
-let musicTimer = null;
 let engine = null;
 
 function ensure() {
@@ -15,9 +13,6 @@ function ensure() {
   master = ctx.createGain();
   master.gain.value = muted ? 0 : 0.5;
   master.connect(ctx.destination);
-  musicGain = ctx.createGain();
-  musicGain.gain.value = 0.16;
-  musicGain.connect(master);
   return true;
 }
 
@@ -135,34 +130,4 @@ export function engineStop() {
   engine = null;
   e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
   e.o.stop(ctx.currentTime + 0.5);
-}
-
-// A 4-bar looping tune: bass + lead + hats.
-const BASS = [N.A4 / 4, 0, N.A4 / 4, N.A4 / 4, N.F4 / 4, 0, N.F4 / 4, N.F4 / 4, N.C4 / 2, 0, N.C4 / 2, N.C4 / 2, N.G4 / 4, 0, N.G4 / 4, N.G4 / 4];
-const LEAD = [N.A4, N.C5, N.E5, N.C5, N.A4, N.C5, N.F4 * 2, N.C5, N.G4, N.C5, N.E5, N.G5, N.D5, N.B4, N.G4, N.B4];
-const LEAD2 = [N.E5, 0, N.E5, N.D5, N.C5, 0, N.A4, 0, N.G5, 0, N.E5, N.D5, N.D5, N.E5, N.D5, N.B4];
-
-export function musicStart() {
-  if (!ctx || musicTimer) return;
-  let step = 0;
-  let next = ctx.currentTime + 0.05;
-  const len = 0.14;
-  musicTimer = setInterval(() => {
-    while (next < ctx.currentTime + 0.3) {
-      const at = next - ctx.currentTime;
-      const i = step % 16;
-      const bar = Math.floor(step / 32) % 2;
-      const b = BASS[Math.floor(step / 2) % 16];
-      if (b && step % 2 === 0) tone(b, len * 1.8, { type: "triangle", vol: 0.5, at, out: musicGain });
-      const l = (bar ? LEAD2 : LEAD)[i];
-      if (l) tone(l, len * 0.9, { vol: 0.16, at, out: musicGain });
-      if (step % 4 === 2) noise(0.03, { vol: 0.03, at, hp: 6000 });
-      next += len;
-      step++;
-    }
-  }, 60);
-}
-export function musicStop() {
-  clearInterval(musicTimer);
-  musicTimer = null;
 }

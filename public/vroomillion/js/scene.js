@@ -1,12 +1,8 @@
 // The pixel-art race scene drawn on a low-res canvas and scaled up by CSS.
 import { carSprite } from "./cars.js";
 
-const W = 384;
-const H = 150;
-const HORIZON = 80;
-const ROAD_TOP = 92;
-const LANES = [112, 146]; // y of the bottom of the tyres per lane
-const SCALE = 3;
+// Sizes are in canvas pixels; CSS scales the canvas up with crisp pixels.
+const ROAD_DEPTH = 58; // two lanes of tarmac
 
 const hash = (n) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -16,10 +12,9 @@ const mod = (a, n) => ((a % n) + n) % n;
 
 export class Scene {
   constructor(canvas) {
-    canvas.width = W;
-    canvas.height = H;
+    this.canvas = canvas;
     this.g = canvas.getContext("2d");
-    this.g.imageSmoothingEnabled = false;
+    this.resize(384, 150);
     this.racers = [];
     this.scroll = 0;
     this.speed = 0.3; // 0..1 overall sense of speed
@@ -35,6 +30,24 @@ export class Scene {
     this.calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
+  // Set the canvas size. roadTop is where the tarmac starts; by default the road
+  // fills the bottom of the canvas (the menu banner).
+  resize(w, h, roadTop = h - ROAD_DEPTH) {
+    w = Math.max(160, Math.round(w));
+    h = Math.max(110, Math.round(h));
+    if (w === this.W && h === this.H && roadTop === this.ROAD_TOP) return;
+    this.W = w;
+    this.H = h;
+    this.ROAD_TOP = Math.round(roadTop);
+    this.ROAD_BOT = this.ROAD_TOP + ROAD_DEPTH;
+    this.HORIZON = this.ROAD_TOP - 12;
+    this.LANES = [this.ROAD_TOP + 20, this.ROAD_TOP + 54]; // bottom of the tyres per lane
+    this.SCALE = w < 300 ? 2 : 3; // car sprite size
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.g.imageSmoothingEnabled = false; // resizing a canvas resets this
+  }
+
   // racers: [{ car, label, color }]
   setRacers(list) {
     this.racers = list.map((r, i) => ({
@@ -43,7 +56,6 @@ export class Scene {
     }));
     this.kick = 0;
     this.warp = 0;
-    this.goal = null;
   }
 
   // Engine rev before a launch: cars shudder and puff smoke.
@@ -53,6 +65,7 @@ export class Scene {
 
   // Fire a racer off the line. Bigger tiers get bigger effects.
   launch(i, tier, nitro) {
+    const { W, H, HORIZON, ROAD_TOP, ROAD_BOT, LANES, SCALE } = this; // eslint-disable-line no-unused-vars
     const r = this.racers[i];
     if (!r) return;
     const w = r.sprite.width * SCALE;
@@ -86,6 +99,7 @@ export class Scene {
 
   // Where a racer is on screen, as fractions of the canvas, for DOM pop-ups.
   anchor(i) {
+    const { W, H, HORIZON, ROAD_TOP, ROAD_BOT, LANES, SCALE } = this; // eslint-disable-line no-unused-vars
     const r = this.racers[i];
     if (!r) return { x: 0.5, y: 0.5 };
     const sw = r.sprite.width * SCALE;
@@ -94,6 +108,7 @@ export class Scene {
   }
 
   confetti() {
+    const { W, H, HORIZON, ROAD_TOP, ROAD_BOT, LANES, SCALE } = this; // eslint-disable-line no-unused-vars
     for (let i = 0; i < 90; i++) {
       this.particles.push({
         x: Math.random() * W, y: -Math.random() * 40, vx: (Math.random() - 0.5) * 30, vy: 30 + Math.random() * 60,
@@ -106,6 +121,7 @@ export class Scene {
   }
 
   update(dt) {
+    const { W, H, HORIZON, ROAD_TOP, ROAD_BOT, LANES, SCALE } = this; // eslint-disable-line no-unused-vars
     this.time += dt;
     this.scroll += (40 + this.speed * 520) * dt;
     this.shake = Math.max(0, this.shake - dt);
@@ -161,6 +177,7 @@ export class Scene {
   }
 
   draw() {
+    const { W, H, HORIZON, ROAD_TOP, ROAD_BOT, LANES, SCALE } = this; // eslint-disable-line no-unused-vars
     const g = this.g;
     g.save();
     if (this.shake > 0) g.translate(Math.round((Math.random() - 0.5) * 8 * this.shake), Math.round((Math.random() - 0.5) * 8 * this.shake));
@@ -182,17 +199,17 @@ export class Scene {
     });
 
     // stars
-    for (let i = 0; i < 46; i++) {
+    for (let i = 0; i < Math.round((W * HORIZON) / 670); i++) {
       const x = Math.floor(hash(i) * W);
-      const y = Math.floor(hash(i + 99) * 36);
+      const y = Math.floor(hash(i + 99) * HORIZON * 0.55);
       const tw = Math.sin(this.time * 2 + i * 1.7) > 0.2;
       g.fillStyle = tw ? "#ffffff" : "#8f7fc4";
       g.fillRect(x, y, 1, 1);
     }
 
     // striped retro sun
-    const sx = 276;
-    const sy = 62;
+    const sx = Math.round(W * 0.72);
+    const sy = HORIZON - 18;
     for (let y = -26; y <= 18; y++) {
       const half = Math.floor(Math.sqrt(26 * 26 - y * y));
       const gap = y > -4 && mod(y + Math.floor(this.time * 3), 6) < 2;
@@ -232,7 +249,7 @@ export class Scene {
     g.fillStyle = "#1b1036";
     g.fillRect(0, HORIZON, W, ROAD_TOP - HORIZON);
     g.fillStyle = "#2a2a3c";
-    g.fillRect(0, ROAD_TOP, W, H - ROAD_TOP);
+    g.fillRect(0, ROAD_TOP, W, ROAD_BOT - ROAD_TOP);
     g.fillStyle = "#33334a";
     for (let i = 0; i < 40; i++) g.fillRect(mod(hash(i + 7) * 900 - this.scroll, W + 20) - 10, ROAD_TOP + 6 + Math.floor(hash(i + 3) * 50), 6, 1);
 
@@ -242,10 +259,10 @@ export class Scene {
       const odd = Math.round((x + mod(this.scroll, rs * 2)) / rs) % 2;
       g.fillStyle = odd ? "#ff3b5c" : "#f4f4f4";
       g.fillRect(Math.round(x), ROAD_TOP, rs, 3);
-      g.fillRect(Math.round(x), H - 3, rs, 3);
+      g.fillRect(Math.round(x), ROAD_BOT - 3, rs, 3);
     }
     g.fillStyle = "#ffd23a";
-    for (let x = -mod(this.scroll, 40); x < W; x += 40) g.fillRect(Math.round(x), 121, 20, 2);
+    for (let x = -mod(this.scroll, 40); x < W; x += 40) g.fillRect(Math.round(x), ROAD_TOP + 29, 20, 2);
 
     // palms along the verge
     for (let i = Math.floor(this.scroll * 0.7 / 110) - 1; i < Math.floor(this.scroll * 0.7 / 110) + 5; i++) {
@@ -282,24 +299,15 @@ export class Scene {
       }
     }
 
-    // checkered finish line for solo races
-    if (this.goal && this.racers.length) {
-      const r0 = this.racers[0];
-      const fx = Math.round(r0.x + r0.sprite.width * SCALE + (this.goal - this.cam) * this.camScale);
-      if (fx > -12 && fx < W + 12) {
-        for (let y = ROAD_TOP; y < H; y += 4) {
-          for (let c = 0; c < 3; c++) {
-            g.fillStyle = ((y - ROAD_TOP) / 4 + c) % 2 ? "#0b0618" : "#ffffff";
-            g.fillRect(fx + c * 4, y, 4, 4);
-          }
-        }
-        g.fillStyle = "#c9ced6";
-        g.fillRect(fx + 5, ROAD_TOP - 26, 2, 26);
-        for (let y = 0; y < 3; y++) for (let c = 0; c < 4; c++) {
-          g.fillStyle = (y + c) % 2 ? "#0b0618" : "#ffffff";
-          g.fillRect(fx + 7 + c * 3, ROAD_TOP - 26 + y * 3, 3, 3);
-        }
-      }
+    // verge below the road with a fast guardrail, for full-screen races
+    if (H > ROAD_BOT) {
+      g.fillStyle = "#140a2c";
+      g.fillRect(0, ROAD_BOT, W, H - ROAD_BOT);
+      g.fillStyle = "#1c1040";
+      for (let y = ROAD_BOT + 14; y < H; y += 6) g.fillRect(0, y, W, 2);
+      g.fillStyle = "#4a3896";
+      g.fillRect(0, ROAD_BOT + 6, W, 2);
+      for (let x = -mod(this.scroll * 1.4, 26); x < W; x += 26) g.fillRect(Math.round(x), ROAD_BOT + 3, 3, 9);
     }
 
     // cars, far lane first

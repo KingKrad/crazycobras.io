@@ -1,8 +1,9 @@
 import { QUESTIONS } from "./data.js";
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
-  TIERS, ROUNDS, ANSWER_SECONDS, LEAGUES, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, exampleAnswer, deckQuestions,
+  TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
+  pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
+  dayKey, msUntilTomorrow, canRace, isDailyRun, seededRng,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -26,7 +27,10 @@ function h(tag, attrs = {}, ...kids) {
 
 // ---------- save data ----------
 const SAVE_KEY = "vroomillion.v1";
-const fresh = () => ({ cash: 0, owned: ["rustbucket"], car: "rustbucket", league: 0, deck: "classic", muted: false, races: 0, wins: 0, vrooms: 0, deep: 0 });
+const fresh = () => ({
+  cash: 0, owned: ["rustbucket"], car: "rustbucket", deck: "classic", muted: false,
+  races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null, unlimited: false, receipt: null,
+});
 let save = fresh();
 try {
   const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
@@ -48,6 +52,33 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// Menus show the scene as a banner; races fill the whole window.
+function fitScene() {
+  if (current !== "race") { scene.resize(384, 150); return; }
+  const vw = window.innerWidth;
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty("--vvh", vh + "px");
+  const iw = Math.max(220, Math.min(420, Math.round(vw / 3.2)));
+  const k = vw / iw;
+  const ih = Math.round(vh / k);
+  const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
+  const roadTop = Math.max(Math.round(ih * 0.42), ih - dock - 58 - 4);
+  scene.resize(iw, ih, roadTop);
+  requestAnimationFrame(fitCard);
+}
+
+// Keep the question card above the road so it never hides the cars.
+function fitCard() {
+  if (current !== "race") return;
+  const card = $("q-card");
+  const k = window.innerWidth / scene.W;
+  const carsTop = (scene.ROAD_TOP - 22) * k; // car roofs + name tags in the far lane
+  const top = card.parentElement.getBoundingClientRect().top;
+  card.style.maxHeight = Math.max(140, Math.floor(carsTop - top - 6)) + "px";
+}
+window.addEventListener("resize", fitScene);
+window.visualViewport?.addEventListener("resize", fitScene);
 
 function attract() {
   scene.setRacers([{ car: carById(save.car), label: "P1", color: "#4fd1ff", lane: 1 }]);
@@ -78,9 +109,55 @@ function renderCash(animate) {
 }
 
 function renderSound() {
-  const b = $("btn-sound");
-  b.textContent = save.muted ? "SND OFF" : "SND ON";
-  b.setAttribute("aria-pressed", String(!save.muted));
+  for (const id of ["btn-sound", "btn-sound-race"]) {
+    const b = $(id);
+    b.textContent = save.muted ? "SND OFF" : "SND ON";
+    b.setAttribute("aria-pressed", String(!save.muted));
+  }
+}
+
+// ---------- daily free run + unlimited ----------
+function timeLeft() {
+  const m = Math.ceil(msUntilTomorrow() / 60000);
+  return m >= 60 ? `${Math.floor(m / 60)}H ${m % 60}M` : `${m}M`;
+}
+
+function renderDaily() {
+  const box = $("daily");
+  box.textContent = "";
+  const today = dayKey();
+  if (save.unlimited) {
+    box.append(h("div", { class: "daily-line good", text: "★ UNLIMITED — RACE AS MUCH AS YOU LIKE" }));
+  } else if (canRace(save, today)) {
+    box.append(h("div", { class: "daily-line good", text: "1 FREE RUN READY TODAY" }));
+  } else {
+    box.append(
+      h("div", { class: "daily-line", text: `TODAY'S FREE RUN IS USED · NEXT ONE IN ${timeLeft()}` }),
+      h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }));
+  }
+}
+
+async function buyUnlimited() {
+  const btn = $("btn-buy");
+  const msg = $("pay-msg");
+  btn.disabled = true;
+  msg.className = "pay-msg";
+  msg.textContent = "Opening secure checkout…";
+  try {
+    const res = await fetch("/api/vroomillion/checkout", { method: "POST" });
+    if (!(res.headers.get("content-type") || "").includes("json")) throw new Error("no payment server here");
+    const body = await res.json().catch(() => ({}));
+    if (res.ok && typeof body.url === "string" && body.url.startsWith("https://checkout.stripe.com/")) {
+      window.location.assign(body.url);
+      return;
+    }
+    msg.textContent = body.error || "Couldn't start checkout. Try again later.";
+  } catch {
+    // e.g. the Claude artifact preview, which can't reach the payment server
+    msg.textContent = "Payments only work on the VROOMILLION website, not in this preview.";
+  }
+  msg.className = "pay-msg bad";
+  btn.disabled = false;
 }
 
 let current = "title";
@@ -93,15 +170,24 @@ function show(name) {
     $("pops").textContent = "";
     document.querySelector(".stage").classList.remove("launch", ...[0, 1, 2, 3, 4, 5].map((t) => "launch-t" + t));
   }
+  fitScene();
   if (name === "title") {
     raceToken++;
     audio.engineStop();
     attract();
+    renderDaily();
     $("stats").textContent = save.races
-      ? `MODE ${modeName(save.deck)} · RACES ${save.races} · WINS ${save.wins} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
+      ? `MODE ${modeName(save.deck)} · BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "leagues") renderLeagues();
+  if (name === "paywall") {
+    $("pay-lead").textContent = canRace(save, dayKey())
+      ? "Race as often as you like, every day."
+      : `You've used today's free run. The next one is in ${timeLeft()}.`;
+    $("pay-msg").textContent = "";
+    $("btn-buy").disabled = false;
+  }
   if (name === "versus") renderVersus();
   if (name === "garage") renderGarage();
   window.scrollTo({ top: 0 });
@@ -170,18 +256,9 @@ function modeSwitch(mount) {
 function renderLeagues() {
   modeSwitch($("mode-solo"));
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
-  const list = $("league-list");
-  list.textContent = "";
-  LEAGUES.forEach((lg, i) => {
-    const locked = i > save.league;
-    list.append(h("button", {
-      class: "league" + (locked ? " locked" : ""), type: "button", disabled: locked,
-      onclick: () => { audio.sfx.click(); startRace({ mode: "solo", league: lg }); },
-    },
-    h("span", { class: "league-name", text: (locked ? "🔒 " : "") + lg.name }),
-    h("span", { class: "league-info", text: locked ? `WIN ${LEAGUES[i - 1].name} TO UNLOCK` : `REACH ${lg.target.toLocaleString("en-US")} M IN ${ROUNDS} ANSWERS` }),
-    h("span", { class: "league-prize", text: money(lg.prize) })));
-  });
+  $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
+  const ok = canRace(save, dayKey());
+  $("btn-start-1p").textContent = ok ? (save.unlimited ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
 }
 
 const versus = { p1: save.car, p2: save.car };
@@ -263,7 +340,7 @@ function hudCard(r, i) {
     h("div", { class: "hud-name", text: r.name }),
     h("div", { class: "hud-car", text: r.car.name }),
     h("div", { class: "dist-row" }, r.elDist, r.elSpeed),
-    race.solo ? goalBar(r) : null,
+    race.solo ? h("div", { class: "hud-best", text: save.best ? `BEST ${Math.round(save.best).toLocaleString("en-US")} M` : "FIRST RUN" }) : null,
     h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
 }
 
@@ -280,35 +357,31 @@ function popGain(i, metres, tier, nitro) {
   setTimeout(() => el.remove(), 1800);
 }
 
-function goalBar(r) {
-  r.elGoalFill = h("span", { class: "goal-fill" });
-  r.elGoalText = h("span", { class: "goal-text", text: `GOAL ${race.setup.league.target.toLocaleString("en-US")} M` });
-  return h("div", { class: "goal" }, h("span", { class: "goal-bar" }, r.elGoalFill), r.elGoalText);
-}
-
-function drawGoal(r) {
-  if (!r.elGoalFill) return;
-  const target = race.setup.league.target;
-  const k = Math.min(1, r.dist / target);
-  r.elGoalFill.style.transform = `scaleX(${k})`;
-  r.elGoalFill.classList.toggle("done", k >= 1);
-  r.elGoalText.textContent = k >= 1 ? "GOAL REACHED!" : `${Math.round(target - r.dist).toLocaleString("en-US")} M TO GO`;
-}
 
 function startRace(setup) {
   lastSetup = setup;
+  const today = dayKey();
+  if (!canRace(save, today)) {
+    show("paywall");
+    return;
+  }
+  // The first race of the day uses the shared daily prompts.
+  const daily = isDailyRun(save, today);
+  save.lastRunDay = today;
+  persist();
+  const deckQs = deckQuestions(QUESTIONS, save.deck);
+  const questions = pickQuestions(deckQs, ROUNDS, daily ? seededRng(`${today}:${save.deck}`) : Math.random);
   const token = ++raceToken;
   const solo = setup.mode === "solo";
   const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
   const racers = solo
     ? [mk("YOU", carById(save.car))]
     : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
-  race = { token, solo, setup, racers, round: 0, questions: pickQuestions(deckQuestions(QUESTIONS, save.deck), ROUNDS), deck: save.deck };
+  race = { token, solo, setup, racers, round: 0, questions, deck: save.deck, daily };
 
   scene.setRacers(solo
     ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
     : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }]);
-  if (solo) scene.goal = setup.league.target;
   scene.speed = 0.05;
   const hud = $("hud");
   hud.textContent = "";
@@ -319,11 +392,13 @@ function startRace(setup) {
   $("reveal").textContent = "";
   $("hint").textContent = "";
   $("question").textContent = "GET READY…";
-  $("round-label").textContent = `ROUND 1/${ROUNDS}`;
-  $("mode-label").textContent = modeName(save.deck);
+  $("round-label").textContent = `ROUND 1 OF ${ROUNDS}`;
+  $("q-kicker").textContent = daily ? "TODAY'S RUN" : "GET READY";
+  $("mode-label").textContent = modeName(save.deck) + (daily ? " · DAILY" : "");
   $("mode-label").className = "mode-tag mode-" + save.deck;
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
+  $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible
   show("race");
   audio.engineStart();
   audio.engineSet(0.1);
@@ -339,6 +414,7 @@ async function runRace(token) {
     if (!alive()) return;
   }
   overlay("GO!", "count go");
+  $("q-card").classList.remove("hidden");
   audio.sfx.go();
   scene.speed = 0.3;
   audio.engineSet(0.3);
@@ -350,7 +426,10 @@ async function runRace(token) {
     race.round = round;
     const q = race.questions[round];
     const index = buildIndex(q);
-    $("round-label").textContent = `ROUND ${round + 1}/${ROUNDS}`;
+    $("round-label").textContent = `ROUND ${round + 1} OF ${ROUNDS}`;
+    $("q-kicker").textContent = `ROUND ${round + 1} OF ${ROUNDS}`;
+    $("q-hint").classList.remove("hidden");
+    $("q-card").classList.remove("revealing");
     [...$("pips").children].forEach((p, i) => p.classList.toggle("on", i === round));
     $("reveal").textContent = "";
     $("hint").textContent = "";
@@ -371,6 +450,8 @@ async function runRace(token) {
 
     // reveal
     $("answer-zone").classList.add("hidden");
+    $("q-hint").classList.add("hidden");
+    $("q-card").classList.add("revealing");
     const cards = final.map((res, i) => revealCard(race.racers[i], res, i));
     $("reveal").append(...cards);
     await sleep(500);
@@ -385,6 +466,7 @@ async function runRace(token) {
     if (bumped) {
       audio.sfx.bump();
       overlay("FENDER BENDER!", "small bad");
+      $("hint").textContent = "FENDER BENDER! SAME ANSWER — BOTH DROP A TIER.";
       scene.shake = scene.calm ? 0 : 0.4;
       await sleep(900);
       if (!alive()) return;
@@ -440,7 +522,6 @@ async function runRace(token) {
           top = Math.max(top, scene.racers[i].boost);
           r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
           r.elSpeed.textContent = Math.round(40 + Math.min(4.5, scene.racers[i].boost) * 85 * r.power) + " KM/H";
-          drawGoal(r);
         });
         scene.speed = 0.25 + Math.min(0.75, top * 0.9);
         // climb through the gears: rpm rises, then drops on each shift
@@ -461,26 +542,16 @@ async function runRace(token) {
       scene.racers[i].nitro = false;
       scene.racers[i].boost = 0;
     });
-    if (race.solo) {
-      const r = race.racers[0];
-      const target = race.setup.league.target;
-      if (r.dist >= target && r.dist - gain[0] < target) {
-        audio.sfx.win();
-        scene.confetti();
-        overlay("GOAL!", "win");
-        setTimeout(() => alive() && overlay(""), 1200);
-      }
-      $("hud").firstChild.classList.toggle("leading", r.dist >= target);
-    } else {
+    if (!race.solo) {
       const lead = race.racers[0].dist === race.racers[1].dist ? -1 : race.racers[0].dist > race.racers[1].dist ? 0 : 1;
       [...$("hud").children].forEach((c, i) => c.classList.toggle("leading", i === lead));
     }
     [...$("pips").children][round].classList.add("done");
 
     const best = Math.max(...final.map((f) => f.tier));
-    $("hint").textContent = best >= 5
+    $("hint").textContent = (bumped ? "FENDER BENDER — BOTH DROPPED A TIER. " : "") + (best >= 5
       ? "THAT'S AS NICHE AS IT GETS."
-      : `A VROOMILLION ANSWER: ${exampleAnswer(q, 5).toUpperCase()}`;
+      : `A VROOMILLION ANSWER: ${exampleAnswer(q, 5).toUpperCase()}`);
 
     await waitNext(round === ROUNDS - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
@@ -493,7 +564,6 @@ function revealCard(r, res, i) {
   return h("div", { class: `reveal-card p${i + 1} tier${res.tier}` },
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
-    res.corrected ? h("div", { class: "reveal-fixed", text: "(AUTOCORRECTED)" }) : null,
     h("div", { class: "badge t" + res.tier, text: t.name }),
     h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
 }
@@ -507,6 +577,9 @@ function askAnswer(r, i, token, index) {
     const fill = $("timer-fill");
     const nitroBtn = $("btn-nitro");
     const hidden = !race.solo;
+    const ring = $("ring-fg");
+    const secs = $("secs");
+    $("q-hint").classList.remove("hidden");
     zone.classList.remove("hidden");
     zone.dataset.player = String(i + 1);
     input.value = "";
@@ -515,7 +588,7 @@ function askAnswer(r, i, token, index) {
     feedback.className = "feedback";
     input.type = hidden ? "password" : "text";
     input.autocomplete = hidden ? "new-password" : "off";
-    $("turn").textContent = race.solo ? "YOUR ANSWER" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
+    $("turn").textContent = race.solo ? "" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
     r.useNitro = false;
     const drawNitro = () => {
       nitroBtn.textContent = r.useNitro ? "NITRO ARMED ×1.5" : `NITRO ×${r.nitro}`;
@@ -548,15 +621,8 @@ function askAnswer(r, i, token, index) {
     const lockIn = (res) => {
       end();
       audio.sfx.lock();
-      if (res.corrected) {
-        // show the fix for a moment, like a phone keyboard would
-        say(hidden ? "AUTOCORRECTED!" : `AUTOCORRECTED: ${res.display.toUpperCase()}`, "good");
-        if (!hidden) input.value = res.display.toUpperCase();
-        setTimeout(() => { input.value = ""; resolve(res); }, 650);
-      } else {
-        input.value = "";
-        resolve(res);
-      }
+      input.value = "";
+      resolve(res);
     };
     const submit = (timedOut = false) => {
       if (finished) return;
@@ -594,8 +660,12 @@ function askAnswer(r, i, token, index) {
     const tick = (now) => {
       if (token !== raceToken) { end(); return resolve(stalled); }
       const left = ANSWER_SECONDS - (now - t0) / 1000;
-      fill.style.transform = `scaleX(${Math.max(0, left / ANSWER_SECONDS)})`;
+      const frac = Math.max(0, left / ANSWER_SECONDS);
+      fill.style.transform = `scaleX(${frac})`;
       fill.classList.toggle("low", left < 6);
+      ring.style.strokeDashoffset = String(100 - frac * 100);
+      ring.classList.toggle("low", left < 6);
+      secs.textContent = String(Math.max(0, Math.ceil(left)));
       const whole = Math.ceil(left);
       if (whole < lastTick && whole <= 5 && whole > 0) audio.sfx.tick();
       lastTick = whole;
@@ -633,26 +703,18 @@ function waitNext(label, token) {
 function finish(token) {
   if (token !== raceToken) return;
   const [a, b] = race.racers;
-  const winner = race.solo
-    ? (a.dist >= race.setup.league.target ? 0 : -1)
-    : a.dist === b.dist ? -1 : a.dist > b.dist ? 0 : 1;
+  const winner = race.solo ? 0 : a.dist === b.dist ? -1 : a.dist > b.dist ? 0 : 1;
   audio.engineStop();
   scene.speed = 0.3;
 
   let pay;
   let title;
-  let unlocked = null;
+  let newBest = false;
   if (race.solo) {
-    const lg = race.setup.league;
-    const won = winner === 0;
-    pay = payout(lg.prize, won, a.tiers);
-    title = won ? "GOAL REACHED!" : `${Math.round(lg.target - a.dist).toLocaleString("en-US")} M SHORT`;
-    const idx = LEAGUES.indexOf(lg);
-    if (won && idx === save.league && idx < LEAGUES.length - 1) {
-      save.league = idx + 1;
-      unlocked = LEAGUES[idx + 1].name;
-    }
-    if (won) save.wins++;
+    pay = soloPayout(a.dist, a.car, a.tiers);
+    newBest = a.dist > save.best;
+    if (newBest) save.best = a.dist;
+    title = newBest && save.races > 0 ? "NEW BEST!" : "RUN COMPLETE";
     save.vrooms += a.tiers.filter((t) => t === 5).length;
     save.deep += a.tiers.filter((t) => t === 4).length;
   } else {
@@ -668,7 +730,7 @@ function finish(token) {
   save.cash += pay.total;
   persist();
 
-  const happy = !race.solo ? winner !== -1 : winner === 0;
+  const happy = race.solo ? newBest || a.tiers.includes(5) : winner !== -1;
   if (happy) { audio.sfx.win(); scene.confetti(); } else audio.sfx.lose();
   setTimeout(() => { audio.sfx.cash(); renderCash(true); }, 900);
 
@@ -682,12 +744,16 @@ function finish(token) {
         spriteCanvas(r.car, 4),
         h("div", { class: "hud-name", text: r.name }),
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
-        race.solo ? h("div", { class: "note", text: `GOAL ${race.setup.league.target.toLocaleString("en-US")} M` }) : null))),
+        race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
     h("div", { class: "payout" },
       h("div", { text: race.solo ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
       h("div", { class: "payout-total", text: "+" + money(pay.total) }),
-      h("div", { class: "note", text: `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` }),
-      unlocked ? h("div", { class: "unlock", text: `UNLOCKED: ${unlocked}!` }) : null),
+      h("div", { class: "note", text: race.solo
+        ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
+        : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
+    save.unlimited ? null : h("div", { class: "daily-next" },
+      h("div", { text: `NEXT FREE RUN IN ${timeLeft()}` }),
+      h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },
         h("div", { class: "log-q", text: `${i + 1}. ${row.q.toUpperCase()}` }),
@@ -695,18 +761,13 @@ function finish(token) {
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
           h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short })))))),
   );
+  $("btn-again").textContent = canRace(save, dayKey()) ? "RACE AGAIN" : "RACE AGAIN — $5";
   show("results");
 }
 
 // ---------- wiring ----------
-let started = false;
-function firstTouch() {
-  audio.unlock();
-  if (!started) {
-    started = true;
-    if (!save.muted) audio.musicStart();
-  }
-}
+// Browsers only allow sound after the first tap or key press.
+const firstTouch = () => audio.unlock();
 document.addEventListener("pointerdown", firstTouch);
 document.addEventListener("keydown", firstTouch);
 
@@ -723,19 +784,24 @@ $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); sho
 $("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
 $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
 $("btn-again").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace(lastSetup); });
+$("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
+$("btn-buy").addEventListener("click", () => { audio.sfx.click(); buyUnlimited(); });
 $("btn-start-2p").addEventListener("click", () => {
   audio.sfx.click();
   const clean = (id, fallback) => ($(id).value.trim().toUpperCase().slice(0, 10) || fallback);
   startRace({ mode: "versus", names: [clean("name-p1", "P1"), clean("name-p2", "P2")], cars: [versus.p1, versus.p2] });
 });
-$("btn-sound").addEventListener("click", () => {
+function toggleSound() {
   save.muted = !save.muted;
   persist();
   audio.setMuted(save.muted);
-  if (save.muted) audio.musicStop();
-  else { audio.unlock(); audio.musicStart(); audio.sfx.click(); }
+  if (!save.muted) { audio.unlock(); audio.sfx.click(); }
   renderSound();
-});
+}
+$("btn-sound").addEventListener("click", toggleSound);
+$("btn-sound-race").addEventListener("click", toggleSound);
+// refresh the "next free run" countdown on the title screen
+setInterval(() => { if (current === "title") renderDaily(); }, 30000);
 
 audio.setMuted(save.muted);
 renderSound();

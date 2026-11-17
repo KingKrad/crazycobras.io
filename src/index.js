@@ -2,6 +2,7 @@ import { ROOM_TYPES, STYLES, MAX_STYLES } from "./options.js";
 import { validatePayload, checkJpeg } from "./validate.js";
 import { buildImagePrompt, generateImage, generateList, shapeList } from "./ai.js";
 import { verifyTurnstile } from "./turnstile.js";
+import { handleCheckout, handleVerify } from "./vroomillion.js";
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -95,6 +96,8 @@ export default {
         if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
         return json({ roomTypes: ROOM_TYPES, styles: STYLES, maxStyles: MAX_STYLES, turnstileSiteKey: env.TURNSTILE_SITE_KEY });
       }
+      if (pathname === "/api/vroomillion/checkout") return await handleCheckout(request, env);
+      if (pathname === "/api/vroomillion/verify") return await handleVerify(request, env);
       if (pathname === "/api/generate") {
         if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
         return await handleGenerate(request, env);

@@ -13,14 +13,40 @@ export const ROUNDS = 7;
 export const ANSWER_SECONDS = 25;
 export const NITRO_BOOST = 1.5;
 
-// Solo tracks: reach the goal distance within the race to win the prize.
-export const LEAGUES = [
-  { id: "street", name: "STREET MEET", prize: 600, target: 2000 },
-  { id: "club", name: "CLUB CUP", prize: 3000, target: 3000 },
-  { id: "pro", name: "PRO CIRCUIT", prize: 15000, target: 4000 },
-  { id: "hyper", name: "HYPER LEAGUE", prize: 60000, target: 5000 },
-  { id: "gp", name: "VROOMILLION GP", prize: 200000, target: 6000 },
-];
+// ---- daily free run ----
+// Local calendar day, e.g. "2026-11-17".
+export function dayKey(d = new Date()) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+export function msUntilTomorrow(now = new Date()) {
+  const next = new Date(now);
+  next.setHours(24, 0, 0, 0);
+  return next - now;
+}
+
+// Free players get one race per day; unlimited players race as often as they like.
+export const canRace = (save, today) => !!save.unlimited || save.lastRunDay !== today;
+
+// The first race of the day uses the same 7 prompts for everyone, so friends can compare.
+export const isDailyRun = (save, today) => save.lastRunDay !== today;
+
+// Small seeded random generator (cyrb53-style hash into mulberry32).
+export function seededRng(text) {
+  let h = 1779033703 ^ text.length;
+  for (let i = 0; i < text.length; i++) {
+    h = Math.imul(h ^ text.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 export function normalize(s) {
   return String(s)
@@ -73,7 +99,7 @@ export function editDistance(a, b, max, subCost = 1) {
 }
 
 // How many typos to forgive for an answer of this length.
-export const typoAllowance = (len) => (len >= 9 ? 2 : len >= 4 ? 1 : 0);
+export const typoAllowance = (len) => (len >= 12 ? 3 : len >= 8 ? 2 : len >= 4 ? 1 : 0);
 
 // Words that just name the category, so "nile river" means "nile".
 const FILLER = new Set(["river", "tree", "cheese", "pasta", "dog", "bird", "fish", "game", "language", "city", "circuit", "raceway", "speedway", "superspeedway", "racetrack", "track", "engine", "racing", "team", "car", "breed", "spice", "herb", "colour", "color", "fruit", "plant", "flag"]);
@@ -128,7 +154,7 @@ export function judge(index, raw) {
   // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
   // People rarely fumble the first letter, so it must match; short words can't have a wrong letter.
   const max = typoAllowance(key.length);
-  const subCost = key.length < 6 ? 2 : 1;
+  const subCost = key.length < 5 ? 2 : 1;
   if (max) {
     let best = null;
     for (const [cand, hit] of index) {
@@ -164,7 +190,7 @@ export function pickQuestions(all, n, rng = Math.random) {
   return pool.slice(0, n);
 }
 
-// Cash for a finished race. tiers = the tier this racer hit each round.
+// 2P: the winner's prize. tiers = the tier this racer hit each round.
 export function payout(prize, won, tiers) {
   const base = won ? prize : Math.round(prize * 0.2);
   let bonus = 0;
@@ -173,6 +199,16 @@ export function payout(prize, won, tiers) {
     if (t === 5) bonus += Math.round(prize * 0.2);
   }
   return { base, bonus, total: base + bonus };
+}
+
+// 1P: cash for a solo run. Pricier cars earn more per metre, so savings snowball
+// towards the hypercars; Deep Cuts and Vroomillions add a percentage on top.
+export function soloPayout(distance, car, tiers) {
+  const rate = 2 + car.price / 25000;
+  const base = Math.round(distance * rate);
+  const mult = tiers.reduce((m, t) => m + (t === 4 ? 0.1 : t === 5 ? 0.25 : 0), 0);
+  const bonus = Math.round(base * mult);
+  return { base, bonus, total: base + bonus, rate };
 }
 
 export function exampleAnswer(question, tier, rng = Math.random) {

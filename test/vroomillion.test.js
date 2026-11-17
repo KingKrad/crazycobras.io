@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
-  TIERS, ROUNDS, LEAGUES, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions,
+  TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, isDailyRun, seededRng,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -51,7 +51,9 @@ test("autocorrect snaps close misspellings to the real answer", () => {
   for (const junk of ["spanner", "zzzz", "keyboard", "car", "bread", "honey"]) assert.equal(judge(fruit, junk).tier, 0, junk);
   const music = buildIndex(QUESTIONS.find((q) => q.q === "Name a musical instrument"));
   assert.equal(judge(music, "hello").tier, 0, "a different first letter is not a typo");
-  assert.equal(judge(music, "flate").tier, 0, "short words don't forgive a wrong letter");
+  assert.equal(judge(music, "flate").display, "flute", "5+ letters forgive a wrong letter");
+  assert.equal(judge(music, "harb").tier, 0, "4-letter words don't forgive a wrong letter");
+  assert.equal(judge(fruit, "peech").display, "peach");
   assert.equal(judge(music, "violn").display, "violin");
 });
 
@@ -86,13 +88,34 @@ test("matching answers cause a fender bender", () => {
   assert.equal(n.bump, undefined);
 });
 
-test("solo tracks get harder and pay more", () => {
-  for (let i = 1; i < LEAGUES.length; i++) {
-    assert.ok(LEAGUES[i].target > LEAGUES[i - 1].target);
-    assert.ok(LEAGUES[i].prize > LEAGUES[i - 1].prize);
-  }
-  // the first track is winnable in the starter car with mostly CRUISING answers
-  assert.ok(metresFor(2, 1, false) * 5 + metresFor(3, 1, false) * 2 >= LEAGUES[0].target);
+test("one free race per day, unlimited races after paying", () => {
+  const today = dayKey(new Date(2026, 10, 17, 9, 30));
+  assert.equal(today, "2026-11-17");
+  assert.equal(dayKey(new Date(2026, 0, 5)), "2026-01-05");
+  assert.ok(canRace({}, today), "never raced");
+  assert.ok(canRace({ lastRunDay: "2026-11-16" }, today), "raced yesterday");
+  assert.ok(!canRace({ lastRunDay: today }, today), "already raced today");
+  assert.ok(canRace({ lastRunDay: today, unlimited: true }, today), "unlimited");
+  assert.ok(isDailyRun({ lastRunDay: "2026-11-16" }, today));
+  assert.ok(!isDailyRun({ lastRunDay: today, unlimited: true }, today));
+  assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
+});
+
+test("the daily prompts are the same for everyone on a given day", () => {
+  const pick = (seed) => pickQuestions(QUESTIONS, ROUNDS, seededRng(seed)).map((x) => x.q).join("|");
+  assert.equal(pick("2026-11-17:classic"), pick("2026-11-17:classic"));
+  assert.notEqual(pick("2026-11-17:classic"), pick("2026-11-18:classic"));
+  const r = seededRng("x");
+  for (let i = 0; i < 1000; i++) { const v = r(); assert.ok(v >= 0 && v < 1); }
+});
+
+test("solo prize money grows with the car and niche answers", () => {
+  const starter = { price: 0 };
+  const bugatti = { price: 1600000 };
+  assert.deepEqual(soloPayout(3000, starter, [1, 2, 3]), { base: 6000, bonus: 0, total: 6000, rate: 2 });
+  assert.equal(soloPayout(3000, starter, [4, 5]).bonus, Math.round(6000 * 0.35));
+  assert.ok(soloPayout(8000, bugatti, [3]).total > 100 * soloPayout(3000, starter, [3]).total / 2);
+  assert.equal(soloPayout(0, bugatti, [0, 0]).total, 0);
 });
 
 test("pickQuestions returns distinct questions", () => {
