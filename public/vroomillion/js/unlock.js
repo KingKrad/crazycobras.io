@@ -16,7 +16,7 @@ async function run() {
     if (body.paid !== true) {
       return say("NOT UNLOCKED YET", body.error || "That payment hasn't gone through. If you were charged, reload this page in a minute.");
     }
-    say("UNLIMITED UNLOCKED!", `${String(body.email || "Your account").toUpperCase()} can now race as often as you like. Log in with it on any device.`);
+    say("UNLIMITED UNLOCKED!", "Your account can now race as often as you like. Log in with it on any device.");
     $("unlock-play").textContent = "START RACING ▶";
   } catch {
     say("COULDN'T CHECK THE PAYMENT", "Check your connection and reload this page.");

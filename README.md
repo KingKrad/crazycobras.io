@@ -15,7 +15,7 @@ The game lives in `public/vroomillion/`; the site's home page (`/`) redirects th
 - **Rarity tiers:** Stalled → Traffic → Cruising → Fast Lane → Deep Cut → One in a Vroomillion.
 - **Daily free run:** one race per day per browser (1P or 2P). The first race each day uses the same 7 prompts for everyone, picked from the date.
 - **Unlimited ($5, one-time):** removes the daily limit. Buyers must create an account (email + password) first; Unlimited belongs to the account and works on any device they log in on. Paid through Stripe Checkout; see setup below.
-- **Accounts:** stored in a Cloudflare D1 database (`DB` binding, created automatically on the first deploy). Passwords are salted PBKDF2-SHA256 hashes; sessions are HttpOnly cookies. Players can delete their account in the game. Privacy notice: `public/vroomillion/privacy.html`.
+- **Accounts:** stored in a Cloudflare D1 database (`DB` binding, created automatically on the first deploy). Passwords are salted PBKDF2-SHA256 hashes; sessions are HttpOnly cookies. Accounts are for players 13+. Each account gets a one-time **recovery code** at sign-up (stored only as a hash) that resets a forgotten password from the log-in screen; players can make a new code from the ACCOUNT screen. Players can delete their account in the game. Terms: `public/vroomillion/terms.html`; privacy notice: `public/vroomillion/privacy.html`.
 - **Sound:** sound effects only, no music.
 - **Adding questions:** edit `public/vroomillion/js/data.js`. Each question is five lists of answers, from most obvious to most niche; `"a|b"` makes `b` an accepted spelling of `a`. Add `deck: "car"` for GEARHEAD-only questions or `deck: "both"` for questions in both modes.
 - **Adding cars:** edit the `CARS` list in `public/vroomillion/js/cars.js`.
@@ -35,6 +35,8 @@ Buyers see the Stripe account's **business name** on the checkout page and on th
 
 ### Limits to know about
 - Unlimited is checked on the server against the account, so it can't be faked in the browser. The one-free-run-a-day limit for players without Unlimited is still kept in the browser; clearing site data gives a fresh free run.
-- There's no "forgot password" yet: sending reset emails needs an email service. Until then, a locked-out buyer can be helped by hand (check their payment in Stripe, then ask them to make a new account and mark it Unlimited in the D1 console with `UPDATE users SET unlimited = 1 WHERE email = '…'`).
+- Password reset works with the recovery code, not email (that would need an email service). A buyer who loses both the password and the code can be helped by hand: check their payment in Stripe, ask them to make a new account, and mark it Unlimited in the D1 console with `UPDATE users SET unlimited = 1 WHERE email = '…'`.
+- The site doesn't show a contact email yet. The Terms send buyers to the support contact on their Stripe receipt, so set a support email in Stripe → Settings → Business → **Public details** before going live.
+- The Terms promise refunds within 14 days. Refund from the Stripe dashboard, then set `unlimited = 0` for that account in D1.
 - Password hashing uses 50,000 PBKDF2 rounds so sign-ups fit the Workers free plan's CPU limit. On a paid plan, set the variable `PBKDF2_ITERATIONS` to `100000`; existing passwords upgrade when people next log in.
 - Accounts and payments only work on the website, not in the Claude artifact preview.

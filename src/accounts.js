@@ -68,7 +68,9 @@ export async function ensureSchema(db) {
       pw_iter INTEGER NOT NULL,
       unlimited INTEGER NOT NULL DEFAULT 0,
       pending_session TEXT,
+      pending_checked_at INTEGER,
       paid_session TEXT,
+      recovery_hash TEXT,
       created_at INTEGER NOT NULL
     )`),
     db.prepare(`CREATE TABLE IF NOT EXISTS sessions (
@@ -78,6 +80,10 @@ export async function ensureSchema(db) {
     )`),
     db.prepare("CREATE INDEX IF NOT EXISTS sessions_user ON sessions (user_id)"),
   ]);
+  // Columns added after the first release; ignore "duplicate column" on databases that have them.
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT"]) {
+    try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
+  }
   schemaReady = true;
 }
 export const resetSchemaFlagForTests = () => { schemaReady = false; };
@@ -116,6 +122,17 @@ export async function currentUser(request, env) {
 }
 
 export const publicUser = (u) => ({ email: u.email, unlimited: u.unlimited === 1 });
+
+// Recovery codes: 20 random characters from an alphabet without look-alikes (~100 bits),
+// shown once, stored only as a SHA-256 hash. They let a player reset a forgotten password.
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export function newRecoveryCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  const chars = [...bytes].map((b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+  return chars.match(/.{5}/g).join("-");
+}
+const normalizeCode = (raw) => String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 40);
+const hashCode = (code) => sha256("vroomillion-recovery:" + normalizeCode(code));
 
 // Shared checks for the sign-up / log-in forms.
 async function guard(request, env) {
@@ -159,14 +176,15 @@ export async function handleSignup(request, env) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iterations = iterationsFor(env);
   const id = crypto.randomUUID();
+  const recoveryCode = newRecoveryCode();
   try {
     await env.DB.prepare(
-      "INSERT INTO users (id, email, pw_hash, pw_salt, pw_iter, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-    ).bind(id, email, await hashPassword(body.password, salt, iterations), b64(salt), iterations, Date.now()).run();
+      "INSERT INTO users (id, email, pw_hash, pw_salt, pw_iter, recovery_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).bind(id, email, await hashPassword(body.password, salt, iterations), b64(salt), iterations, await hashCode(recoveryCode), Date.now()).run();
   } catch {
     return json({ error: "There's already an account with that email. Log in instead." }, 409);
   }
-  return json({ email, unlimited: false }, 201, { "set-cookie": await startSession(env, id) });
+  return json({ email, unlimited: false, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
 }
 
 export async function handleLogin(request, env) {
@@ -223,4 +241,47 @@ export async function handleDeleteAccount(request, env) {
     env.DB.prepare("DELETE FROM users WHERE id = ?").bind(user.id),
   ]);
   return json({ ok: true }, 200, { "set-cookie": cookie("", 0) });
+}
+
+// POST /api/vroomillion/reset-password { email, code, password }
+// Sets a new password using the recovery code, signs out every device, and issues a new code.
+export async function handleResetPassword(request, env) {
+  const stop = await guard(request, env);
+  if (stop) return stop;
+  const body = await readForm(request);
+  const email = normalizeEmail(body.email);
+  const problem = checkPassword(body.password);
+  if (problem) return json({ error: problem }, 400);
+  const wrong = json({ error: "That email and recovery code don't match." }, 401);
+  if (!email || !normalizeCode(body.code)) return wrong;
+
+  await ensureSchema(env.DB);
+  const user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+  const given = await hashCode(body.code);
+  if (!user || !user.recovery_hash || !sameString(given, user.recovery_hash)) return wrong;
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iterations = iterationsFor(env);
+  const recoveryCode = newRecoveryCode();
+  await env.DB.batch([
+    env.DB.prepare("UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ?, recovery_hash = ? WHERE id = ?")
+      .bind(await hashPassword(body.password, salt, iterations), b64(salt), iterations, await hashCode(recoveryCode), user.id),
+    env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
+  ]);
+  return json({ ...publicUser(user), recoveryCode }, 200, { "set-cookie": await startSession(env, user.id) });
+}
+
+// POST /api/vroomillion/recovery-code { password } -> a new recovery code (the old one stops working).
+export async function handleNewRecoveryCode(request, env) {
+  const stop = await guard(request, env);
+  if (stop) return stop;
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "Log in first." }, 401);
+  const body = await readForm(request);
+  const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
+  const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
+  if (!sameString(hash, user.pw_hash)) return json({ error: "Wrong password." }, 401);
+  const recoveryCode = newRecoveryCode();
+  await env.DB.prepare("UPDATE users SET recovery_hash = ? WHERE id = ?").bind(await hashCode(recoveryCode), user.id).run();
+  return json({ recoveryCode });
 }

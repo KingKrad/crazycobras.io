@@ -60,7 +60,10 @@ const userId = (email = "racer@example.com") => db.sql.prepare("SELECT id FROM u
 test("sign up creates an account, a session cookie and a hashed password", async () => {
   const { res, cookie, body } = await signup("  Racer@Example.com ");
   assert.equal(res.status, 201);
-  assert.deepEqual(body, { email: "racer@example.com", unlimited: false });
+  assert.equal(body.email, "racer@example.com");
+  assert.equal(body.unlimited, false);
+  assert.match(body.recoveryCode, /^[A-Z2-9]{5}(-[A-Z2-9]{5}){3}$/);
+  assert.ok(!JSON.stringify(db.sql.prepare("SELECT * FROM users").get()).includes(body.recoveryCode), "only a hash of the code is stored");
   const setCookie = res.headers.get("set-cookie");
   for (const flag of ["HttpOnly", "Secure", "SameSite=Lax", "Path=/api/vroomillion"]) assert.ok(setCookie.includes(flag), flag);
   const row = db.sql.prepare("SELECT * FROM users").get();
@@ -182,7 +185,7 @@ test("a paid checkout upgrades the account that bought it", async () => {
   const { cookie } = await signup();
   stripeReply = { body: paidSession(userId()) };
   const res = await worker.fetch(get("verify?session_id=" + ID), env());
-  assert.deepEqual(await res.json(), { paid: true, email: "racer@example.com" });
+  assert.deepEqual(await res.json(), { paid: true }, "the receipt link doesn't reveal the email");
   assert.equal(stripeCalls.at(-1).url, "https://api.stripe.com/v1/checkout/sessions/" + ID);
   const me = await worker.fetch(get("me", { cookie }), env());
   assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true });
@@ -237,4 +240,71 @@ test("deleting an account needs the password and removes everything", async () =
   assert.equal(db.sql.prepare("SELECT COUNT(*) AS n FROM users").get().n, 0);
   assert.equal(db.sql.prepare("SELECT COUNT(*) AS n FROM sessions").get().n, 0);
   assert.equal((await worker.fetch(get("me", { cookie }), env())).status, 401);
+});
+
+// ---------- password recovery ----------
+
+test("a recovery code resets the password, signs out other devices and is replaced", async () => {
+  const { cookie: oldCookie, body } = await signup();
+  const code = body.recoveryCode.toLowerCase().replace(/-/g, " "); // typed sloppily
+  const res = await worker.fetch(post("reset-password", { email: "racer@example.com", code, password: "brandnewpass" }), env());
+  assert.equal(res.status, 200);
+  const out = await res.json();
+  assert.equal(out.email, "racer@example.com");
+  assert.notEqual(out.recoveryCode, body.recoveryCode, "a fresh code is issued");
+  assert.equal((await worker.fetch(get("me", { cookie: oldCookie }), env())).status, 401, "old sessions are ended");
+  assert.equal((await worker.fetch(post("login", { email: "racer@example.com", password: "hunter2hunter2" }), env())).status, 401);
+  assert.equal((await worker.fetch(post("login", { email: "racer@example.com", password: "brandnewpass" }), env())).status, 200);
+  const reuse = await worker.fetch(post("reset-password", { email: "racer@example.com", code: body.recoveryCode, password: "anotherpass1" }), env());
+  assert.equal(reuse.status, 401, "the old code no longer works");
+});
+
+test("wrong codes, unknown emails and weak new passwords are refused", async () => {
+  await signup();
+  const tryReset = async (b) => (await worker.fetch(post("reset-password", b), env())).status;
+  assert.equal(await tryReset({ email: "racer@example.com", code: "AAAAA-AAAAA-AAAAA-AAAAA", password: "brandnewpass" }), 401);
+  assert.equal(await tryReset({ email: "ghost@example.com", code: "AAAAA-AAAAA-AAAAA-AAAAA", password: "brandnewpass" }), 401);
+  assert.equal(await tryReset({ email: "racer@example.com", code: "", password: "brandnewpass" }), 401);
+  assert.equal(await tryReset({ email: "racer@example.com", code: "AAAAA", password: "short" }), 400);
+  assert.equal((await worker.fetch(post("reset-password", { email: "racer@example.com", code: "x", password: "brandnewpass" }), env({ AUTH_LIMITER: { limit: async () => ({ success: false }) } }))).status, 429);
+});
+
+test("a logged-in player can make a new recovery code with their password", async () => {
+  const { cookie, body } = await signup();
+  assert.equal((await worker.fetch(post("recovery-code", { password: "hunter2hunter2" }), env())).status, 401, "needs a session");
+  assert.equal((await worker.fetch(post("recovery-code", { password: "wrongwrong" }, { cookie }), env())).status, 401);
+  const res = await worker.fetch(post("recovery-code", { password: "hunter2hunter2" }, { cookie }), env());
+  const { recoveryCode } = await res.json();
+  assert.notEqual(recoveryCode, body.recoveryCode);
+  assert.equal((await worker.fetch(post("reset-password", { email: "racer@example.com", code: body.recoveryCode, password: "brandnewpass" }), env())).status, 401);
+  assert.equal((await worker.fetch(post("reset-password", { email: "racer@example.com", code: recoveryCode, password: "brandnewpass" }), env())).status, 200);
+});
+
+// ---------- not spamming Stripe ----------
+
+test("/me checks a pending payment with Stripe at most once a minute", async () => {
+  const { cookie } = await signup();
+  db.sql.prepare("UPDATE users SET pending_session = ?").run(ID);
+  stripeReply = { body: { id: ID, status: "open", payment_status: "unpaid", metadata: { product: "vroomillion_unlimited", user_id: userId() } } };
+  for (let i = 0; i < 5; i++) await worker.fetch(get("me", { cookie }), env());
+  assert.equal(stripeCalls.length, 1);
+  db.sql.prepare("UPDATE users SET pending_checked_at = ?").run(Date.now() - 61000);
+  await worker.fetch(get("me", { cookie }), env());
+  assert.equal(stripeCalls.length, 2);
+});
+
+test("/verify is rate limited", async () => {
+  const res = await worker.fetch(get("verify?session_id=" + ID), env({ PAY_LIMITER: { limit: async () => ({ success: false }) } }));
+  assert.equal(res.status, 429);
+  assert.equal(stripeCalls.length, 0);
+});
+
+test("a database from before recovery codes gets the new columns", async () => {
+  db.sql.exec(`CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, pw_hash TEXT NOT NULL, pw_salt TEXT NOT NULL,
+    pw_iter INTEGER NOT NULL, unlimited INTEGER NOT NULL DEFAULT 0, pending_session TEXT, paid_session TEXT, created_at INTEGER NOT NULL)`);
+  const { res, body } = await signup();
+  assert.equal(res.status, 201);
+  assert.ok(body.recoveryCode);
+  const cols = db.sql.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+  assert.ok(cols.includes("recovery_hash") && cols.includes("pending_checked_at"));
 });

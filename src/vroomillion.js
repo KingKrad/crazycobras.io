@@ -32,8 +32,11 @@ export async function handleMe(request, env) {
   if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
   const user = await currentUser(request, env);
   if (!user) return json({ error: "Not logged in." }, 401);
-  // Paid but closed the tab before coming back? Check the last checkout once more.
-  if (user.unlimited !== 1 && user.pending_session && env.STRIPE_SECRET_KEY) {
+  // Paid but closed the tab before coming back? Check the last checkout again,
+  // at most once a minute per account so this can't be used to spam Stripe.
+  const now = Date.now();
+  if (user.unlimited !== 1 && user.pending_session && env.STRIPE_SECRET_KEY && !(user.pending_checked_at > now - 60000)) {
+    await env.DB.prepare("UPDATE users SET pending_checked_at = ? WHERE id = ?").bind(now, user.id).run();
     const res = await stripe(env, "checkout/sessions/" + user.pending_session, { method: "GET" });
     if (res.ok && isPaid(res.body) && res.body.metadata?.user_id === user.id) {
       await markPaid(env, user.id, user.pending_session);
@@ -96,6 +99,11 @@ export async function handleVerify(request, env) {
   if (!env.STRIPE_SECRET_KEY || !env.DB) return json({ error: "Payments aren't set up yet." }, 503);
   const id = new URL(request.url).searchParams.get("session_id") || "";
   if (!SESSION_ID.test(id)) return json({ paid: false, error: "Invalid receipt." }, 400);
+  if (env.PAY_LIMITER) {
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const { success } = await env.PAY_LIMITER.limit({ key: ip });
+    if (!success) return json({ paid: false, error: "Too many tries — wait a minute and reload." }, 429);
+  }
 
   const res = await stripe(env, "checkout/sessions/" + id, { method: "GET" });
   if (res.status === 404) return json({ paid: false, error: "Receipt not found." }, 404);
@@ -109,5 +117,5 @@ export async function handleVerify(request, env) {
   const user = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(res.body.metadata.user_id || "").first();
   if (!user) return json({ paid: false, error: "That payment isn't linked to an account. Contact us with your receipt." }, 404);
   if (user.unlimited !== 1) await markPaid(env, user.id, id);
-  return json({ paid: true, email: user.email });
+  return json({ paid: true });
 }

@@ -168,35 +168,39 @@ async function refreshAccount() {
   if (current === "account") renderAccount();
 }
 
-// Create-account / log-in form. mode is "signup" or "login".
-function authForm(mode, onDone) {
+// Shows a recovery code once, with a copy button. onDone runs after "I'VE SAVED IT".
+function recoveryPanel(code, onDone, intro) {
   const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
-  const email = h("input", { type: "email", name: "email", autocomplete: "email", required: true, maxlength: "254", placeholder: "you@example.com", "aria-label": "Email" });
-  const password = h("input", { type: "password", name: "password", required: true, minlength: "8", maxlength: "128",
-    autocomplete: mode === "signup" ? "new-password" : "current-password", placeholder: mode === "signup" ? "8+ characters" : "password", "aria-label": "Password" });
-  const submit = h("button", { class: "btn big", type: "submit", text: mode === "signup" ? "CREATE ACCOUNT" : "LOG IN" });
-  const form = h("form", { class: "auth-form", novalidate: true },
-    h("label", {}, h("span", { text: "EMAIL" }), email),
-    h("label", {}, h("span", { text: "PASSWORD" }), password),
-    submit, msg,
-    mode === "signup" ? h("p", { class: "note" }, "Your email is used only for your account. ", h("a", { href: "privacy.html", text: "Privacy" })) : null,
-    h("button", { class: "link", type: "button", text: mode === "signup" ? "Already have an account? Log in" : "New here? Create an account",
-      onclick: () => form.replaceWith(authForm(mode === "signup" ? "login" : "signup", onDone)) }));
+  const codeEl = h("div", { class: "recovery-code", text: code });
+  const copy = h("button", { class: "btn", type: "button", text: "COPY CODE", onclick: async () => {
+    try { await navigator.clipboard.writeText(code); msg.textContent = "Copied."; } catch {
+      const range = document.createRange(); range.selectNodeContents(codeEl);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      msg.textContent = "Selected: copy it with your keyboard or long-press.";
+    }
+  } });
+  return h("div", { class: "auth-form recovery" },
+    h("div", { class: "step-label", text: "SAVE YOUR RECOVERY CODE" }),
+    h("p", { class: "note", text: intro || "If you ever forget your password, this code is the only way back into your account. It's shown once — screenshot it or keep it somewhere safe." }),
+    codeEl, copy, msg,
+    h("button", { class: "btn big", type: "button", text: "I'VE SAVED IT ▶", onclick: () => { audio.sfx.click(); onDone(); } }));
+}
+
+const authLabel = (text, input) => h("label", {}, h("span", { text }), input);
+const emailInput = () => h("input", { type: "email", name: "email", autocomplete: "email", required: true, maxlength: "254", placeholder: "you@example.com", "aria-label": "Email" });
+const passwordInput = (kind, placeholder) => h("input", { type: "password", name: "password", required: true, minlength: "8", maxlength: "128", autocomplete: kind, placeholder, "aria-label": "Password" });
+
+// Sends a form to the account API and handles the shared busy / error states.
+function wireForm(form, submit, msg, busyText, send, onOk) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     audio.sfx.click();
     msg.className = "pay-msg";
-    msg.textContent = mode === "signup" ? "Creating your account…" : "Logging in…";
+    msg.textContent = busyText;
     submit.disabled = true;
     try {
-      const { res, body } = await api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value }) });
-      if (res.ok) {
-        account = body;
-        password.value = "";
-        audio.sfx.lock();
-        onDone();
-        return;
-      }
+      const { res, body } = await send();
+      if (res.ok) { audio.sfx.lock(); onOk(body); return; }
       msg.textContent = body.error || "Something went wrong. Try again.";
     } catch {
       msg.textContent = "Accounts only work on the VROOMILLION website, not in this preview.";
@@ -204,7 +208,68 @@ function authForm(mode, onDone) {
     msg.className = "pay-msg bad";
     submit.disabled = false;
   });
+}
+
+// Create-account / log-in / forgot-password form. mode is "signup", "login" or "reset".
+function authForm(mode, onDone) {
+  let form;
+  const swap = (next) => form.replaceWith(authForm(next, onDone));
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const email = emailInput();
+  if (mode === "reset") {
+    const code = h("input", { type: "text", name: "code", required: true, maxlength: "40", autocomplete: "off", autocapitalize: "characters", spellcheck: "false", placeholder: "XXXXX-XXXXX-XXXXX-XXXXX", "aria-label": "Recovery code" });
+    const password = passwordInput("new-password", "8+ characters");
+    const submit = h("button", { class: "btn big", type: "submit", text: "SET NEW PASSWORD" });
+    form = h("form", { class: "auth-form", novalidate: true },
+      h("div", { class: "step-label", text: "FORGOT YOUR PASSWORD?" }),
+      h("p", { class: "note", text: "Use the recovery code you saved when you made your account." }),
+      authLabel("EMAIL", email), authLabel("RECOVERY CODE", code), authLabel("NEW PASSWORD", password),
+      submit, msg,
+      h("p", { class: "note" }, "Lost the code too? If you bought Unlimited, see ", h("a", { href: "terms.html#contact", text: "Getting help" }), "."),
+      h("button", { class: "link", type: "button", text: "Back to log in", onclick: () => swap("login") }));
+    wireForm(form, submit, msg, "Resetting…",
+      () => api("reset-password", { method: "POST", body: JSON.stringify({ email: email.value, code: code.value, password: password.value }) }),
+      (body) => {
+        account = { email: body.email, unlimited: body.unlimited };
+        form.replaceWith(recoveryPanel(body.recoveryCode, onDone, "Password changed and other devices signed out. Your old recovery code no longer works — here's your new one."));
+      });
+    return form;
+  }
+  const signup = mode === "signup";
+  const password = passwordInput(signup ? "new-password" : "current-password", signup ? "8+ characters" : "password");
+  const submit = h("button", { class: "btn big", type: "submit", text: signup ? "CREATE ACCOUNT" : "LOG IN" });
+  form = h("form", { class: "auth-form", novalidate: true },
+    authLabel("EMAIL", email), authLabel("PASSWORD", password),
+    submit, msg,
+    signup ? h("p", { class: "note" }, "Accounts are for players 13 and over. Your email is used only for your account. ",
+      h("a", { href: "terms.html", text: "Terms" }), " · ", h("a", { href: "privacy.html", text: "Privacy" })) : null,
+    signup ? null : h("button", { class: "link", type: "button", text: "Forgot password?", onclick: () => swap("reset") }),
+    h("button", { class: "link", type: "button", text: signup ? "Already have an account? Log in" : "New here? Create an account",
+      onclick: () => swap(signup ? "login" : "signup") }));
+  wireForm(form, submit, msg, signup ? "Creating your account…" : "Logging in…",
+    () => api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value }) }),
+    (body) => {
+      account = { email: body.email, unlimited: body.unlimited };
+      password.value = "";
+      if (body.recoveryCode) form.replaceWith(recoveryPanel(body.recoveryCode, onDone));
+      else onDone();
+    });
   return form;
+}
+
+// Make a new recovery code (the old one stops working). Needs the password.
+function newCodeForm() {
+  const password = passwordInput("current-password", "your password");
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const submit = h("button", { class: "btn", type: "submit", text: "MAKE A NEW CODE" });
+  const form = h("form", { class: "auth-form hidden", novalidate: true },
+    h("p", { class: "note", text: "Lost your recovery code? Make a new one. The old code stops working." }),
+    authLabel("PASSWORD", password), submit, msg);
+  wireForm(form, submit, msg, "Making a new code…",
+    () => api("recovery-code", { method: "POST", body: JSON.stringify({ password: password.value }) }),
+    (body) => form.replaceWith(recoveryPanel(body.recoveryCode, () => renderAccount(), "Here's your new recovery code. The old one no longer works.")));
+  const open = h("button", { class: "link", type: "button", text: "New recovery code…", onclick: () => { open.remove(); form.classList.remove("hidden"); password.focus(); } });
+  return h("div", { class: "danger-zone" }, open, form);
 }
 
 async function logOut() {
@@ -231,6 +296,7 @@ function renderPaywall() {
       h("div", { class: "step-label", text: "STEP 2 OF 2 · PAY" }),
       h("div", { class: "signed-in", text: `LOGGED IN AS ${account.email.toUpperCase()}` }),
       h("button", { class: "btn big", id: "btn-buy", type: "button", text: "UNLOCK UNLIMITED — $5", onclick: () => { audio.sfx.click(); buyUnlimited(); } }),
+      h("p", { class: "note" }, "By paying you agree to the ", h("a", { href: "terms.html", text: "Terms" }), ", including the 14-day refund policy."),
       h("button", { class: "link", type: "button", text: "Not you? Log out", onclick: logOut }));
   }
 }
@@ -247,6 +313,7 @@ function renderAccount() {
     h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? "★ UNLIMITED" : "FREE PLAYER — ONE RUN A DAY" }),
     account.unlimited ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
+    newCodeForm(),
     deleteAccountForm(),
   ].filter(Boolean));
 }
