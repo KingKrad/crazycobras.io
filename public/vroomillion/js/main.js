@@ -29,7 +29,7 @@ function h(tag, attrs = {}, ...kids) {
 const SAVE_KEY = "vroomillion.v1";
 const fresh = () => ({
   cash: 0, owned: ["rustbucket"], car: "rustbucket", deck: "classic", muted: false,
-  races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null, unlimited: false, receipt: null,
+  races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null,
 });
 let save = fresh();
 try {
@@ -37,6 +37,9 @@ try {
   if (raw && Array.isArray(raw.owned)) save = { ...save, ...raw };
 } catch { /* private mode or bad data: start fresh */ }
 if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
+// Unlimited comes from the logged-in account on the server, never from this save.
+delete save.unlimited;
+delete save.receipt;
 const persist = () => {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* ignore */ }
 };
@@ -126,15 +129,153 @@ function renderDaily() {
   const box = $("daily");
   box.textContent = "";
   const today = dayKey();
-  if (save.unlimited) {
-    box.append(h("div", { class: "daily-line good", text: "★ UNLIMITED — RACE AS MUCH AS YOU LIKE" }));
-  } else if (canRace(save, today)) {
+  if (unlimitedNow()) {
+    box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
+  } else if (canRace(me(), today)) {
     box.append(h("div", { class: "daily-line good", text: "1 FREE RUN READY TODAY" }));
   } else {
     box.append(
       h("div", { class: "daily-line", text: `TODAY'S FREE RUN IS USED · NEXT ONE IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }));
   }
+}
+
+// ---------- accounts ----------
+let account = null; // { email, unlimited } from the server, or null when logged out / offline
+const unlimitedNow = () => account?.unlimited === true;
+const me = () => ({ ...save, unlimited: unlimitedNow() });
+
+// Talk to the account API. Throws "offline" when there's no server (e.g. the artifact preview).
+async function api(path, options = {}) {
+  const res = await fetch("/api/vroomillion/" + path, {
+    cache: "no-store",
+    ...options,
+    headers: options.body ? { "content-type": "application/json" } : {},
+  });
+  if (!(res.headers.get("content-type") || "").includes("json")) throw new Error("offline");
+  return { res, body: await res.json().catch(() => ({})) };
+}
+
+async function refreshAccount() {
+  try {
+    const { res, body } = await api("me");
+    account = res.ok ? body : null;
+  } catch {
+    account = null;
+  }
+  if (current === "title") renderDaily();
+  if (current === "paywall") renderPaywall();
+  if (current === "account") renderAccount();
+}
+
+// Create-account / log-in form. mode is "signup" or "login".
+function authForm(mode, onDone) {
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const email = h("input", { type: "email", name: "email", autocomplete: "email", required: true, maxlength: "254", placeholder: "you@example.com", "aria-label": "Email" });
+  const password = h("input", { type: "password", name: "password", required: true, minlength: "8", maxlength: "128",
+    autocomplete: mode === "signup" ? "new-password" : "current-password", placeholder: mode === "signup" ? "8+ characters" : "password", "aria-label": "Password" });
+  const submit = h("button", { class: "btn big", type: "submit", text: mode === "signup" ? "CREATE ACCOUNT" : "LOG IN" });
+  const form = h("form", { class: "auth-form", novalidate: true },
+    h("label", {}, h("span", { text: "EMAIL" }), email),
+    h("label", {}, h("span", { text: "PASSWORD" }), password),
+    submit, msg,
+    mode === "signup" ? h("p", { class: "note" }, "Your email is used only for your account. ", h("a", { href: "privacy.html", text: "Privacy" })) : null,
+    h("button", { class: "link", type: "button", text: mode === "signup" ? "Already have an account? Log in" : "New here? Create an account",
+      onclick: () => form.replaceWith(authForm(mode === "signup" ? "login" : "signup", onDone)) }));
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    audio.sfx.click();
+    msg.className = "pay-msg";
+    msg.textContent = mode === "signup" ? "Creating your account…" : "Logging in…";
+    submit.disabled = true;
+    try {
+      const { res, body } = await api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value }) });
+      if (res.ok) {
+        account = body;
+        password.value = "";
+        audio.sfx.lock();
+        onDone();
+        return;
+      }
+      msg.textContent = body.error || "Something went wrong. Try again.";
+    } catch {
+      msg.textContent = "Accounts only work on the VROOMILLION website, not in this preview.";
+    }
+    msg.className = "pay-msg bad";
+    submit.disabled = false;
+  });
+  return form;
+}
+
+async function logOut() {
+  audio.sfx.click();
+  try { await api("logout", { method: "POST" }); } catch { /* offline: nothing to end */ }
+  account = null;
+  show("title");
+}
+
+function renderPaywall() {
+  $("pay-lead").textContent = canRace(me(), dayKey())
+    ? "Race as often as you like, every day."
+    : `You've used today's free run. The next one is in ${timeLeft()}.`;
+  $("pay-msg").textContent = "";
+  const step = $("pay-step");
+  step.textContent = "";
+  if (!account) {
+    step.append(h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall));
+  } else if (account.unlimited) {
+    step.append(h("div", { class: "daily-line good", text: `★ ${account.email.toUpperCase()} HAS UNLIMITED` }),
+      h("button", { class: "btn big", type: "button", text: "RACE ▶", onclick: () => { audio.sfx.click(); show("leagues"); } }));
+  } else {
+    step.append(
+      h("div", { class: "step-label", text: "STEP 2 OF 2 · PAY" }),
+      h("div", { class: "signed-in", text: `LOGGED IN AS ${account.email.toUpperCase()}` }),
+      h("button", { class: "btn big", id: "btn-buy", type: "button", text: "UNLOCK UNLIMITED — $5", onclick: () => { audio.sfx.click(); buyUnlimited(); } }),
+      h("button", { class: "link", type: "button", text: "Not you? Log out", onclick: logOut }));
+  }
+}
+
+function renderAccount() {
+  const box = $("account-box");
+  box.textContent = "";
+  if (!account) {
+    box.append(h("p", { class: "note", text: "Bought Unlimited? Log in to use it on this device." }), authForm("login", () => show("title")));
+    return;
+  }
+  box.append(...[
+    h("div", { class: "signed-in", text: account.email.toUpperCase() }),
+    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? "★ UNLIMITED" : "FREE PLAYER — ONE RUN A DAY" }),
+    account.unlimited ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } }),
+    h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
+    deleteAccountForm(),
+  ].filter(Boolean));
+}
+
+// Delete the account after re-entering the password.
+function deleteAccountForm() {
+  const password = h("input", { type: "password", autocomplete: "current-password", maxlength: "128", placeholder: "your password", "aria-label": "Password to confirm deleting your account" });
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const go = h("button", { class: "btn danger", type: "submit", text: "DELETE MY ACCOUNT" });
+  const form = h("form", { class: "auth-form hidden", novalidate: true },
+    h("p", { class: "note", text: account?.unlimited ? "This removes your email and password and you lose Unlimited. It can't be undone." : "This removes your email and password. It can't be undone." }),
+    h("label", {}, h("span", { text: "PASSWORD" }), password), go, msg);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    go.disabled = true;
+    msg.className = "pay-msg";
+    msg.textContent = "Deleting…";
+    try {
+      const { res, body } = await api("delete-account", { method: "POST", body: JSON.stringify({ password: password.value }) });
+      if (res.ok) { account = null; audio.sfx.deny(); show("title"); return; }
+      msg.textContent = body.error || "Couldn't delete the account. Try again.";
+    } catch {
+      msg.textContent = "Couldn't reach the server. Try again.";
+    }
+    msg.className = "pay-msg bad";
+    go.disabled = false;
+  });
+  const open = h("button", { class: "link", type: "button", text: "Delete account…", onclick: () => { open.remove(); form.classList.remove("hidden"); password.focus(); } });
+  return h("div", { class: "danger-zone" }, open, form);
 }
 
 async function buyUnlimited() {
@@ -144,16 +285,15 @@ async function buyUnlimited() {
   msg.className = "pay-msg";
   msg.textContent = "Opening secure checkout…";
   try {
-    const res = await fetch("/api/vroomillion/checkout", { method: "POST" });
-    if (!(res.headers.get("content-type") || "").includes("json")) throw new Error("no payment server here");
-    const body = await res.json().catch(() => ({}));
+    const { res, body } = await api("checkout", { method: "POST" });
     if (res.ok && typeof body.url === "string" && body.url.startsWith("https://checkout.stripe.com/")) {
       window.location.assign(body.url);
       return;
     }
+    if (res.status === 401) { account = null; renderPaywall(); }
+    if (res.status === 409) { await refreshAccount(); return; }
     msg.textContent = body.error || "Couldn't start checkout. Try again later.";
   } catch {
-    // e.g. the Claude artifact preview, which can't reach the payment server
     msg.textContent = "Payments only work on the VROOMILLION website, not in this preview.";
   }
   msg.className = "pay-msg bad";
@@ -181,13 +321,8 @@ function show(name) {
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "leagues") renderLeagues();
-  if (name === "paywall") {
-    $("pay-lead").textContent = canRace(save, dayKey())
-      ? "Race as often as you like, every day."
-      : `You've used today's free run. The next one is in ${timeLeft()}.`;
-    $("pay-msg").textContent = "";
-    $("btn-buy").disabled = false;
-  }
+  if (name === "paywall") renderPaywall();
+  if (name === "account") renderAccount();
   if (name === "versus") renderVersus();
   if (name === "garage") renderGarage();
   window.scrollTo({ top: 0 });
@@ -257,8 +392,8 @@ function renderLeagues() {
   modeSwitch($("mode-solo"));
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
-  const ok = canRace(save, dayKey());
-  $("btn-start-1p").textContent = ok ? (save.unlimited ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
+  const ok = canRace(me(), dayKey());
+  $("btn-start-1p").textContent = ok ? (unlimitedNow() ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
 }
 
 const versus = { p1: save.car, p2: save.car };
@@ -361,7 +496,7 @@ function popGain(i, metres, tier, nitro) {
 function startRace(setup) {
   lastSetup = setup;
   const today = dayKey();
-  if (!canRace(save, today)) {
+  if (!canRace(me(), today)) {
     show("paywall");
     return;
   }
@@ -738,7 +873,7 @@ function finish(token) {
   $("result-title").className = "result-title " + (happy ? "good" : "bad");
   const body = $("result-body");
   body.textContent = "";
-  body.append(
+  body.append(...[
     h("div", { class: "final" },
       ...race.racers.map((r, i) => h("div", { class: `final-card p${i + 1}` + (i === winner ? " winner" : "") },
         spriteCanvas(r.car, 4),
@@ -751,7 +886,7 @@ function finish(token) {
       h("div", { class: "note", text: race.solo
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
-    save.unlimited ? null : h("div", { class: "daily-next" },
+    unlimitedNow() ? null : h("div", { class: "daily-next" },
       h("div", { text: `NEXT FREE RUN IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); show("paywall"); } })),
     h("div", { class: "log" },
@@ -760,8 +895,8 @@ function finish(token) {
         ...race.racers.map((r, pi) => h("div", { class: `log-a p${pi + 1}` },
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
           h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short })))))),
-  );
-  $("btn-again").textContent = canRace(save, dayKey()) ? "RACE AGAIN" : "RACE AGAIN — $5";
+  ].filter(Boolean));
+  $("btn-again").textContent = canRace(me(), dayKey()) ? "RACE AGAIN" : "RACE AGAIN — $5";
   show("results");
 }
 
@@ -785,7 +920,7 @@ $("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); }
 $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
 $("btn-again").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace(lastSetup); });
 $("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
-$("btn-buy").addEventListener("click", () => { audio.sfx.click(); buyUnlimited(); });
+$("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("btn-start-2p").addEventListener("click", () => {
   audio.sfx.click();
   const clean = (id, fallback) => ($(id).value.trim().toUpperCase().slice(0, 10) || fallback);
@@ -808,3 +943,4 @@ renderSound();
 renderCash(false);
 renderLegend();
 show("title");
+refreshAccount();

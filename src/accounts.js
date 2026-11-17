@@ -1,0 +1,226 @@
+// VROOMILLION accounts: email + password, stored in the D1 database bound as DB.
+// Passwords are hashed with PBKDF2-SHA256 and a random salt per user; sessions are
+// random tokens kept in an HttpOnly cookie, and only their SHA-256 hash is stored.
+
+const COOKIE = "vr_session";
+const SESSION_DAYS = 30;
+// The Workers free plan allows about 10 ms of CPU per request, and 100k rounds
+// takes ~18 ms, so the default is 50k. Raise PBKDF2_ITERATIONS on a paid plan;
+// older hashes are upgraded the next time that person logs in.
+const DEFAULT_ITERATIONS = 50000;
+const MAX_ITERATIONS = 100000; // the most Workers' PBKDF2 accepts
+
+const enc = new TextEncoder();
+const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+export function json(body, status = 200, headers = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers },
+  });
+}
+
+export const iterationsFor = (env) => {
+  const n = Number(env.PBKDF2_ITERATIONS);
+  return Number.isInteger(n) && n >= 10000 ? Math.min(n, MAX_ITERATIONS) : DEFAULT_ITERATIONS;
+};
+
+export async function hashPassword(password, salt, iterations) {
+  const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations }, key, 256);
+  return b64(bits);
+}
+
+// Compare without stopping at the first difference.
+function sameString(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function sha256(text) {
+  return b64(await crypto.subtle.digest("SHA-256", enc.encode(text)));
+}
+
+export function normalizeEmail(raw) {
+  const email = String(raw || "").trim().toLowerCase();
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? email : null;
+}
+
+export function checkPassword(raw) {
+  const pw = typeof raw === "string" ? raw : "";
+  if (pw.length < 8) return "Use at least 8 characters for your password.";
+  if (pw.length > 128) return "That password is too long (128 characters max).";
+  return null;
+}
+
+let schemaReady = false;
+export async function ensureSchema(db) {
+  if (schemaReady) return;
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      pw_hash TEXT NOT NULL,
+      pw_salt TEXT NOT NULL,
+      pw_iter INTEGER NOT NULL,
+      unlimited INTEGER NOT NULL DEFAULT 0,
+      pending_session TEXT,
+      paid_session TEXT,
+      created_at INTEGER NOT NULL
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS sessions (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      expires_at INTEGER NOT NULL
+    )`),
+    db.prepare("CREATE INDEX IF NOT EXISTS sessions_user ON sessions (user_id)"),
+  ]);
+  schemaReady = true;
+}
+export const resetSchemaFlagForTests = () => { schemaReady = false; };
+
+function readCookie(request) {
+  const header = request.headers.get("cookie") || "";
+  for (const part of header.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k === COOKIE) return v.join("=");
+  }
+  return null;
+}
+
+const cookie = (value, maxAge) =>
+  `${COOKIE}=${value}; Path=/api/vroomillion; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+
+async function startSession(env, userId) {
+  const token = b64(crypto.getRandomValues(new Uint8Array(32))).replace(/[+/=]/g, (c) => ({ "+": "-", "/": "_", "=": "" }[c]));
+  const expires = Date.now() + SESSION_DAYS * 86400000;
+  await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)")
+    .bind(await sha256(token), userId, expires).run();
+  // tidy up this person's expired sessions
+  await env.DB.prepare("DELETE FROM sessions WHERE user_id = ? AND expires_at < ?").bind(userId, Date.now()).run();
+  return cookie(token, SESSION_DAYS * 86400);
+}
+
+// The logged-in user for this request, or null.
+export async function currentUser(request, env) {
+  const token = readCookie(request);
+  if (!token || token.length > 100) return null;
+  await ensureSchema(env.DB);
+  const row = await env.DB.prepare(
+    "SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?",
+  ).bind(await sha256(token), Date.now()).first();
+  return row || null;
+}
+
+export const publicUser = (u) => ({ email: u.email, unlimited: u.unlimited === 1 });
+
+// Shared checks for the sign-up / log-in forms.
+async function guard(request, env) {
+  if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
+  const origin = new URL(request.url).origin;
+  const from = request.headers.get("origin");
+  if (from && from !== origin) return json({ error: "Bad request." }, 403);
+  if (env.AUTH_LIMITER) {
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const { success } = await env.AUTH_LIMITER.limit({ key: ip });
+    if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
+  }
+  const len = Number(request.headers.get("content-length") || 0);
+  if (len > 2000) return json({ error: "Bad request." }, 413);
+  return null;
+}
+
+async function readForm(request) {
+  try {
+    const body = await request.json();
+    return body && typeof body === "object" ? body : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function handleSignup(request, env) {
+  const stop = await guard(request, env);
+  if (stop) return stop;
+  const body = await readForm(request);
+  const email = normalizeEmail(body.email);
+  if (!email) return json({ error: "Enter a valid email address." }, 400);
+  const problem = checkPassword(body.password);
+  if (problem) return json({ error: problem }, 400);
+
+  await ensureSchema(env.DB);
+  const exists = await env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(email).first();
+  if (exists) return json({ error: "There's already an account with that email. Log in instead." }, 409);
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iterations = iterationsFor(env);
+  const id = crypto.randomUUID();
+  try {
+    await env.DB.prepare(
+      "INSERT INTO users (id, email, pw_hash, pw_salt, pw_iter, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    ).bind(id, email, await hashPassword(body.password, salt, iterations), b64(salt), iterations, Date.now()).run();
+  } catch {
+    return json({ error: "There's already an account with that email. Log in instead." }, 409);
+  }
+  return json({ email, unlimited: false }, 201, { "set-cookie": await startSession(env, id) });
+}
+
+export async function handleLogin(request, env) {
+  const stop = await guard(request, env);
+  if (stop) return stop;
+  const body = await readForm(request);
+  const email = normalizeEmail(body.email);
+  const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
+  const wrong = json({ error: "Wrong email or password." }, 401);
+  if (!email || !password) return wrong;
+
+  await ensureSchema(env.DB);
+  const user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
+  if (!user) {
+    // spend the same time as a real check so response timing doesn't reveal which emails exist
+    await hashPassword(password, new Uint8Array(16), iterationsFor(env));
+    return wrong;
+  }
+  const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
+  if (!sameString(hash, user.pw_hash)) return wrong;
+
+  // upgrade older, weaker hashes
+  const want = iterationsFor(env);
+  if (user.pw_iter < want) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    await env.DB.prepare("UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ? WHERE id = ?")
+      .bind(await hashPassword(password, salt, want), b64(salt), want, user.id).run();
+  }
+  return json(publicUser(user), 200, { "set-cookie": await startSession(env, user.id) });
+}
+
+export async function handleLogout(request, env) {
+  if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  const token = readCookie(request);
+  if (env.DB && token && token.length <= 100) {
+    await ensureSchema(env.DB);
+    await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha256(token)).run();
+  }
+  return json({ ok: true }, 200, { "set-cookie": cookie("", 0) });
+}
+
+// POST /api/vroomillion/delete-account { password } -> removes the account and its sessions.
+export async function handleDeleteAccount(request, env) {
+  const stop = await guard(request, env);
+  if (stop) return stop;
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: "Log in first." }, 401);
+  const body = await readForm(request);
+  const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
+  const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
+  if (!sameString(hash, user.pw_hash)) return json({ error: "Wrong password." }, 401);
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
+    env.DB.prepare("DELETE FROM users WHERE id = ?").bind(user.id),
+  ]);
+  return json({ ok: true }, 200, { "set-cookie": cookie("", 0) });
+}

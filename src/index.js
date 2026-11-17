@@ -2,7 +2,8 @@ import { ROOM_TYPES, STYLES, MAX_STYLES } from "./options.js";
 import { validatePayload, checkJpeg } from "./validate.js";
 import { buildImagePrompt, generateImage, generateList, shapeList } from "./ai.js";
 import { verifyTurnstile } from "./turnstile.js";
-import { handleCheckout, handleVerify } from "./vroomillion.js";
+import { handleCheckout, handleVerify, handleMe } from "./vroomillion.js";
+import { handleSignup, handleLogin, handleLogout, handleDeleteAccount } from "./accounts.js";
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -98,6 +99,11 @@ export default {
       }
       if (pathname === "/api/vroomillion/checkout") return await handleCheckout(request, env);
       if (pathname === "/api/vroomillion/verify") return await handleVerify(request, env);
+      if (pathname === "/api/vroomillion/me") return await handleMe(request, env);
+      if (pathname === "/api/vroomillion/signup") return await handleSignup(request, env);
+      if (pathname === "/api/vroomillion/login") return await handleLogin(request, env);
+      if (pathname === "/api/vroomillion/logout") return await handleLogout(request, env);
+      if (pathname === "/api/vroomillion/delete-account") return await handleDeleteAccount(request, env);
       if (pathname === "/api/generate") {
         if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
         return await handleGenerate(request, env);
