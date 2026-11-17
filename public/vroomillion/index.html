@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12082e">
+  <meta name="description" content="VROOMILLION — the 8-bit trivia racer where the more niche your answer, the faster your car.">
+  <title>VROOMILLION — niche answers, fast cars</title>
+  <link rel="preload" href="fonts/press-start-2p.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="btn-home" type="button" aria-label="Back to title">VROOM<span>ILLION</span></button>
+      <div class="topbar-right">
+        <div class="cash" id="cash" aria-live="polite">$0</div>
+        <button class="icon-btn" id="btn-sound" type="button" aria-pressed="true">SND ON</button>
+      </div>
+    </header>
+
+    <div class="stage">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="stage-overlay" id="overlay" aria-live="assertive"></div>
+      <div class="title-art" id="title-art">
+        <h1 class="logo"><span class="logo-a">VROOM</span><span class="logo-b">ILLION</span></h1>
+        <p class="tagline">THE NICHER THE ANSWER, THE FASTER THE CAR</p>
+      </div>
+    </div>
+
+    <main>
+      <section class="screen" id="s-title">
+        <p class="blink">— PRESS START —</p>
+        <div class="menu">
+          <button class="btn big" id="btn-1p" type="button">1P RACE</button>
+          <button class="btn big alt" id="btn-2p" type="button">2P VERSUS</button>
+          <button class="btn" id="btn-garage" type="button">GARAGE</button>
+          <button class="btn" id="btn-how" type="button">HOW TO PLAY</button>
+        </div>
+        <p class="stats" id="stats"></p>
+      </section>
+
+      <section class="screen" id="s-how">
+        <h2>HOW TO PLAY</h2>
+        <ol class="how">
+          <li>Every race is 7 questions. Each one has lots of right answers.</li>
+          <li>Type one. The <b>more niche</b> your answer, the further your car blasts down the road.</li>
+          <li>Furthest after 7 rounds wins the prize money. Spend it on faster cars.</li>
+          <li>Same answer as your rival? <b>FENDER BENDER</b> — you both drop a tier.</li>
+          <li>Hit <b>NITRO</b> before you answer for 1.5× distance. Charges depend on your car.</li>
+        </ol>
+        <div class="tiers" id="tier-legend"></div>
+        <button class="btn" data-go="title" type="button">BACK</button>
+      </section>
+
+      <section class="screen" id="s-leagues">
+        <h2>1P RACE — PICK A LEAGUE</h2>
+        <div class="picker" id="picker-solo"></div>
+        <div class="leagues" id="league-list"></div>
+        <button class="btn" data-go="title" type="button">BACK</button>
+      </section>
+
+      <section class="screen" id="s-versus">
+        <h2>2P VERSUS — SAME SCREEN</h2>
+        <p class="note">Answers are hidden while you type. No peeking.</p>
+        <div class="versus-grid">
+          <div class="vs-col p1">
+            <label>PLAYER 1 <input id="name-p1" maxlength="10" value="P1" autocomplete="off" spellcheck="false"></label>
+            <div class="picker" id="picker-p1"></div>
+          </div>
+          <div class="vs-col p2">
+            <label>PLAYER 2 <input id="name-p2" maxlength="10" value="P2" autocomplete="off" spellcheck="false"></label>
+            <div class="picker" id="picker-p2"></div>
+          </div>
+        </div>
+        <div class="menu row">
+          <button class="btn big" id="btn-start-2p" type="button">START RACE</button>
+          <button class="btn" data-go="title" type="button">BACK</button>
+        </div>
+      </section>
+
+      <section class="screen" id="s-garage">
+        <h2>GARAGE &amp; SHOWROOM</h2>
+        <p class="note">PWR multiplies your distance. N2O is nitro charges per race.</p>
+        <div id="garage-list"></div>
+        <button class="btn sticky" data-go="title" type="button">BACK</button>
+      </section>
+
+      <section class="screen" id="s-race">
+        <div class="hud" id="hud"></div>
+        <div class="round-row">
+          <span id="round-label">ROUND 1/7</span>
+          <span class="pips" id="pips"></span>
+          <button class="link" id="btn-quit" type="button">QUIT</button>
+        </div>
+        <div class="question" id="question"></div>
+        <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
+        <div class="answer-zone" id="answer-zone">
+          <p class="turn" id="turn"></p>
+          <div class="answer-row">
+            <input id="answer" type="text" maxlength="40" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="TYPE AN ANSWER" aria-label="Your answer">
+            <button class="btn go" id="btn-go" type="button">GO!</button>
+          </div>
+          <button class="btn nitro" id="btn-nitro" type="button">NITRO</button>
+        </div>
+        <div class="reveal" id="reveal"></div>
+        <p class="hint" id="hint"></p>
+        <button class="btn big hidden" id="btn-next" type="button">NEXT ▶</button>
+      </section>
+
+      <section class="screen" id="s-results">
+        <h2 class="result-title" id="result-title"></h2>
+        <div class="result-body" id="result-body"></div>
+        <div class="menu row">
+          <button class="btn big" id="btn-again" type="button">RACE AGAIN</button>
+          <button class="btn" id="btn-results-garage" type="button">GARAGE</button>
+          <button class="btn" data-go="title" type="button">MENU</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>A fan-made trivia racer. Not affiliated with any car maker or with Krillion.</footer>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

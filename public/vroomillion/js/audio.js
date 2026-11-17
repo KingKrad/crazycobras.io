@@ -1,0 +1,153 @@
+// Chiptune sound, synthesised with Web Audio. No audio files.
+
+let ctx = null;
+let master = null;
+let musicGain = null;
+let muted = false;
+let musicTimer = null;
+let engine = null;
+
+function ensure() {
+  if (ctx) return true;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return false;
+  ctx = new AC();
+  master = ctx.createGain();
+  master.gain.value = muted ? 0 : 0.5;
+  master.connect(ctx.destination);
+  musicGain = ctx.createGain();
+  musicGain.gain.value = 0.16;
+  musicGain.connect(master);
+  return true;
+}
+
+// Browsers only allow sound after a tap or key press.
+export function unlock() {
+  if (!ensure()) return;
+  if (ctx.state === "suspended") ctx.resume();
+}
+
+export function setMuted(m) {
+  muted = m;
+  if (master) master.gain.value = m ? 0 : 0.5;
+}
+export const isMuted = () => muted;
+
+function tone(freq, dur, { type = "square", vol = 0.2, at = 0, slide = 0, out = master } = {}) {
+  if (!ctx) return;
+  const t = ctx.currentTime + at;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * slide), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(out);
+  o.start(t);
+  o.stop(t + dur + 0.02);
+}
+
+function noise(dur, { vol = 0.2, at = 0, hp = 800 } = {}) {
+  if (!ctx) return;
+  const t = ctx.currentTime + at;
+  const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * dur), ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const f = ctx.createBiquadFilter();
+  f.type = "highpass";
+  f.frequency.value = hp;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(f).connect(g).connect(master);
+  src.start(t);
+}
+
+const N = { C4: 261.6, D4: 293.7, E4: 329.6, F4: 349.2, G4: 392, A4: 440, B4: 493.9, C5: 523.3, D5: 587.3, E5: 659.3, G5: 784, A5: 880, C6: 1046.5, E6: 1318.5 };
+
+export const sfx = {
+  click: () => tone(660, 0.05, { vol: 0.12 }),
+  move: () => tone(440, 0.04, { vol: 0.08 }),
+  key: () => tone(900 + Math.random() * 200, 0.02, { vol: 0.04 }),
+  deny: () => { tone(160, 0.12, { type: "sawtooth", vol: 0.15 }); tone(120, 0.16, { type: "sawtooth", vol: 0.15, at: 0.1 }); },
+  tick: () => tone(1200, 0.03, { vol: 0.06 }),
+  beep: () => tone(440, 0.14, { vol: 0.2 }),
+  go: () => tone(880, 0.4, { vol: 0.22 }),
+  lock: () => { tone(520, 0.05, { vol: 0.12 }); tone(780, 0.07, { vol: 0.12, at: 0.05 }); },
+  nitro: () => { noise(0.5, { vol: 0.2, hp: 1500 }); tone(200, 0.5, { type: "sawtooth", vol: 0.12, slide: 4 }); },
+  cash: () => [N.E5, N.G5, N.C6, N.E6].forEach((f, i) => tone(f, 0.08, { vol: 0.13, at: i * 0.05 })),
+  buy: () => [N.C5, N.E5, N.G5, N.C6, N.G5, N.C6].forEach((f, i) => tone(f, 0.1, { vol: 0.15, at: i * 0.08 })),
+  bump: () => { noise(0.2, { vol: 0.3, hp: 300 }); tone(90, 0.2, { type: "square", vol: 0.2, slide: 0.5 }); },
+  win: () => [N.C5, N.C5, N.C5, N.E5, N.G5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f, i === 7 ? 0.5 : 0.11, { vol: 0.18, at: i * 0.12 })),
+  lose: () => [N.G4, N.F4, N.E4, N.C4].forEach((f, i) => tone(f, 0.25, { type: "triangle", vol: 0.22, at: i * 0.22 })),
+  // Reveal jingle gets grander with each rarity tier.
+  tier: (t) => {
+    if (t === 0) { tone(110, 0.3, { type: "sawtooth", vol: 0.18, slide: 0.5 }); noise(0.25, { vol: 0.1, hp: 200 }); return; }
+    const scale = [N.C5, N.E5, N.G5, N.C6, N.E6, 1568];
+    for (let i = 0; i <= t; i++) tone(scale[i], 0.09 + (i === t ? 0.2 : 0), { vol: 0.15, at: i * 0.07 });
+    if (t === 5) { noise(0.6, { vol: 0.12, hp: 4000, at: 0.4 }); [1568, 2093, 1568, 2093, 2637].forEach((f, i) => tone(f, 0.08, { vol: 0.12, at: 0.45 + i * 0.07 })); }
+  },
+};
+
+// Engine drone that follows car speed (0..1).
+export function engineStart() {
+  if (!ctx || engine) return;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  o.type = "sawtooth";
+  o.frequency.value = 50;
+  f.type = "lowpass";
+  f.frequency.value = 500;
+  g.gain.value = 0;
+  o.connect(f).connect(g).connect(master);
+  o.start();
+  engine = { o, g, f };
+}
+export function engineSet(speed) {
+  if (!engine) return;
+  const t = ctx.currentTime;
+  engine.o.frequency.setTargetAtTime(48 + speed * 150, t, 0.08);
+  engine.f.frequency.setTargetAtTime(350 + speed * 1400, t, 0.08);
+  engine.g.gain.setTargetAtTime(0.03 + speed * 0.09, t, 0.08);
+}
+export function engineStop() {
+  if (!engine) return;
+  const e = engine;
+  engine = null;
+  e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
+  e.o.stop(ctx.currentTime + 0.5);
+}
+
+// A 4-bar looping tune: bass + lead + hats.
+const BASS = [N.A4 / 4, 0, N.A4 / 4, N.A4 / 4, N.F4 / 4, 0, N.F4 / 4, N.F4 / 4, N.C4 / 2, 0, N.C4 / 2, N.C4 / 2, N.G4 / 4, 0, N.G4 / 4, N.G4 / 4];
+const LEAD = [N.A4, N.C5, N.E5, N.C5, N.A4, N.C5, N.F4 * 2, N.C5, N.G4, N.C5, N.E5, N.G5, N.D5, N.B4, N.G4, N.B4];
+const LEAD2 = [N.E5, 0, N.E5, N.D5, N.C5, 0, N.A4, 0, N.G5, 0, N.E5, N.D5, N.D5, N.E5, N.D5, N.B4];
+
+export function musicStart() {
+  if (!ctx || musicTimer) return;
+  let step = 0;
+  let next = ctx.currentTime + 0.05;
+  const len = 0.14;
+  musicTimer = setInterval(() => {
+    while (next < ctx.currentTime + 0.3) {
+      const at = next - ctx.currentTime;
+      const i = step % 16;
+      const bar = Math.floor(step / 32) % 2;
+      const b = BASS[Math.floor(step / 2) % 16];
+      if (b && step % 2 === 0) tone(b, len * 1.8, { type: "triangle", vol: 0.5, at, out: musicGain });
+      const l = (bar ? LEAD2 : LEAD)[i];
+      if (l) tone(l, len * 0.9, { vol: 0.16, at, out: musicGain });
+      if (step % 4 === 2) noise(0.03, { vol: 0.03, at, hp: 6000 });
+      next += len;
+      step++;
+    }
+  }, 60);
+}
+export function musicStop() {
+  clearInterval(musicTimer);
+  musicTimer = null;
+}
