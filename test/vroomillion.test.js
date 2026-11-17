@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -102,30 +102,29 @@ test("one free race per day, unlimited races after paying, everything during fre
   assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
 });
 
-test("no question repeats until every question in the mode has been played", () => {
+test("a prompt never comes back, even after the mode runs out", () => {
   const deck = deckQuestions(QUESTIONS, "classic");
-  let seen = [];
-  const shown = [];
-  const races = Math.floor(deck.length / ROUNDS);
-  for (let r = 0; r < races; r++) {
-    const out = pickFresh(deck, seen, ROUNDS);
-    assert.equal(out.questions.length, ROUNDS);
-    shown.push(...out.questions.map((q) => q.q));
-    seen = out.seen;
+  const seen = [];
+  const lengths = [];
+  for (;;) {
+    const race = pickFresh(deck, seen, ROUNDS);
+    if (!race.length) break;
+    assert.equal(new Set(race.map((q) => q.q)).size, race.length, "no repeats within a race");
+    for (const q of race) assert.ok(!seen.includes(q.q), "never shown twice: " + q.q);
+    seen.push(...race.map((q) => q.q));
+    lengths.push(race.length);
+    assert.equal(promptsLeft(deck, seen), deck.length - seen.length);
   }
-  assert.equal(new Set(shown).size, shown.length, "no repeats across races");
-  // the next race uses up the leftovers first, then starts a new cycle
-  const leftovers = deck.filter((q) => !shown.includes(q.q)).map((q) => q.q);
-  const next = pickFresh(deck, seen, ROUNDS);
-  assert.equal(new Set(next.questions.map((q) => q.q)).size, ROUNDS, "no repeats within a race");
-  for (const t of leftovers) assert.ok(next.questions.some((q) => q.q === t), "unseen question shown before any repeat: " + t);
-  assert.ok(next.seen.length <= deck.length);
+  assert.equal(seen.length, deck.length, "every prompt was played exactly once");
+  assert.ok(lengths.slice(0, -1).every((n) => n === ROUNDS), "full races until the last one");
+  assert.equal(lengths.at(-1), deck.length % ROUNDS || ROUNDS, "the last race uses whatever is left");
+  assert.deepEqual(pickFresh(deck, seen, ROUNDS), [], "nothing new once every prompt is played");
 });
 
-test("seen questions in one mode carry over to shared questions in the other", () => {
+test("prompts seen in one mode stay seen in the other", () => {
   const both = QUESTIONS.filter((q) => q.deck === "both").map((q) => q.q);
-  const out = pickFresh(deckQuestions(QUESTIONS, "car"), both, ROUNDS);
-  assert.ok(out.questions.every((q) => !both.includes(q.q)));
+  const race = pickFresh(deckQuestions(QUESTIONS, "car"), both, ROUNDS);
+  assert.ok(race.length > 0 && race.every((q) => !both.includes(q.q)));
 });
 
 test("solo prize money grows with the car and niche answers", () => {

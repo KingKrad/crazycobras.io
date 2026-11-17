@@ -33,26 +33,18 @@ export const FREE_PLAY = true;
 // Free players get one race per day; unlimited players race as often as they like.
 export const canRace = (save, today, freePlay = FREE_PLAY) => freePlay || !!save.unlimited || save.lastRunDay !== today;
 
-// No repeats: questions this browser has seen are skipped until every question in the
-// mode has been played; then that mode starts a fresh cycle. Returns the race's
-// questions and the updated list of seen question texts.
+// No repeats: a prompt this browser has seen never comes back. Picks up to n
+// prompts from the ones not seen yet; fewer (or none) once the mode runs low.
 export function pickFresh(deckQs, seen, n, rng = Math.random) {
   const seenSet = new Set(seen);
   const unseen = deckQs.filter((q) => !seenSet.has(q.q));
-  let picked;
-  let nextSeen = [...seen];
-  if (unseen.length >= n) {
-    picked = pickQuestions(unseen, n, rng);
-  } else {
-    // finish the cycle with what's left, then top up from the rest of the mode
-    const inDeck = new Set(deckQs.map((q) => q.q));
-    nextSeen = nextSeen.filter((t) => !inDeck.has(t));
-    const rest = deckQs.filter((q) => !unseen.includes(q));
-    picked = [...pickQuestions(unseen, unseen.length, rng), ...pickQuestions(rest, n - unseen.length, rng)];
-  }
-  for (const q of picked) nextSeen.push(q.q);
-  return { questions: picked, seen: nextSeen };
+  return pickQuestions(unseen, Math.min(n, unseen.length), rng);
 }
+
+export const promptsLeft = (deckQs, seen) => {
+  const seenSet = new Set(seen);
+  return deckQs.filter((q) => !seenSet.has(q.q)).length;
+};
 
 
 export function normalize(s) {

@@ -3,7 +3,7 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, pickFresh, FREE_PLAY,
+  dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, FREE_PLAY,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -460,24 +460,42 @@ const MODES = [
 ];
 const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
 
-function modeSwitch(mount) {
+function modeSwitch(mount, onChange) {
   mount.textContent = "";
   mount.append(...MODES.map((m) => h("button", {
     class: "mode mode-" + m.id, type: "button", "aria-pressed": String(save.deck === m.id),
-    onclick: () => { save.deck = m.id; persist(); audio.sfx.move(); modeSwitch(mount); },
+    onclick: () => { save.deck = m.id; persist(); audio.sfx.move(); modeSwitch(mount, onChange); onChange?.(); },
   }, h("span", { class: "mode-name", text: m.name }), h("span", { class: "mode-info", text: m.info }))));
 }
+const seenList = () => (Array.isArray(save.seen) ? save.seen : []);
+const leftInMode = () => promptsLeft(deckQuestions(QUESTIONS, save.deck), seenList());
+
+// "28 NEW PROMPTS LEFT" under the mode switch; when none are left, say what to do instead.
+function renderPromptsLeft(el, startBtn, ready) {
+  const left = leftInMode();
+  el.className = "prompts-left" + (left ? "" : " none");
+  el.textContent = left
+    ? `${left} NEW PROMPT${left === 1 ? "" : "S"} LEFT IN ${modeName(save.deck)}${left < ROUNDS ? ` · LAST RACE IS ${left} ROUND${left === 1 ? "" : "S"}` : ""}`
+    : `YOU'VE PLAYED EVERY ${modeName(save.deck)} PROMPT. TRY THE OTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
+  startBtn.disabled = !left;
+  if (!left) startBtn.textContent = "NO NEW PROMPTS";
+  else ready();
+}
+
 function renderLeagues() {
-  modeSwitch($("mode-solo"));
+  modeSwitch($("mode-solo"), renderLeagues);
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
   const ok = canRace(me(), dayKey());
-  $("btn-start-1p").textContent = ok ? (FREE_PLAY || unlimitedNow() ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
+  renderPromptsLeft($("left-solo"), $("btn-start-1p"), () => {
+    $("btn-start-1p").textContent = ok ? (FREE_PLAY || unlimitedNow() ? "START RACE" : "START TODAY'S FREE RUN") : "GO UNLIMITED — $5";
+  });
 }
 
 const versus = { p1: save.car, p2: save.car };
 function renderVersus() {
-  modeSwitch($("mode-2p"));
+  modeSwitch($("mode-2p"), renderVersus);
+  renderPromptsLeft($("left-2p"), $("btn-start-2p"), () => { $("btn-start-2p").textContent = "START RACE"; });
   versus.p1 = save.car;
   versus.p2 = save.car;
   carPicker($("picker-p1"), () => versus.p1, (id) => { versus.p1 = id; });
@@ -572,18 +590,23 @@ function popGain(i, metres, tier, nitro) {
 }
 
 
+// setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
-  lastSetup = setup;
   const today = dayKey();
   if (!canRace(me(), today)) {
     show("paywall");
     return;
   }
+  const questions = setup.redo && setup.questions?.length
+    ? setup.questions
+    : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS);
+  if (!questions.length) {
+    // nothing new left in this mode: back to the setup screen, which explains
+    show(setup.mode === "solo" ? "leagues" : "versus");
+    return;
+  }
+  lastSetup = { ...setup, redo: false, questions };
   save.lastRunDay = today;
-  // never repeat a question until every question in this mode has been played
-  const picked = pickFresh(deckQuestions(QUESTIONS, save.deck), Array.isArray(save.seen) ? save.seen : [], ROUNDS);
-  const questions = picked.questions;
-  save.seen = picked.seen;
   persist();
   const token = ++raceToken;
   const solo = setup.mode === "solo";
@@ -603,11 +626,11 @@ function startRace(setup) {
   for (const id of ["hud", "reveal", "result-body"]) $(id).classList.toggle("solo", solo);
   racers.forEach((r, i) => hud.append(hudCard(r, i)));
   $("pips").textContent = "";
-  for (let i = 0; i < ROUNDS; i++) $("pips").append(h("i", { class: "pip" }));
+  for (let i = 0; i < questions.length; i++) $("pips").append(h("i", { class: "pip" }));
   $("reveal").textContent = "";
   $("hint").textContent = "";
   $("question").textContent = "GET READY…";
-  $("round-label").textContent = `ROUND 1 OF ${ROUNDS}`;
+  $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
   $("mode-label").textContent = modeName(save.deck);
   $("mode-label").className = "mode-tag mode-" + save.deck;
@@ -637,12 +660,15 @@ async function runRace(token) {
   if (!alive()) return;
   overlay("");
 
-  for (let round = 0; round < ROUNDS; round++) {
+  const rounds = race.questions.length;
+  for (let round = 0; round < rounds; round++) {
     race.round = round;
     const q = race.questions[round];
     const index = buildIndex(q);
-    $("round-label").textContent = `ROUND ${round + 1} OF ${ROUNDS}`;
-    $("q-kicker").textContent = `ROUND ${round + 1} OF ${ROUNDS}`;
+    $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
+    $("q-kicker").textContent = `ROUND ${round + 1} OF ${rounds}`;
+    // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
+    if (!seenList().includes(q.q)) { save.seen = [...seenList(), q.q]; persist(); }
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing");
     requestAnimationFrame(fitCard);
@@ -769,7 +795,7 @@ async function runRace(token) {
       ? "THAT'S AS NICHE AS IT GETS."
       : `A DEEP CUT HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
-    await waitNext(round === ROUNDS - 1 ? "FINISH ▶" : "NEXT ▶", token);
+    await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
   }
   finish(token);
@@ -977,7 +1003,11 @@ function finish(token) {
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
           h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short })))))),
   ].filter(Boolean));
-  $("btn-again").textContent = canRace(me(), dayKey()) ? "RACE AGAIN" : "RACE AGAIN — $5";
+  const paid = canRace(me(), dayKey());
+  const left = leftInMode();
+  $("btn-again").textContent = !paid ? "NEW RACE — $5" : left ? "NEW RACE" : "NO NEW PROMPTS";
+  $("btn-again").disabled = paid && !left;
+  $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   show("results");
 }
 
@@ -999,7 +1029,8 @@ $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garag
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
 $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
-$("btn-again").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace(lastSetup); });
+$("btn-again").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: false }); });
+$("btn-redo").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true }); });
 $("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
 $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("btn-start-2p").addEventListener("click", () => {

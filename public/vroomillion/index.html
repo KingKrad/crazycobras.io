@@ -52,7 +52,7 @@
           <li>Type one. The <b>more niche</b> your answer, the further your car blasts down the road.</li>
           <li>Small typos are fixed for you. Not on the list? <b>Try again</b> — keep guessing until the timer runs out.</li>
           <li>Your distance is your score. Prize money grows with how far you go and how fancy your car is — spend it on faster cars.</li>
-          <li><b>No repeats:</b> you won't see a question again until you've played every question in that mode.</li>
+          <li><b>No repeats:</b> once you've seen a prompt it never comes back, unless you hit <b>REDO THIS RACE</b> on the results screen to replay the same prompts.</li>
           <li><b>One in a Vroomillion</b> only counts if it's spelled exactly right — a typo we fix for you scores as a Deep Cut.</li>
           <li><b>GEARHEAD MODE:</b> every question is about cars and racing. Pick it on the race setup screen.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
@@ -66,6 +66,7 @@
         <h2>1P RACE</h2>
         <p class="note">Seven prompts. Go as far as you can. Your best: <span id="best-solo">—</span></p>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
+        <p class="prompts-left" id="left-solo" role="status"></p>
         <div class="picker" id="picker-solo"></div>
         <div class="menu row">
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
@@ -94,6 +95,7 @@
         <h2>2P VERSUS — SAME SCREEN</h2>
         <p class="note">Answers are hidden while you type. No peeking.</p>
         <div class="modes" id="mode-2p" role="group" aria-label="Question mode"></div>
+        <p class="prompts-left" id="left-2p" role="status"></p>
         <div class="versus-grid">
           <div class="vs-col p1">
             <label>PLAYER 1 <input id="name-p1" maxlength="10" value="P1" autocomplete="off" spellcheck="false"></label>
@@ -168,7 +170,8 @@
         <h2 class="result-title" id="result-title"></h2>
         <div class="result-body" id="result-body"></div>
         <div class="menu row">
-          <button class="btn big" id="btn-again" type="button">RACE AGAIN</button>
+          <button class="btn big" id="btn-again" type="button">NEW RACE</button>
+          <button class="btn big alt" id="btn-redo" type="button">REDO THIS RACE</button>
           <button class="btn" id="btn-results-garage" type="button">GARAGE</button>
           <button class="btn" data-go="title" type="button">MENU</button>
         </div>
