@@ -384,6 +384,14 @@ h3 { font-weight: normal; }
 .hint { min-height: 1.6em; margin: 14px 0; font-size: 8px; color: var(--dim); text-align: center; }
 #btn-next { width: 100%; }
 
+.hud.solo, .reveal.solo, .solo .final, .solo .log-row { grid-template-columns: 1fr; }
+.solo .final-card, .reveal.solo .reveal-card { max-width: 420px; width: 100%; justify-self: center; }
+.goal { margin-top: 8px; }
+.goal-bar { display: block; height: 10px; background: #000; border: 2px solid var(--line); }
+.goal-fill { display: block; height: 100%; background: var(--yellow); transform-origin: left; transform: scaleX(0); }
+.goal-fill.done { background: var(--green); }
+.goal-text { display: block; margin-top: 6px; font-size: 7px; color: var(--dim); }
+
 /* ---------- results ---------- */
 .result-title { font-size: clamp(22px, 7vw, 44px); text-align: center; margin: 6px 0 18px; animation: slam 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
 .result-title.good { color: var(--yellow); text-shadow: 4px 4px 0 #c2410c, 8px 8px 0 #000; }

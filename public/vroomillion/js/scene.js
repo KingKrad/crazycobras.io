@@ -33,7 +33,8 @@ export class Scene {
 
   // racers: [{ car, label, color }]
   setRacers(list) {
-    this.racers = list.map((r, i) => ({ ...r, sprite: carSprite(r.car), dist: 0, lane: i, boost: 0, nitro: false, x: 0 }));
+    this.racers = list.map((r, i) => ({ ...r, sprite: carSprite(r.car), dist: 0, lane: r.lane ?? i, boost: 0, nitro: false, x: 0 }));
+    this.goal = null;
   }
 
   confetti() {
@@ -57,6 +58,8 @@ export class Scene {
       const cam = this.racers.reduce((s, r) => s + r.dist, 0) / this.racers.length;
       const half = Math.max(...this.racers.map((r) => Math.abs(r.dist - cam)), 1);
       const scale = Math.min(0.14, 125 / half);
+      this.cam = cam;
+      this.camScale = scale;
       for (const r of this.racers) {
         const w = r.sprite.width * SCALE;
         const target = W * 0.5 + (r.dist - cam) * scale - w / 2;
@@ -178,6 +181,26 @@ export class Scene {
         const len = 20 + hash(i) * 50 * this.speed;
         const x = W - mod(this.scroll * (2 + hash(i + 40)) + hash(i) * 700, W + 80);
         g.fillRect(Math.round(x), ROAD_TOP + 4 + Math.floor(hash(i + 20) * 52), Math.round(len), 1);
+      }
+    }
+
+    // checkered finish line for solo races
+    if (this.goal && this.racers.length) {
+      const r0 = this.racers[0];
+      const fx = Math.round(r0.x + r0.sprite.width * SCALE + (this.goal - this.cam) * this.camScale);
+      if (fx > -12 && fx < W + 12) {
+        for (let y = ROAD_TOP; y < H; y += 4) {
+          for (let c = 0; c < 3; c++) {
+            g.fillStyle = ((y - ROAD_TOP) / 4 + c) % 2 ? "#0b0618" : "#ffffff";
+            g.fillRect(fx + c * 4, y, 4, 4);
+          }
+        }
+        g.fillStyle = "#c9ced6";
+        g.fillRect(fx + 5, ROAD_TOP - 26, 2, 26);
+        for (let y = 0; y < 3; y++) for (let c = 0; c < 4; c++) {
+          g.fillStyle = (y + c) % 2 ? "#0b0618" : "#ffffff";
+          g.fillRect(fx + 7 + c * 3, ROAD_TOP - 26 + y * 3, 3, 3);
+        }
       }
     }
 

@@ -1,4 +1,4 @@
-// Pure game rules: answer judging, rarity tiers, rivals and payouts. No DOM in here.
+// Pure game rules: answer judging, rarity tiers and payouts. No DOM in here.
 
 export const TIERS = [
   { id: 0, name: "STALLED", short: "STALL", metres: 0, blurb: "Not on the list. The engine coughs." },
@@ -13,12 +13,13 @@ export const ROUNDS = 7;
 export const ANSWER_SECONDS = 25;
 export const NITRO_BOOST = 1.5;
 
+// Solo tracks: reach the goal distance within the race to win the prize.
 export const LEAGUES = [
-  { id: "street", name: "STREET MEET", prize: 600, rivalPower: 1.0, skill: [0.1, 0.5, 0.3, 0.1, 0, 0], rival: "Rusty Ray" },
-  { id: "club", name: "CLUB CUP", prize: 3000, rivalPower: 1.08, skill: [0.05, 0.3, 0.4, 0.2, 0.05, 0], rival: "Clutch Karla" },
-  { id: "pro", name: "PRO CIRCUIT", prize: 15000, rivalPower: 1.17, skill: [0.03, 0.15, 0.35, 0.3, 0.14, 0.03], rival: "Apex Akira" },
-  { id: "hyper", name: "HYPER LEAGUE", prize: 60000, rivalPower: 1.28, skill: [0, 0.08, 0.25, 0.35, 0.25, 0.07], rival: "Baron Von Boost" },
-  { id: "gp", name: "VROOMILLION GP", prize: 200000, rivalPower: 1.4, skill: [0, 0.03, 0.15, 0.35, 0.32, 0.15], rival: "The Professor" },
+  { id: "street", name: "STREET MEET", prize: 600, target: 2000 },
+  { id: "club", name: "CLUB CUP", prize: 3000, target: 3000 },
+  { id: "pro", name: "PRO CIRCUIT", prize: 15000, target: 4000 },
+  { id: "hyper", name: "HYPER LEAGUE", prize: 60000, target: 5000 },
+  { id: "gp", name: "VROOMILLION GP", prize: 200000, target: 6000 },
 ];
 
 export function normalize(s) {
@@ -101,25 +102,6 @@ export function applyFenderBender(a, b) {
     return [{ ...a, tier: Math.max(1, a.tier - 1), bump: true }, { ...b, tier: Math.max(1, b.tier - 1), bump: true }];
   }
   return [a, b];
-}
-
-function pickWeighted(weights, rng) {
-  let r = rng() * weights.reduce((s, w) => s + w, 0);
-  for (let i = 0; i < weights.length; i++) {
-    r -= weights[i];
-    if (r < 0) return i;
-  }
-  return weights.length - 1;
-}
-
-// The rival's answer for a question. It never copies the player's answer.
-export function rivalAnswer(question, league, avoidKey, rng = Math.random) {
-  const tier = pickWeighted(league.skill, rng);
-  if (tier === 0) return { tier: 0, display: "…blanked", key: "" };
-  const pool = question.a[tier - 1].map((e) => e.split("|")[0]).filter((d) => normalize(d) !== avoidKey);
-  if (!pool.length) return { tier: 0, display: "…blanked", key: "" };
-  const display = pool[Math.floor(rng() * pool.length)];
-  return { tier, display, key: normalize(display) };
 }
 
 export function pickQuestions(all, n, rng = Math.random) {

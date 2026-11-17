@@ -2,7 +2,7 @@ import { QUESTIONS } from "./data.js";
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, LEAGUES, buildIndex, judge, metresFor, applyFenderBender,
-  rivalAnswer, pickQuestions, payout, exampleAnswer,
+  pickQuestions, payout, exampleAnswer,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -50,9 +50,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 function attract() {
-  const rival = CARS[5 + Math.floor(Math.random() * 30)];
-  scene.setRacers([{ car: carById(save.car), label: "P1", color: "#4fd1ff" }, { car: rival, label: "CPU", color: "#ff4fd8" }]);
-  scene.racers[1].dist = 300;
+  scene.setRacers([{ car: carById(save.car), label: "P1", color: "#4fd1ff", lane: 1 }]);
   scene.speed = 0.3;
 }
 
@@ -163,7 +161,7 @@ function renderLeagues() {
       onclick: () => { audio.sfx.click(); startRace({ mode: "solo", league: lg }); },
     },
     h("span", { class: "league-name", text: (locked ? "🔒 " : "") + lg.name }),
-    h("span", { class: "league-info", text: locked ? `WIN ${LEAGUES[i - 1].name} TO UNLOCK` : `VS ${lg.rival.toUpperCase()} · RIVAL PWR ×${lg.rivalPower.toFixed(2)}` }),
+    h("span", { class: "league-info", text: locked ? `WIN ${LEAGUES[i - 1].name} TO UNLOCK` : `REACH ${lg.target.toLocaleString("en-US")} M IN ${ROUNDS} ANSWERS` }),
     h("span", { class: "league-prize", text: money(lg.prize) })));
   });
 }
@@ -244,26 +242,44 @@ function hudCard(r, i) {
   return h("div", { class: "hud-card p" + (i + 1) },
     h("div", { class: "hud-name", text: r.name }),
     h("div", { class: "hud-car", text: r.car.name }),
-    r.elDist, h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
+    r.elDist,
+    race.solo ? goalBar(r) : null,
+    h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
+}
+
+function goalBar(r) {
+  r.elGoalFill = h("span", { class: "goal-fill" });
+  r.elGoalText = h("span", { class: "goal-text", text: `GOAL ${race.setup.league.target.toLocaleString("en-US")} M` });
+  return h("div", { class: "goal" }, h("span", { class: "goal-bar" }, r.elGoalFill), r.elGoalText);
+}
+
+function drawGoal(r) {
+  if (!r.elGoalFill) return;
+  const target = race.setup.league.target;
+  const k = Math.min(1, r.dist / target);
+  r.elGoalFill.style.transform = `scaleX(${k})`;
+  r.elGoalFill.classList.toggle("done", k >= 1);
+  r.elGoalText.textContent = k >= 1 ? "GOAL REACHED!" : `${Math.round(target - r.dist).toLocaleString("en-US")} M TO GO`;
 }
 
 function startRace(setup) {
   lastSetup = setup;
   const token = ++raceToken;
   const solo = setup.mode === "solo";
-  const mk = (name, car, human, power) => ({ name, car, human, power: power ?? car.power, nitro: human ? car.nitro : 0, dist: 0, tiers: [], log: [], useNitro: false });
+  const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
   const racers = solo
-    ? [mk("YOU", carById(save.car), true), mk(setup.league.rival.toUpperCase(), rivalCar(setup.league), false, setup.league.rivalPower)]
-    : [mk(setup.names[0], carById(setup.cars[0]), true), mk(setup.names[1], carById(setup.cars[1]), true)];
+    ? [mk("YOU", carById(save.car))]
+    : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
   race = { token, solo, setup, racers, round: 0, questions: pickQuestions(QUESTIONS, ROUNDS) };
 
-  scene.setRacers([
-    { car: racers[0].car, label: "P1", color: "#4fd1ff" },
-    { car: racers[1].car, label: solo ? "CPU" : "P2", color: "#ff4fd8" },
-  ]);
+  scene.setRacers(solo
+    ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
+    : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }]);
+  if (solo) scene.goal = setup.league.target;
   scene.speed = 0.05;
   const hud = $("hud");
   hud.textContent = "";
+  for (const id of ["hud", "reveal", "result-body"]) $(id).classList.toggle("solo", solo);
   racers.forEach((r, i) => hud.append(hudCard(r, i)));
   $("pips").textContent = "";
   for (let i = 0; i < ROUNDS; i++) $("pips").append(h("i", { class: "pip" }));
@@ -277,12 +293,6 @@ function startRace(setup) {
   audio.engineStart();
   audio.engineSet(0.1);
   runRace(token);
-}
-
-function rivalCar(league) {
-  const i = LEAGUES.indexOf(league);
-  const pool = CARS.filter((c) => c.cls === "DCBAS"[i]);
-  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 async function runRace(token) {
@@ -317,23 +327,20 @@ async function runRace(token) {
 
     // collect answers
     const results = [];
-    for (let i = 0; i < 2; i++) {
-      const r = race.racers[i];
-      if (!r.human) continue;
-      const raw = await askAnswer(r, i, token);
+    for (let i = 0; i < race.racers.length; i++) {
+      const raw = await askAnswer(race.racers[i], i, token);
       if (!alive()) return;
       results[i] = judge(index, raw);
     }
-    if (race.solo) results[1] = rivalAnswer(q, race.setup.league, results[0].key);
-    const [a, b] = applyFenderBender(results[0], results[1]);
-    const final = [a, b];
+    const final = race.solo ? results : applyFenderBender(results[0], results[1]);
+    const bumped = final.some((f) => f.bump);
 
     // reveal
     $("answer-zone").classList.add("hidden");
     const cards = final.map((res, i) => revealCard(race.racers[i], res, i));
     $("reveal").append(...cards);
     await sleep(500);
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < cards.length; i++) {
       if (!alive()) return;
       cards[i].classList.add("shown");
       audio.sfx.tier(final[i].tier);
@@ -341,7 +348,7 @@ async function runRace(token) {
       await sleep(final[i].tier === 5 ? 1300 : 800);
     }
     if (!alive()) return;
-    if (a.bump) {
+    if (bumped) {
       audio.sfx.bump();
       overlay("FENDER BENDER!", "small bad");
       scene.shake = scene.calm ? 0 : 0.4;
@@ -376,6 +383,7 @@ async function runRace(token) {
           scene.racers[i].boost = (gain[i] / 1500) * v;
           top = Math.max(top, scene.racers[i].boost);
           r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
+          drawGoal(r);
         });
         scene.speed = 0.25 + Math.min(0.75, top * 0.9);
         audio.engineSet(scene.speed);
@@ -390,11 +398,23 @@ async function runRace(token) {
       scene.racers[i].nitro = false;
       scene.racers[i].boost = 0;
     });
-    const lead = race.racers[0].dist === race.racers[1].dist ? -1 : race.racers[0].dist > race.racers[1].dist ? 0 : 1;
-    [...$("hud").children].forEach((c, i) => c.classList.toggle("leading", i === lead));
+    if (race.solo) {
+      const r = race.racers[0];
+      const target = race.setup.league.target;
+      if (r.dist >= target && r.dist - gain[0] < target) {
+        audio.sfx.win();
+        scene.confetti();
+        overlay("GOAL!", "win");
+        setTimeout(() => alive() && overlay(""), 1200);
+      }
+      $("hud").firstChild.classList.toggle("leading", r.dist >= target);
+    } else {
+      const lead = race.racers[0].dist === race.racers[1].dist ? -1 : race.racers[0].dist > race.racers[1].dist ? 0 : 1;
+      [...$("hud").children].forEach((c, i) => c.classList.toggle("leading", i === lead));
+    }
     [...$("pips").children][round].classList.add("done");
 
-    const best = Math.max(a.tier, b.tier);
+    const best = Math.max(...final.map((f) => f.tier));
     $("hint").textContent = best >= 5
       ? "THAT'S AS NICHE AS IT GETS."
       : `A VROOMILLION ANSWER: ${exampleAnswer(q, 5).toUpperCase()}`;
@@ -512,7 +532,9 @@ function waitNext(label, token) {
 function finish(token) {
   if (token !== raceToken) return;
   const [a, b] = race.racers;
-  const winner = a.dist === b.dist ? -1 : a.dist > b.dist ? 0 : 1;
+  const winner = race.solo
+    ? (a.dist >= race.setup.league.target ? 0 : -1)
+    : a.dist === b.dist ? -1 : a.dist > b.dist ? 0 : 1;
   audio.engineStop();
   scene.speed = 0.3;
 
@@ -523,7 +545,7 @@ function finish(token) {
     const lg = race.setup.league;
     const won = winner === 0;
     pay = payout(lg.prize, won, a.tiers);
-    title = won ? "YOU WIN!" : winner === -1 ? "DEAD HEAT" : "YOU LOSE";
+    title = won ? "GOAL REACHED!" : `${Math.round(lg.target - a.dist).toLocaleString("en-US")} M SHORT`;
     const idx = LEAGUES.indexOf(lg);
     if (won && idx === save.league && idx < LEAGUES.length - 1) {
       save.league = idx + 1;
@@ -558,7 +580,8 @@ function finish(token) {
       ...race.racers.map((r, i) => h("div", { class: `final-card p${i + 1}` + (i === winner ? " winner" : "") },
         spriteCanvas(r.car, 4),
         h("div", { class: "hud-name", text: r.name }),
-        h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" })))),
+        h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
+        race.solo ? h("div", { class: "note", text: `GOAL ${race.setup.league.target.toLocaleString("en-US")} M` }) : null))),
     h("div", { class: "payout" },
       h("div", { text: race.solo ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
       h("div", { class: "payout-total", text: "+" + money(pay.total) }),

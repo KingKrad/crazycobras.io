@@ -26,7 +26,7 @@ A mobile-first web app where anyone can redesign a room with AI. Pick a room, si
 
 An 8-bit trivia racer that lives at `/vroomillion/` on the same site. Every question has lots of right answers; the more niche yours is, the further your car goes. Win races, buy faster cars.
 
-- **Modes:** 1P against five leagues of rivals, or 2P on one screen (answers are hidden while typing).
+- **Modes:** 1P is just you and the road — reach each track's goal distance to win; or 2P on one screen (answers are hidden while typing).
 - **Rarity tiers:** Stalled → Traffic → Cruising → Fast Lane → Deep Cut → One in a Vroomillion.
 - **Cost:** $0. It is plain static files in `public/vroomillion/` — no AI calls, no server code, no accounts. Progress is saved in the player's own browser.
 - **Adding questions:** edit `public/vroomillion/js/data.js`. Each question is five lists of answers, from most obvious to most niche; `"a|b"` makes `b` an accepted spelling of `a`.

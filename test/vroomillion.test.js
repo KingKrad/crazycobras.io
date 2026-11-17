@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   TIERS, ROUNDS, LEAGUES, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  rivalAnswer, pickQuestions, payout,
+  pickQuestions, payout,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -71,17 +71,13 @@ test("matching answers cause a fender bender", () => {
   assert.equal(n.bump, undefined);
 });
 
-test("rival answers are valid for their tier and never copy the player", () => {
-  const q = QUESTIONS[0];
-  const idx = buildIndex(q);
-  for (const league of LEAGUES) {
-    assert.ok(Math.abs(league.skill.reduce((s, w) => s + w, 0) - 1) < 1e-9, league.id);
-    for (let i = 0; i < 200; i++) {
-      const r = rivalAnswer(q, league, "apple");
-      assert.notEqual(r.key, "apple");
-      if (r.tier > 0) assert.ok(judge(idx, r.display).tier >= 1);
-    }
+test("solo tracks get harder and pay more", () => {
+  for (let i = 1; i < LEAGUES.length; i++) {
+    assert.ok(LEAGUES[i].target > LEAGUES[i - 1].target);
+    assert.ok(LEAGUES[i].prize > LEAGUES[i - 1].prize);
   }
+  // the first track is winnable in the starter car with mostly CRUISING answers
+  assert.ok(metresFor(2, 1, false) * 5 + metresFor(3, 1, false) * 2 >= LEAGUES[0].target);
 });
 
 test("pickQuestions returns distinct questions", () => {
