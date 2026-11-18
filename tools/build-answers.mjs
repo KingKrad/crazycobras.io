@@ -103,7 +103,7 @@ async function fetchPages(src) {
       // src.require: the linked article must be one of these kinds of thing on Wikidata (a musical, a song, a film...).
       // Otherwise people, countries and cities linked from list pages (songwriters, settings) are dropped.
       const check = src.require
-        ? `BIND(EXISTS { ?i wdt:P31/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } } AS ?good)`
+        ? `BIND(EXISTS { ?i (wdt:P31|wdt:P279)/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } } AS ?good)`
         // anything that is a person, any kind of place, a language, an organisation, an event, a period of
         // time, a chemical or a creative work is never an answer here ("europe", "paris", "water", "winter")
         : `BIND(NOT EXISTS { ?i wdt:P31/wdt:P279* ?bad. VALUES ?bad { wd:Q5 wd:Q2221906 wd:Q34770 wd:Q315 wd:Q43229 wd:Q1190554 wd:Q186081 wd:Q11173 wd:Q79529 wd:Q17537576 wd:Q11862829 wd:Q9174 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
@@ -115,6 +115,9 @@ async function fetchPages(src) {
   return all.map((t) => {
     const n = counts.get(t.toLowerCase()) ?? (src.require ? -1 : 1); // with a required kind, unknown articles are dropped
     if (n < 0) return { n, forms: [] };
+    // without a required kind, very widely covered links from list pages are usually generic ("water",
+    // "milk", "europe"): the real well-known answers are hand-written already
+    if (!src.require && n >= (src.pageMax ?? 90)) return { n, forms: [] };
     const forms = [...new Set([t, titles.get(t)].map((f) => clean(f, src)).filter(Boolean))];
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
     return { n, forms };
