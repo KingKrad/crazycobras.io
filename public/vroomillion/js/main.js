@@ -3,7 +3,7 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants, FREE_PLAY,
+  dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -877,11 +877,25 @@ function askAnswer(r, i, token, index) {
       input.value = "";
       resolve(res);
     };
+    // A typo isn't sent straight away: the fix is shown in the box and they press GO again to use it.
+    // Confirming keeps the typo's score (a fixed typo can't be a One in a Vroomillion).
+    let suggestion = null;
     const submit = (timedOut = false) => {
       if (finished) return;
       if (token !== raceToken) { end(); return resolve(stalled); }
       const value = input.value;
+      if (suggestion && normalize(value) === suggestion.key) return lockIn(suggestion);
+      suggestion = null;
       const res = judge(index, value);
+      if (res.tier > 0 && res.corrected && !timedOut) {
+        suggestion = res;
+        input.value = res.display;
+        audio.sfx.click();
+        say(`DID YOU MEAN "${res.display.toUpperCase().slice(0, 28)}"? PRESS GO TO USE IT`, "fix");
+        input.focus({ preventScroll: true });
+        input.select();
+        return;
+      }
       if (res.tier > 0) return lockIn(res);
       if (timedOut) {
         end();

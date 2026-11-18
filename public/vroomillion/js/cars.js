@@ -206,6 +206,12 @@ const WHEELS = [
   [".KKK.", "KHKHK", "KKHKK", "KHKHK", ".KKK."],
 ];
 
+function lighten(hex, t) {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (v) => Math.round(v + (255 - v) * t);
+  return `rgb(${ch(n >> 16)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
+}
+
 function shade(hex, f) {
   const n = parseInt(hex.slice(1), 16);
   const ch = (v) => Math.max(0, Math.min(255, Math.round(v * f)));
@@ -255,81 +261,153 @@ export function carSprite(car, frame = 0) {
 
 // ---- rear views, for the behind-the-car race camera ----
 // Each body type is described by a few measurements and drawn as pixel rows.
-// B body · D shadow · S accent · W glass · R tail light · K tyre · T tread
-// P number plate · G exhaust · H headrest/helmet · . empty
+// B body · L body highlight · D body shadow · E dark edge · S accent · W glass · w glass glint
+// N plate lettering · R tail light · r tail light (lower, darker) · Y indicator · C chrome/badge · P number plate
+// K tyre · T tread · G exhaust tip · X diffuser · H headrest/helmet · . empty
 const REAR = {
-  micro:    { w: 20, roof: 12, glass: 3, body: 4, tyre: 3, tyreH: 3 },
-  hatch:    { w: 24, roof: 16, glass: 3, body: 4, tyre: 4, tyreH: 3, lip: true },
-  sedan:    { w: 26, roof: 14, glass: 3, body: 5, tyre: 4, tyreH: 3 },
-  coupe:    { w: 26, roof: 12, glass: 2, body: 5, tyre: 4, tyreH: 3, wing: 1 },
-  muscle:   { w: 28, roof: 14, glass: 2, body: 5, tyre: 5, tyreH: 4, lip: true, stripes: true },
-  roadster: { w: 24, open: true, body: 4, tyre: 4, tyreH: 3 },
-  suv:      { w: 28, roof: 24, glass: 4, body: 6, tyre: 5, tyreH: 4, tall: true, slope: 0 },
-  super:    { w: 30, roof: 10, glass: 2, body: 4, tyre: 5, tyreH: 4, wing: 2 },
-  hyper:    { w: 32, roof: 10, glass: 2, body: 4, tyre: 6, tyreH: 4, wing: 3 },
+  micro:    { w: 30, roof: 18, glass: 5, body: 7, tyre: 5, tyreH: 5 },
+  hatch:    { w: 34, roof: 22, glass: 5, body: 7, tyre: 6, tyreH: 5, lip: true },
+  sedan:    { w: 38, roof: 20, glass: 5, body: 8, tyre: 6, tyreH: 5, chrome: true },
+  coupe:    { w: 38, roof: 18, glass: 4, body: 8, tyre: 6, tyreH: 5, wing: 1, pipes: "twin" },
+  muscle:   { w: 40, roof: 20, glass: 4, body: 9, tyre: 7, tyreH: 6, lip: true, stripes: true, chrome: true, pipes: "quad" },
+  roadster: { w: 34, open: true, body: 7, tyre: 6, tyreH: 5, pipes: "twin" },
+  suv:      { w: 40, roof: 34, glass: 6, body: 10, tyre: 7, tyreH: 6, slope: 0, spare: true, tall: true },
+  super:    { w: 42, roof: 16, glass: 3, body: 7, tyre: 8, tyreH: 6, wing: 2, lightbar: true, diffuser: true, pipes: "centre" },
+  hyper:    { w: 44, roof: 14, glass: 3, body: 7, tyre: 9, tyreH: 6, wing: 3, lightbar: true, diffuser: true, pipes: "quad" },
 };
+
+function grid(w) {
+  const rows = [];
+  const row = () => { const r = Array(w).fill("."); rows.push(r); return r; };
+  // fill `width` cells centred in the row with ch; returns the start x
+  const span = (r, width, ch) => { const s = Math.floor((w - width) / 2); for (let i = 0; i < width; i++) if (s + i >= 0 && s + i < w) r[s + i] = ch; return s; };
+  const put = (r, x, str) => { [...str].forEach((c, i) => { if (x + i >= 0 && x + i < w && c !== " ") r[x + i] = c; }); };
+  return { rows, row, span, put };
+}
 
 function rearRows(type, frame) {
   if (type === "formula") return formulaRows(frame);
   const t = REAR[type] || REAR.sedan;
   const w = t.w;
-  const rows = [];
-  const line = (fill) => fill.padEnd(w, ".").slice(0, w);
-  const centred = (s) => { const pad = Math.floor((w - s.length) / 2); return line(".".repeat(pad) + s); };
+  const { rows, row, span, put } = grid(w);
+  const bw = w - 4; // body width; the outer 2 columns each side are for mirrors
+  const mid = Math.floor(w / 2);
+
   if (t.wing) {
-    rows.push(centred("S".repeat(w - 2)));
-    if (t.wing > 1) rows.push(centred("D".repeat(w - 2)));
+    let r = row(); span(r, w - 2, "S"); r[1] = r[w - 2] = "E";
+    if (t.wing > 1) { r = row(); span(r, w - 2, "D"); r[1] = r[w - 2] = "E"; }
     const q = Math.floor(w / 4);
-    for (let i = 0; i < (t.wing > 2 ? 2 : 1); i++) rows.push(line(".".repeat(q) + "D" + ".".repeat(w - 2 * q - 2) + "D"));
+    for (let i = 0; i < 2; i++) { r = row(); r[q] = r[q + 1] = r[w - 1 - q] = r[w - 2 - q] = "G"; }
   }
+
+  let glassBottom;
   if (t.open) {
-    rows.push(centred("WWWWWWWWWWWWWWWW"));
-    rows.push(centred("HH........HH"));
-    rows.push(centred("HHHH......HHHH"));
+    // roadster: windscreen frame, the backs of two seats and a roll hoop
+    let r = row(); span(r, bw - 10, "E");
+    r = row(); const g0 = span(r, bw - 10, "W"); put(r, g0 + 2, "ww");
+    r = row(); span(r, bw - 8, "W"); put(r, mid - 9, "HHHH"); put(r, mid + 5, "HHHH"); put(r, g0 + 3, "w");
+    r = row(); put(r, mid - 10, "EHHHHE"); put(r, mid + 4, "EHHHHE");
+    glassBottom = rows.length;
   } else {
-    rows.push(centred("B".repeat(t.roof)));
+    let r = row(); span(r, t.roof, "B"); span(r, t.roof - 6, "L");
+    r = row(); span(r, t.roof + 2, "B");
     for (let i = 0; i < t.glass; i++) {
-      const width = Math.min(w, t.roof + 2 * (i + 1) * (t.slope ?? 1));
-      rows.push(centred("B" + "W".repeat(width - 2) + "B"));
+      r = row();
+      const width = Math.min(bw, t.roof + 2 + 2 * (i + 1) * (t.slope ?? 1));
+      const s0 = span(r, width, "B");
+      span(r, width - 2, "W");
+      // a diagonal glint across the glass
+      put(r, s0 + 3 + i, "ww");
+      if (i > 0) put(r, s0 + 6 + i, "w");
+      // headrests show through the rear window
+      if (i >= t.glass - 2 && t.glass > 2) { put(r, mid - 7, "HHH"); put(r, mid + 4, "HHH"); }
     }
+    glassBottom = rows.length;
   }
-  if (t.lip) rows.push(centred("S".repeat(w - 6)));
-  // body: shoulder, tail lights, plate, bumper
-  rows.push(line("B".repeat(w)));
-  const mid = t.stripes ? "BBSSBB" : "B".repeat(6);
-  const tl = "RRR";
-  const inner = w - 2 * tl.length;
-  rows.push(line(tl + ("B".repeat(Math.floor((inner - mid.length) / 2)) + mid).padEnd(inner, "B") + tl));
-  for (let i = 0; i < t.body - 3; i++) rows.push(line(i === 0 ? "B".repeat(Math.floor((w - 8) / 2)) + "BPPPPPPB" + "B".repeat(Math.ceil((w - 8) / 2)) : "B".repeat(w)));
-  if (t.tall) rows.push(line("D".repeat(w)));
-  rows.push(line("D" + "D".repeat(2) + "GG" + "D".repeat(w - 10) + "GG" + "DDD"));
+  if (t.lip) { const r = row(); span(r, bw - 6, "S"); }
+
+  // shoulder line with mirrors poking out each side
+  let r = row(); const s = span(r, bw, "B"); span(r, bw - 4, "L");
+  put(r, 0, "DD"); put(r, w - 2, "DD");
+  if (!t.lightbar) { put(r, s, "RR"); put(r, s + bw - 2, "RR"); }
+  // tail lights
+  r = row(); span(r, bw, "B");
+  if (t.lightbar) {
+    for (let x = s + 1; x < s + bw - 1; x++) r[x] = "R";
+    put(r, mid - 2, "CCCC");
+  } else {
+    put(r, s, "RRRRY"); put(r, s + bw - 5, "YRRRR"); put(r, mid - 1, "CC");
+  }
+  r = row(); span(r, bw, "B");
+  if (t.lightbar) { put(r, s, "rrr"); put(r, s + bw - 3, "rrr"); } else { put(r, s, "rrrr"); put(r, s + bw - 4, "rrrr"); }
+  // number plate, with a few dark "letters"
+  r = row(); span(r, bw, "B"); r[s] = r[s + bw - 1] = "D";
+  if (t.spare) {
+    // a spare wheel hung on the tailgate, over the plate area
+    put(r, mid - 3, "KKKKKK");
+  } else {
+    const pw = t.lightbar ? 8 : 10;
+    const p0 = span(r, pw, "P"); put(r, p0 + 1, t.lightbar ? "NNNNNN" : "NN NNN N");
+  }
+  if (t.spare) { r = row(); span(r, bw, "B"); r[s] = r[s + bw - 1] = "D"; put(r, mid - 4, "KKTCCTKK"); r = row(); span(r, bw, "B"); r[s] = r[s + bw - 1] = "D"; put(r, mid - 3, "KKKKKK"); }
+  // the rest of the body, shaded at the edges
+  const used = t.spare ? 6 : 4;
+  for (let i = 0; i < t.body - used; i++) { r = row(); span(r, bw, "B"); r[s] = r[s + bw - 1] = "D"; }
+  if (t.stripes) for (let y = glassBottom - 1; y < rows.length; y++) { if (rows[y][mid - 3] === "B" || rows[y][mid - 3] === "L") { rows[y][mid - 3] = rows[y][mid - 2] = rows[y][mid + 1] = rows[y][mid + 2] = "S"; } }
+  if (t.chrome) { r = row(); span(r, bw, "D"); span(r, bw - 4, "C"); }
+  if (t.tall) { r = row(); span(r, bw, "D"); }
+  // bumper and exhausts
+  r = row(); span(r, bw, "D"); r[s] = r[s + bw - 1] = "E";
+  const pipes = t.pipes || "single";
+  if (pipes === "centre") put(r, mid - 3, "GKKKKG");
+  else if (pipes === "quad") { put(r, s + 3, "GKG GKG"); put(r, s + bw - 10, "GKG GKG"); }
+  else if (pipes === "twin") { put(r, s + 3, "GKG"); put(r, s + bw - 6, "GKG"); }
+  else put(r, s + 3, "GKG");
+  if (t.diffuser) {
+    r = row(); span(r, bw - 2, "X");
+    for (let x = s + 3; x < s + bw - 3; x += 4) r[x] = "E";
+    if (pipes === "centre") put(r, mid - 2, "GKKG");
+  }
   // tyres below the bumper; tread alternates between frames so they look like they roll
   for (let i = 0; i < t.tyreH; i++) {
+    r = row();
     const tread = (i + frame) % 2 ? "T" : "K";
     const tyre = "K" + tread.repeat(t.tyre - 2) + "K";
-    rows.push(line(tyre + (i === 0 ? "D" : ".").repeat(w - 2 * t.tyre) + tyre));
+    put(r, s, tyre); put(r, s + bw - t.tyre, tyre);
+    if (i === 0) for (let x = s + t.tyre; x < s + bw - t.tyre; x++) r[x] = "X";
+    if (i === t.tyreH - 1) { put(r, s, "K".repeat(t.tyre)); put(r, s + bw - t.tyre, "K".repeat(t.tyre)); }
   }
-  return rows;
+  return rows.map((x) => x.join(""));
 }
 
 function formulaRows(frame) {
-  const w = 30;
-  const line = (s) => s.padEnd(w, ".").slice(0, w);
-  const rows = [
-    line("..SSSSSSSSSSSSSSSSSSSSSSSSSS"),
-    line("..DDDDDDDDDDDDDDDDDDDDDDDDDD"),
-    line("..............DD"),
-    line("............HHHHHH"),
-    line("...........HHWWWWHH"),
-    line("..........BBBBBBBBBB"),
-  ];
-  for (let i = 0; i < 6; i++) {
+  const w = 42;
+  const { rows, row, span, put } = grid(w);
+  const mid = w / 2;
+  // big rear wing on endplates
+  let r = row(); span(r, 38, "S"); put(r, 2, "E"); put(r, w - 3, "E");
+  r = row(); span(r, 38, "D"); put(r, 2, "E"); put(r, w - 3, "E");
+  r = row(); span(r, 30, "S"); put(r, 2, "E"); put(r, w - 3, "E");
+  r = row(); put(r, 2, "E"); put(r, w - 3, "E"); span(r, 2, "E");
+  // driver's helmet over the engine cover
+  r = row(); put(r, 2, "E"); put(r, w - 3, "E"); span(r, 6, "H");
+  r = row(); span(r, 8, "H"); span(r, 4, "S");
+  r = row(); span(r, 12, "B"); span(r, 6, "L");
+  // wheels, suspension and the narrow tail
+  for (let i = 0; i < 9; i++) {
+    r = row();
     const tread = (i + frame) % 2 ? "T" : "K";
-    const tyre = "K" + tread.repeat(5) + "K";
-    const body = i < 4 ? (i === 1 ? "BBBRRBBB" : "BBBBBBBB") : i === 4 ? ".DGGGGD." : "........";
-    rows.push(line(tyre + "...." + body + "...." + tyre));
+    const tyre = i === 8 ? "K".repeat(9) : "K" + tread.repeat(7) + "K";
+    put(r, 1, tyre); put(r, w - 10, tyre);
+    if (i === 1 || i === 4) { for (let x = 10; x < w - 10; x++) r[x] = "E"; }
+    if (i < 2) span(r, 14, "B");
+    else if (i === 2) { span(r, 16, "B"); span(r, 12, "L"); }
+    else if (i === 3) { span(r, 16, "B"); span(r, 2, "R"); }
+    else if (i === 4) { span(r, 14, "D"); span(r, 2, "R"); }
+    else if (i === 5) { span(r, 12, "X"); for (let x = mid - 5; x < mid + 6; x += 3) r[x] = "E"; }
+    else if (i === 6) put(r, mid - 2, "GKKG");
   }
-  return rows;
+  return rows.map((x) => x.join(""));
 }
 
 const rearCache = new Map();
@@ -342,8 +420,9 @@ export function rearSprite(car, frame = 0) {
   cv.height = rows.length;
   const g = cv.getContext("2d");
   const pal = {
-    B: car.color, D: shade(car.color, 0.5), S: car.accent, W: "#2b3a55", R: "#ff3b3b",
-    K: "#15151c", T: "#2c2c38", P: "#e9e6d8", G: "#a7adb8", H: "#22222b",
+    B: car.color, L: lighten(car.color, 0.3), D: shade(car.color, 0.55), E: shade(car.color, 0.3), S: car.accent,
+    W: "#2b3a55", w: "#9fc2ea", N: "#7d8296", R: "#ff3b3b", r: "#b0202c", Y: "#ffb02e", C: "#d8dde6",
+    K: "#15151c", T: "#2c2c38", P: "#e9e6d8", G: "#a7adb8", H: "#22222b", X: "#1c1c24",
   };
   rows.forEach((row, y) => [...row].forEach((ch, x) => {
     if (!pal[ch]) return;

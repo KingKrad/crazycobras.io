@@ -663,3 +663,15 @@ a.btn { display: inline-block; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* autocorrect suggestion waiting for GO */
+.feedback.fix { color: var(--yellow); }
+
+/* after answering: only the answer floats over the race, no question, card or hints */
+.q-card.revealing { background: transparent; box-shadow: none; padding: 0; overflow: visible; animation: none; }
+.q-card.revealing .q-kicker,
+.q-card.revealing .question,
+.q-card.revealing .q-hint,
+.q-card.revealing .hint { display: none; }
+.q-card.revealing .reveal { margin-top: 0; }
+.q-card.revealing .reveal-card { background: rgba(13, 8, 32, 0.9); }

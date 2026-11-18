@@ -340,7 +340,7 @@ export class ChaseScene {
     this.u = 1; // canvas pixels per art pixel (the canvas itself is low-res and scaled up)
     this.horizon = Math.round(Math.min(h * 0.42, carBottom - h * 0.3));
     this.carBottom = Math.round(carBottom);
-    this.carPx = Math.max(2, Math.round((w * 0.2) / 28)); // canvas px per sprite px for the nearest car (~20% of the width)
+    this.carPx = Math.max(1, Math.round((w * 0.22) / 40)); // canvas px per sprite px for the nearest car (~22% of the width) // canvas px per sprite px for the nearest car (~20% of the width)
     this.canvas.width = w;
     this.canvas.height = h;
     this.layer.width = w;
@@ -442,7 +442,7 @@ export class ChaseScene {
   coverTop() {
     // the nearest car (lowest on screen); a leader far up the road may pass behind the card
     const near = this.racers.filter((r) => r.box).sort((a, b) => b.box.y - a.box.y)[0];
-    return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 18;
+    return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 26;
   }
 
   zoneAt(i) {
