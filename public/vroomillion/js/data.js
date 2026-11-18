@@ -7,7 +7,7 @@
 import { POP_QUESTIONS } from "./data-pop.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE } from "./data-more.js";
-import { normalize } from "./logic.js";
+import { normalize, FILLER } from "./logic.js";
 
 const CORE_QUESTIONS = [
   {
@@ -605,6 +605,10 @@ const withExtra = (q) => {
   for (let t = 1; t <= 3; t++) {
     for (const m of add) {
       for (const entry of m[t - 1] || []) {
+        // "monza circuit" or "the nile river" is the hand-written answer with a category word on it: skip it,
+        // or typing the long form would score as rarer than the hand-written tier
+        const bare = (k) => { const w = k.split(" "); return w.length > 1 && FILLER.has(w[w.length - 1]) ? w.slice(0, -1).join(" ") : k; };
+        if (entry.split("|").some((f) => seen.has(bare(normalize(f))) && bare(normalize(f)) !== normalize(f))) continue;
         const forms = entry.split("|").filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; });
         if (forms.length) a[t].push(forms.join("|"));
       }

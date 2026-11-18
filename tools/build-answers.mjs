@@ -85,13 +85,15 @@ async function fetchPages(src) {
   for (let k = 0; k < all.length; k += 250) {
     const batch = all.slice(k, k + 250).map((t) => JSON.stringify(t.charAt(0).toUpperCase() + t.slice(1)) + "@en").join(" ");
     try {
-      const rows = await sparql(`SELECT ?t ?n WHERE { VALUES ?t { ${batch} } ?a schema:about ?i; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?t. ?i wikibase:sitelinks ?n. }`);
-      for (const r of rows) counts.set(r.t.value.toLowerCase(), Number(r.n.value));
+      // people, countries and cities linked from list pages (songwriters, composers, places) aren't answers
+      const rows = await sparql(`SELECT ?t ?n (SAMPLE(?bad) AS ?b) WHERE { VALUES ?t { ${batch} } ?a schema:about ?i; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?t. ?i wikibase:sitelinks ?n. OPTIONAL { ?i wdt:P31 ?bad. VALUES ?bad { wd:Q5 wd:Q6256 wd:Q515 wd:Q1549591 wd:Q3624078 wd:Q35657 wd:Q215380 wd:Q4830453 wd:Q482994 wd:Q134556 } } } GROUP BY ?t ?n`);
+      for (const r of rows) counts.set(r.t.value.toLowerCase(), r.b ? -1 : Number(r.n.value));
     } catch { /* unknown popularity: treat as rare */ }
     await sleep(500);
   }
   return all.map((t) => {
     const n = counts.get(t.toLowerCase()) ?? 1;
+    if (n < 0) return { n, forms: [] };
     const forms = [...new Set([t, titles.get(t)].map(clean).filter(Boolean))];
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
     return { n, forms };
@@ -148,6 +150,8 @@ async function fetchPrompt(prompt, src) {
     const alts = e.alts.filter((x) => x.split(" ").length <= 3 && !/\b(by|for|from|with|in|of the)\b/i.test(x) && !/^[A-Z0-9]{1,3}$/.test(x));
     const forms = [e.label, ...alts].map(clean).filter(Boolean);
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
+    // people: their surname on its own counts too ("einstein")
+    if (src.surnames && forms[0]) { const last = forms[0].split(" ").pop(); if (last.length >= 4 && last !== forms[0]) forms.push(last); }
     return { n: x.n, forms: [...new Set(forms)] };
   }).filter((x) => x.forms.length);
 }
