@@ -287,13 +287,14 @@ function partialMatch(index, key) {
     const words = wordIndex(index);
     const exact = words.get(key) || (key.endsWith("s") ? words.get(key.slice(0, -1)) : null);
     if (exact) return bestOf(exact);
-    // a typo in the word: "elanor" -> eleanor
-    const max = typoAllowance(key.length);
-    if (!max) return null;
+    // a typo in the word: "elanor" -> eleanor. Only one letter off, and only for longer words:
+    // a typo of a partial answer is a double guess, so "bread" must not become "broad-leaved ..."
+    if (key.length < 6) return null;
+    const max = 1;
     let best = null;
     for (const [w, hits] of words) {
       if (w[0] !== key[0] || Math.abs(w.length - key.length) > max) continue;
-      const d = editDistance(key, w, max, key.length < 5 ? 2 : 1);
+      const d = editDistance(key, w, max, 1);
       if (d <= max && (!best || d < best.d)) best = { d, hits };
     }
     return best ? bestOf(best.hits) : null;

@@ -96,15 +96,17 @@ async function fetchPages(src) {
   }
   const all = [...titles.keys()];
   const counts = new Map();
-  for (let k = 0; k < all.length; k += 250) {
-    const batch = all.slice(k, k + 250).map((t) => JSON.stringify(t.charAt(0).toUpperCase() + t.slice(1)) + "@en").join(" ");
+  for (let k = 0; k < all.length; k += 120) {
+    const batch = all.slice(k, k + 120).map((t) => JSON.stringify(t.charAt(0).toUpperCase() + t.slice(1)) + "@en").join(" ");
     try {
       // people, countries and cities linked from list pages (songwriters, composers, places) aren't answers
       // src.require: the linked article must be one of these kinds of thing on Wikidata (a musical, a song, a film...).
       // Otherwise people, countries and cities linked from list pages (songwriters, settings) are dropped.
       const check = src.require
         ? `BIND(EXISTS { ?i wdt:P31/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } } AS ?good)`
-        : `BIND(NOT EXISTS { ?i wdt:P31 ?bad. VALUES ?bad { wd:Q5 wd:Q6256 wd:Q515 wd:Q1549591 wd:Q3624078 wd:Q35657 wd:Q215380 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
+        // anything that is a person, any kind of place, a language, an organisation, an event, a period of
+        // time, a chemical or a creative work is never an answer here ("europe", "paris", "water", "winter")
+        : `BIND(NOT EXISTS { ?i wdt:P31/wdt:P279* ?bad. VALUES ?bad { wd:Q5 wd:Q2221906 wd:Q34770 wd:Q315 wd:Q43229 wd:Q1190554 wd:Q186081 wd:Q11173 wd:Q79529 wd:Q17537576 wd:Q11862829 wd:Q9174 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
       const rows = await sparql(`SELECT ?t ?n ?good WHERE { VALUES ?t { ${batch} } ?a schema:about ?i; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?t. ?i wikibase:sitelinks ?n. ${check} }`);
       for (const r of rows) counts.set(r.t.value.toLowerCase(), r.good.value === "true" ? Number(r.n.value) : -1);
     } catch { /* unknown popularity: treat as rare */ }
