@@ -4,7 +4,9 @@
 // VROOMILLION lists are deliberately short and hand-picked; everything else obscure is a DEEP CUT.
 // deck: "car" = GEARHEAD mode only, "both" = CLASSIC and GEARHEAD, missing = CLASSIC only.
 
-export const QUESTIONS = [
+import { POP_QUESTIONS } from "./data-pop.js";
+
+const CORE_QUESTIONS = [
   {
     q: "Name a fruit",
     a: [
@@ -585,3 +587,7 @@ export const QUESTIONS = [
     ],
   },
 ];
+
+// Krillion-style everyday and pop-culture prompts live in data-pop.js.
+// pop: true puts them first in the queue, so races feel like Krillion before the trivia-heavy ones.
+export const QUESTIONS = [...CORE_QUESTIONS, ...POP_QUESTIONS.map((q) => ({ ...q, pop: true }))];

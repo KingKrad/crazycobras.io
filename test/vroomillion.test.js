@@ -204,12 +204,17 @@ test("no answer appears in two tiers of the same question", () => {
 const VARIANTS = makeVariants(QUESTIONS);
 const ALL = [...QUESTIONS, ...VARIANTS];
 
-test("there are about a thousand prompts, each with a unique text", () => {
-  const classic = deckQuestions(ALL, "classic").length;
-  const car = deckQuestions(ALL, "car").length;
-  assert.ok(classic >= 800, "classic " + classic);
-  assert.ok(car >= 300, "gearhead " + car);
+test("mostly hand-written prompts, a few 'starting with' twists, each with a unique text", () => {
+  const classic = deckQuestions(ALL, "classic");
+  const car = deckQuestions(ALL, "car");
+  assert.ok(classic.filter((q) => !q.variant).length >= 80, "hand-written classic");
+  assert.ok(classic.length >= 300, "classic " + classic.length);
+  assert.ok(car.length >= 80, "gearhead " + car.length);
   assert.equal(new Set(ALL.map((q) => q.q)).size, ALL.length);
+  assert.ok(VARIANTS.every((v) => v.variant === "start"), "no 'ending in' or 'exactly N letters' prompts");
+  const perBase = new Map();
+  for (const v of VARIANTS) perBase.set(v.base, (perBase.get(v.base) || 0) + 1);
+  assert.ok([...perBase.values()].every((n) => n <= 3), "at most 3 twists per category");
 });
 
 test("every generated prompt has enough answers and every answer fits its rule", () => {
@@ -228,13 +233,13 @@ test("every generated prompt has enough answers and every answer fits its rule",
 });
 
 test("generated prompts judge strictly and keep rarity tiers", () => {
-  const fruitA = VARIANTS.find((v) => v.q === 'Name a fruit starting with "A"');
-  assert.ok(fruitA, "fruit / A exists");
-  const idx = buildIndex(fruitA);
-  assert.equal(judge(idx, "apple").tier, 1);
-  assert.equal(judge(idx, "red apple").tier, 0, "no extra words in front for generated prompts");
-  assert.equal(judge(idx, "banana").tier, 0, "a fruit that doesn't start with A is not on the list");
-  assert.equal(judge(idx, "araza").tier, 5, "rarity carries over");
+  const fruitB = VARIANTS.find((v) => v.q === 'Name a fruit starting with "B"');
+  assert.ok(fruitB, "fruit / B exists");
+  const idx = buildIndex(fruitB);
+  assert.equal(judge(idx, "banana").tier, 1);
+  assert.equal(judge(idx, "ripe banana").tier, 0, "no extra words in front for generated prompts");
+  assert.equal(judge(idx, "apple").tier, 0, "a fruit that doesn't start with B is not on the list");
+  assert.equal(judge(idx, "blueberry").tier, 2, "rarity carries over");
   // a person can be named by surname when it fits the letter
   const champs = VARIANTS.find((v) => v.base === "Name a famous racing driver (any series)" && v.variant === "start" && v.q.endsWith('"H"'));
   if (champs) assert.ok(judge(buildIndex(champs), "hamilton").tier > 0);

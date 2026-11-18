@@ -40,6 +40,7 @@ export const canRace = (save, today, freePlay = FREE_PLAY) => freePlay || !!save
 // ones) are used, so there are about a thousand prompts.
 const LETTERS = "abcdefghijklmnopqrstuvwxyz";
 const VARIANT_MIN = 8;
+const VARIANTS_PER_QUESTION = 3;
 
 function filterQuestion(q, test) {
   return q.a.map((list) => list.flatMap((entry) => {
@@ -58,13 +59,17 @@ function goodVariant(a) {
 export function makeVariants(questions) {
   const out = [];
   for (const q of questions) {
-    const make = (kind, label, test) => {
-      const a = filterQuestion(q, test);
-      if (goodVariant(a)) out.push({ q: `${q.q} ${label}`, a, deck: q.deck, base: q.q, variant: kind });
-    };
-    for (const L of LETTERS) make("start", `starting with "${L.toUpperCase()}"`, (k) => k[0] === L);
-    for (const L of LETTERS) make("end", `ending in "${L.toUpperCase()}"`, (k) => k[k.length - 1] === L);
-    for (let n = 3; n <= 14; n++) make("length", `with exactly ${n} letters`, (k) => !k.includes(" ") && k.length === n);
+    // Only "starting with" twists, and only the few letters with the most answers, so they
+    // stay a light seasoning on top of the hand-written prompts.
+    const options = [];
+    for (const L of LETTERS) {
+      const a = filterQuestion(q, (k) => k[0] === L);
+      if (goodVariant(a)) options.push({ L, a, count: a.flat().length });
+    }
+    options.sort((x, y) => y.count - x.count);
+    for (const { L, a } of options.slice(0, VARIANTS_PER_QUESTION)) {
+      out.push({ q: `${q.q} starting with "${L.toUpperCase()}"`, a, deck: q.deck, base: q.q, variant: "start" });
+    }
   }
   return out;
 }
@@ -75,7 +80,9 @@ export function pickFresh(deckQs, seen, n, rng = Math.random) {
   const seenSet = new Set(seen);
   const unseen = deckQs.filter((q) => !seenSet.has(q.q));
   const shuffled = pickQuestions(unseen, unseen.length, rng);
-  shuffled.sort((x, y) => (x.variant ? 1 : 0) - (y.variant ? 1 : 0)); // stable: hand-written first
+  // stable sort: everyday / pop-culture prompts first, then the other hand-written ones, then twists
+  const rank = (q) => (q.variant ? 2 : q.pop ? 0 : 1);
+  shuffled.sort((x, y) => rank(x) - rank(y));
   const picked = [];
   const bases = new Set();
   for (const q of shuffled) {
@@ -115,7 +122,7 @@ export function normalize(s) {
 // the more common tier wins, so a typo in the data can never over-reward.
 export function buildIndex(question) {
   const index = new Map();
-  index.strict = !!question.variant; // generated prompts must match the letter / length rule exactly
+  index.strict = !!question.variant; // generated prompts must match the starting letter exactly
   question.a.forEach((list, i) => {
     for (const entry of list) {
       const forms = entry.split("|");
