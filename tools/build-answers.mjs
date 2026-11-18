@@ -5,7 +5,7 @@
 //
 //   node tools/build-answers.mjs            fetch everything and write the file
 //   node tools/build-answers.mjs --probe    print counts and samples, write nothing
-//   node tools/build-answers.mjs --only "Name a job"
+//   node tools/build-answers.mjs --only "Name a job;Name a bird"   rebuild just these prompts
 import fs from "node:fs";
 import { execFile } from "node:child_process";
 import { SOURCES } from "./answer-sources.mjs";
@@ -14,7 +14,7 @@ import { normalize } from "../public/vroomillion/js/logic.js";
 const OUT = new URL("../public/vroomillion/js/data-extra.js", import.meta.url);
 const args = process.argv.slice(2);
 const probe = args.includes("--probe");
-const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
+const only = args.includes("--only") ? args[args.indexOf("--only") + 1].split(";").map((x) => x.trim()) : null; // "A;B;C"
 const MAX = 1500; // per prompt
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -50,10 +50,52 @@ function clean(label) {
   return s.toLowerCase();
 }
 
-function tierFor(n) {
-  if (n >= 70) return 2;
-  if (n >= 25) return 3;
+// src.tiers = [CRUISING from, FAST LANE from] in sitelinks; animals and people are covered in far more
+// languages than everyday things, so their prompts use higher thresholds.
+function tierFor(n, src) {
+  const [t2, t3] = src.tiers || [70, 25];
+  if (n >= t2) return 2;
+  if (n >= t3) return 3;
   return 4;
+}
+
+// Raw wikitext of a Wikipedia page (index.php?action=raw is not rate-limited like the API).
+function rawPage(title) {
+  return new Promise((resolve) => {
+    execFile("curl", ["-s", "-m", "30", "-H", "User-Agent: vroomillion-answer-builder/1.0", "https://en.wikipedia.org/w/index.php?title=" + encodeURIComponent(title.replace(/ /g, "_")) + "&action=raw"],
+      { maxBuffer: 64 << 20 }, (err, out) => resolve(err ? "" : out));
+  });
+}
+
+// Answers from the links on Wikipedia list pages; popularity looked up on Wikidata by article title.
+async function fetchPages(src) {
+  const titles = new Map(); // article title -> what the page shows
+  for (const page of src.pages) {
+    const text = await rawPage(page);
+    for (const m of text.matchAll(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g)) {
+      const target = m[1].trim();
+      if (/^(file|image|category|wikipedia|template|help|portal|list of|lists of|wp|wikt|commons|s|d):/i.test(target) || /^list(s)? of/i.test(target)) continue;
+      if (/^\d+$/.test(target)) continue;
+      if (!titles.has(target)) titles.set(target, m[2] && !/[\[{]/.test(m[2]) ? m[2] : target);
+    }
+    await sleep(800);
+  }
+  const all = [...titles.keys()];
+  const counts = new Map();
+  for (let k = 0; k < all.length; k += 250) {
+    const batch = all.slice(k, k + 250).map((t) => JSON.stringify(t.charAt(0).toUpperCase() + t.slice(1)) + "@en").join(" ");
+    try {
+      const rows = await sparql(`SELECT ?t ?n WHERE { VALUES ?t { ${batch} } ?a schema:about ?i; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?t. ?i wikibase:sitelinks ?n. }`);
+      for (const r of rows) counts.set(r.t.value.toLowerCase(), Number(r.n.value));
+    } catch { /* unknown popularity: treat as rare */ }
+    await sleep(500);
+  }
+  return all.map((t) => {
+    const n = counts.get(t.toLowerCase()) ?? 1;
+    const forms = [...new Set([t, titles.get(t)].map(clean).filter(Boolean))];
+    for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
+    return { n, forms };
+  }).filter((x) => x.forms.length && x.n >= (src.min ?? 1)).sort((a, b) => b.n - a.n).slice(0, MAX);
 }
 
 function branches(where) {
@@ -117,10 +159,10 @@ if (fs.existsSync(OUT) && only) existing = (await import(OUT.href + "?" + Date.n
 const extra = { ...existing };
 
 for (const [prompt, src] of Object.entries(SOURCES)) {
-  if (!src || (only && prompt !== only)) continue;
+  if (!src || (only && !only.includes(prompt))) continue;
   if (!known.has(prompt)) { console.log("?? no such prompt:", prompt); continue; }
   let items;
-  try { items = await fetchPrompt(prompt, src); } catch (e) { console.log("!! failed:", prompt, e.message); continue; }
+  try { items = [...(src.where ? await fetchPrompt(prompt, src) : []), ...(src.pages ? await fetchPages(src) : [])]; } catch (e) { console.log("!! failed:", prompt, e.message); continue; }
   const have = known.get(prompt);
   const tiers = [[], [], []];
   let added = 0;
@@ -129,7 +171,7 @@ for (const [prompt, src] of Object.entries(SOURCES)) {
     if (forms.length < it.forms.length) { forms.forEach((f) => have.add(normalize(f))); continue; } // already a hand-written answer (any form): keep its hand tier
     if (!forms.length) continue;
     forms.forEach((f) => have.add(normalize(f)));
-    tiers[tierFor(it.n) - 2].push(forms.join("|"));
+    tiers[tierFor(it.n, src) - 2].push(forms.join("|"));
     added++;
   }
   extra[prompt] = tiers;
