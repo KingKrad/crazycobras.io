@@ -3,6 +3,26 @@
 
 export const POP_QUESTIONS = [
   {
+    q: "Name a South Park character",
+    a: [
+      ["cartman|eric cartman", "kenny|kenny mccormick", "kyle|kyle broflovski", "stan|stan marsh", "butters|butters stotch", "randy marsh|randy", "mr garrison|garrison|mr. garrison", "chef"],
+      ["wendy|wendy testaburger", "towelie", "mr hankey|mr. hankey|mr hankey the christmas poo", "token|token black", "jimmy|jimmy valmer", "timmy", "craig|craig tucker", "tweek|tweek tweak", "ike|ike broflovski", "sharon marsh", "shelly marsh", "sheila broflovski", "liane cartman", "pc principal", "mr mackey|mr. mackey", "officer barbrady|barbrady", "terrance", "phillip", "satan", "mr slave", "big gay al", "scott tenorman", "kyle's mom", "mysterion", "the coon", "professor chaos", "jesus", "santa", "manbearpig", "al gore"],
+      ["clyde|clyde donovan", "kevin stoley", "bebe stevens", "heidi turner", "red", "nichole", "jimbo kern|uncle jimbo", "ned gerblanski|ned", "stuart mccormick", "carol mccormick", "kevin mccormick", "marvin marsh|grandpa marsh", "stephen stotch", "linda stotch", "gerald broflovski", "mayor mcdaniels", "principal victoria", "strong woman", "nathan", "mimsy", "scott malkinson", "pip|pip pirrup", "damien", "father maxi", "mrs garrison", "ms choksondik", "mr wyland", "dog poo", "mr adams", "mr kitty", "sparky", "goobacks", "the mongolians", "lemmiwinks", "starvin marvin", "the goth kids", "henrietta", "michael", "pete", "firkle", "dougie|general disarray", "tolkien", "bradley", "sergeant yates", "mr derp", "mr hat", "mr twig", "mr hands", "skuzzlebutt", "chickenlover", "crab people", "underpants gnomes", "visitors", "hat mcCullough", "tuong lu kim|city wok guy", "mr tuong lu kim", "lu kim", "nelly", "towel", "cthulhu", "mint-berry crunch", "tupperware", "kyle schwartz", "cupid me", "the woodland critters", "terrance and phillip", "ugly bob", "fosse mcdonald", "ben affleck", "jennifer lopez|jlo", "mr. mephesto|dr mephesto|mephesto", "kevin", "the spirit of christmas"],
+      ["shelly's boyfriend", "skeeter", "eddie the sniffing guy", "bill and fosse", "officer mitch", "sgt harrison yates", "mrs crabtree|ms crabtree", "mr. 'professor' chaos", "rebecca cotswolds", "gary harrison", "flora stoley", "mr wilson", "doctor alphonse mephesto", "ike's teacher", "josh meyers", "dr gouache", "bebe's boobs", "jason white", "token's dad", "mr and mrs testaburger", "the ruler of tr'ellan"],
+      ["kip drordy", "steamy ray vaughn", "harbuckle"],
+    ],
+  },
+  {
+    q: "Name a Family Guy character",
+    a: [
+      ["peter griffin|peter", "stewie|stewie griffin", "brian|brian griffin", "lois|lois griffin", "meg|meg griffin", "chris|chris griffin", "quagmire|glenn quagmire"],
+      ["cleveland|cleveland brown", "joe swanson|joe", "mort goldman|mort", "herbert", "consuela", "carter pewterschmidt|carter", "babs pewterschmidt", "adam west|mayor adam west", "tom tucker", "ernie the giant chicken|giant chicken", "seamus", "bonnie swanson|bonnie", "evil monkey", "death", "jillian", "rupert", "vinny", "donna tubbs", "rallo", "neil goldman", "angela", "opie", "dr hartman", "bruce", "jesus", "god", "santa", "ollie williams"],
+      ["tricia takanawa", "jonathan weed|principal shepherd", "diane simmons", "ida quagmire", "connie d'amico", "kevin swanson", "susie swanson", "loretta brown", "francis griffin", "thelma griffin", "mickey mcfinnigan", "jasper", "nate griffin", "patrick pewterschmidt|the fat guy strangler", "carol pewterschmidt", "jake tucker", "barbara pewterschmidt", "james woods", "seth macfarlane", "the greased-up deaf guy|greased up deaf guy", "buzz killington", "fouad", "elmer hartman", "frank sinatra jr", "kool-aid man", "lord stewie", "rush limbaugh", "new brian", "bertram", "chip", "steve", "olivia fuller", "gus", "dylan flannigan", "ellen", "tom tucker's toupee", "horace", "esther", "joe's leg"],
+      ["mort's wife muriel|muriel goldman", "phineas", "barnaby", "angry face", "charles yamamoto", "carl", "doug", "sandra", "spooner street"],
+      ["jeffrey fecalman", "mister ludwig"],
+    ],
+  },
+  {
     q: "Name a pizza topping",
     a: [
       ["pepperoni", "cheese|mozzarella", "mushroom|mushrooms", "sausage", "ham", "pineapple", "onion|onions", "olives|olive|black olives", "peppers|pepper|bell pepper|green pepper", "bacon", "chicken"],
