@@ -43,7 +43,7 @@ function sparql(query) {
 }
 
 // Words that never belong in a family trivia game, whatever Wikidata files them under.
-const BLOCK = /\b(godemiche|f[uü]hrer|yakuza|slave|slavery|penis|vagina|vulva|scrotum|testicle|testis|anus|anal|rectum|clitoris|labia|dildo|vibrator|sex|sexual|porn|genital|genitals|mutilation|nipple|breast|semen|sperm|masturbat\w*|erotic|fetish|bdsm|condom|brothel|prostitut\w*|rape|nazi|hitler|swastika|genocide|massacre|suicide|murder|terroris\w*|torture|lynching|slur|cocaine|heroin|meth)\b/i;
+const BLOCK = /\b(gokudo|godemiche|striptease|stripper|f[uü]hrer|yakuza|slave|slavery|penis|vagina|vulva|scrotum|testicle|testis|anus|anal|rectum|clitoris|labia|dildo|vibrator|sex|sexual|porn|genital|genitals|mutilation|nipple|breast|semen|sperm|masturbat\w*|erotic|fetish|bdsm|condom|brothel|prostitut\w*|rape|nazi|hitler|swastika|genocide|massacre|suicide|murder|terroris\w*|torture|lynching|slur|cocaine|heroin|meth)\b/i;
 // Scientific names: "prunus domestica", "ribes", "bambusoideae". Players type common names.
 const LATIN_PAIR = /^[a-z]+(us|um|a|is|ae|ii|on|es|ix|ex|os|ys)\s[a-z]+(us|um|a|is|ae|ii|i|ensis|ica|icus|ata|atus|ana|anus|ina|inus|ea|eus|osa|osus|ens|ans|ix|ex|ides|oides|alis|ale|ii|orum|arum|um|ia)$/;
 const LATIN_GROUP = /(idae|inae|oideae|aceae|ales|iformes|opsida|ophyta|phyceae|eae|ini)$/;
@@ -58,7 +58,7 @@ function clean(label, src = {}) {
   const k = normalize(s);
   if (!k || k.length < 2 || !/[a-z]/.test(k)) return null;
   if (BLOCK.test(k)) return null;
-  if (src.exclude && new RegExp(src.exclude, "i").test(k)) return null;
+  if (src.exclude) { const re = new RegExp(src.exclude, "i"); if (re.test(k) || re.test(s.toLowerCase()) || re.test(k.replace(/ /g, "-"))) return null; }
   if (/^(january|february|march|april|may|june|july|august|september|october|november|december) \d+$/.test(k)) return null;
   if (src.taxa && latin(k)) return null; // only plant and animal prompts: elsewhere "pina colada" would look Latin
   return s.toLowerCase();
@@ -172,6 +172,7 @@ async function fetchPrompt(prompt, src) {
     const e = names.get(x.id);
     // aliases are messy on Wikidata: keep short, plain ones only
     const alts = e.alts.filter((x) => x.split(" ").length <= 3 && !/\b(by|for|from|with|in|of the)\b/i.test(x) && !/^[A-Z0-9]{1,3}$/.test(x));
+    if (clean(e.label, src) === null) return { n: x.n, forms: [] }; // main name filtered: drop its aliases too
     const forms = [e.label, ...alts].map((f) => clean(f, src)).filter(Boolean);
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
     // people: their surname on its own counts too ("einstein")
@@ -196,7 +197,12 @@ if (args.includes("--refilter")) {
   let dropped = 0;
   for (const [prompt, tiers] of Object.entries(EXTRA)) {
     const src = SOURCES[prompt] || {};
-    EXTRA[prompt] = tiers.map((list) => list.map((e) => e.split("|").filter((f) => { const ok = clean(f, src) !== null; if (!ok) dropped++; return ok; }).join("|")).filter(Boolean));
+    // if an answer's main name is filtered out, its aliases go too ("dalai lama" takes "grand lama" with it)
+    EXTRA[prompt] = tiers.map((list) => list.map((e) => {
+      const forms = e.split("|");
+      if (clean(forms[0], src) === null) { dropped += forms.length; return ""; }
+      return forms.filter((f) => { const ok = clean(f, src) !== null; if (!ok) dropped++; return ok; }).join("|");
+    }).filter(Boolean));
   }
   writeOut(EXTRA);
   console.log("refiltered, dropped", dropped, "forms");
