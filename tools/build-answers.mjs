@@ -95,7 +95,7 @@ async function fetchPages(src) {
     const forms = [...new Set([t, titles.get(t)].map(clean).filter(Boolean))];
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
     return { n, forms };
-  }).filter((x) => x.forms.length && x.n >= (src.min ?? 1)).sort((a, b) => b.n - a.n).slice(0, MAX);
+  }).filter((x) => x.forms.length && x.n >= (src.pageMin ?? (src.where ? 1 : src.min ?? 1))).sort((a, b) => b.n - a.n).slice(0, MAX);
 }
 
 function branches(where) {
