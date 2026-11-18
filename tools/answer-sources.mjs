@@ -34,7 +34,7 @@ export const SOURCES = {
   "Name a Lamborghini model": { where: "?i wdt:P31 wd:Q3231690; wdt:P176 wd:Q35886.", min: 1, strip: ["lamborghini "] },
   "Name a country in Asia": { where: "?i wdt:P31 wd:Q6256; wdt:P30 wd:Q48.", min: 1 },
   "Name a mammal": { where: "?i wdt:P171+ wd:Q7377; wdt:P105 ?rank. VALUES ?rank { wd:Q7432 wd:Q34740 wd:Q35409 }", min: 25, strip: ["common "], tiers: [150, 70], taxa: true },
-  "Name an insect": { where: "{ ?i wdt:P171+ wd:Q13676. } UNION { ?i wdt:P171+ wd:Q22651. } UNION { ?i wdt:P171+ wd:Q22671. } UNION { ?i wdt:P171+ wd:Q25309. } UNION { ?i wdt:P171+ wd:Q25312. } UNION { ?i wdt:P171+ wd:Q25375. } UNION { ?i wdt:P171+ wd:Q26371. } UNION { ?i wdt:P171+ wd:Q28319. } UNION { ?i wdt:P171+ wd:Q30111. } UNION { ?i wdt:P171+ wd:Q131250. } UNION { ?i wdt:P171+ wd:Q156438. } UNION { ?i wdt:P171+ wd:Q167810. } UNION { ?i wdt:P171+ wd:Q174273. } UNION { ?i wdt:P171+ wd:Q184616. } UNION { ?i wdt:P171+ wd:Q185628. } UNION { ?i wdt:P171+ wd:Q194025. } UNION { ?i wdt:P171+ wd:Q205301. } UNION { ?i wdt:P171+ wd:Q388162. } UNION { ?i wdt:P171+ wd:Q3409994. } UNION { ?i wdt:P171+ wd:Q49381348. } ?i wdt:P105 ?rank. VALUES ?rank { wd:Q7432 wd:Q34740 wd:Q35409 }", min: 12, tiers: [100, 40], strip: ["common "], taxa: true },
+  // insects: Wikidata's insect tree is too big to query in time, so their extra answers are hand-written in data-more.js
   "Name a flower": { pages: ["List of garden plants in North America"], min: 3, tiers: [90, 40], require: ["Q16521"], taxa: true },
   "Name a type of bread": { where: "{ ?i wdt:P279+ wd:Q7802. } UNION { ?i wdt:P31/wdt:P279* wd:Q7802. }", min: 2 },
   "Name a dance": { where: "{ ?i wdt:P31/wdt:P279* wd:Q11639. } UNION { ?i wdt:P279+ wd:Q11639. } UNION { ?i wdt:P31 wd:Q1047497. }", min: 3 },
