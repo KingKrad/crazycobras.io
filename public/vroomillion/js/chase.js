@@ -64,8 +64,46 @@ const ZONES = [
   { id: "desert", name: "THE DESERT", verge: ["#d9955a", "#cd8a50"], road: ["#3d3434", "#443a3a"], rumble: ["#f4f4f4", "#e0582c"], line: "#ffd23a", weather: ["sand", "clear", "sand"] },
   { id: "alpine", name: "MOUNTAIN PASS", verge: ["#e9eef9", "#dbe2f2"], road: ["#363846", "#3c3e4d"], rumble: ["#f4f4f4", "#3a7bd5"], line: "#ffd23a", weather: ["snow", "snow", "fog"] },
   { id: "neon", name: "NEON STRIP", verge: ["#1a0d38", "#211046"], road: ["#2a2a3c", "#303046"], rumble: ["#f4f4f4", "#ff3b5c"], line: "#ffd23a", weather: ["clear", "rain", "clear"] },
+  // ---- destinations: where a race ends up (see DESTINATIONS in logic.js) ----
+  { id: "scrap", name: "THE SCRAPYARD", verge: ["#6b5a45", "#625240"], road: ["#3a3530", "#403a34"], rumble: ["#c9b38a", "#7a5530"], line: "#c9b38a", weather: ["clear"] },
+  { id: "town", name: "SLEEPY TOWN", verge: ["#4f9a3c", "#468d35"], road: ["#3a3a46", "#40404c"], rumble: ["#f4f4f4", "#d9363e"], line: "#f4f4f4", weather: ["clear"] },
+  { id: "beach", name: "BEACH BOARDWALK", verge: ["#f2dca0", "#ead293"], road: ["#3a3a48", "#41414f"], rumble: ["#f4f4f4", "#ff5e8a"], line: "#ffd23a", weather: ["clear"] },
+  { id: "monaco", name: "MONACO HARBOUR", verge: ["#d9d2c0", "#cfc7b3"], road: ["#2f2f3a", "#363642"], rumble: ["#f4f4f4", "#e0201b"], line: "#f4f4f4", weather: ["clear"] },
+  { id: "summit", name: "MOUNTAIN SUMMIT", verge: ["#eef3fb", "#e1e8f5"], road: ["#363846", "#3c3e4d"], rumble: ["#f4f4f4", "#3a7bd5"], line: "#ffd23a", weather: ["snow"] },
+  { id: "volcano", name: "THE VOLCANO", verge: ["#2b2222", "#332828"], road: ["#1e1a1a", "#241f1f"], rumble: ["#ff6a2e", "#ffd23a"], line: "#ff6a2e", weather: ["ash"] },
+  { id: "moon", name: "THE MOON", verge: ["#8a8a94", "#7f7f89"], road: ["#3d3d45", "#44444d"], rumble: ["#f4f4f4", "#8a8a94"], line: "#ffffff", weather: ["clear"] },
+  { id: "gold", name: "VROOMILLION CITY", verge: ["#b8860b", "#a87a0a"], road: ["#2a1f05", "#33260a"], rumble: ["#ffd23a", "#fff3a0"], line: "#fff3a0", weather: ["clear"] },
 ];
-const FOG = { clear: "#c8b8d8", fog: "#cfd5e2", rain: "#606a86", snow: "#e6ecf7", sand: "#e3a965" };
+const BASE_ZONES = 5; // the ones a race passes through; the rest are destinations
+const zoneIndex = (id) => ZONES.findIndex((z) => z.id === id);
+// destination id (logic.js) -> zone id
+const DEST_ZONE = { scrapyard: "scrap", town: "town", beach: "beach", city: "city", monaco: "monaco", summit: "summit", volcano: "volcano", moon: "moon", vroomcity: "gold" };
+// each destination has its own sky; null = the time of day it would be anyway
+const DEST_SKY = {
+  scrap: { sky: ["#5b6680", "#7f8aa3", "#a9b2c4", "#d0d5df"], tint: ["#8a7a5a", 0.08], stars: 0, sun: 0.35, lamps: 0 },
+  town: { sky: ["#2a6ad0", "#4b8fe6", "#8cc4f4", "#d4ecff"], tint: ["#ffffff", 0], stars: 0, sun: 0.7, lamps: 0 },
+  beach: { sky: ["#1f7bd8", "#3da0ee", "#7fd0f8", "#d6f4ff"], tint: ["#ffffff", 0], stars: 0, sun: 0.8, lamps: 0 },
+  city: { sky: ["#0b0b28", "#1d1648", "#3d2160", "#62305f"], tint: ["#14194a", 0.22], stars: 0.6, sun: -0.3, lamps: 1 },
+  monaco: { sky: ["#2b1652", "#7a2b6e", "#ff6a4d", "#ffb35c"], tint: ["#ff6a2e", 0.08], stars: 0.1, sun: 0.12, lamps: 0.6 },
+  summit: { sky: ["#1b4fae", "#3f7fd8", "#9cc6f0", "#e8f3ff"], tint: ["#ffffff", 0], stars: 0, sun: 0.85, lamps: 0 },
+  volcano: { sky: ["#1a0505", "#4a0f0a", "#a8321a", "#ff7a2e"], tint: ["#ff3b1a", 0.12], stars: 0.15, sun: -0.3, lamps: 0.8 },
+  moon: { sky: ["#000000", "#03030a", "#07071a", "#0c0c22"], tint: ["#2a2a50", 0.1], stars: 1, sun: -0.5, lamps: 0.7, noMoon: true },
+  gold: { sky: ["#2a0b5e", "#8a1fa8", "#ff4fd8", "#ffd23a"], tint: ["#ffb000", 0.06], stars: 0.6, sun: -0.3, lamps: 1 },
+};
+function mixTod(a, b, t) {
+  return {
+    sky: a.sky.map((c, i) => mixC(c, b.sky[i], t)),
+    tint: mixC(a.tint, b.tint, t),
+    tintA: a.tintA + (b.tintA - a.tintA) * t,
+    stars: a.stars + (b.stars - a.stars) * t,
+    sun: a.sun + (b.sun - a.sun) * t,
+    lamps: a.lamps + (b.lamps - a.lamps) * t,
+    noMoon: t > 0.5 ? b.noMoon : a.noMoon,
+  };
+}
+const skyOf = (d) => ({ sky: d.sky.map(rgb), tint: rgb(d.tint[0]), tintA: d.tint[1], stars: d.stars, sun: d.sun, lamps: d.lamps, noMoon: !!d.noMoon });
+
+const FOG = { clear: "#c8b8d8", fog: "#cfd5e2", rain: "#606a86", snow: "#e6ecf7", sand: "#e3a965", ash: "#5a3a30" };
 
 // Time of day keyframes along the race: sunrise → day → sunset → night (→ sunrise again on very long runs).
 // sky: four gradient stops top→horizon · tint: colour laid over the world and how strongly
@@ -135,10 +173,10 @@ function outline(src) {
 }
 
 // A city block, drawn straight at full detail, with a matching canvas of lit windows for night.
-function building(seed) {
+function building(seed, palette) {
   const w = 14 + Math.floor(hash(seed) * 3) * 4;
   const h = 30 + Math.floor(hash(seed + 1) * 34);
-  const body = ["#7b7f93", "#8a6f6a", "#6a7d8f", "#9a8f7a", "#5f6478", "#7a6a8a"][seed % 6];
+  const body = (palette || ["#7b7f93", "#8a6f6a", "#6a7d8f", "#9a8f7a", "#5f6478", "#7a6a8a"])[seed % 6];
   const cv = document.createElement("canvas");
   const lit = document.createElement("canvas");
   cv.width = lit.width = w + 2;
@@ -283,7 +321,95 @@ function sprites() {
     ".....P......P.....",
     "....PPP....PPP....",
   ], { Y: "#ffd23a", R: "#e0582c", W: "#fff4d6", P: "#5a3a22" }));
-  S.buildings = [0, 1, 2, 3, 4, 5].map(building);
+  S.buildings = [0, 1, 2, 3, 4, 5].map((n) => building(n));
+  S.goldTowers = [0, 1, 2, 3, 4, 5].map((n) => building(n + 11, ["#d4a017", "#e8b923", "#c9971a", "#f0c419", "#b8860b", "#ffd23a"]));
+  S.whiteBlocks = [0, 1, 2, 3, 4, 5].map((n) => building(n + 3, ["#f2ede0", "#e8dcc6", "#f7e7d0", "#efe4d6", "#ffffff", "#e6d5bd"]));
+  S.tyres = outline(pixelCanvas([
+    ".KKKKKK.",
+    "KGKKKKGK",
+    ".KKKKKK.",
+    ".KKKKKK.",
+    "KGKKKKGK",
+    ".KKKKKK.",
+    ".KKKKKK.",
+    "KGKKKKGK",
+    ".KKKKKK.",
+  ], { K: "#1d1d24", G: "#4a4a55" }));
+  S.wreck = outline(pixelCanvas([
+    "....RRRRRRR.......",
+    "...RWWRRRWWR......",
+    "..RRRRRRRRRRRRRR..",
+    ".RRrRRRRRRrRRRRRR.",
+    "RRRRRRRRRRRRRRRRRR",
+    "RrRRRRrRRRRRRrRRRR",
+    "..KK........KK....",
+  ], { R: "#8a4a2a", r: "#5a2e1a", W: "#3a4a5a", K: "#1d1d24" }));
+  S.house = outline(pixelCanvas([
+    "......RR......",
+    ".....RRRR.....",
+    "....RRRRRR....",
+    "...RRRRRRRR...",
+    "..RRRRRRRRRR..",
+    ".RRRRRRRRRRRR.",
+    "..WWWWWWWWWW..",
+    "..WBBWWWWBBW..",
+    "..WBBWWWWBBW..",
+    "..WWWWDDWWWW..",
+    "..WWWWDDWWWW..",
+    "..WWWWDDWWWW..",
+  ], { R: "#c0392b", W: "#f4ecd8", B: "#5b8fd8", D: "#6a4428" }));
+  S.church = outline(pixelCanvas([
+    "...Y...",
+    "..YYY..",
+    "...W...",
+    "..WWW..",
+    "..WWW..",
+    ".RRRRR.",
+    "RRRRRRR",
+    ".WWWWW.",
+    ".WBWBW.",
+    ".WWWWW.",
+    ".WBWBW.",
+    ".WWDWW.",
+    ".WWDWW.",
+  ], { Y: "#ffd23a", W: "#f4ecd8", R: "#6a6a7a", B: "#5b8fd8", D: "#6a4428" }));
+  S.umbrella = outline(pixelCanvas([
+    "..RWRWRWR..",
+    ".RWRWRWRWR.",
+    "RWRWRWRWRWR",
+    ".....P.....",
+    ".....P.....",
+    ".....P.....",
+    ".....P.....",
+    "....PPP....",
+  ], { R: "#ff4f6a", W: "#f4f4f4", P: "#8a6a4a" }));
+  S.flag = outline(pixelCanvas([
+    "PRRRRRRR",
+    "PRWWWWRR",
+    "PRRRRRRR",
+    "PRWWWWRR",
+    "PRRRRRRR",
+    "P.......",
+    "P.......",
+    "P.......",
+    "P.......",
+    "P.......",
+    "PP......",
+  ], { P: "#d7d3ea", R: "#ff4fd8", W: "#ffd23a" }));
+  S.ember = outline(pixelCanvas([
+    "..RRRR..",
+    ".RrrRRR.",
+    "RRrRRRDR",
+    "RRRRDDDD",
+    "DRRDDDDD",
+  ], { R: "#3a2a2a", r: "#ff6a2e", D: "#221818" }));
+  S.goldLamp = outline(pixelCanvas([
+    "LLLL..",
+    "GGGGG.",
+    "....G.", "....G.", "....G.", "....G.", "....G.", "....G.", "....G.",
+    "....G.", "....G.", "....G.", "....G.", "....G.", "....G.", "....G.",
+    "...GGG",
+  ], { L: "#fff3a0", G: "#d4a017" }));
   SPRITES = S;
   return S;
 }
@@ -430,13 +556,14 @@ export class ChaseScene {
 
   resetWorld() {
     this.seed = Math.random() * 1000;
-    const first = Math.floor(hash(this.seed) * ZONES.length);
+    const first = Math.floor(hash(this.seed) * BASE_ZONES);
     this.zones = [{ zone: first, start: -Infinity, weather: "clear" }]; // the first stretch is always dry
     this.progress = 0;
     this.shown = 0; // the zone entry the camera is in
     this.fade = 1; // 0→1 crossfade of skyline into the camera's zone
     this.prevZone = first;
-    this.wx = { rain: 0, snow: 0, sand: 0, fog: 0 };
+    this.wx = { rain: 0, snow: 0, sand: 0, fog: 0, ash: 0 };
+    this.arrival = null; // { zone, t }: the race is over and the road becomes its destination
     this.drops = [];
     this.tod = timeOfDay(0);
   }
@@ -526,6 +653,29 @@ export class ChaseScene {
     // the nearest car (lowest on screen); a leader far up the road may pass behind the card
     const near = this.racers.filter((r) => r.box).sort((a, b) => b.box.y - a.box.y)[0];
     return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 26;
+  }
+
+  // The race is over: the road turns into its destination (a DESTINATIONS id from logic.js).
+  arrive(destId) {
+    const zone = zoneIndex(DEST_ZONE[destId] || "city");
+    const camSeg = Math.floor(this.camZ / SEG);
+    this.zones.push({ zone, start: camSeg + 45, weather: ZONES[zone].weather[0] });
+    this.arrival = { zone, t: 0 };
+  }
+
+  // A still of a destination, for the passport.
+  preview(destId) {
+    const zone = zoneIndex(DEST_ZONE[destId] || "city");
+    this.zones = [{ zone, start: -Infinity, weather: ZONES[zone].weather[0] }];
+    this.shown = 0;
+    this.prevZone = zone;
+    this.fade = 1;
+    this.arrival = { zone, t: 10 };
+    const w = ZONES[zone].weather[0];
+    for (const k of Object.keys(this.wx)) this.wx[k] = k === w ? 1 : 0;
+    this.speed = 0.4;
+    for (let i = 0; i < 40; i++) this.update(1 / 30);
+    this.draw();
   }
 
   // The answer slams in, then each car charges up the road and smashes through its card.
@@ -737,10 +887,10 @@ export class ChaseScene {
       this.progress = Math.max(...this.racers.map((r) => r.dist / (r.car?.power || 1)));
     }
     const want = Math.floor(this.progress / ZONE_M);
-    while (this.zones.length - 1 < want) {
+    while (!this.arrival && this.zones.length - 1 < want) {
       const prev = this.zones[this.zones.length - 1];
       const n = this.zones.length;
-      const zone = (this.zones[0].zone + n) % ZONES.length;
+      const zone = (this.zones[0].zone + n) % BASE_ZONES;
       const opts = ZONES[zone].weather;
       // new zones appear at the horizon and you drive into them
       this.zones.push({ zone, start: Math.max(camSeg + DRAW - 4, prev.start + 40), weather: opts[Math.floor(hash(this.seed + n * 3.3) * opts.length)] });
@@ -757,7 +907,16 @@ export class ChaseScene {
       const target = k === weather ? 1 : 0;
       this.wx[k] += clamp(target - this.wx[k], -dt * 0.45, dt * 0.45);
     }
-    const goal = timeOfDay(this.progress / DAY_M);
+    let goal = timeOfDay(this.progress / DAY_M);
+    if (this.arrival) {
+      this.arrival.t += dt;
+      const sky = DEST_SKY[ZONES[this.arrival.zone].id];
+      if (sky) goal = mixTod(goal, skyOf(sky), smooth(Math.min(1, this.arrival.t / 2)));
+      if (ZONES[this.arrival.zone].id === "gold") {
+        this.glow = Math.max(this.glow, 1.2); // the gold city's road is always lit
+        if (Math.random() < dt * 30) this.particles.push({ x: Math.random() * this.W, y: Math.random() * this.horizon, vx: 0, vy: 8 * u, life: 0.8, size: Math.max(1, u), color: Math.random() < 0.5 ? "#fff3a0" : "#ffd23a", g: 0 });
+      }
+    }
     this.tod = goal;
     // lightning in a night storm
     if (!this.calm && this.wx.rain > 0.7 && this.tod.lamps > 0.6 && Math.random() < dt * 0.12) {
@@ -794,6 +953,10 @@ export class ChaseScene {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: "#cfd3e6", g: 0, soft: true });
           }
+          // the exclusive gold car leaves a sparkle trail
+          if (r.car?.exclusive && Math.random() < 0.5 + r.boost) {
+            this.particles.push({ x: r.box.x + Math.random() * r.box.w, y: r.box.y - Math.random() * r.box.h, vx: (Math.random() - 0.5) * 30 * u, vy: (20 + Math.random() * 40) * u, life: 0.6, size: Math.max(1, u), color: Math.random() < 0.6 ? "#fff3a0" : "#ffffff", g: 0 });
+          }
           // spray off the tyres on a wet road, powder on snow, dust in the desert
           const kick = this.wx.rain > 0.3 ? "#b9c4e6" : this.wx.snow > 0.3 ? "#f4f8ff" : this.wx.sand > 0.3 ? "#e8b878" : null;
           if (kick && Math.random() < 0.12 + this.speed * 0.3) {
@@ -822,8 +985,9 @@ export class ChaseScene {
       rain: Math.round(this.wx.rain * 80 * area),
       snow: Math.round(this.wx.snow * 70 * area),
       sand: Math.round(this.wx.sand * 40 * area),
+      ash: Math.round(this.wx.ash * 70 * area),
     };
-    const count = { rain: 0, snow: 0, sand: 0 };
+    const count = { rain: 0, snow: 0, sand: 0, ash: 0 };
     for (const d of this.drops) count[d.type]++;
     const spawn = (type, anywhere) => {
       const d = { type, x: Math.random() * W, y: anywhere ? Math.random() * H : -10 * u, s: 0.6 + Math.random() * 0.8 };
@@ -841,7 +1005,7 @@ export class ChaseScene {
       if (d.type === "rain") {
         d.x += (-50 - speed * 90) * u * dt * d.s;
         d.y += (420 + speed * 380) * u * dt * d.s;
-      } else if (d.type === "snow") {
+      } else if (d.type === "snow" || d.type === "ash") {
         d.x += (Math.sin(this.time * 2 + d.s * 9) * 18 + ((d.x - vx0) / W) * speed * 320) * u * dt;
         d.y += (24 + speed * 110) * u * dt * d.s;
       } else {
@@ -983,6 +1147,35 @@ export class ChaseScene {
         if (roll < 0.5) push(p, spr.pine, side * (1.3 + far * 1.9));
         if (hash(i * 9.1) < 0.12) push(p, spr.pine, -side * (1.5 + hash(i * 4.4) * 1.6));
         else if (roll > 0.92) push(p, spr.boulder, side * (1.3 + far));
+      } else if (zone === "scrap") {
+        if (roll < 0.22) push(p, spr.tyres, side * (1.3 + far * 1.4));
+        else if (roll < 0.36) push(p, spr.wreck, side * (1.4 + far * 1.6));
+        else if (roll < 0.44) push(p, spr.rock, side * (1.3 + far));
+      } else if (zone === "town") {
+        if (i % 5 === 0) push(p, spr.house, side * (1.6 + far * 0.8));
+        if (i % 37 === 0) push(p, spr.church, -side * 1.9);
+        if (roll > 0.8) push(p, spr.bush, -side * (1.3 + far));
+        if (i % 9 === 0) { push(p, spr.lamp, -1.2, { lamp: true }); push(p, spr.lamp, 1.2, { lamp: true, flip: true }); }
+      } else if (zone === "beach") {
+        if (roll < 0.22) push(p, spr.umbrella, side * (1.4 + far * 1.6));
+        else if (roll < 0.4) push(p, spr.palm, side * (1.35 + far * 1.1));
+      } else if (zone === "monaco") {
+        if (i % 4 === 0) { const b = Math.floor(hash(i * 1.9) * 6); push(p, spr.whiteBlocks[b].img, -(1.9 + far * 0.5), { lit: spr.whiteBlocks[b].lit }); }
+        if (roll < 0.25) push(p, spr.palm, 1.4 + far * 0.8);
+        if (i % 8 === 0) { push(p, spr.lamp, -1.2, { lamp: true }); push(p, spr.lamp, 1.2, { lamp: true, flip: true }); }
+      } else if (zone === "summit") {
+        if (roll < 0.35) push(p, spr.pine, side * (1.3 + far * 1.9));
+        else if (roll > 0.85) push(p, spr.boulder, side * (1.3 + far));
+      } else if (zone === "volcano") {
+        if (roll < 0.3) push(p, spr.ember, side * (1.3 + far * 1.8));
+        else if (roll < 0.4) push(p, spr.rock, side * (1.3 + far * 1.4));
+      } else if (zone === "moon") {
+        if (roll < 0.25) push(p, spr.boulder, side * (1.3 + far * 2));
+        if (i % 53 === 0) push(p, spr.flag, hash(i) < 0.5 ? -1.6 : 1.6);
+      } else if (zone === "gold") {
+        if (i % 3 === 0) { const b = Math.floor(hash(i * 1.9) * 6); push(p, spr.goldTowers[b].img, side * (1.8 + far * 0.6), { lit: spr.goldTowers[b].lit }); }
+        if (i % 6 === 0) { push(p, spr.goldLamp, -1.2, { lamp: true }); push(p, spr.goldLamp, 1.2, { lamp: true, flip: true }); }
+        if (i % 23 === 0) push(p, spr.sign, -side * 1.9, { neon: true });
       } else {
         if (roll < 0.2) push(p, spr.palm, side * (1.35 + far * 1.1));
         if (i % 10 === 0) { push(p, spr.lamp, -1.2, { lamp: true }); push(p, spr.lamp, 1.2, { lamp: true, flip: true }); }
@@ -1036,7 +1229,7 @@ export class ChaseScene {
     // ---- haze, time of day, then lights ----
     wg.globalCompositeOperation = "source-atop";
     const fogC = this.fogColour();
-    const haze = clamp(this.wx.fog * 0.55 + this.wx.sand * 0.3 + this.wx.rain * 0.1 + this.wx.snow * 0.12, 0, 0.65);
+    const haze = clamp(this.wx.fog * 0.55 + this.wx.sand * 0.3 + this.wx.rain * 0.1 + this.wx.snow * 0.12 + this.wx.ash * 0.2, 0, 0.65);
     const hz = this.horizon;
     const fog = wg.createLinearGradient(0, hz - 70 * u, 0, hz + (this.carBottom - hz) * (0.55 + this.wx.fog * 0.35));
     fog.addColorStop(0, css(fogC, haze * 0.8));
@@ -1114,11 +1307,11 @@ export class ChaseScene {
 
   fogColour() {
     const w = this.wx;
-    const total = w.fog + w.rain + w.snow + w.sand;
+    const total = w.fog + w.rain + w.snow + w.sand + w.ash;
     const horizonSky = this.tod.sky[3];
     if (total < 0.01) return horizonSky;
     let c = [0, 0, 0];
-    for (const k of ["fog", "rain", "snow", "sand"]) {
+    for (const k of ["fog", "rain", "snow", "sand", "ash"]) {
       const v = rgb(FOG[k]);
       c = [c[0] + v[0] * w[k], c[1] + v[1] * w[k], c[2] + v[2] * w[k]];
     }
@@ -1177,7 +1370,7 @@ export class ChaseScene {
         g.fillRect(sx - half, sy + y, half * 2, 1);
       }
     }
-    if (tod.stars > 0.3) {
+    if (tod.stars > 0.3 && !tod.noMoon) {
       const mx = Math.round(W - sx * 0.6 - W * 0.15);
       const my = Math.round(hz * 0.28);
       const mr = Math.round(R * 0.7);
@@ -1316,6 +1509,150 @@ export class ChaseScene {
         peaks(0.4, 40, 26, "#4d5a7e", "#e2e9f7", 11);
         ridge(0.7, "#2d5a4a", 4, 0.05, 2, 0.13);
       }
+    } else if (id === "beach") {
+      g.globalAlpha = a;
+      this.skyline(g, "coast", lit);
+    } else if (id === "summit") {
+      g.globalAlpha = a;
+      this.skyline(g, "alpine", lit);
+    } else if (id === "scrap") {
+      if (!lit) {
+        // junk heaps and a crane
+        g.fillStyle = "#4a4038";
+        for (let x = 0; x < W; x += 2) {
+          const wx = (x - this.bgX * 0.3) / u;
+          const h = (10 + Math.abs(Math.sin(wx * 0.05)) * 14 + (hash(Math.floor(wx / 3)) * 4)) * u;
+          g.fillRect(x, Math.round(hz - h), 2, Math.round(h) + 2);
+        }
+        const cx = Math.round(mod(W * 0.7 - this.bgX * 0.3, W + 80 * u) - 40 * u);
+        g.fillStyle = "#c9a227";
+        g.fillRect(cx, hz - Math.round(46 * u), Math.round(3 * u), Math.round(46 * u));
+        g.fillRect(cx - Math.round(26 * u), hz - Math.round(46 * u), Math.round(40 * u), Math.round(3 * u));
+        g.fillStyle = "#2a2a30";
+        g.fillRect(cx - Math.round(24 * u), hz - Math.round(43 * u), Math.max(1, Math.round(u)), Math.round(14 * u));
+        g.fillRect(cx - Math.round(28 * u), hz - Math.round(29 * u), Math.round(9 * u), Math.round(4 * u));
+        ridge(0.6, "#5a4a3c", 4, 0.07, 2, 0.15);
+      }
+    } else if (id === "town") {
+      if (!lit) ridge(0.2, "#3f7a35", 10, 0.015, 4, 0.04);
+      const cs = (-this.bgX * 0.45) / u;
+      for (let i = Math.floor(cs / 14) - 1; i < Math.floor(cs / 14) + W / u / 14 + 2; i++) {
+        if (hash(i + 70) < 0.4) continue;
+        const x = Math.round((i * 14 - cs) * u);
+        const hw = Math.round(10 * u);
+        const hh = Math.round((5 + hash(i) * 4) * u);
+        if (!lit) {
+          g.fillStyle = hash(i + 3) > 0.5 ? "#e8dcc6" : "#d6c7a8";
+          g.fillRect(x, hz - hh, hw, hh + 2);
+          g.fillStyle = "#9a3a2a";
+          for (let k = 0; k < Math.round(4 * u); k++) g.fillRect(x - Math.round(u) + k, hz - hh - k, hw + 2 * Math.round(u) - 2 * k, 1);
+        }
+        g.fillStyle = "#ffd98a";
+        if (lit || hash(i * 5) > 0.5) g.fillRect(x + Math.round(3 * u), hz - Math.round(hh * 0.6), Math.max(1, Math.round(2 * u)), Math.max(1, Math.round(2 * u)));
+      }
+    } else if (id === "monaco") {
+      if (!lit) {
+        ridge(0.15, "#5a6a5a", 26, 0.012, 6, 0.03);
+        const top = hz - Math.round(5 * u);
+        g.fillStyle = "#1f5fa0";
+        g.fillRect(0, top, W, hz - top + 2);
+      }
+      // white buildings stacked up the hillside
+      const cs = (-this.bgX * 0.3) / u;
+      for (let i = Math.floor(cs / 9) - 1; i < Math.floor(cs / 9) + W / u / 9 + 2; i++) {
+        const x = Math.round((i * 9 - cs) * u);
+        const h = Math.round((8 + hash(i * 2.1) * 16) * u);
+        const y0 = hz - Math.round(5 * u) - h;
+        if (!lit) { g.fillStyle = hash(i) > 0.5 ? "#f2ede0" : "#e8c9a8"; g.fillRect(x, y0, Math.round(7 * u), h); }
+        g.fillStyle = "#ffe9a8";
+        for (let wy = 2 * u; wy < h - u; wy += 3 * u) if (hash(i * 13 + wy) > (lit ? 0.4 : 0.85)) g.fillRect(x + Math.round(2 * u), Math.round(y0 + wy), Math.max(1, Math.round(u)), Math.max(1, Math.round(u)));
+      }
+      if (!lit) {
+        // yachts in the harbour
+        for (let i = 0; i < 5; i++) {
+          const x = Math.round(mod(i * 97 * u - this.bgX * 0.35, W + 40 * u) - 20 * u);
+          g.fillStyle = "#ffffff";
+          g.fillRect(x, hz - Math.round(3 * u), Math.round(14 * u), Math.round(2 * u));
+          g.fillRect(x + Math.round(3 * u), hz - Math.round(5 * u), Math.round(7 * u), Math.round(2 * u));
+          g.fillStyle = "#2a3a5a";
+          g.fillRect(x + Math.round(4 * u), hz - Math.round(5 * u), Math.round(5 * u), Math.max(1, Math.round(u)));
+        }
+      }
+    } else if (id === "volcano") {
+      if (!lit) ridge(0.3, "#2a1a18", 8, 0.03, 3, 0.07);
+      // the volcano itself, with a lava glow and a smoking crater
+      const vx = Math.round(mod(W * 0.55 - this.bgX * 0.12, W + 200 * u) - 100 * u);
+      const vh = Math.round(Math.min(hz * 0.75, 70 * u));
+      const vw = Math.round(vh * 1.4);
+      if (!lit) {
+        g.fillStyle = "#3a2420";
+        g.beginPath();
+        g.moveTo(vx - vw, hz + 2);
+        g.lineTo(vx - vw * 0.18, hz - vh);
+        g.lineTo(vx + vw * 0.18, hz - vh);
+        g.lineTo(vx + vw, hz + 2);
+        g.fill();
+      }
+      g.fillStyle = "#ff6a2e";
+      g.fillRect(vx - Math.round(vw * 0.17), hz - vh, Math.round(vw * 0.34), Math.max(2, Math.round(2 * u)));
+      for (let k = 0; k < 5; k++) {
+        const lx = vx + Math.round((hash(k * 3.3) - 0.5) * vw * 0.3);
+        const len = Math.round(vh * (0.3 + hash(k * 7.1) * 0.5));
+        g.fillStyle = k % 2 ? "#ff3b1a" : "#ffb02e";
+        g.fillRect(lx, hz - vh, Math.max(1, Math.round(u)), len);
+      }
+      if (!lit) {
+        for (let k = 0; k < 8; k++) {
+          const t = mod(this.time * 0.15 + k / 8, 1);
+          const r = Math.round((4 + t * 18) * u);
+          g.globalAlpha = a * (1 - t) * 0.6;
+          g.fillStyle = "#4a4040";
+          g.fillRect(vx - r + Math.round(Math.sin(k * 2 + this.time) * 6 * u), hz - vh - Math.round(t * 50 * u) - r, r * 2, r * 2);
+        }
+        g.globalAlpha = a;
+      }
+    } else if (id === "moon") {
+      if (!lit) {
+        // Earth hangs in the black sky
+        const ex = Math.round(mod(W * 0.75 - this.bgX * 0.05, W + 60 * u) - 30 * u);
+        const ey = Math.round(hz * 0.3);
+        const er = Math.round(Math.min(W, hz) * 0.09);
+        for (let y = -er; y <= er; y++) {
+          const half = Math.floor(Math.sqrt(er * er - y * y));
+          g.fillStyle = "#2f6fd0";
+          g.fillRect(ex - half, ey + y, half * 2, 1);
+          g.fillStyle = "#3fae5a";
+          if (hash(y * 3.1) > 0.45) g.fillRect(ex - Math.round(half * 0.5), ey + y, Math.round(half * (0.4 + hash(y) * 0.6)), 1);
+          g.fillStyle = "#f4f4f4";
+          if (Math.abs(y) > er * 0.8) g.fillRect(ex - half, ey + y, half * 2, 1);
+        }
+        ridge(0.25, "#5a5a64", 10, 0.02, 5, 0.06);
+        // craters along the ridge
+        g.fillStyle = "#43434c";
+        for (let i = 0; i < 6; i++) g.fillRect(Math.round(mod(i * 71 * u - this.bgX * 0.25, W)), hz - Math.round((3 + hash(i) * 6) * u), Math.round(8 * u), Math.max(1, Math.round(2 * u)));
+      }
+    } else if (id === "gold") {
+      // golden towers with spires
+      const tower = (par, bw, hMax, colour, seed) => {
+        const cs = (-this.bgX * par) / u;
+        for (let i = Math.floor(cs / bw) - 1; i < Math.floor(cs / bw) + W / u / bw + 2; i++) {
+          if (hash(i + seed) < 0.15) continue;
+          const h = Math.round((14 + hash(i * 1.7 + seed) * hMax) * u);
+          const x = Math.round((i * bw - cs) * u);
+          const w = Math.round((bw - 3) * u);
+          if (!lit) {
+            g.fillStyle = colour;
+            g.fillRect(x, hz - h, w, h + 2);
+            g.fillRect(x + Math.round(w / 2) - Math.round(u / 2), hz - h - Math.round(8 * u), Math.max(1, Math.round(u)), Math.round(8 * u));
+            g.fillStyle = "rgba(255,255,255,0.25)";
+            g.fillRect(x, hz - h, Math.max(1, Math.round(u)), h);
+          }
+          g.fillStyle = lit ? "#fff3a0" : "#fff8d0";
+          for (let wy = 3 * u; wy < h - 2 * u; wy += 3 * u) for (let wx = 2 * u; wx < w - u; wx += 3 * u) if (hash(i * 31 + wy * 7 + wx) > 0.55) g.fillRect(Math.round(x + wx), Math.round(hz - h + wy), Math.max(1, Math.round(u)), Math.max(1, Math.round(u)));
+        }
+      };
+      tower(0.2, 13, 40, "#b8860b", 3);
+      tower(0.5, 17, 26, "#d4a017", 41);
     } else {
       // neon strip: purple ridges and a lit-up skyline
       ridge(0.4, "#2a0f4e", 12, 0.021, 4, 0.057);
@@ -1501,7 +1838,10 @@ export class ChaseScene {
       g.fillRect(Math.round(d.x), Math.round(d.y), 1, Math.round((3 + speed * 4) * d.s));
     }
     for (const d of this.drops) {
-      if (d.type === "snow") {
+      if (d.type === "ash") {
+        g.fillStyle = d.s > 1.1 ? "#ff8a2e" : d.s > 0.9 ? "#ffd23a" : "#6a5a5a";
+        g.fillRect(Math.round(d.x), Math.round(d.y), Math.max(1, Math.round(u)), Math.max(1, Math.round(u)));
+      } else if (d.type === "snow") {
         const sz = Math.max(1, Math.round(u * d.s * 1.4));
         g.fillStyle = d.s > 1 ? "#ffffff" : "#dfe6f5";
         g.fillRect(Math.round(d.x), Math.round(d.y), sz, sz);

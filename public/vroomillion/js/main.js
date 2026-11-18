@@ -4,6 +4,7 @@ import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
   dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
+  DESTINATIONS, destinationFor, EXCLUSIVE_CAR,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -34,12 +35,14 @@ const SAVE_KEY = "vroomillion.v1";
 const fresh = () => ({
   cash: 0, owned: ["rustbucket"], car: "rustbucket", deck: "classic", muted: false,
   races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null, seen: [],
+  passport: {}, // destination id -> best distance there
 });
 let save = fresh();
 try {
   const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
   if (raw && Array.isArray(raw.owned)) save = { ...save, ...raw };
 } catch { /* private mode or bad data: start fresh */ }
+if (!save.passport || typeof save.passport !== "object") save.passport = {};
 if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
 // Unlimited comes from the logged-in account on the server, never from this save.
 delete save.unlimited;
@@ -408,6 +411,7 @@ function show(name) {
   if (name === "account") renderAccount();
   if (name === "versus") renderVersus();
   if (name === "garage") renderGarage();
+  if (name === "passport") renderPassport();
   window.scrollTo({ top: 0 });
 }
 
@@ -523,7 +527,9 @@ function renderGarage() {
       const owned = save.owned.includes(car.id);
       const equipped = save.car === car.id;
       const afford = save.cash >= car.price;
-      const action = equipped
+      const action = car.exclusive && !owned
+        ? h("div", { class: "tag locked", text: "LOCKED · REACH VROOMILLION CITY" })
+        : equipped
         ? h("div", { class: "tag equipped", text: "EQUIPPED" })
         : owned
           ? h("button", { class: "btn small", type: "button", text: "DRIVE", onclick: () => { save.car = car.id; persist(); audio.sfx.lock(); renderGarage(); } })
@@ -827,7 +833,41 @@ async function runRace(token) {
     await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
   }
+  await arrive(token);
   finish(token);
+}
+
+// After the last round the road turns into wherever this race's distance has taken you.
+async function arrive(token) {
+  const alive = () => token === raceToken;
+  const top = Math.max(...race.racers.map((r) => r.dist));
+  const dest = destinationFor(top);
+  const newStamp = !(dest.id in save.passport);
+  save.passport[dest.id] = Math.max(save.passport[dest.id] || 0, Math.round(top));
+  const carUnlocked = !!dest.exclusive && !save.owned.includes(EXCLUSIVE_CAR);
+  if (carUnlocked) save.owned.push(EXCLUSIVE_CAR);
+  persist();
+  race.arrival = { dest, newStamp, carUnlocked, top };
+
+  $("q-card").classList.add("hidden");
+  document.body.classList.add("smashing");
+  scene.arrive(dest.id);
+  scene.speed = 0.55;
+  audio.engineSet(0.5);
+  await sleep(1900);
+  if (!alive()) return;
+  const card = h("div", { class: "arrive-card" + (dest.exclusive ? " exclusive" : "") },
+    h("div", { class: "arrive-kicker", text: dest.exclusive ? "EXCLUSIVE AREA · WELCOME TO" : "YOU'VE ARRIVED AT" }),
+    h("div", { class: "arrive-name", text: dest.name }),
+    h("div", { class: "arrive-blurb", text: dest.blurb }),
+    newStamp ? h("div", { class: "arrive-tag", text: "NEW PASSPORT STAMP!" }) : null,
+    carUnlocked ? h("div", { class: "arrive-tag gold", text: "THE VROOMILLIONAIRE IS YOURS!" }) : null);
+  $("overlay").textContent = "";
+  $("overlay").append(card);
+  if (dest.exclusive || newStamp) { scene.confetti(); audio.sfx.win(); } else audio.sfx.cash();
+  await sleep(dest.exclusive ? 3600 : 2600);
+  $("overlay").textContent = "";
+  document.body.classList.remove("smashing");
 }
 
 function revealCard(r, res, i) {
@@ -985,6 +1025,34 @@ function waitNext(label, token) {
   });
 }
 
+function destResult({ dest, newStamp, carUnlocked, top }) {
+  const next = DESTINATIONS.find((d) => d.min > top);
+  return h("div", { class: "dest-result" + (dest.exclusive ? " exclusive" : "") },
+    h("div", { class: "note", text: "THIS RACE TOOK YOU TO" }),
+    h("div", { class: "dest-name", text: dest.name }),
+    h("div", { class: "note", text: [newStamp ? "NEW PASSPORT STAMP!" : "", carUnlocked ? "GOLD CAR UNLOCKED: THE VROOMILLIONAIRE" : "",
+      next ? `NEXT: ${next.exclusive ? "??? (EXCLUSIVE)" : next.name} AT ${next.min.toLocaleString("en-US")} M` : "YOU'VE BEEN EVERYWHERE."].filter(Boolean).join(" · ") }),
+    h("button", { class: "btn small", type: "button", text: "OPEN PASSPORT", onclick: () => { audio.sfx.click(); show("passport"); } }));
+}
+
+// The passport: every destination, stamped once you've reached it.
+function renderPassport() {
+  const root = $("passport-grid");
+  root.textContent = "";
+  const got = Object.keys(save.passport).length;
+  $("passport-count").textContent = `${got} OF ${DESTINATIONS.length} STAMPS`;
+  for (const d of DESTINATIONS) {
+    const best = save.passport[d.id];
+    const cv = h("canvas", { class: "stamp-art", width: 192, height: 108, "aria-hidden": "true" });
+    try { const sc = new ChaseScene(cv); sc.resize(192, 108, 100); sc.preview(d.id); } catch { /* preview is decoration only */ }
+    root.append(h("div", { class: "stamp" + (best ? " got" : " locked") + (d.exclusive ? " exclusive" : "") },
+      cv,
+      h("div", { class: "stamp-name", text: best || !d.exclusive ? d.name : "??? EXCLUSIVE ???" }),
+      h("div", { class: "stamp-info", text: best ? `BEST ${best.toLocaleString("en-US")} M` : d.min ? `REACH ${d.min.toLocaleString("en-US")} M IN ONE RACE` : "FINISH ANY RACE" }),
+      best ? h("div", { class: "stamp-mark", text: "VISITED" }) : null));
+  }
+}
+
 function finish(token) {
   if (token !== raceToken) return;
   const [a, b] = race.racers;
@@ -1030,6 +1098,7 @@ function finish(token) {
         h("div", { class: "hud-name", text: r.name }),
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
         race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
+    race.arrival ? destResult(race.arrival) : null,
     h("div", { class: "payout" },
       h("div", { text: race.solo ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
       h("div", { class: "payout-total", text: "+" + money(pay.total) }),
@@ -1069,6 +1138,7 @@ $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues")
 $("btn-gearhead").addEventListener("click", () => { audio.sfx.click(); save.deck = "car"; persist(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
+$("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
 $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });

@@ -38,6 +38,7 @@
           <button class="btn big alt" id="btn-2p" type="button">2P VERSUS</button>
           <button class="btn big gear" id="btn-gearhead" type="button">GEARHEAD MODE</button>
           <button class="btn" id="btn-garage" type="button">GARAGE</button>
+          <button class="btn" id="btn-passport" type="button">PASSPORT</button>
           <button class="btn" id="btn-how" type="button">HOW TO PLAY</button>
           <button class="btn" id="btn-account" type="button">ACCOUNT</button>
         </div>
@@ -54,6 +55,7 @@
           <li>Your distance is your score. Prize money grows with how far you go and how fancy your car is — spend it on faster cars.</li>
           <li><b>No repeats:</b> once you've seen a prompt it never comes back, unless you hit <b>REDO THIS RACE</b> on the results screen to replay the same prompts. Once you've played the main prompts, a few twists like <b>starting with "M"</b> join in.</li>
           <li><b>One in a Vroomillion</b> only counts if it's spelled exactly right — a fixed typo scores as a Deep Cut.</li>
+          <li><b>Destinations:</b> your total distance at the end of a race decides where you end up — from the scrapyard to the Moon. Each new place gets a passport stamp. There's an exclusive area at the very top, and getting there unlocks a car you can't buy.</li>
           <li><b>Cartoon shows:</b> real people who appeared count too — Donald Trump is a South Park character. The more famous the cameo, the less it scores.</li>
           <li><b>GEARHEAD MODE:</b> every question is about cars and racing. Pick it on the race setup screen.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
@@ -111,6 +113,13 @@
           <button class="btn big" id="btn-start-2p" type="button">START RACE</button>
           <button class="btn" data-go="title" type="button">BACK</button>
         </div>
+      </section>
+
+      <section class="screen" id="s-passport">
+        <h2>PASSPORT</h2>
+        <p class="note">Each race's total distance takes you somewhere. Go further to reach cooler places. <span id="passport-count"></span></p>
+        <div class="passport-grid" id="passport-grid"></div>
+        <button class="btn" data-go="title" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-account">

@@ -15,7 +15,7 @@ const OUT = new URL("../public/vroomillion/js/data-extra.js", import.meta.url);
 const args = process.argv.slice(2);
 const probe = args.includes("--probe");
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1].split(";").map((x) => x.trim()) : null; // "A;B;C"
-const MAX = 1500; // per prompt
+const MAX = 4000; // per prompt
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // curl is used rather than fetch: it copes better with big responses through proxies.

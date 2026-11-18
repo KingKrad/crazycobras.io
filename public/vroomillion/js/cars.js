@@ -74,6 +74,8 @@ export const CARS = [
 
   C("v10", "Screaming V10 Formula Car", "X", 3000000, 1.5, 4, "formula", "#e0201b", "#f4f4f4"),
   C("golden", "The Golden Vroomillion", "X", 5000000, 1.55, 5, "hyper", "#ffd23a", "#ff4fd8"),
+  // can't be bought: reaching VROOMILLION CITY unlocks it
+  { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
 ];
 
 export const carById = (id) => CARS.find((c) => c.id === id) || CARS[0];

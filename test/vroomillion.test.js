@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
+  DESTINATIONS, destinationFor,
   TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants,
 } from "../public/vroomillion/js/logic.js";
@@ -254,4 +255,29 @@ test("races use hand-written prompts first and don't repeat a category", () => {
   assert.equal(later.length, ROUNDS);
   assert.ok(later.every((q) => q.variant));
   assert.equal(new Set(later.map((q) => q.base)).size, ROUNDS, "one prompt per category in a race");
+});
+
+test("part of a longer answer is fixed to the full answer and scores the same", () => {
+  const beatles = buildIndex(QUESTIONS.find((x) => x.q === "Name a Beatles song"));
+  for (const typed of ["Eleanor ", "eleanor", "rigby", "elanor"]) {
+    const r = judge(beatles, typed);
+    assert.equal(r.display, "eleanor rigby", typed);
+    assert.ok(r.corrected && r.partial, "shown as a fix to confirm");
+    assert.equal(r.tier, judge(beatles, "eleanor rigby").tier, "same tier as typing it in full");
+  }
+  assert.equal(judge(beatles, "banana").tier, 0, "a word that isn't in any answer doesn't count");
+  assert.equal(judge(beatles, "love").tier, 0, "too vague a word doesn't count");
+  const fruit = buildIndex(QUESTIONS.find((x) => x.q === "Name a fruit"));
+  assert.equal(judge(fruit, "dragon").display, "dragon fruit");
+});
+
+test("destinations get further away and the last one is exclusive and very hard", () => {
+  for (let i = 1; i < DESTINATIONS.length; i++) assert.ok(DESTINATIONS[i].min > DESTINATIONS[i - 1].min);
+  assert.equal(destinationFor(0).id, "scrapyard");
+  assert.equal(destinationFor(3500).id, "monaco");
+  const top = DESTINATIONS.at(-1);
+  assert.ok(top.exclusive);
+  // a starter car answering all Deep Cuts can't get there; mostly Deep Cuts plus two Vroomillions in a fast car can
+  assert.ok(metresFor(4, 1, false) * 7 < top.min);
+  assert.ok(metresFor(4, 1.45, false) * 5 + metresFor(5, 1.45, true) * 2 >= top.min);
 });

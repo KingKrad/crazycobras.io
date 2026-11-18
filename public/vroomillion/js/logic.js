@@ -9,6 +9,23 @@ export const TIERS = [
   { id: 5, name: "ONE IN A VROOMILLION", short: "VROOMILLION", metres: 1000, blurb: "Almost nobody alive says that." },
 ];
 
+// Where a race ends up: its total distance decides. The last one is the exclusive area.
+// A starter car tops out around 5,600 m; 9,000 m needs mostly Deep Cuts and a couple of
+// One in a Vroomillions in a fast car.
+export const DESTINATIONS = [
+  { id: "scrapyard", name: "THE SCRAPYARD", min: 0, blurb: "Rust, tyres and a dog that won't stop barking." },
+  { id: "town", name: "SLEEPY TOWN", min: 700, blurb: "One traffic light, and it's always green." },
+  { id: "beach", name: "BEACH BOARDWALK", min: 1500, blurb: "Sun, sand and ice cream on the dashboard." },
+  { id: "city", name: "BIG CITY", min: 2400, blurb: "Bright lights, tall towers, nowhere to park." },
+  { id: "monaco", name: "MONACO HARBOUR", min: 3400, blurb: "Yachts, a casino and a very expensive coffee." },
+  { id: "summit", name: "MOUNTAIN SUMMIT", min: 4500, blurb: "Top of the world. Mind the hairpins." },
+  { id: "volcano", name: "THE VOLCANO", min: 5800, blurb: "Hot tarmac. Very, very hot tarmac." },
+  { id: "moon", name: "THE MOON", min: 7300, blurb: "One small drive for a car, one giant lap for car-kind." },
+  { id: "vroomcity", name: "VROOMILLION CITY", min: 9000, exclusive: true, blurb: "Streets of gold. Hardly anyone ever gets here." },
+];
+export const destinationFor = (metres) => DESTINATIONS.reduce((best, d) => (metres >= d.min ? d : best), DESTINATIONS[0]);
+export const EXCLUSIVE_CAR = "vroomillionaire";
+
 export const ROUNDS = 7;
 export const ANSWER_SECONDS = 25;
 export const NITRO_BOOST = 1.5;
@@ -228,7 +245,68 @@ export function judge(index, raw) {
     }
     if (best) return capped({ ...best.hit, key: normalize(best.hit.display), corrected: true });
   }
+  // Part of a longer answer: "eleanor" -> Eleanor Rigby, "mustang" -> Ford Mustang, "rigby" too.
+  // Shown as a fix to confirm, and scores exactly like the full answer.
+  const part = index.strict ? null : partialMatch(index, key); // "starting with" twists stay strict
+  if (part) return { ...part, key: normalize(part.display), corrected: true, partial: true };
   return { tier: 0, display: String(raw).trim().slice(0, 40), key };
+}
+
+// Words too common to point at one answer on their own.
+const STOP = new Set(["the", "and", "of", "a", "an", "in", "on", "at", "for", "with", "from", "to", "my", "your", "our", "his", "her", "its", "you", "me", "is", "it", "be", "are", "was", "this", "that", "de", "la", "le", "el", "von", "van", "der", "da", "di", "du", "mr", "mrs", "ms", "dr", "st", "saint", "new", "old", "big", "little", "great", "grand", "small", "red", "blue", "green", "black", "white", "yellow", "pink", "golden", "silver", "dark", "light", "common", "royal", "king", "queen", "prince", "princess", "lord", "lady", "sir", "man", "woman", "boy", "girl", "baby", "day", "night", "time", "world", "love", "song", "theme", "part", "show", "film", "movie", "game", "series", "edition", "version", "style", "type", "kind", "classic", "original", "super", "mega", "ultra", "pro", "plus", "max", "one", "two", "three", "four", "five", "first", "second", "last"]);
+const MAX_PARTIAL = 12; // a word that fits more answers than this is too vague to guess from
+
+function wordIndex(index) {
+  if (index.words) return index.words;
+  const words = new Map();
+  for (const [key, hit] of index) {
+    // only an answer's main name counts, so "bread" can't pick up "monkey bread", an alias of bouye
+    if (key !== normalize(hit.display)) continue;
+    const ws = key.split(" ");
+    if (ws.length < 2) continue;
+    for (const w of new Set(ws)) {
+      if (w.length < 4 || STOP.has(w)) continue;
+      let list = words.get(w);
+      if (!list) words.set(w, (list = []));
+      if (!list.includes(hit)) list.push(hit);
+    }
+  }
+  index.words = words;
+  return words;
+}
+
+function bestOf(hits) {
+  if (!hits.length || hits.length > MAX_PARTIAL) return null;
+  return hits.reduce((b, h) => (h.tier < b.tier || (h.tier === b.tier && h.display.length < b.display.length) ? h : b));
+}
+
+function partialMatch(index, key) {
+  const ws = key.split(" ");
+  if (ws.length === 1) {
+    if (key.length < 4 || STOP.has(key)) return null;
+    const words = wordIndex(index);
+    const exact = words.get(key) || (key.endsWith("s") ? words.get(key.slice(0, -1)) : null);
+    if (exact) return bestOf(exact);
+    // a typo in the word: "elanor" -> eleanor
+    const max = typoAllowance(key.length);
+    if (!max) return null;
+    let best = null;
+    for (const [w, hits] of words) {
+      if (w[0] !== key[0] || Math.abs(w.length - key.length) > max) continue;
+      const d = editDistance(key, w, max, key.length < 5 ? 2 : 1);
+      if (d <= max && (!best || d < best.d)) best = { d, hits };
+    }
+    return best ? bestOf(best.hits) : null;
+  }
+  // several words: they must appear together, in order, inside a longer answer ("eleanor rig" too)
+  if (ws.every((w) => STOP.has(w) || w.length < 3)) return null;
+  const hits = [];
+  for (const [cand, hit] of index) {
+    if (cand !== normalize(hit.display)) continue;
+    const c = " " + cand + " ";
+    if (c.length > key.length + 2 && (c.includes(" " + key + " ") || c.startsWith(" " + key)) && !hits.includes(hit)) hits.push(hit);
+  }
+  return bestOf(hits);
 }
 
 export function metresFor(tier, power, nitro) {
