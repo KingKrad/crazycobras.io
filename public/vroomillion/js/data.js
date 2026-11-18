@@ -5,6 +5,9 @@
 // deck: "car" = GEARHEAD mode only, "both" = CLASSIC and GEARHEAD, missing = CLASSIC only.
 
 import { POP_QUESTIONS } from "./data-pop.js";
+import { EXTRA } from "./data-extra.js";
+import { MORE } from "./data-more.js";
+import { normalize } from "./logic.js";
 
 const CORE_QUESTIONS = [
   {
@@ -590,4 +593,26 @@ const CORE_QUESTIONS = [
 
 // Krillion-style everyday and pop-culture prompts live in data-pop.js.
 // pop: true puts them first in the queue, so races feel like Krillion before the trivia-heavy ones.
-export const QUESTIONS = [...CORE_QUESTIONS, ...POP_QUESTIONS.map((q) => ({ ...q, pop: true }))];
+// Extra answers pulled from Wikidata (tools/build-answers.mjs) fill out CRUISING, FAST LANE and
+// DEEP CUT so far more real answers count. The hand-written tiers come first and always win.
+// data-more.js has extra hand-written answers for prompts Wikidata can't fill well.
+// An extra answer that's already listed anywhere (any spelling) is skipped, so hand-written tiers win.
+const withExtra = (q) => {
+  const add = [MORE[q.q], EXTRA[q.q]].filter(Boolean);
+  if (!add.length) return q;
+  const seen = new Set(q.a.flat().flatMap((e) => e.split("|")).map(normalize));
+  const a = q.a.map((list) => [...list]);
+  for (let t = 1; t <= 3; t++) {
+    for (const m of add) {
+      for (const entry of m[t - 1] || []) {
+        const forms = entry.split("|").filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+        if (forms.length) a[t].push(forms.join("|"));
+      }
+    }
+  }
+  return { ...q, a };
+};
+
+// HAND_QUESTIONS: just the hand-written answers (the answer builder uses these).
+export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...POP_QUESTIONS.map((q) => ({ ...q, pop: true }))];
+export const QUESTIONS = HAND_QUESTIONS.map(withExtra);
