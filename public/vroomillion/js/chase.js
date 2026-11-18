@@ -6,8 +6,8 @@
 // through sunset to night, with weather rolling in. Deep Cuts light the road up and
 // a One in a Vroomillion sends you down a rainbow tunnel.
 //
-// Art is drawn at twice the old detail: sprites are upscaled with Scale2x, then shaded
-// and outlined, for a 16-bit console look.
+// Art stays chunky 8-bit: a low-res canvas scaled up with hard pixels, flat bold colours,
+// and scenery with a one-pixel dark outline.
 import { rearSprite } from "./cars.js";
 import { pixelText } from "./scene.js";
 
@@ -16,7 +16,7 @@ const ROAD = 2000; // road width (world units)
 const CAM_H = 1000; // camera height above the road
 const BASE_DEPTH = 0.84; // ~100° field of view
 const DRAW = 150; // segments drawn ahead
-const SPR = 19; // world units per pixel of roadside sprites (sprites are double detail)
+const SPR = 38; // world units per pixel of roadside sprites
 const LANES = { solo: 0, 0: -0.45, 1: 0.45 }; // x in half-road widths
 const ZONE_M = 700; // power-adjusted metres per zone
 const DAY_M = 3000; // power-adjusted metres from sunrise to night
@@ -70,14 +70,14 @@ const FOG = { clear: "#c8b8d8", fog: "#cfd5e2", rain: "#606a86", snow: "#e6ecf7"
 // Time of day keyframes along the race: sunrise → day → sunset → night (→ sunrise again on very long runs).
 // sky: four gradient stops top→horizon · tint: colour laid over the world and how strongly
 const TOD = [
-  { t: 0.0, sky: ["#232156", "#5a3d7e", "#e3787e", "#ffc28a"], tint: ["#4a2f70", 0.28], stars: 0.35, sun: 0.08, lamps: 0.5 },
+  { t: 0.0, sky: ["#232156", "#5a3d7e", "#e3787e", "#ffc28a"], tint: ["#4a2f70", 0.12], stars: 0.35, sun: 0.08, lamps: 0.5 },
   { t: 0.22, sky: ["#2a6ad0", "#4b8fe6", "#8cc4f4", "#d4ecff"], tint: ["#ffffff", 0], stars: 0, sun: 0.75, lamps: 0 },
   { t: 0.5, sky: ["#2864c6", "#4a88de", "#93c2ee", "#e0eeff"], tint: ["#ffffff", 0], stars: 0, sun: 0.6, lamps: 0 },
-  { t: 0.72, sky: ["#2b1652", "#7a2b6e", "#ff6a4d", "#ffb35c"], tint: ["#ff6a2e", 0.2], stars: 0.1, sun: 0.1, lamps: 0.45 },
-  { t: 0.9, sky: ["#0b0b28", "#1d1648", "#3d2160", "#62305f"], tint: ["#14194a", 0.48], stars: 0.8, sun: -0.2, lamps: 1 },
-  { t: 1.05, sky: ["#05061a", "#0c0d30", "#1a1846", "#2c2358"], tint: ["#0d1240", 0.56], stars: 1, sun: -0.4, lamps: 1 },
-  { t: 1.25, sky: ["#05061a", "#0c0d30", "#1a1846", "#2c2358"], tint: ["#0d1240", 0.56], stars: 1, sun: -0.4, lamps: 1 },
-  { t: 1.45, sky: ["#232156", "#5a3d7e", "#e3787e", "#ffc28a"], tint: ["#4a2f70", 0.28], stars: 0.35, sun: 0.08, lamps: 0.5 },
+  { t: 0.72, sky: ["#2b1652", "#7a2b6e", "#ff6a4d", "#ffb35c"], tint: ["#ff6a2e", 0.1], stars: 0.1, sun: 0.1, lamps: 0.45 },
+  { t: 0.9, sky: ["#0b0b28", "#1d1648", "#3d2160", "#62305f"], tint: ["#14194a", 0.3], stars: 0.8, sun: -0.2, lamps: 1 },
+  { t: 1.05, sky: ["#05061a", "#0c0d30", "#1a1846", "#2c2358"], tint: ["#0d1240", 0.36], stars: 1, sun: -0.4, lamps: 1 },
+  { t: 1.25, sky: ["#05061a", "#0c0d30", "#1a1846", "#2c2358"], tint: ["#0d1240", 0.36], stars: 1, sun: -0.4, lamps: 1 },
+  { t: 1.45, sky: ["#232156", "#5a3d7e", "#e3787e", "#ffc28a"], tint: ["#4a2f70", 0.12], stars: 0.35, sun: 0.08, lamps: 0.5 },
 ];
 function timeOfDay(phase) {
   const p = mod(phase, 1.45); // the last keyframe is sunrise again, so very long runs keep cycling
@@ -111,78 +111,33 @@ function pixelCanvas(rows, pal) {
   return cv;
 }
 
-// Scale2x upscale (keeps pixel art crisp but rounds off the jaggies), then soft top-down
-// shading, a highlight along top edges, a glint on glass and a dark outline.
-const hiCache = new WeakMap();
-function hiRes(src, glass) {
-  if (hiCache.has(src)) return hiCache.get(src);
+// A one-pixel dark outline round a sprite, at its own resolution (no smoothing or upscaling).
+const outlineCache = new WeakMap();
+function outline(src) {
+  if (outlineCache.has(src)) return outlineCache.get(src);
   const w = src.width;
   const h = src.height;
-  const a = new Uint32Array(src.getContext("2d").getImageData(0, 0, w, h).data.buffer.slice(0));
-  const W2 = w * 2 + 2;
-  const H2 = h * 2 + 2;
+  const d = src.getContext("2d").getImageData(0, 0, w, h).data;
   const out = document.createElement("canvas");
-  out.width = W2;
-  out.height = H2;
-  const og = out.getContext("2d");
-  const img = og.createImageData(W2, H2);
-  const b = new Uint32Array(img.data.buffer);
-  const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : a[y * w + x]);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const P = at(x, y);
-      const A = at(x, y - 1);
-      const B = at(x + 1, y);
-      const C = at(x - 1, y);
-      const D = at(x, y + 1);
-      let e0 = P;
-      let e1 = P;
-      let e2 = P;
-      let e3 = P;
-      if (A !== D && C !== B) {
-        if (C === A) e0 = C;
-        if (A === B) e1 = B;
-        if (C === D) e2 = C;
-        if (D === B) e3 = B;
-      }
-      const o = (y * 2 + 1) * W2 + x * 2 + 1;
-      b[o] = e0;
-      b[o + 1] = e1;
-      b[o + W2] = e2;
-      b[o + W2 + 1] = e3;
+  out.width = w + 2;
+  out.height = h + 2;
+  const g = out.getContext("2d");
+  const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && d[(y * w + x) * 4 + 3] > 0;
+  g.fillStyle = "#0b0618";
+  for (let y = -1; y <= h; y++) {
+    for (let x = -1; x <= w; x++) {
+      if (!solid(x, y) && (solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1))) g.fillRect(x + 1, y + 1, 1, 1);
     }
   }
-  const d = img.data;
-  const solid = new Uint8Array(W2 * H2);
-  for (let i = 0; i < W2 * H2; i++) solid[i] = d[i * 4 + 3] > 0 ? 1 : 0;
-  const gl = glass ? rgb(glass) : null;
-  for (let y = 0; y < H2; y++) {
-    for (let x = 0; x < W2; x++) {
-      const i = y * W2 + x;
-      const p = i * 4;
-      if (solid[i]) {
-        let f = 1.12 - 0.3 * (y / H2);
-        if (y > 0 && !solid[i - W2]) f += 0.2;
-        else if (y > 1 && !solid[i - 2 * W2]) f += 0.08;
-        if (y < H2 - 1 && !solid[i + W2]) f -= 0.18;
-        if (gl && Math.abs(d[p] - gl[0]) < 3 && Math.abs(d[p + 1] - gl[1]) < 3 && Math.abs(d[p + 2] - gl[2]) < 3 && mod(x + y, 11) < 2) f += 0.7;
-        d[p] = clamp(d[p] * f, 0, 255);
-        d[p + 1] = clamp(d[p + 1] * f, 0, 255);
-        d[p + 2] = clamp(d[p + 2] * f, 0, 255);
-      } else if ((x > 0 && solid[i - 1]) || (x < W2 - 1 && solid[i + 1]) || (y > 0 && solid[i - W2]) || (y < H2 - 1 && solid[i + W2])) {
-        d[p] = 11; d[p + 1] = 6; d[p + 2] = 24; d[p + 3] = 210;
-      }
-    }
-  }
-  og.putImageData(img, 0, 0);
-  hiCache.set(src, out);
+  g.drawImage(src, 1, 1);
+  outlineCache.set(src, out);
   return out;
 }
 
 // A city block, drawn straight at full detail, with a matching canvas of lit windows for night.
 function building(seed) {
-  const w = 30 + Math.floor(hash(seed) * 4) * 6;
-  const h = 70 + Math.floor(hash(seed + 1) * 70);
+  const w = 14 + Math.floor(hash(seed) * 3) * 4;
+  const h = 30 + Math.floor(hash(seed + 1) * 34);
   const body = ["#7b7f93", "#8a6f6a", "#6a7d8f", "#9a8f7a", "#5f6478", "#7a6a8a"][seed % 6];
   const cv = document.createElement("canvas");
   const lit = document.createElement("canvas");
@@ -195,23 +150,21 @@ function building(seed) {
   g.fillStyle = body;
   g.fillRect(1, 1, w, h);
   g.fillStyle = css(mixC(rgb(body), [255, 255, 255], 0.25));
-  g.fillRect(1, 1, w, 3); // roof ledge
+  g.fillRect(1, 1, w, 2); // roof ledge
   g.fillStyle = css(mixC(rgb(body), [0, 0, 0], 0.25));
-  g.fillRect(w - 4, 4, 5, h - 3); // shaded side
-  for (let y = 8; y < h - 8; y += 9) {
-    for (let x = 4; x < w - 7; x += 6) {
+  g.fillRect(w - 2, 3, 3, h - 2); // shaded side
+  for (let y = 5; y < h - 6; y += 5) {
+    for (let x = 3; x < w - 4; x += 4) {
       g.fillStyle = "#26304a";
-      g.fillRect(x, y, 3, 5);
-      g.fillStyle = "#5b6d92";
-      g.fillRect(x, y, 3, 1);
-      if (hash(seed * 13 + x * 7 + y) > 0.45) {
+      g.fillRect(x, y, 2, 3);
+      if (hash(seed * 13 + x * 7 + y) > 0.6) {
         l.fillStyle = hash(seed + x + y * 3) > 0.25 ? "#ffd98a" : "#9fe3ff";
-        l.fillRect(x, y, 3, 5);
+        l.fillRect(x, y, 2, 3);
       }
     }
   }
   g.fillStyle = "#2a2433";
-  g.fillRect(Math.floor(w / 2) - 3, h - 9, 7, 10); // door
+  g.fillRect(Math.floor(w / 2) - 2, h - 5, 4, 6); // door
   return { img: cv, lit };
 }
 
@@ -219,7 +172,7 @@ let SPRITES = null;
 function sprites() {
   if (SPRITES) return SPRITES;
   const S = {};
-  S.palm = hiRes(pixelCanvas([
+  S.palm = outline(pixelCanvas([
     ".....GG...GG....",
     "...GGGGG.GGGGG..",
     ".GGGG.GGgGG.GGG.",
@@ -239,14 +192,14 @@ function sprites() {
     ".........T......",
     "........TTT.....",
   ], { G: "#1e7a4f", g: "#2fae6c", T: "#6a4428" }));
-  S.lamp = hiRes(pixelCanvas([
+  S.lamp = outline(pixelCanvas([
     "LLLL..",
     "PPPPP.",
     "....P.", "....P.", "....P.", "....P.", "....P.", "....P.", "....P.",
     "....P.", "....P.", "....P.", "....P.", "....P.", "....P.", "....P.",
     "...PPP",
   ], { L: "#fff6a0", P: "#5d5488" }));
-  S.sign = hiRes(pixelCanvas([
+  S.sign = outline(pixelCanvas([
     "MMMMMMMMMMMMMMMMMMMM",
     "MWWKKWWKKWWKKWWKKWWM",
     "MWWKKWWKKWWKKWWKKWWM",
@@ -261,7 +214,7 @@ function sprites() {
     "......P......P......",
     ".....PPP....PPP.....",
   ], { M: "#ff4fd8", W: "#f4f4f4", K: "#12082e", P: "#3b2a78" }));
-  S.cactus = hiRes(pixelCanvas([
+  S.cactus = outline(pixelCanvas([
     "....GG....",
     "...GGgG...",
     "...GGgG...",
@@ -277,7 +230,7 @@ function sprites() {
     "...GGgG...",
     "..dddddd..",
   ], { G: "#3f8f4a", g: "#6cc46a", d: "#a8743f" }));
-  S.rock = hiRes(pixelCanvas([
+  S.rock = outline(pixelCanvas([
     "...RRRR...",
     "..RRrrRRR.",
     ".RRrrRRRRR",
@@ -285,7 +238,7 @@ function sprites() {
     "RRRRRRRDDD",
     "DRRRRDDDDD",
   ], { R: "#9a6a52", r: "#c48d6c", D: "#6e4a3c" }));
-  S.boulder = hiRes(pixelCanvas([
+  S.boulder = outline(pixelCanvas([
     "...RRRR...",
     "..RRrrRRR.",
     ".RRrrRRRRR",
@@ -293,7 +246,7 @@ function sprites() {
     "RRRRRRRDDD",
     "DRRRRDDDDD",
   ], { R: "#7d8496", r: "#f2f6ff", D: "#596073" }));
-  S.pine = hiRes(pixelCanvas([
+  S.pine = outline(pixelCanvas([
     ".....S.....",
     "....SPS....",
     "....PPP....",
@@ -308,14 +261,14 @@ function sprites() {
     "....TT.....",
     "....TT.....",
   ], { S: "#f4f8ff", P: "#1f5c45", p: "#173f33", T: "#5a3a22" }));
-  S.bush = hiRes(pixelCanvas([
+  S.bush = outline(pixelCanvas([
     "..GGGG..",
     ".GGgGGG.",
     "GGgGGGGG",
     "GGGGGGdG",
     ".dGGGdd.",
   ], { G: "#2c8c4c", g: "#5cc46a", d: "#1d6638" }));
-  S.billboard = hiRes(pixelCanvas([
+  S.billboard = outline(pixelCanvas([
     "YYYYYYYYYYYYYYYYYY",
     "YRRRRRRRRRRRRRRRRY",
     "YRWWWRRWWWRRWWWRRY",
@@ -375,7 +328,7 @@ export class ChaseScene {
     this.particles = [];
     this.calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.resetWorld();
-    this.resize(800, 500, 440);
+    this.resize(400, 250, 220);
   }
 
   // carBottom: canvas y where the nearest car's tyres should sit (above the answer bar).
@@ -384,11 +337,10 @@ export class ChaseScene {
     h = Math.max(110, Math.round(h));
     this.W = w;
     this.H = h;
-    // u: canvas pixels per "old" chunky pixel, so effects keep their size at the finer resolution
-    this.u = w / clamp(w / 2, 200, 420);
+    this.u = 1; // canvas pixels per art pixel (the canvas itself is low-res and scaled up)
     this.horizon = Math.round(Math.min(h * 0.42, carBottom - h * 0.3));
     this.carBottom = Math.round(carBottom);
-    this.carPx = Math.max(1, (w * 0.2) / 56); // canvas px per sprite px for the nearest car (~20% of the width)
+    this.carPx = Math.max(2, Math.round((w * 0.2) / 28)); // canvas px per sprite px for the nearest car (~20% of the width)
     this.canvas.width = w;
     this.canvas.height = h;
     this.layer.width = w;
@@ -413,7 +365,7 @@ export class ChaseScene {
   setRacers(list) {
     this.racers = list.map((r, i) => ({
       ...r,
-      frames: [hiRes(rearSprite(r.car, 0), "#2b3a55"), hiRes(rearSprite(r.car, 1), "#2b3a55")],
+      frames: [rearSprite(r.car, 0), rearSprite(r.car, 1)],
       lane: list.length === 1 ? LANES.solo : LANES[i],
       dist: 0, boost: 0, nitro: false, gap: 0, wheel: 0, lift: 0, drift: 0,
       trail: [], tier: 0, launchT: 0, box: null,
@@ -490,7 +442,7 @@ export class ChaseScene {
   coverTop() {
     // the nearest car (lowest on screen); a leader far up the road may pass behind the card
     const near = this.racers.filter((r) => r.box).sort((a, b) => b.box.y - a.box.y)[0];
-    return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 40;
+    return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 18;
   }
 
   zoneAt(i) {
@@ -576,7 +528,7 @@ export class ChaseScene {
           }
           // spray off the tyres on a wet road, powder on snow, dust in the desert
           const kick = this.wx.rain > 0.3 ? "#b9c4e6" : this.wx.snow > 0.3 ? "#f4f8ff" : this.wx.sand > 0.3 ? "#e8b878" : null;
-          if (kick && Math.random() < 0.35 + this.speed) {
+          if (kick && Math.random() < 0.12 + this.speed * 0.3) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx + (Math.random() - 0.5) * r.box.w * 0.2, y: r.box.y - 2 * u, vx: (sx < r.box.x + r.box.w / 2 ? -1 : 1) * (20 + Math.random() * 50) * u, vy: (20 + Math.random() * 30) * u, life: 0.5, size: 1.5 * u, grow: 4 * u, color: kick, g: 0, soft: true });
           }
@@ -599,9 +551,9 @@ export class ChaseScene {
     const { W, H, u } = this;
     const area = (W * H) / (u * u * 420 * 260);
     const target = {
-      rain: Math.round(this.wx.rain * 170 * area),
-      snow: Math.round(this.wx.snow * 130 * area),
-      sand: Math.round(this.wx.sand * 90 * area),
+      rain: Math.round(this.wx.rain * 80 * area),
+      snow: Math.round(this.wx.snow * 70 * area),
+      sand: Math.round(this.wx.sand * 40 * area),
     };
     const count = { rain: 0, snow: 0, sand: 0 };
     for (const d of this.drops) count[d.type]++;
@@ -681,12 +633,12 @@ export class ChaseScene {
         let v = rgb(c);
         if (this.wx.snow > 0) v = mixC(v, [242, 246, 255], this.wx.snow * 0.75);
         if (this.wx.sand > 0) v = mixC(v, [227, 176, 112], this.wx.sand * 0.4);
-        if (this.wx.rain > 0) v = mixC(v, [30, 34, 52], this.wx.rain * 0.25);
+        if (this.wx.rain > 0) v = mixC(v, [30, 34, 52], this.wx.rain * 0.12);
         return css(v);
       };
       const tar = (c) => {
         let v = rgb(c);
-        if (this.wx.rain > 0) v = mixC(v, [20, 22, 34], this.wx.rain * 0.35);
+        if (this.wx.rain > 0) v = mixC(v, [20, 22, 34], this.wx.rain * 0.2);
         if (this.wx.sand > 0) v = mixC(v, [150, 110, 80], this.wx.sand * 0.25);
         return css(v);
       };
@@ -742,11 +694,13 @@ export class ChaseScene {
       const far = hash(i * 5.3);
       const roll = hash(i * 3.1);
       if (zone === "city") {
-        if (i % 2 === 0) {
+        if (i % 4 === 0) {
           const bi = Math.floor(hash(i * 1.9) * 6);
-          push(p, spr.buildings[bi].img, -(1.75 + far * 0.5), { lit: spr.buildings[bi].lit });
+          push(p, spr.buildings[bi].img, -(1.9 + far * 0.6), { lit: spr.buildings[bi].lit });
+        }
+        if (i % 4 === 2) {
           const bj = Math.floor(hash(i * 2.9) * 6);
-          push(p, spr.buildings[bj].img, 1.75 + hash(i * 6.1) * 0.5, { lit: spr.buildings[bj].lit });
+          push(p, spr.buildings[bj].img, 1.9 + hash(i * 6.1) * 0.6, { lit: spr.buildings[bj].lit });
         }
         if (i % 8 === 0) { push(p, spr.lamp, -1.2, { lamp: true }); push(p, spr.lamp, 1.2, { lamp: true, flip: true }); }
       } else if (zone === "coast") {
@@ -790,7 +744,7 @@ export class ChaseScene {
       if (it.gantry) { this.drawGantry(wg, it.p, it.gantry); continue; }
       const sprite = it.img;
       const ps = it.p.scale * k * SPR;
-      if (ps < 0.06) continue;
+      if (ps < 0.12) continue;
       const w = sprite.width * ps;
       const h = sprite.height * ps;
       const bx = it.p.sx + it.p.sw * it.off;
@@ -806,7 +760,7 @@ export class ChaseScene {
       } else {
         wg.drawImage(sprite, left, top, Math.round(w), Math.round(h));
       }
-      if (it.lit && h > 30 * this.u) glows.push({ img: it.lit, x: left, y: top, w: Math.round(w), h: Math.round(h) });
+      if (it.lit && h > 14) glows.push({ img: it.lit, x: left, y: top, w: Math.round(w), h: Math.round(h) });
       if (it.neon) glows.push({ img: sprite, x: left, y: top, w: Math.round(w), h: Math.round(h), a: 0.7 });
       if (it.lamp) glows.push({ halo: true, x: it.flip ? bx + w * 0.25 : bx - w * 0.25, y: top + h * 0.04, r: Math.max(2, w * 1.4) });
     }
@@ -814,7 +768,7 @@ export class ChaseScene {
     // ---- haze, time of day, then lights ----
     wg.globalCompositeOperation = "source-atop";
     const fogC = this.fogColour();
-    const haze = clamp(0.12 + this.wx.fog * 0.75 + this.wx.sand * 0.5 + this.wx.rain * 0.28 + this.wx.snow * 0.38, 0, 0.9);
+    const haze = clamp(this.wx.fog * 0.55 + this.wx.sand * 0.3 + this.wx.rain * 0.1 + this.wx.snow * 0.12, 0, 0.65);
     const hz = this.horizon;
     const fog = wg.createLinearGradient(0, hz - 70 * u, 0, hz + (this.carBottom - hz) * (0.55 + this.wx.fog * 0.35));
     fog.addColorStop(0, css(fogC, haze * 0.8));
@@ -823,8 +777,16 @@ export class ChaseScene {
     wg.fillStyle = fog;
     wg.fillRect(0, 0, W, H);
     if (tod.tintA > 0.01) {
+      wg.save();
+      wg.beginPath();
+      wg.rect(0, 0, W, H);
+      for (const L of lights) wg.rect(L.cx - L.w / 2, L.bottom - L.h, L.w, L.h);
+      wg.clip("evenodd");
       wg.fillStyle = css(tod.tint, tod.tintA);
       wg.fillRect(0, 0, W, H);
+      wg.restore();
+      wg.fillStyle = css(tod.tint, tod.tintA * 0.35);
+      for (const L of lights) wg.fillRect(L.cx - L.w / 2, L.bottom - L.h, L.w, L.h);
     }
     if (this.tunnel > 0 && !this.calm) {
       wg.fillStyle = `hsla(${Math.floor(this.time * 300) % 360},100%,60%,${Math.min(0.3, this.tunnel * 0.15).toFixed(3)})`;
@@ -836,12 +798,12 @@ export class ChaseScene {
       this.drawSkyline(wg, night);
       for (const gl of glows) {
         if (gl.halo) {
-          const rad = gl.r;
-          const grad = wg.createRadialGradient(gl.x, gl.y, 0, gl.x, gl.y, rad);
-          grad.addColorStop(0, `rgba(255,236,160,${(0.55 * night).toFixed(3)})`);
-          grad.addColorStop(1, "rgba(255,236,160,0)");
-          wg.fillStyle = grad;
-          wg.fillRect(gl.x - rad, gl.y - rad, rad * 2, rad * 2);
+          // a small pool of light round the bulb
+          const rad = Math.round(gl.r * 0.22);
+          if (rad < 2) continue;
+          wg.fillStyle = `rgba(255,236,160,${(0.35 * night).toFixed(3)})`;
+          wg.fillRect(Math.round(gl.x - rad), Math.round(gl.y - rad / 2), rad * 2, rad);
+          wg.fillRect(Math.round(gl.x - rad / 2), Math.round(gl.y - rad), rad, rad * 2);
         } else {
           // windows only really come on once it's properly dark
           wg.globalAlpha = (gl.a ? night * gl.a : clamp((night - 0.35) / 0.65, 0, 1));
@@ -863,12 +825,7 @@ export class ChaseScene {
     for (const p of this.particles) {
       g.globalAlpha = Math.min(1, p.life * 3) * (p.soft ? 0.85 : 1);
       g.fillStyle = p.color;
-      if (p.soft && p.size > 3 * u) {
-        // smoke puffs are rounded blobs rather than squares
-        g.beginPath();
-        g.arc(Math.round(p.x), Math.round(p.y), p.size / 2, 0, Math.PI * 2);
-        g.fill();
-      } else if (p.spin !== undefined) {
+      if (p.spin !== undefined) {
         const w = Math.max(1, Math.abs(Math.cos(p.spin)) * p.size);
         g.fillRect(Math.round(p.x - w / 2), Math.round(p.y - p.size / 2), Math.ceil(w), Math.ceil(p.size));
       } else {
@@ -905,8 +862,8 @@ export class ChaseScene {
     const hz = this.horizon;
     const tod = this.tod;
     const stops = tod.sky;
-    // 16-bit style: a smooth-looking gradient made of many thin bands
-    const bands = 32;
+    // 8-bit style: a few hard colour bands
+    const bands = 10;
     const bh = (hz + 4 * u) / bands;
     for (let i = 0; i < bands; i++) {
       const t = i / (bands - 1);
@@ -942,11 +899,6 @@ export class ChaseScene {
     if (tod.sun > -0.15) {
       const sy = Math.round(hz - 6 * u - tod.sun * hz * 0.7);
       const warm = clamp(1 - tod.sun * 1.6, 0, 1); // low sun is big, orange and striped
-      const glow = g.createRadialGradient(sx, sy, R * 0.5, sx, sy, R * 3.2);
-      glow.addColorStop(0, `rgba(255,${Math.round(220 - warm * 80)},150,0.45)`);
-      glow.addColorStop(1, "rgba(255,200,150,0)");
-      g.fillStyle = glow;
-      g.fillRect(sx - R * 3.2, sy - R * 3.2, R * 6.4, R * 6.4);
       for (let y = -R; y <= R; y++) {
         if (sy + y > hz) break;
         if (warm > 0.5 && y > -R * 0.3 && mod(y + Math.floor(this.time * 3 * u), Math.round(6 * u)) < 2 * u) continue;
@@ -962,9 +914,10 @@ export class ChaseScene {
       const mr = Math.round(R * 0.7);
       g.globalAlpha = clamp((tod.stars - 0.3) * 2, 0, 1);
       g.fillStyle = "#f1eedc";
-      g.beginPath();
-      g.arc(mx, my, mr, 0, Math.PI * 2);
-      g.fill();
+      for (let y = -mr; y <= mr; y++) {
+        const half = Math.floor(Math.sqrt(mr * mr - y * y));
+        g.fillRect(mx - half, my + y, half * 2, 1);
+      }
       g.fillStyle = "#d3cdb4";
       g.fillRect(mx - Math.round(mr * 0.4), my - Math.round(mr * 0.2), Math.max(1, Math.round(mr * 0.3)), Math.max(1, Math.round(mr * 0.3)));
       g.fillRect(mx + Math.round(mr * 0.15), my + Math.round(mr * 0.25), Math.max(1, Math.round(mr * 0.22)), Math.max(1, Math.round(mr * 0.22)));
@@ -972,9 +925,9 @@ export class ChaseScene {
     }
 
     // heavy weather greys the sky out
-    const grey = this.wx.fog * 0.6 + this.wx.rain * 0.45 + this.wx.snow * 0.4 + this.wx.sand * 0.5;
+    const grey = this.wx.fog * 0.45 + this.wx.rain * 0.3 + this.wx.snow * 0.2 + this.wx.sand * 0.3;
     if (grey > 0.01) {
-      g.fillStyle = css(this.fogColour(), Math.min(0.75, grey));
+      g.fillStyle = css(this.fogColour(), Math.min(0.5, grey));
       g.fillRect(0, 0, W, hz + 4 * u);
     }
   }
@@ -1155,30 +1108,22 @@ export class ChaseScene {
     });
     g.globalAlpha = 1;
 
-    // soft shadow
-    g.fillStyle = "rgba(0,0,0,0.35)";
-    g.beginPath();
-    g.ellipse(cx, bottom - s, w * 0.48, Math.max(2, s * 3), 0, 0, Math.PI * 2);
-    g.fill();
+    // shadow
+    g.fillStyle = "rgba(0,0,0,0.4)";
+    g.fillRect(left + Math.round(w * 0.06), bottom - Math.max(1, Math.round(s)), Math.round(w * 0.88), Math.max(2, Math.round(s * 2)));
 
     // nitro flames out of both exhausts, towards the camera
     if (r.nitro && r.boost > 0.05) {
-      const fl = (6 + Math.random() * 8 + r.boost * 6) * rel * u;
+      const fl = (6 + Math.random() * 8 + r.boost * 6) * rel;
       for (const fx of [left + w * 0.2, left + w * 0.8]) {
         const fy = bottom - h * 0.2;
-        const fw = Math.max(2, s * 4.8);
-        const grad = g.createLinearGradient(0, fy, 0, fy + fl);
-        grad.addColorStop(0, "#ffffff");
-        grad.addColorStop(0.25, "#4fd1ff");
-        grad.addColorStop(0.6, "#ff8a2e");
-        grad.addColorStop(1, "rgba(255,80,40,0)");
-        g.fillStyle = grad;
-        g.beginPath();
-        g.moveTo(fx - fw / 2, fy);
-        g.lineTo(fx + fw / 2, fy);
-        g.lineTo(fx + fw * 0.15, fy + fl);
-        g.lineTo(fx - fw * 0.15, fy + fl);
-        g.fill();
+        const fw = Math.max(2, s * 2.4);
+        g.fillStyle = "#ff8a2e";
+        g.fillRect(Math.round(fx - fw / 2), Math.round(fy), Math.round(fw), Math.round(fl));
+        g.fillStyle = "#4fd1ff";
+        g.fillRect(Math.round(fx - fw / 3), Math.round(fy), Math.round((fw * 2) / 3), Math.round(fl * 0.7));
+        g.fillStyle = "#ffffff";
+        g.fillRect(Math.round(fx - fw / 6), Math.round(fy), Math.max(1, Math.round(fw / 3)), Math.round(fl * 0.35));
       }
     }
 
@@ -1220,10 +1165,7 @@ export class ChaseScene {
         g.rect(0, 0, this.W, this.H);
         for (const o of lights) g.rect(o.cx - o.w / 2, o.bottom - o.h, o.w, o.h); // not over the cars themselves
         g.clip("evenodd");
-        const grad = g.createLinearGradient(0, nearY, 0, farY);
-        grad.addColorStop(0, `rgba(255,244,200,${(0.32 * amt).toFixed(3)})`);
-        grad.addColorStop(1, "rgba(255,244,200,0)");
-        g.fillStyle = grad;
+        g.fillStyle = `rgba(255,244,200,${(0.14 * amt).toFixed(3)})`;
         g.beginPath();
         g.moveTo(cx - w * 0.42, nearY);
         g.lineTo(cx + w * 0.42, nearY);
@@ -1235,13 +1177,10 @@ export class ChaseScene {
       const tail = Math.max(night * 0.8, r.boost > 0.3 ? 0.6 : 0, this.wx.fog * 0.5, this.wx.rain * 0.5);
       if (tail > 0.05) {
         const ty = bottom - h * 0.52;
+        g.fillStyle = `rgba(255,59,59,${(0.35 * tail).toFixed(3)})`;
         for (const tx of [cx - w * 0.4, cx + w * 0.4]) {
-          const rad = Math.max(3 * u, s * 10);
-          const grad = g.createRadialGradient(tx, ty, 0, tx, ty, rad);
-          grad.addColorStop(0, `rgba(255,70,70,${(0.7 * tail).toFixed(3)})`);
-          grad.addColorStop(1, "rgba(255,40,40,0)");
-          g.fillStyle = grad;
-          g.fillRect(tx - rad, ty - rad, rad * 2, rad * 2);
+          const rad = Math.max(1 * u, Math.round(s * 1.5));
+          g.fillRect(Math.round(tx - rad), Math.round(ty - rad), rad * 2, rad * 2);
         }
       }
     }
@@ -1267,8 +1206,8 @@ export class ChaseScene {
   // One in a Vroomillion: rainbow rings rush out of the horizon around the road
   drawTunnel(g, pts) {
     const a = Math.min(1, this.tunnel);
-    for (let ring = 0; ring < 10; ring++) {
-      const n = Math.floor(mod(ring * 8 - this.time * 30, 80)) + 10;
+    for (let ring = 0; ring < 6; ring++) {
+      const n = Math.floor(mod(ring * 13 - this.time * 30, 78)) + 10;
       const p = pts[n];
       if (!p || p.hidden) continue;
       const wHalf = p.sw * 1.6;
@@ -1286,17 +1225,12 @@ export class ChaseScene {
     const { u } = this;
     if (!this.drops.length) return;
     const speed = this.speed;
-    // rain as thin slanted lines, one stroke for all of them
-    g.strokeStyle = "rgba(200,212,255,0.55)";
-    g.lineWidth = Math.max(1, u * 0.5);
-    g.beginPath();
+    // rain as short pixel dashes
+    g.fillStyle = "rgba(200,212,255,0.6)";
     for (const d of this.drops) {
       if (d.type !== "rain") continue;
-      const len = (7 + speed * 9) * u * d.s;
-      g.moveTo(Math.round(d.x), Math.round(d.y));
-      g.lineTo(Math.round(d.x - len * 0.18), Math.round(d.y + len));
+      g.fillRect(Math.round(d.x), Math.round(d.y), 1, Math.round((3 + speed * 4) * d.s));
     }
-    g.stroke();
     for (const d of this.drops) {
       if (d.type === "snow") {
         const sz = Math.max(1, Math.round(u * d.s * 1.4));
@@ -1317,20 +1251,16 @@ export class ChaseScene {
     const vy = this.horizon;
     const maxR = Math.hypot(W, H);
     const draw = (count, alpha, colours, lenScale, rate) => {
-      g.lineWidth = Math.max(1, u * 0.6);
       for (let i = 0; i < count; i++) {
         const ang = hash(i * 2.3) * Math.PI * 2;
         const t = mod(this.time * rate * (0.6 + hash(i * 4.1)) + hash(i * 9.7), 1);
         const d0 = t * t * maxR;
         const len = (8 + t * 60) * lenScale * u;
-        g.strokeStyle = colours[i % colours.length];
+        g.fillStyle = colours[i % colours.length];
         g.globalAlpha = alpha * Math.min(1, t * 3);
         const cos = Math.cos(ang);
         const sin = Math.sin(ang) * 0.8;
-        g.beginPath();
-        g.moveTo(vx + cos * d0, vy + sin * d0);
-        g.lineTo(vx + cos * (d0 + len), vy + sin * (d0 + len));
-        g.stroke();
+        for (let k = 0; k < len; k += 2) g.fillRect(Math.round(vx + cos * (d0 + k)), Math.round(vy + sin * (d0 + k)), 1, 1);
       }
       g.globalAlpha = 1;
     };

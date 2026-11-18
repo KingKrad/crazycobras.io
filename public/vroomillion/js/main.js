@@ -75,8 +75,7 @@ function fitScene() {
   const vw = window.innerWidth;
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   document.documentElement.style.setProperty("--vvh", vh + "px");
-  // twice the old resolution for a finer, 16-bit look; never more canvas pixels than screen pixels across
-  const iw = Math.min(Math.round(vw), Math.max(440, Math.min(840, Math.round(vw / 1.6))));
+  const iw = Math.max(220, Math.min(420, Math.round(vw / 3.2)));
   const k = vw / iw;
   const ih = Math.round(vh / k);
   const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
