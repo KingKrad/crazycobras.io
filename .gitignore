@@ -4,3 +4,4 @@ node_modules/
 .dev.vars
 .env*
 .DS_Store
+tools/.part*.js
