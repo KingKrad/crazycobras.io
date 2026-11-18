@@ -681,7 +681,7 @@ async function runRace(token) {
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
     if (!seenList().includes(q.q)) { save.seen = [...seenList(), q.q]; persist(); }
     $("q-hint").classList.remove("hidden");
-    $("q-card").classList.remove("revealing");
+    $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);
     [...$("pips").children].forEach((p, i) => p.classList.toggle("on", i === round));
     $("reveal").textContent = "";
@@ -701,20 +701,31 @@ async function runRace(token) {
     const final = race.solo ? results : applyFenderBender(results[0], results[1]);
     const bumped = final.some((f) => f.bump);
 
-    // reveal
+    // reveal: everything else fades, the answer slams into the middle and the car smashes through it
     $("answer-zone").classList.add("hidden");
     $("q-hint").classList.add("hidden");
-    $("q-card").classList.add("revealing");
-    const cards = final.map((res, i) => revealCard(race.racers[i], res, i));
-    $("reveal").append(...cards);
-    await sleep(500);
-    for (let i = 0; i < cards.length; i++) {
-      if (!alive()) return;
-      cards[i].classList.add("shown");
-      audio.sfx.tier(final[i].tier);
-      if (final[i].tier === 5) scene.confetti();
-      await sleep(final[i].tier === 5 ? 1300 : 800);
-    }
+    $("q-card").classList.add("hidden");
+    document.body.classList.add("smashing");
+    const smashCards = final.map((res, i) => {
+      const r = race.racers[i];
+      const m = metresFor(res.tier, r.power, r.useNitro);
+      return {
+        who: race.solo ? "" : r.name.toUpperCase(),
+        answer: (res.display || "NO ANSWER").toUpperCase(),
+        tierName: TIERS[res.tier].name + (res.bump ? " (BUMPED)" : ""),
+        gain: res.tier ? `+${m.toLocaleString("en-US")} M${r.useNitro ? " NITRO" : ""}` : "0 M",
+        tier: res.tier,
+        color: i ? "#ff4fd8" : "#4fd1ff",
+      };
+    });
+    scene.onEvent = (type, card) => {
+      if (type === "slam") audio.sfx.tier(card.tier);
+      else if (type === "impact") { audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); }
+      else if (type === "bonk") audio.sfx.bonk();
+    };
+    await scene.smash(smashCards);
+    scene.onEvent = null;
+    document.body.classList.remove("smashing");
     if (!alive()) return;
     if (bumped) {
       audio.sfx.bump();
@@ -800,6 +811,13 @@ async function runRace(token) {
       [...$("hud").children].forEach((c, i) => c.classList.toggle("leading", i === lead));
     }
     [...$("pips").children][round].classList.add("done");
+
+    // the answers stay up, small, while you decide to go on
+    $("q-card").classList.add("revealing");
+    $("reveal").textContent = "";
+    $("reveal").append(...final.map((res, i) => { const c = revealCard(race.racers[i], res, i); c.classList.add("shown"); return c; }));
+    $("q-card").classList.remove("hidden");
+    requestAnimationFrame(fitCard);
 
     const best = Math.max(...final.map((f) => f.tier));
     $("hint").textContent = (bumped ? "FENDER BENDER — BOTH DROPPED A TIER. " : "") + (best >= 5

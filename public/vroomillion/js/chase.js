@@ -306,6 +306,81 @@ function gantryText(name) {
   return cv;
 }
 
+// ---- the answer card the car smashes through ----
+const TIER_COL = ["#8a8499", "#d7d3ea", "#4fd1ff", "#5dff8f", "#ffb02e", "#ff4fd8"];
+const FONT_NAME = '"Press Start 2P", monospace';
+if (typeof document !== "undefined" && document.fonts) document.fonts.load('8px "Press Start 2P"').catch(() => {});
+
+// Hard-edged pixel text (the font's anti-aliasing is thresholded away).
+function pixelLine(text, size, colour) {
+  const m = document.createElement("canvas").getContext("2d");
+  m.font = `${size}px ${FONT_NAME}`;
+  const w = Math.max(1, Math.ceil(m.measureText(text).width));
+  const cv = document.createElement("canvas");
+  cv.width = w;
+  cv.height = size + 2;
+  const g = cv.getContext("2d");
+  g.font = `${size}px ${FONT_NAME}`;
+  g.textBaseline = "top";
+  g.fillStyle = colour;
+  g.fillText(text, 0, 1);
+  const img = g.getImageData(0, 0, cv.width, cv.height);
+  for (let i = 3; i < img.data.length; i += 4) img.data[i] = img.data[i] >= 110 ? 255 : 0;
+  g.putImageData(img, 0, 0);
+  return cv;
+}
+
+// card: { who, answer, tierName, gain, tier, color }; maxW in canvas pixels
+function buildCard(card, maxW) {
+  const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7e]/g, "");
+  const fit = (text, size) => {
+    let t = plain(text);
+    let line = pixelLine(t, size, "#fff");
+    while (line.width > maxW - 16 && t.length > 3) { t = t.slice(0, -2) + "."; line = pixelLine(t, size, "#fff"); }
+    return t;
+  };
+  const big = pixelLine(plain(card.answer), 16, "#fff").width <= maxW - 16 ? 16 : 8;
+  const rows = [];
+  if (card.who) rows.push(pixelLine(card.who, 8, card.color));
+  rows.push(pixelLine(fit(card.answer, big), big, "#ffffff"));
+  rows.push(pixelLine(fit(card.tierName, 8), 8, TIER_COL[card.tier]));
+  rows.push(pixelLine(card.gain, 8, card.tier ? "#ffd23a" : "#8a8499"));
+  const pad = 7;
+  const gap = 5;
+  const w = Math.max(...rows.map((r) => r.width)) + pad * 2;
+  const h = rows.reduce((a, r) => a + r.height, 0) + gap * (rows.length - 1) + pad * 2;
+  const cv = document.createElement("canvas");
+  cv.width = w;
+  cv.height = h;
+  const g = cv.getContext("2d");
+  g.fillStyle = "#0b0618";
+  g.fillRect(0, 0, w, h);
+  // tinted with the tier colour, so the shards are colourful when it breaks
+  g.fillStyle = card.tier === 5 ? "#3a1068" : css(mixC(rgb(TIER_COL[card.tier]), [16, 9, 36], 0.72));
+  g.fillRect(2, 2, w - 4, h - 4);
+  if (card.tier === 5) {
+    const hues = ["#ff4fd8", "#ffd23a", "#5dff8f", "#4fd1ff", "#b388ff"];
+    for (let x = 0; x < w; x += 4) { g.fillStyle = hues[(x / 4) % hues.length]; g.fillRect(x, 0, 4, 2); g.fillRect(x, h - 2, 4, 2); }
+    for (let y = 0; y < h; y += 4) { g.fillStyle = hues[(y / 4) % hues.length]; g.fillRect(0, y, 2, 4); g.fillRect(w - 2, y, 2, 4); }
+  } else {
+    g.fillStyle = TIER_COL[card.tier];
+    g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h);
+  }
+  let y = pad;
+  for (const r of rows) { g.drawImage(r, Math.round((w - r.width) / 2), y); y += r.height + gap; }
+  return cv;
+}
+
+// how hard each tier hits: shard size, launch speed, how much shards fly at the camera
+const SMASH = [
+  null,
+  { tile: 9, speed: 55, grow: 0, accel: 30 },
+  { tile: 7, speed: 95, grow: 0.25, accel: 38 },
+  { tile: 5, speed: 150, grow: 0.55, accel: 50 },
+  { tile: 5, speed: 230, grow: 0.95, accel: 64 },
+  { tile: 4, speed: 340, grow: 1.5, accel: 85 },
+];
+
 export class ChaseScene {
   constructor(canvas) {
     this.canvas = canvas;
@@ -326,6 +401,10 @@ export class ChaseScene {
     this.revT = 0;
     this.time = 0;
     this.particles = [];
+    this.smashes = [];
+    this.shards = [];
+    this.slowmo = 0;
+    this.onEvent = null;
     this.calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.resetWorld();
     this.resize(400, 250, 220);
@@ -368,13 +447,17 @@ export class ChaseScene {
       frames: [rearSprite(r.car, 0), rearSprite(r.car, 1)],
       lane: list.length === 1 ? LANES.solo : LANES[i],
       dist: 0, boost: 0, nitro: false, gap: 0, wheel: 0, lift: 0, drift: 0,
-      trail: [], tier: 0, launchT: 0, box: null,
+      trail: [], tier: 0, launchT: 0, box: null, charge: 0, chargeV: 0,
     }));
     this.kick = 0;
     this.warp = 0;
     this.glow = 0;
     this.tunnel = 0;
     this.particles = [];
+    this.smashes = [];
+    this.shards = [];
+    this.slowmo = 0;
+    if (this.smashDone) { this.smashDone(); this.smashDone = null; }
     this.resetWorld();
   }
 
@@ -445,6 +528,177 @@ export class ChaseScene {
     return near ? near.box.y - near.box.h - 14 * this.u : this.carBottom - this.carPx * 26;
   }
 
+  // The answer slams in, then each car charges up the road and smashes through its card.
+  // Resolves once every card has been hit; the shards keep flying after that.
+  smash(cards) {
+    return new Promise((resolve) => {
+      const n = cards.length;
+      const maxW = Math.round(this.W * (n > 1 ? 0.46 : 0.88));
+      const top = this.horizon + (this.carBottom - this.horizon) * 0.08;
+      this.smashes = cards.map((c, i) => {
+        const img = buildCard(c, maxW);
+        const cx = n > 1 ? this.W * (i ? 0.74 : 0.26) : this.W / 2;
+        // sit above the car (and its name tag) so it's clear the car has to drive into it
+        const cy = Math.round(Math.min(top + img.height / 2, this.coverTop() - 10 - img.height / 2));
+        return { ...c, i, img, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0 };
+      });
+      this.smashDone = resolve;
+    });
+  }
+
+  updateSmash(dt) {
+    if (!this.smashes.length) return;
+    let pending = false;
+    for (const s of this.smashes) {
+      s.t += dt;
+      const r = this.racers[s.i];
+      const bottom = s.cy + s.img.height / 2 + s.dy;
+      if (s.phase === "slam" && s.t >= 0.28) {
+        s.phase = "hold";
+        if (!this.calm) this.shake = Math.max(this.shake, 0.25 + s.tier * 0.05);
+        this.onEvent?.("slam", s);
+      } else if (s.phase === "hold" && s.t >= 1.15 + s.i * 0.15) {
+        s.phase = "charge";
+        if (r) { r.chargeV = 0; r.charging = true; }
+      } else if (s.phase === "charge") {
+        if (r) {
+          const accel = s.tier ? SMASH[s.tier].accel : 20;
+          r.chargeV += accel * dt;
+          r.charge += r.chargeV * dt;
+          r.boost = Math.min(2, r.chargeV / 12);
+          // the card is on the road ahead: it rushes at the car as the car charges at it
+          s.vy += (40 + accel * 9) * this.u * dt;
+          s.dy += s.vy * dt;
+        }
+        const hit = r?.box && r.box.y - r.box.h * 0.75 <= bottom;
+        if (hit || s.t > 3.2) { s.vy = 0; this.impact(s, r); }
+      } else if (s.phase === "broken") {
+        s.hitT += dt;
+        if (r && s.hitT > 0.35) r.charging = false;
+      } else if (s.phase === "cracked") {
+        s.hitT += dt;
+        if (s.hitT > 0.55) { s.vy += 420 * dt; s.dy += s.vy * dt; s.alpha = Math.max(0, 1 - (s.hitT - 0.55) * 2.4); }
+      }
+      if (s.phase === "slam" || s.phase === "hold" || s.phase === "charge" || (s.phase === "broken" && s.hitT < 0.45) || (s.phase === "cracked" && s.hitT < 0.95)) pending = true;
+    }
+    if (!pending && this.smashDone) {
+      const done = this.smashDone;
+      this.smashDone = null;
+      for (const r of this.racers) r.charging = false;
+      done();
+    }
+    if (!pending && this.smashes.every((s) => s.phase === "broken" || s.alpha <= 0)) this.smashes = this.smashes.filter((s) => s.phase !== "broken" && s.alpha > 0);
+  }
+
+  impact(s, r) {
+    const u = this.u;
+    const k = 1;
+    const w = s.img.width * k;
+    const h = s.img.height * k;
+    const left = s.cx - w / 2;
+    const top = s.cy - h / 2 + s.dy;
+    const hx = r?.box ? r.box.x + r.box.w / 2 : s.cx; // where the car hit
+    const hy = top + h;
+    s.hitT = 0;
+    if (!s.tier) {
+      // STALLED: the card only cracks and the car bounces off it
+      s.phase = "cracked";
+      for (let c = 0; c < 5; c++) {
+        const pts = [[hx - left, h]];
+        let ang = -Math.PI / 2 + (c - 2) * 0.5;
+        for (let j = 0; j < 4; j++) {
+          const [px, py] = pts[pts.length - 1];
+          ang += (Math.random() - 0.5) * 0.8;
+          pts.push([px + Math.cos(ang) * (6 + Math.random() * 10), py + Math.sin(ang) * (6 + Math.random() * 10)]);
+        }
+        s.cracks.push(pts);
+      }
+      if (r) { r.chargeV = -16; r.charge = Math.max(r.charge, 0); r.charging = true; setTimeout(() => { r.charging = false; }, 700); }
+      for (let q = 0; q < 16; q++) this.particles.push({ x: hx + (Math.random() - 0.5) * 30 * u, y: hy, vx: (Math.random() - 0.5) * 60 * u, vy: (Math.random() - 0.8) * 40 * u, life: 1, size: 3 * u, grow: 7 * u, color: q % 2 ? "#7d778f" : "#4e4960", g: 0 });
+      if (!this.calm) this.shake = Math.max(this.shake, 0.35);
+      this.onEvent?.("bonk", s);
+      return;
+    }
+    // shatter into tiles that fly away from where the car hit
+    s.phase = "broken";
+    const P = SMASH[s.tier];
+    const tile = P.tile;
+    for (let y = 0; y < s.img.height; y += tile) {
+      for (let x = 0; x < s.img.width; x += tile) {
+        const sw = Math.min(tile, s.img.width - x);
+        const sh = Math.min(tile, s.img.height - y);
+        const px = left + (x + sw / 2) * k;
+        const py = top + (y + sh / 2) * k;
+        let dx = px - hx;
+        let dy = py - hy - h * 0.6;
+        const d = Math.hypot(dx, dy) || 1;
+        dx /= d; dy /= d;
+        const sp = P.speed * u * (0.55 + Math.random() * 0.9) * (1.3 - Math.min(1, d / (w * 0.8)) * 0.5);
+        this.shards.push({ img: s.img, sx: x, sy: y, sw, sh, x: px, y: py, vx: dx * sp, vy: dy * sp - P.speed * 0.35 * u, rot: 0, vr: (Math.random() - 0.5) * (2 + s.tier * 3), scale: k, vs: P.grow * (0.4 + Math.random()), life: 1.1 + Math.random() * 0.6 + s.tier * 0.12 });
+      }
+    }
+    if (r) r.chargeV *= 0.7;
+    if (!this.calm) this.shake = Math.max(this.shake, 0.3 + s.tier * 0.18);
+    this.kick = Math.max(this.kick, 0.2 + s.tier * 0.18);
+    if (s.tier >= 3) for (let q = 0; q < s.tier * 14; q++) this.particles.push({ x: hx, y: hy, vx: (Math.random() - 0.5) * 320 * u, vy: -Math.random() * 220 * u, life: 0.5 + Math.random() * 0.5, size: Math.max(1, u * 0.75), color: Math.random() < 0.5 ? "#ffd23a" : "#ffffff", g: 300 * u, hot: true });
+    if (s.tier >= 4) { this.flash = Math.max(this.flash, s.tier === 5 ? 0.6 : 0.3); this.flashColor = s.tier === 5 ? "rainbow" : "#ffb02e"; this.glow = Math.max(this.glow, 2); }
+    if (s.tier === 5) { this.slowmo = 0.7; this.warp = Math.max(this.warp, 1.6); this.tunnel = Math.max(this.tunnel, 2.4); }
+    this.onEvent?.("impact", s);
+  }
+
+  drawSmash(g) {
+    const u = this.u;
+    for (const s of this.smashes) {
+      if (s.phase === "broken" || s.alpha <= 0) continue;
+      let sc = 1;
+      if (s.phase === "slam") { const t = Math.min(1, s.t / 0.28); sc = 1 + 1.6 * (1 - t) * (1 - t); }
+      let jx = 0;
+      let jy = 0;
+      if (s.phase === "hold" && s.tier >= 4 && !this.calm) { jx = Math.round((Math.random() - 0.5) * (s.tier - 3) * 2 * u); jy = Math.round((Math.random() - 0.5) * (s.tier - 3) * 2 * u); }
+      if (s.phase === "charge" && !this.calm) jx = Math.round(Math.sin(s.t * 60) * u);
+      const w = Math.round(s.img.width * sc);
+      const h = Math.round(s.img.height * sc);
+      const x = Math.round(s.cx - w / 2) + jx;
+      const y = Math.round(s.cy - h / 2 + s.dy) + jy;
+      g.globalAlpha = s.phase === "slam" ? Math.min(1, s.t / 0.12) : s.alpha;
+      g.fillStyle = "rgba(0,0,0,0.45)";
+      g.fillRect(x + 3, y + 4, w, h);
+      g.drawImage(s.img, x, y, w, h);
+      if (s.tier === 5 && s.phase !== "slam") {
+        g.strokeStyle = `hsl(${Math.floor(this.time * 600) % 360},100%,65%)`;
+        g.lineWidth = 2;
+        g.strokeRect(x - 2, y - 2, w + 4, h + 4);
+      }
+      if (s.cracks.length) {
+        g.strokeStyle = "#0b0618";
+        g.lineWidth = 2;
+        for (const pts of s.cracks) {
+          g.beginPath();
+          pts.forEach(([px, py], j) => (j ? g.lineTo(x + px, y + py) : g.moveTo(x + px, y + py)));
+          g.stroke();
+        }
+        g.strokeStyle = "#d7d3ea";
+        g.lineWidth = 1;
+        for (const pts of s.cracks) {
+          g.beginPath();
+          pts.forEach(([px, py], j) => (j ? g.lineTo(x + px + 1, y + py) : g.moveTo(x + px + 1, y + py)));
+          g.stroke();
+        }
+      }
+      g.globalAlpha = 1;
+    }
+    for (const p of this.shards) {
+      g.globalAlpha = Math.min(1, p.life * 2);
+      g.save();
+      g.translate(p.x, p.y);
+      g.rotate(p.rot);
+      g.scale(p.scale, p.scale);
+      g.drawImage(p.img, p.sx, p.sy, p.sw, p.sh, -p.sw / 2, -p.sh / 2, p.sw, p.sh);
+      g.restore();
+    }
+    g.globalAlpha = 1;
+  }
+
   zoneAt(i) {
     for (let k = this.zones.length - 1; k >= 0; k--) if (this.zones[k].start <= i) return k;
     return 0;
@@ -452,6 +706,18 @@ export class ChaseScene {
 
   update(dt) {
     const u = this.u;
+    // a One in a Vroomillion smash plays in slow motion for a moment
+    if (this.slowmo > 0) { this.slowmo -= dt; dt *= this.calm ? 1 : 0.3; }
+    this.updateSmash(dt);
+    for (const p of this.shards) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 380 * u * dt;
+      p.rot += p.vr * dt;
+      p.scale += p.vs * dt;
+      p.life -= dt;
+    }
+    this.shards = this.shards.filter((p) => p.life > 0 && p.y < this.H + 80 && p.x > -80 && p.x < this.W + 80);
     this.time += dt;
     this.shake = Math.max(0, this.shake - dt);
     this.flash = Math.max(0, this.flash - dt);
@@ -507,6 +773,8 @@ export class ChaseScene {
         // between the question card and the car behind
         const target = clamp(Math.sqrt(Math.max(0, r.dist - back)) * 0.35, 0, 10);
         r.gap += (target - r.gap) * Math.min(1, dt * 3);
+        if (r.charging && r.chargeV < 0) { r.charge += r.chargeV * dt; r.chargeV += 40 * dt; if (r.chargeV > 0) r.chargeV = 0; r.charge = Math.max(-1.2, r.charge); }
+        else if (!r.charging) { r.charge += (0 - r.charge) * Math.min(1, dt * 2.5); r.chargeV = 0; }
         r.wheel += dt * (4 + this.speed * 26 + r.boost * 20);
         r.lift = Math.max(0, r.lift - dt * 1.6);
         r.launchT = Math.max(0, r.launchT - dt);
@@ -723,7 +991,7 @@ export class ChaseScene {
     }
     this.racers.forEach((r, idx) => {
       const lunge = Math.min(7, r.boost * 2.2);
-      items.push({ z: playerZ + (r.gap + lunge) * SEG, car: true, r, idx });
+      items.push({ z: playerZ + (r.gap + lunge + r.charge) * SEG, car: true, r, idx });
     });
     items.sort((p, q) => q.z - p.z);
 
@@ -821,6 +1089,7 @@ export class ChaseScene {
 
     this.drawWeather(g);
     this.drawStreaks(g);
+    this.drawSmash(g);
 
     for (const p of this.particles) {
       g.globalAlpha = Math.min(1, p.life * 3) * (p.soft ? 0.85 : 1);

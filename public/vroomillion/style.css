@@ -675,3 +675,7 @@ a.btn { display: inline-block; text-decoration: none; }
 .q-card.revealing .hint { display: none; }
 .q-card.revealing .reveal { margin-top: 0; }
 .q-card.revealing .reveal-card { background: rgba(13, 8, 32, 0.9); }
+
+/* the smash: while the answer card is on screen, nothing else is */
+#s-race .race-top, #s-race .race-dock { transition: opacity 0.18s; }
+body.smashing #s-race .race-top, body.smashing #s-race .race-dock, body.smashing #pops { opacity: 0; pointer-events: none; }

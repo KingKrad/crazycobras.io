@@ -92,6 +92,14 @@ export const sfx = {
     noise(0.5 + t * 0.15, { vol: 0.06 + t * 0.02, hp: 600, at: 0.1 });
     if (t >= 4) tone(220, 0.8, { type: "sawtooth", vol: 0.1, slide: 4, at: 0.05 });
   },
+  // The car smashing through the answer card: glass, a thump, more of both for rarer answers.
+  smash: (t) => {
+    tone(70, 0.25, { type: "square", vol: 0.22 + t * 0.03, slide: 0.4 });
+    noise(0.18 + t * 0.12, { vol: 0.16 + t * 0.04, hp: 2500 });
+    for (let i = 0; i < 2 + t * 2; i++) tone(1800 + Math.random() * 2600, 0.04, { vol: 0.05, at: 0.03 + i * 0.035 });
+    if (t >= 4) noise(0.6, { vol: 0.1, hp: 800, at: 0.08 });
+  },
+  bonk: () => { tone(140, 0.12, { type: "square", vol: 0.22, slide: 0.6 }); tone(95, 0.25, { type: "triangle", vol: 0.18, at: 0.1, slide: 0.7 }); noise(0.15, { vol: 0.1, hp: 300, at: 0.05 }); },
   shift: () => { noise(0.05, { vol: 0.12, hp: 1200 }); tone(320, 0.05, { vol: 0.06 }); },
   // Reveal jingle gets grander with each rarity tier.
   tier: (t) => {
