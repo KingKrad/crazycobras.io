@@ -21,6 +21,18 @@ Weighting: Security 35%, Legal 25%, AI-Slop 25%, Craft 15%. No Critical findings
 - **L4 fixed:** "Accounts are for players 13 and over" on the sign-up form, Terms and Privacy. L6 fixed: Privacy now mentions Cloudflare request logs.
 - **Q1 fixed:** one-time recovery codes at sign-up reset a forgotten password; new codes from the ACCOUNT screen. No email verification yet.
 
+## Re-audit (19 Nov 2026)
+Scanner plus a manual read of every API route (`src/index.js`, `src/accounts.js`, `src/vroomillion.js`, `src/check.js`) after the live answer check, the long answer lists and hard mode were added.
+
+- **No secrets** in the code or anywhere in git history. `npm audit --omit=dev`: 0 vulnerabilities.
+- **Scanner false positives dropped:** "hard-coded credential" (`typeof body.password === "string"`), the `innerHTML` in `brand/styles/index.html` (static mock-up page, not deployed), and `you@example.com` (an input placeholder).
+- **Live answer check (`/api/vroomillion/check`):** the answer is cut down to letters, digits and `' & . -`, at most 60 characters, and quoted before it goes into the Wikidata query, so it can't inject SPARQL. Only prompts in the generated class list are accepted, requests are rate-limited per IP, and results are cached for a day.
+- **Fixed:** request bodies are now capped by their real length, not the `Content-Length` header (was S6), on every POST route including checkout and the answer check. API responses send `nosniff`; the site sends HSTS.
+- **Fixed (legal):** the privacy page said "Nothing about your games is sent anywhere", which stopped being true when unlisted answers started being checked online. It now says the answer and the question go to our server and on to Wikidata, unlinked to the player. The Terms credit Wikidata (CC0) and say how rarity is worked out.
+- **Fixed (craft, was Q2):** favicon, Apple touch icon and a 1200×630 share image.
+- **New:** `ALLOWED_ORIGINS` lets a second front end (the Vercel deployment) call the API; any other site is still refused, and Stripe returns buyers to the site they paid from.
+- **Still open, accepted for now:** S2 (the free run limit lives in the browser), S3 (50k PBKDF2 rounds on the free plan), S4 (sign-up reveals whether an email has an account), S5 (no bot check on sign-up), L3 (name echoes Krillion: worth a trademark search), L5 (small pixel text and fixed timer), and the em-dash house style.
+
 ## Fix these first
 1. **L1**: add Terms of Service, a refund policy and a contact address before taking real money.
 2. **L2**: stop selling and advertising real car brands ("Bugattis and Koenigseggs") in a paid game; rename the cars or drop brand names from the paywall.
