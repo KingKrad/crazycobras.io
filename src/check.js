@@ -66,7 +66,9 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
         label = String(row.l.value).replace(/\s*\([^)]*\)\s*/g, " ").trim().toLowerCase();
         n = Number(row.n.value) || 0;
         const ex = cls.exclude ? new RegExp(cls.exclude, "i") : null;
-        found = !!label && label.length <= 60 && !BLOCK_RE.test(label) && !(ex && ex.test(label));
+        // titleRx: word-in-title prompts ("a movie with a number in the title") also need the right word in the name
+        const title = cls.titleRx ? new RegExp(cls.titleRx, "i") : null;
+        found = !!label && label.length <= 60 && !BLOCK_RE.test(label) && !(ex && ex.test(label)) && !(title && !title.test(label));
       }
     } else {
       return json({ found: false, reason: "lookup failed" }, 502);
