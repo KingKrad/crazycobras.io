@@ -8,7 +8,7 @@
     { "name": "PAY_LIMITER", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } },
     { "name": "AUTH_LIMITER", "namespace_id": "1003", "simple": { "limit": 10, "period": 60 } },
     // live answer checks against Wikidata (src/check.js)
-    { "name": "CHECK_LIMITER", "namespace_id": "1004", "simple": { "limit": 40, "period": 60 } }
+    { "name": "CHECK_LIMITER", "namespace_id": "1004", "simple": { "limit": 150, "period": 60 } }
   ],
   // VROOMILLION accounts. No database_id: Wrangler creates the database on the first deploy.
   "d1_databases": [{ "binding": "DB", "database_name": "vroomillion" }],

@@ -9,6 +9,7 @@ import {
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
 import { ChaseScene } from "./chase.js";
+import { prefetchDeep, deepAnswers } from "./deep.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
 const QUESTIONS = [...HAND_WRITTEN, ...makeVariants(HAND_WRITTEN)];
@@ -623,6 +624,7 @@ function startRace(setup) {
     show(setup.mode === "solo" ? "leagues" : "versus");
     return;
   }
+  prefetchDeep(questions.map((q) => q.base || q.q)); // the long-tail answer lists, in the background
   lastSetup = { ...setup, redo: false, questions };
   save.lastRunDay = today;
   persist();
@@ -685,6 +687,8 @@ async function runRace(token) {
     const index = buildIndex(q);
     index.prompt = q.base || q.q; // the live check knows prompts by their base wording
     if (q.variant === "start") index.letter = (q.q.match(/"([A-Z])"$/) || [])[1]?.toLowerCase();
+    // the long tail, fetched when the race started; read on each guess, so it counts as soon as it arrives
+    Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     $("q-kicker").textContent = `ROUND ${round + 1} OF ${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
@@ -885,9 +889,18 @@ function revealCard(r, res, i) {
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated
 // guess doesn't ask again. Offline (or in the preview) it just finds nothing.
 const onlineSeen = new Map();
-async function checkOnline(index, value) {
+const onlinePending = new Map(); // lookups still in flight, shared by the typing prefetch and the GO press
+function checkOnline(index, value) {
   const k = index.prompt + "|" + normalize(value);
-  if (onlineSeen.has(k)) return onlineSeen.get(k);
+  if (onlineSeen.has(k)) return Promise.resolve(onlineSeen.get(k));
+  if (onlinePending.has(k)) return onlinePending.get(k);
+  const p = lookupOnline(index, value, k).finally(() => onlinePending.delete(k));
+  onlinePending.set(k, p);
+  return p;
+}
+// The answer as typed so far, already answered? (no network, no waiting)
+const onlineKnown = (index, value) => onlineSeen.has(index.prompt + "|" + normalize(value));
+async function lookupOnline(index, value, k) {
   let hit = null;
   let settled = false; // a real yes/no from the server; a failed lookup is not remembered, so a retry can pass
   try {
@@ -1000,9 +1013,10 @@ function askAnswer(r, i, token, index) {
       if (index.prompt && value.trim().length >= 3) {
         if (checking) return;
         checking = true;
-        $("btn-go").disabled = true;
-        say("CHECKING…", "fix");
+        // usually already answered: the lookup started while they were typing
+        const slow = onlineKnown(index, value) ? 0 : setTimeout(() => { $("btn-go").disabled = true; say("CHECKING…", "fix"); }, 250);
         checkOnline(index, value).then((hit) => {
+          clearTimeout(slow);
           checking = false;
           $("btn-go").disabled = false;
           if (finished || token !== raceToken) return;
@@ -1034,7 +1048,20 @@ function askAnswer(r, i, token, index) {
     };
     const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
     const onGo = () => submit();
-    const onInput = () => audio.sfx.key();
+    // Look answers up while they type: a short pause after typing an answer that isn't on our list
+    // starts the Wikidata check, so by the time they press GO the result is usually already here.
+    let prefetch = 0;
+    const onInput = () => {
+      audio.sfx.key();
+      clearTimeout(prefetch);
+      const value = input.value;
+      if (!index.prompt || value.trim().length < 3) return;
+      prefetch = setTimeout(() => {
+        if (finished || token !== raceToken || input.value !== value) return;
+        if (judge(index, value).tier > 0) return; // on our list: nothing to look up
+        checkOnline(index, value);
+      }, 220);
+    };
     const toggleNitro = () => {
       if (!r.useNitro && r.nitro < 1) return;
       r.useNitro = !r.useNitro;

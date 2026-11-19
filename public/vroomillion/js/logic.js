@@ -263,6 +263,14 @@ export function judge(index, raw) {
       if (hit) return { ...hit, key: normalize(hit.display), display: String(raw).trim().replace(/\s+/g, " ").slice(0, 40) };
     }
   }
+  // The long tail (deep.js): every matching thing on Wikidata. Exact names only, never autocorrected to,
+  // so a typo still snaps to a well-known answer rather than an obscure one.
+  if (index.deep) {
+    for (const k of [key, trimmed.join(" "), key.endsWith("s") ? key.slice(0, -1) : null]) {
+      const hit = k && index.deep.get(k);
+      if (hit && !(index.letter && normalize(hit.display)[0] !== index.letter)) return { ...hit, key: normalize(hit.display), deep: true };
+    }
+  }
   // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
   // People rarely fumble the first letter, so it must match; short words can't have a wrong letter.
   const max = typoAllowance(key.length);

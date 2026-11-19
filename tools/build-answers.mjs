@@ -18,7 +18,7 @@ const OUT = outArg ? new URL("file://" + fs.realpathSync(".") + "/" + outArg) : 
 const args = process.argv.slice(2);
 const probe = args.includes("--probe");
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1].split(";").map((x) => x.trim()) : null; // "A;B;C"
-const MAX = 3000; // per prompt
+const MAX = 3000; // per prompt (src.max overrides: the deep lists go much further)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // curl is used rather than fetch: it copes better with big responses through proxies.
@@ -159,7 +159,7 @@ async function fetchPrompt(prompt, src) {
     for (const r of rows) found.set(r.i.value.split("/").pop(), Number(r.n.value));
     await sleep(500);
   }
-  const top = [...found].map(([id, n]) => ({ id, n })).sort((a, b) => b.n - a.n).slice(0, MAX);
+  const top = [...found].map(([id, n]) => ({ id, n })).sort((a, b) => b.n - a.n).slice(0, src.max ?? MAX);
   const names = new Map();
   for (let k = 0; k < top.length; k += 300) {
     const batch = top.slice(k, k + 300).map((x) => "wd:" + x.id).join(" ");
@@ -219,6 +219,45 @@ export const CLASSES = ${JSON.stringify(out, null, 1)};
   console.log("wrote", file.pathname, Object.keys(out).length, "prompts");
 }
 if (args.includes("--classes")) { await classesFile(); process.exit(0); }
+
+// --deep: the long tail. Every item of each prompt's kind on Wikidata, most covered first (up to
+// 15,000), one file per prompt in public/vroomillion/deep/. The game loads the few files a race needs
+// in the background, so obscure answers count instantly instead of waiting on the live check.
+// --deep-index rebuilds deep/index.json from the files there.
+const DEEP_DIR = new URL("../public/vroomillion/deep/", import.meta.url);
+const deepSlug = (q) => q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function deepIndex() {
+  const files = fs.readdirSync(DEEP_DIR).filter((f) => f.endsWith(".json") && f !== "index.json");
+  const index = {};
+  for (const f of files) { const d = JSON.parse(fs.readFileSync(new URL(f, DEEP_DIR), "utf8")); index[d.q] = { file: f, n: d.a.length }; }
+  fs.writeFileSync(new URL("index.json", DEEP_DIR), JSON.stringify(index));
+  console.log("deep index:", Object.keys(index).length, "prompts");
+}
+if (args.includes("--deep-index")) { deepIndex(); process.exit(0); }
+if (args.includes("--deep")) {
+  fs.mkdirSync(DEEP_DIR, { recursive: true });
+  const { PROMPTS } = await import("./prompt-sources.mjs");
+  const genFile = new URL("../public/vroomillion/js/data-gen.js", import.meta.url);
+  const GEN = (await import(genFile.href)).GEN;
+  const todo = [];
+  for (const [q, src] of Object.entries(PROMPTS)) if (GEN[q] && src.where) todo.push([q, src, GEN[q].tiers]);
+  for (const [q, src] of Object.entries(SOURCES)) if (src?.where && !/schema:description/.test(src.where)) todo.push([q, src, src.tiers || [70, 25]]);
+  const only = args.includes("--only") ? new Set(args[args.indexOf("--only") + 1].split(";")) : null;
+  for (const [q, src, tiers] of todo) {
+    if (only && !only.has(q)) continue;
+    const file = new URL(deepSlug(q) + ".json", DEEP_DIR);
+    if (fs.existsSync(file) && !args.includes("--force")) continue;
+    let items;
+    try { items = await fetchPrompt(q, { ...src, min: 0, max: 15000 }); } catch (e) { console.log("!! failed:", q, e.message); continue; }
+    const a = items.filter((x) => x.forms.length).map((x) => [x.forms.join("|"), x.n]);
+    if (a.length < 10) { console.log("-- skipped", q, a.length); continue; }
+    fs.writeFileSync(file, JSON.stringify({ q, tiers, a }));
+    console.log(q + ": " + a.length + " deep answers");
+    await sleep(600);
+  }
+  deepIndex();
+  process.exit(0);
+}
 
 // --prompts: whole new questions from tools/prompt-sources.mjs. Tiers by rank within the prompt:
 // the most widely covered few are TRAFFIC, then CRUISING, FAST LANE, DEEP CUT, and three of the
