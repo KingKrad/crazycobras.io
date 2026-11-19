@@ -31,7 +31,9 @@ Scanner plus a manual read of every API route (`src/index.js`, `src/accounts.js`
 - **Fixed (legal):** the privacy page said "Nothing about your games is sent anywhere", which stopped being true when unlisted answers started being checked online. It now says the answer and the question go to our server and on to Wikidata, unlinked to the player. The Terms credit Wikidata (CC0) and say how rarity is worked out.
 - **Fixed (craft, was Q2):** favicon, Apple touch icon and a 1200×630 share image.
 - **New:** `ALLOWED_ORIGINS` lets a second front end (the Vercel deployment) call the API; any other site is still refused, and Stripe returns buyers to the site they paid from.
-- **Still open, accepted for now:** S2 (the free run limit lives in the browser), S3 (50k PBKDF2 rounds on the free plan), S4 (sign-up reveals whether an email has an account), S5 (no bot check on sign-up), L3 (name echoes Krillion: worth a trademark search), L5 (small pixel text and fixed timer), and the em-dash house style.
+- **Fixed (S5):** sign-up has a Cloudflare Turnstile bot check, verified on the server; it switches on once `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` are set. The privacy page mentions it.
+- **Reduced (S4):** the "email taken" message no longer says outright that an account exists. A 409 still differs from a success, so full protection would need email verification; with the rate limit and the bot check, checking emails in bulk isn't practical.
+- **Still open, accepted for now:** S2 (the free run limit lives in the browser: a pricing choice, not a risk to players), S3 (50k PBKDF2 rounds, set by the free plan's CPU limit; raise `PBKDF2_ITERATIONS` to 100000 on Workers Paid), L3 (name echoes Krillion: worth a trademark search), L5 (small pixel text and fixed timer), and the em-dash house style.
 
 ## Fix these first
 1. **L1**: add Terms of Service, a refund policy and a contact address before taking real money.
