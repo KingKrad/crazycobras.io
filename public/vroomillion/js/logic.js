@@ -140,6 +140,11 @@ export function normalize(s) {
 export function buildIndex(question) {
   const index = new Map();
   index.strict = !!question.variant; // generated prompts must match the starting letter exactly
+  // words of the prompt itself, so category words like "sauce" are only dropped where they fit
+  const said = normalize((question.base || question.q).replace(/\(.*?\)/g, " ")).split(" ");
+  index.cats = new Set(said.flatMap((w) => [w, w.replace(/s$/, ""), w + "s", w === "flavour" ? "flavor" : w === "flavor" ? "flavour" : w, w === "colour" ? "color" : w]));
+  if (index.cats.has("dessert")) ["cake", "pie", "cookie", "biscuit"].forEach((w) => index.cats.add(w));
+  if (index.cats.has("drink") || index.cats.has("cocktail")) ["drink", "cocktail"].forEach((w) => index.cats.add(w));
   question.a.forEach((list, i) => {
     for (const entry of list) {
       const forms = entry.split("|");
@@ -177,7 +182,16 @@ export function editDistance(a, b, max, subCost = 1) {
 export const typoAllowance = (len) => (len >= 12 ? 3 : len >= 8 ? 2 : len >= 4 ? 1 : 0);
 
 // Words that just name the category, so "nile river" means "nile".
-export const FILLER = new Set(["river", "tree", "cheese", "pasta", "dog", "bird", "fish", "game", "language", "city", "circuit", "raceway", "speedway", "superspeedway", "racetrack", "track", "engine", "racing", "team", "car", "breed", "spice", "herb", "colour", "color", "fruit", "plant", "flag"]);
+// The first group can always be dropped; the rest only when the prompt itself uses the word
+// ("mayochup sauce" for a condiment, "chocolate flavour" for ice cream), so "apple pie" isn't a fruit.
+const FILLER_ANY = new Set(["river", "tree", "cheese", "pasta", "dog", "bird", "fish", "game", "language", "city", "circuit", "raceway", "speedway", "superspeedway", "racetrack", "track", "engine", "racing", "team", "car", "breed", "spice", "herb", "colour", "color", "fruit", "plant", "flag"]);
+export const FILLER = new Set([...FILLER_ANY,
+  "sauce", "condiment", "dressing", "dip", "flavour", "flavor", "soup", "stew", "cake", "cookie", "cookies", "biscuit", "biscuits", "bread", "pie", "dish", "drink", "cocktail", "beer", "wine", "tea", "coffee", "candy", "sweet", "sweets", "chocolate", "bar",
+  "song", "single", "film", "movie", "show", "series", "sitcom", "cartoon", "character", "club", "fc", "band", "toy", "hat", "shoe", "shoes", "boot", "boots", "dance", "cat", "horse", "cattle", "sheep", "chicken", "flower", "mushroom", "snake", "shark", "spider", "butterfly", "whale", "monkey", "owl", "parrot", "frog",
+  "island", "islands", "lake", "mountain", "volcano", "desert", "airport", "bridge", "building", "tower", "skyscraper", "state", "province", "country", "town", "religion", "star", "planet", "moon",
+  "truck", "motorcycle", "motorbike", "bike", "company", "brand", "website", "app", "font", "typeface", "magazine", "newspaper", "novel", "book", "opera", "painting", "sport", "genre", "music", "instrument", "ship", "boat", "aircraft", "plane", "console", "phone", "smartphone"]);
+// two-word category endings: "chocolate ice cream", "yellowstone national park"
+const FILLER2 = new Set(["ice cream", "national park", "video game", "tv show", "tv series", "board game", "card game", "football club", "soccer club", "soft drink", "fast food"]);
 
 function lookup(index, key, addPlural = true) {
   const variants = [key];
@@ -214,7 +228,11 @@ export function judge(index, raw) {
 
   // "nile river", "monza circuit", "v8 engine": drop a trailing category word.
   const words = index.strict ? [key] : key.split(" ");
-  const trimmed = words.length > 1 && FILLER.has(words[words.length - 1]) ? words.slice(0, -1) : words;
+  const last = words[words.length - 1];
+  const fits = (w) => FILLER_ANY.has(w) || (FILLER.has(w) && (!index.cats || index.cats.has(w)));
+  const two = words.slice(-2).join(" ");
+  const trimmed = words.length > 2 && FILLER2.has(two) && (!index.cats || two.split(" ").every((w) => index.cats.has(w))) ? words.slice(0, -2)
+    : words.length > 1 && fits(last) ? words.slice(0, -1) : words;
   if (trimmed !== words) {
     const hit = lookup(index, trimmed.join(" "));
     if (hit) return { ...hit, key: normalize(hit.display) };

@@ -7,6 +7,7 @@
 import { POP_QUESTIONS } from "./data-pop.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE } from "./data-more.js";
+import { GEN } from "./data-gen.js";
 import { normalize, FILLER } from "./logic.js";
 
 const CORE_QUESTIONS = [
@@ -607,7 +608,11 @@ const withExtra = (q) => {
       for (const entry of m[t - 1] || []) {
         // "monza circuit" or "the nile river" is the hand-written answer with a category word on it: skip it,
         // or typing the long form would score as rarer than the hand-written tier
-        const bare = (k) => { const w = k.split(" "); return w.length > 1 && FILLER.has(w[w.length - 1]) ? w.slice(0, -1).join(" ") : k; };
+        const bare = (k) => {
+          const w = k.split(" ");
+          if (w.length > 2 && ["ice cream", "national park", "video game", "soft drink"].includes(w.slice(-2).join(" "))) return w.slice(0, -2).join(" ");
+          return w.length > 1 && FILLER.has(w[w.length - 1]) ? w.slice(0, -1).join(" ") : k;
+        };
         if (entry.split("|").some((f) => seen.has(bare(normalize(f))) && bare(normalize(f)) !== normalize(f))) continue;
         const forms = entry.split("|").filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; });
         if (forms.length) a[t].push(forms.join("|"));
@@ -619,4 +624,7 @@ const withExtra = (q) => {
 
 // HAND_QUESTIONS: just the hand-written answers (the answer builder uses these).
 export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...POP_QUESTIONS.map((q) => ({ ...q, pop: true }))];
-export const QUESTIONS = HAND_QUESTIONS.map(withExtra);
+// Whole prompts generated from Wikidata (tools/prompt-sources.mjs), mixed in with the everyday ones.
+const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
+const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED];

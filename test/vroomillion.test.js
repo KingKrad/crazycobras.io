@@ -281,3 +281,13 @@ test("destinations get further away and the last one is exclusive and very hard"
   assert.ok(metresFor(4, 1, false) * 7 < top.min);
   assert.ok(metresFor(4, 1.45, false) * 5 + metresFor(5, 1.45, true) * 2 >= top.min);
 });
+
+test("category words are dropped only where they fit the prompt", () => {
+  const idx = (n) => buildIndex(QUESTIONS.find((x) => x.q === n));
+  assert.equal(judge(idx("Name a sauce or condiment"), "ketchup sauce").display, "ketchup");
+  assert.equal(judge(idx("Name an ice cream flavour"), "chocolate ice cream").tier, judge(idx("Name an ice cream flavour"), "chocolate").tier);
+  assert.equal(judge(idx("Name an ice cream flavour"), "mint flavour").display, "mint");
+  assert.equal(judge(idx("Name a fruit"), "banana fruit").display, "banana");
+  assert.equal(judge(idx("Name a fruit"), "apple pie").tier, 0, "pie isn't a fruit word");
+  assert.ok(judge(idx("Name a dessert"), "apple pie").tier > 0);
+});
