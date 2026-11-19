@@ -1,6 +1,6 @@
 // VROOMILLION Unlimited: a one-time $5 Stripe Checkout payment, tied to an account.
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
-import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp } from "./accounts.js";
+import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit } from "./accounts.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -57,10 +57,9 @@ export async function handleCheckout(request, env) {
   if (!site.ok) return json({ error: "Bad request." }, 403);
   const origin = site.origin; // Stripe sends the buyer back to the site they paid from
 
-  if (env.PAY_LIMITER) {
-    const ip = clientIp(request, env);
-    const { success } = await env.PAY_LIMITER.limit({ key: ip });
-    if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
+  const ip = clientIp(request, env);
+  if ((env.PAY_LIMITER && !(await env.PAY_LIMITER.limit({ key: ip })).success) || !(await underLimit(env, "pay-ip", ip, 5, 60))) {
+    return json({ error: "Too many tries — wait a minute and try again." }, 429);
   }
 
   const user = await currentUser(request, env);
@@ -107,10 +106,9 @@ export async function handleVerify(request, env) {
   if (!env.STRIPE_SECRET_KEY || !env.DB) return json({ error: "Payments aren't set up yet." }, 503);
   const id = new URL(request.url).searchParams.get("session_id") || "";
   if (!SESSION_ID.test(id)) return json({ paid: false, error: "Invalid receipt." }, 400);
-  if (env.PAY_LIMITER) {
-    const ip = clientIp(request, env);
-    const { success } = await env.PAY_LIMITER.limit({ key: ip });
-    if (!success) return json({ paid: false, error: "Too many tries — wait a minute and reload." }, 429);
+  const ip = clientIp(request, env);
+  if ((env.PAY_LIMITER && !(await env.PAY_LIMITER.limit({ key: ip })).success) || !(await underLimit(env, "verify-ip", ip, 10, 60))) {
+    return json({ paid: false, error: "Too many tries — wait a minute and reload." }, 429);
   }
 
   const res = await stripe(env, "checkout/sessions/" + id, { method: "GET" });

@@ -80,6 +80,14 @@ export async function ensureSchema(db) {
       expires_at INTEGER NOT NULL
     )`),
     db.prepare("CREATE INDEX IF NOT EXISTS sessions_user ON sessions (user_id)"),
+    // attempt counters for rate limits; keys are hashed, rows last a few minutes
+    db.prepare(`CREATE TABLE IF NOT EXISTS rate_counts (
+      bucket TEXT NOT NULL,
+      key TEXT NOT NULL,
+      win INTEGER NOT NULL,
+      count INTEGER NOT NULL,
+      PRIMARY KEY (bucket, key, win)
+    )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
   for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT"]) {
@@ -148,6 +156,24 @@ export function clientIp(request, env) {
   return request.headers.get("cf-connecting-ip") || "unknown";
 }
 
+// Exact rate limits, counted in D1. Cloudflare's rate-limit bindings are approximate and let bursts
+// through (counts sync in the background), so password guessing and payment checks are also counted
+// here. Keys are SHA-256 hashes (an IP or an email is never stored), and old windows are deleted.
+export async function underLimit(env, bucket, rawKey, limit, periodSec) {
+  if (!env.DB || !rawKey || rawKey === "unknown") return true;
+  await ensureSchema(env.DB);
+  const win = Math.floor(Date.now() / 1000 / periodSec);
+  const key = await sha256(bucket + ":" + rawKey);
+  const row = await env.DB.prepare(
+    "INSERT INTO rate_counts (bucket, key, win, count) VALUES (?, ?, ?, 1) " +
+    "ON CONFLICT (bucket, key, win) DO UPDATE SET count = count + 1 RETURNING count",
+  ).bind(bucket, key, win).first();
+  if (Math.random() < 0.05) {
+    await env.DB.prepare("DELETE FROM rate_counts WHERE bucket = ? AND win < ?").bind(bucket, win - 1).run();
+  }
+  return !row || row.count <= limit;
+}
+
 // The site's own origin, plus any front ends listed in ALLOWED_ORIGINS (for example the Vercel
 // deployment that proxies /api/* here). Browsers send Origin on POSTs; a request from any other
 // site is refused.
@@ -164,11 +190,10 @@ async function guard(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
   if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403);
-  if (env.AUTH_LIMITER) {
-    const ip = clientIp(request, env);
-    const { success } = await env.AUTH_LIMITER.limit({ key: ip });
-    if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
-  }
+  const tooMany = json({ error: "Too many tries — wait a minute and try again." }, 429);
+  const ip = clientIp(request, env);
+  if (env.AUTH_LIMITER && !(await env.AUTH_LIMITER.limit({ key: ip })).success) return tooMany;
+  if (!(await underLimit(env, "auth-ip", ip, 10, 60))) return tooMany;
   const len = Number(request.headers.get("content-length") || 0);
   if (len > 4000) return json({ error: "Bad request." }, 413);
   return null;
@@ -252,6 +277,8 @@ export async function handleLogin(request, env) {
   const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
   const wrong = json({ error: "Wrong email or password." }, 401);
   if (!email || !password) return wrong;
+  // per account too, so guesses spread over many IPs still run out
+  if (!(await underLimit(env, "login-email", email, 20, 600))) return json({ error: "Too many tries for this account — wait 10 minutes." }, 429);
 
   await ensureSchema(env.DB);
   const user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();
@@ -311,6 +338,7 @@ export async function handleResetPassword(request, env) {
   if (problem) return json({ error: problem }, 400);
   const wrong = json({ error: "That email and recovery code don't match." }, 401);
   if (!email || !normalizeCode(body.code)) return wrong;
+  if (!(await underLimit(env, "reset-email", email, 10, 600))) return json({ error: "Too many tries for this account — wait 10 minutes." }, 429);
 
   await ensureSchema(env.DB);
   const user = await env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(email).first();

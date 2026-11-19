@@ -62,3 +62,29 @@ test("passwords need 10 to 128 characters", () => {
   assert.equal(checkPassword("1234567890"), null);
   assert.match(checkPassword("x".repeat(129)), /too long/);
 });
+
+import { DatabaseSync } from "node:sqlite";
+import { underLimit, resetSchemaFlagForTests } from "../src/accounts.js";
+
+function memDb() {
+  const sql = new DatabaseSync(":memory:");
+  const stmt = (q, args = []) => ({
+    bind: (...a) => stmt(q, a),
+    first: async () => sql.prepare(q).get(...args) ?? null,
+    run: async () => { sql.prepare(q).run(...args); return { success: true }; },
+    exec: () => sql.prepare(q).run(...args),
+  });
+  return { prepare: (q) => stmt(q), batch: async (list) => list.map((s) => s.exec()), sql };
+}
+
+test("exact limits: the 11th try in a minute is refused, per key, and keys are hashed", async () => {
+  resetSchemaFlagForTests();
+  const env = { DB: memDb() };
+  for (let i = 0; i < 10; i++) assert.equal(await underLimit(env, "auth-ip", "203.0.113.5", 10, 60), true);
+  assert.equal(await underLimit(env, "auth-ip", "203.0.113.5", 10, 60), false);
+  assert.equal(await underLimit(env, "auth-ip", "203.0.113.6", 10, 60), true, "another IP has its own count");
+  assert.equal(await underLimit(env, "auth-ip", "unknown", 10, 60), true, "no IP: not counted");
+  const stored = JSON.stringify(env.DB.sql.prepare("SELECT * FROM rate_counts").all());
+  assert.ok(!stored.includes("203.0.113"), "IPs are stored only as hashes");
+  resetSchemaFlagForTests();
+});
