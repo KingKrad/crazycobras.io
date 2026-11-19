@@ -43,3 +43,14 @@ test("config only hands out the site key when the check is fully set up", async 
   assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site" }).json()).turnstileSiteKey, null);
   assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "s" }).json()).turnstileSiteKey, "site");
 });
+
+import { clientIp } from "../src/accounts.js";
+
+test("x-client-ip is trusted only with the right proxy secret", () => {
+  const r = (h) => new Request("https://x/", { headers: { "cf-connecting-ip": "9.9.9.9", ...h } });
+  const env = { PROXY_SECRET: "abc123" };
+  assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1" }), env), "9.9.9.9");
+  assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1", "x-proxy-secret": "wrong!" }), env), "9.9.9.9");
+  assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1", "x-proxy-secret": "abc123" }), env), "1.1.1.1");
+  assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1", "x-proxy-secret": "abc123" }), {}), "9.9.9.9");
+});

@@ -10,7 +10,14 @@
     // live answer checks against Wikidata (src/check.js)
     { "name": "CHECK_LIMITER", "namespace_id": "1004", "simple": { "limit": 150, "period": 60 } }
   ],
-  // VROOMILLION accounts. No database_id: Wrangler creates the database on the first deploy.
-  "d1_databases": [{ "binding": "DB", "database_name": "vroomillion" }],
+  // VROOMILLION accounts
+  "d1_databases": [{ "binding": "DB", "database_name": "vroomillion", "database_id": "610ba1cd-29fb-47c1-aabd-96d4a808cc50" }],
+  // Plain settings (not secrets). Secrets such as STRIPE_SECRET_KEY and TURNSTILE_SECRET are set in the dashboard.
+  "vars": {
+    // the Turnstile widget's public site key (the widget allows this Worker's workers.dev address)
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAF1bh5K2zSVbvctP",
+    // other front ends allowed to call the API, e.g. the Vercel copy of the site
+    "ALLOWED_ORIGINS": "https://crazycobras-io.vercel.app"
+  },
   "observability": { "enabled": true }
 }

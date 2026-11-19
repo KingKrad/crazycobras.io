@@ -1,6 +1,6 @@
 // VROOMILLION Unlimited: a one-time $5 Stripe Checkout payment, tied to an account.
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
-import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin } from "./accounts.js";
+import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp } from "./accounts.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -58,7 +58,7 @@ export async function handleCheckout(request, env) {
   const origin = site.origin; // Stripe sends the buyer back to the site they paid from
 
   if (env.PAY_LIMITER) {
-    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const ip = clientIp(request, env);
     const { success } = await env.PAY_LIMITER.limit({ key: ip });
     if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
   }
@@ -108,7 +108,7 @@ export async function handleVerify(request, env) {
   const id = new URL(request.url).searchParams.get("session_id") || "";
   if (!SESSION_ID.test(id)) return json({ paid: false, error: "Invalid receipt." }, 400);
   if (env.PAY_LIMITER) {
-    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const ip = clientIp(request, env);
     const { success } = await env.PAY_LIMITER.limit({ key: ip });
     if (!success) return json({ paid: false, error: "Too many tries — wait a minute and reload." }, 429);
   }

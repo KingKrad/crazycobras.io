@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
   "installCommand": "echo no install needed",
   "buildCommand": "echo static site",
   "outputDirectory": "public",
@@ -41,5 +40,12 @@
         }
       ]
     }
-  ]
+  ],
+  "rewrites": [
+    {
+      "source": "/api/vroomillion/:route",
+      "destination": "/api/proxy?route=:route"
+    }
+  ],
+  "framework": null
 }

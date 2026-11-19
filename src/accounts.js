@@ -134,6 +134,19 @@ export function newRecoveryCode() {
 const normalizeCode = (raw) => String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 40);
 const hashCode = (code) => sha256("vroomillion-recovery:" + normalizeCode(code));
 
+// The player's IP, for rate limits and the bot check. Requests that come through the Vercel front end
+// arrive from Vercel's servers, so its proxy (api/[...path].js) passes the player's IP in x-client-ip,
+// along with x-proxy-secret. That header is trusted only when the secret matches PROXY_SECRET.
+export function clientIp(request, env) {
+  const secret = env.PROXY_SECRET;
+  const given = request.headers.get("x-proxy-secret");
+  if (secret && given && sameString(given, secret)) {
+    const ip = (request.headers.get("x-client-ip") || "").trim();
+    if (ip && ip.length <= 64) return ip;
+  }
+  return request.headers.get("cf-connecting-ip") || "unknown";
+}
+
 // The site's own origin, plus any front ends listed in ALLOWED_ORIGINS (for example the Vercel
 // deployment that proxies /api/* here). Browsers send Origin on POSTs; a request from any other
 // site is refused.
@@ -151,7 +164,7 @@ async function guard(request, env) {
   if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
   if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403);
   if (env.AUTH_LIMITER) {
-    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const ip = clientIp(request, env);
     const { success } = await env.AUTH_LIMITER.limit({ key: ip });
     if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
   }
@@ -173,15 +186,16 @@ export async function readForm(request, maxBytes = 2000) {
   }
 }
 
-// Cloudflare Turnstile bot check on sign-up. It's on when TURNSTILE_SECRET_KEY (a Worker secret) and
-// TURNSTILE_SITE_KEY (a plain variable) are set; without them sign-up works as before.
+// Cloudflare Turnstile bot check on sign-up. It's on when the TURNSTILE_SECRET_KEY (or TURNSTILE_SECRET)
+// Worker secret and the TURNSTILE_SITE_KEY variable are set; without them sign-up works as before.
 const TURNSTILE_VERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+const turnstileSecret = (env) => env.TURNSTILE_SECRET_KEY || env.TURNSTILE_SECRET || "";
 export async function passesBotCheck(request, env, token, fetchImpl = fetch) {
-  if (!env.TURNSTILE_SECRET_KEY) return true;
+  if (!turnstileSecret(env)) return true;
   if (typeof token !== "string" || !token || token.length > 2048) return false;
-  const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token });
-  const ip = request.headers.get("cf-connecting-ip");
-  if (ip) form.set("remoteip", ip);
+  const form = new URLSearchParams({ secret: turnstileSecret(env), response: token });
+  const ip = clientIp(request, env);
+  if (ip !== "unknown") form.set("remoteip", ip);
   try {
     const res = await fetchImpl(TURNSTILE_VERIFY, { method: "POST", body: form, signal: AbortSignal.timeout(5000) });
     const out = await res.json();
@@ -194,7 +208,7 @@ export async function passesBotCheck(request, env, token, fetchImpl = fetch) {
 // GET /api/vroomillion/config -> settings the page needs before it can show the sign-up form.
 export function handleConfig(request, env) {
   if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
-  return json({ turnstileSiteKey: env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null });
+  return json({ turnstileSiteKey: turnstileSecret(env) && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null });
 }
 
 export async function handleSignup(request, env) {

@@ -2,7 +2,7 @@
 // the item it finds is the right kind of thing for the prompt (src/answer-classes.js, generated from
 // the same rules as the answer lists). This is how "mayochup" counts as a condiment.
 import { CLASSES, BLOCK } from "./answer-classes.js";
-import { json, readForm } from "./accounts.js";
+import { json, readForm, clientIp } from "./accounts.js";
 
 const BLOCK_RE = new RegExp(BLOCK, "i");
 const WDQS = "https://query.wikidata.org/sparql";
@@ -31,7 +31,7 @@ export function checkQuery(where, answer, exact = false) {
 export async function handleCheck(request, env, fetchImpl = fetch) {
   if (request.method !== "POST") return json({ error: "Use POST." }, 405);
   if (env.CHECK_LIMITER) {
-    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const ip = clientIp(request, env);
     const { success } = await env.CHECK_LIMITER.limit({ key: ip });
     if (!success) return json({ found: false, reason: "busy" }, 429);
   }
