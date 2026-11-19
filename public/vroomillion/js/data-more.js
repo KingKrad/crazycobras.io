@@ -70,5 +70,8 @@ export const NICKNAMES = {
   "Name a Netflix series": ["money heist|la casa de papel", "stranger things", "squid game", "bojack horseman|bojack", "orange is the new black|oitnb", "13 reasons why|thirteen reasons why"],
   "Name a mountain": ["mount everest|everest", "mount kilimanjaro|kilimanjaro|kili", "denali|mount mckinley|mckinley", "k2", "mont blanc", "matterhorn", "mount fuji|fuji|fujiyama", "aconcagua", "olympus mons", "mount olympus|olympus", "mount rainier|rainier", "mount st. helens|mount st helens|st helens", "ben nevis", "table mountain", "mount kosciuszko|kosciuszko"],
   "Name a lake": ["lake superior|superior", "lake tahoe|tahoe", "great salt lake", "lake geneva|lac leman|lake leman", "loch ness", "lake baikal|baikal", "lake titicaca|titicaca", "lake victoria", "lake michigan", "lake erie", "lake huron", "lake ontario", "lake como|como", "lake garda|garda", "dead sea", "caspian sea"],
+  "Name a pop singer": ["harry styles|harry", "lizzo", "chappell roan", "charli xcx|charli", "sabrina carpenter|sabrina"],
+  "Name a famous YouTuber": ["mrbeast|mr beast|jimmy donaldson", "dude perfect", "pewdiepie|felix kjellberg", "ishowspeed|speed"],
+  "Name a video game character": ["solid snake|snake", "master chief|john-117", "pac-man|pacman", "steve"],
   "Name a Taylor Swift song": ["the 1", "august", "anti-hero|antihero", "we are never ever getting back together|never ever", "shake it off", "...ready for it?|ready for it", "look what you made me do|lwymmd", "all too well (10 minute version)|all too well 10 minute version|all too well"],
 };
