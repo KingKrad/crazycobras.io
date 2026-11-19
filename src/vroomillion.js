@@ -1,6 +1,6 @@
 // VROOMILLION Unlimited: a one-time $5 Stripe Checkout payment, tied to an account.
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
-import { json, currentUser, publicUser, ensureSchema } from "./accounts.js";
+import { json, currentUser, publicUser, ensureSchema, readForm } from "./accounts.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -68,7 +68,7 @@ export async function handleCheckout(request, env) {
   if (user.unlimited === 1) return json({ error: "This account already has Unlimited." }, 409);
 
   // All sales are final: the buyer must tick that they understand before paying.
-  const body = await request.json().catch(() => ({}));
+  const body = await readForm(request);
   if (!body || body.acceptNoRefunds !== true) {
     return json({ error: "Tick the box to confirm you understand Unlimited is non-refundable." }, 400);
   }

@@ -17,7 +17,7 @@ const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 export function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff", ...headers },
   });
 }
 
@@ -151,9 +151,13 @@ async function guard(request, env) {
   return null;
 }
 
-async function readForm(request) {
+// Reads a small JSON body. The size is checked on the text itself, not on the Content-Length header,
+// which a client can leave out or get wrong.
+export async function readForm(request, maxBytes = 2000) {
   try {
-    const body = await request.json();
+    const text = await request.text();
+    if (text.length > maxBytes) return {};
+    const body = JSON.parse(text);
     return body && typeof body === "object" ? body : {};
   } catch {
     return {};
