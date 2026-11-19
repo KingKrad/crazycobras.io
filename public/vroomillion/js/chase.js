@@ -6,8 +6,9 @@
 // through sunset to night, with weather rolling in. Deep Cuts light the road up and
 // a One in a Vroomillion sends you down a rainbow tunnel.
 //
-// Art stays chunky 8-bit: a low-res canvas scaled up with hard pixels, flat bold colours,
-// and scenery with a one-pixel dark outline.
+// Art is 16-bit arcade: a canvas at twice the old resolution scaled up with hard pixels, smooth
+// gradient skies with parallax mountains, and sprites smoothed with Scale2x (rounded diagonals,
+// more detail) plus soft shading on the cars.
 import { rearSprite } from "./cars.js";
 import { pixelText } from "./scene.js";
 
@@ -170,6 +171,78 @@ function outline(src) {
   g.drawImage(src, 1, 1);
   outlineCache.set(src, out);
   return out;
+}
+
+// Scale2x (EPX): doubles a sprite, rounding off stair-step diagonals the way 16-bit era upscalers did.
+// Drawn into the same box on screen, it adds detail instead of size. passes = 2 gives Scale4x.
+const smoothCache = new Map();
+function smooth2x(src, passes = 1) {
+  let byPass = smoothCache.get(src);
+  if (!byPass) { byPass = []; smoothCache.set(src, byPass); }
+  if (byPass[passes]) return byPass[passes];
+  let cur = src;
+  for (let n = 0; n < passes; n++) {
+    const w = cur.width, h = cur.height;
+    if (w * h > 160000) break; // big enough already
+    const id = cur.getContext("2d").getImageData(0, 0, w, h);
+    const a = new Uint32Array(id.data.buffer);
+    const out = new ImageData(w * 2, h * 2);
+    const o = new Uint32Array(out.data.buffer);
+    const at = (x, y) => a[clamp(y, 0, h - 1) * w + clamp(x, 0, w - 1)];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const P = a[y * w + x], A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), D = at(x, y + 1);
+        let e0 = P, e1 = P, e2 = P, e3 = P;
+        if (A !== D && C !== B) {
+          if (C === A) e0 = A;
+          if (A === B) e1 = B;
+          if (D === C) e2 = C;
+          if (B === D) e3 = D;
+        }
+        const i = y * 2 * w * 2 + x * 2;
+        o[i] = e0; o[i + 1] = e1; o[i + w * 2] = e2; o[i + w * 2 + 1] = e3;
+      }
+    }
+    const cv = document.createElement("canvas");
+    cv.width = w * 2;
+    cv.height = h * 2;
+    cv.getContext("2d").putImageData(out, 0, 0);
+    cur = cv;
+  }
+  byPass[passes] = cur;
+  return cur;
+}
+
+// A car frame, smoothed, with 16-bit style shading: light falls from above, the lower body darkens,
+// and a soft glossy band runs across the boot.
+const carCache = new Map();
+function carArt(frame) {
+  if (carCache.has(frame)) return carCache.get(frame);
+  const src = smooth2x(frame, 2);
+  const cv = document.createElement("canvas");
+  cv.width = src.width;
+  cv.height = src.height;
+  const g = cv.getContext("2d");
+  g.drawImage(src, 0, 0);
+  g.globalCompositeOperation = "source-atop";
+  const sh = g.createLinearGradient(0, 0, 0, cv.height);
+  sh.addColorStop(0, "rgba(255,255,255,0.16)");
+  sh.addColorStop(0.38, "rgba(255,255,255,0.04)");
+  sh.addColorStop(0.42, "rgba(255,255,255,0.2)");
+  sh.addColorStop(0.47, "rgba(255,255,255,0)");
+  sh.addColorStop(0.75, "rgba(0,0,20,0.08)");
+  sh.addColorStop(1, "rgba(0,0,20,0.32)");
+  g.fillStyle = sh;
+  g.fillRect(0, 0, cv.width, cv.height);
+  const side = g.createLinearGradient(0, 0, cv.width, 0);
+  side.addColorStop(0, "rgba(0,0,20,0.18)");
+  side.addColorStop(0.2, "rgba(0,0,20,0)");
+  side.addColorStop(0.8, "rgba(0,0,20,0)");
+  side.addColorStop(1, "rgba(0,0,20,0.22)");
+  g.fillStyle = side;
+  g.fillRect(0, 0, cv.width, cv.height);
+  carCache.set(frame, cv);
+  return cv;
 }
 
 // A city block, drawn straight at full detail, with a matching canvas of lit windows for night.
@@ -542,7 +615,7 @@ export class ChaseScene {
     h = Math.max(110, Math.round(h));
     this.W = w;
     this.H = h;
-    this.u = 1; // canvas pixels per art pixel (the canvas itself is low-res and scaled up)
+    this.u = w >= 400 ? 2 : 1; // canvas pixels per art pixel: race canvases run at twice the art resolution
     this.horizon = Math.round(Math.min(h * 0.42, carBottom - h * 0.3));
     this.carBottom = Math.round(carBottom);
     this.carPx = Math.max(1, Math.round((w * 0.22) / 40)); // canvas px per sprite px for the nearest car (~22% of the width) // canvas px per sprite px for the nearest car (~20% of the width)
@@ -1094,7 +1167,7 @@ export class ChaseScene {
       const yBot = Math.min(Math.round(a.sy), Math.round(maxY));
       // verge
       wg.fillStyle = P.verge[band];
-      wg.fillRect(0, yTop, W, yBot - yTop + 1);
+      wg.fillRect(0, yTop, W, Math.max(1, yBot - yTop)); // not over the row the nearer segment already drew
       // rumble strips and tarmac
       quad(wg, a.sx, a.sy, a.sw * 1.14, b.sx, b.sy, b.sw * 1.14, P.rumble[band]);
       quad(wg, a.sx, a.sy, a.sw, b.sx, b.sy, b.sw, P.road[band]);
@@ -1216,10 +1289,10 @@ export class ChaseScene {
         wg.save();
         wg.translate(Math.round(bx + w / 2), 0);
         wg.scale(-1, 1);
-        wg.drawImage(sprite, 0, top, Math.round(w), Math.round(h));
+        wg.drawImage(ps > 1.5 ? smooth2x(sprite) : sprite, 0, top, Math.round(w), Math.round(h));
         wg.restore();
       } else {
-        wg.drawImage(sprite, left, top, Math.round(w), Math.round(h));
+        wg.drawImage(ps > 1.5 ? smooth2x(sprite) : sprite, left, top, Math.round(w), Math.round(h));
       }
       if (it.lit && h > 14) glows.push({ img: it.lit, x: left, y: top, w: Math.round(w), h: Math.round(h) });
       if (it.neon) glows.push({ img: sprite, x: left, y: top, w: Math.round(w), h: Math.round(h), a: 0.7 });
@@ -1324,23 +1397,17 @@ export class ChaseScene {
     const hz = this.horizon;
     const tod = this.tod;
     const stops = tod.sky;
-    // 8-bit style: a few hard colour bands
-    const bands = 10;
-    const bh = (hz + 4 * u) / bands;
-    for (let i = 0; i < bands; i++) {
-      const t = i / (bands - 1);
-      const s = t * (stops.length - 1);
-      const j = Math.min(stops.length - 2, Math.floor(s));
-      let c = mixC(stops[j], stops[j + 1], s - j);
-      if (this.tunnel > 0 && !this.calm) {
-        const hue = (i * 14 + this.time * 400) % 360;
-        c = mixC(c, hsl(hue, 1, 0.55), Math.min(0.75, this.tunnel * 0.4));
-      }
-      g.fillStyle = css(c);
-      g.fillRect(0, Math.floor(i * bh), W, Math.ceil(bh) + 1);
+    // 16-bit style: a smooth gradient sky
+    const grad = g.createLinearGradient(0, 0, 0, hz + 4 * u);
+    for (let i = 0; i < stops.length; i++) {
+      let c = stops[i];
+      if (this.tunnel > 0 && !this.calm) c = mixC(c, hsl((i * 50 + this.time * 400) % 360, 1, 0.55), Math.min(0.75, this.tunnel * 0.4));
+      grad.addColorStop(i / (stops.length - 1), css(c));
     }
-    g.fillStyle = css(stops[3]);
-    g.fillRect(0, Math.floor(bands * bh) - 1, W, this.H);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, W, hz + 4 * u);
+    g.fillStyle = css(stops[stops.length - 1]);
+    g.fillRect(0, hz + 4 * u - 1, W, this.H);
 
     // stars come out as night falls
     if (tod.stars > 0.02) {
@@ -1386,11 +1453,54 @@ export class ChaseScene {
       g.globalAlpha = 1;
     }
 
+    // a soft glow round the sun, then two ranges of distant mountains sliding at their own speeds
+    if (tod.sun > -0.15) {
+      const sy = hz - 6 * u - tod.sun * hz * 0.7;
+      const glow = g.createRadialGradient(sx, sy, R * 0.6, sx, sy, R * 3.2);
+      glow.addColorStop(0, "rgba(255,226,150,0.45)");
+      glow.addColorStop(1, "rgba(255,170,120,0)");
+      g.fillStyle = glow;
+      g.fillRect(sx - R * 3.2, sy - R * 3.2, R * 6.4, R * 6.4);
+    }
+    if (ZONES[this.zones[this.shown]?.zone]?.id !== "moon") this.drawMountains(g, stops);
+
     // heavy weather greys the sky out
     const grey = this.wx.fog * 0.45 + this.wx.rain * 0.3 + this.wx.snow * 0.2 + this.wx.sand * 0.3;
     if (grey > 0.01) {
       g.fillStyle = css(this.fogColour(), Math.min(0.5, grey));
       g.fillRect(0, 0, W, hz + 4 * u);
+    }
+  }
+
+  drawMountains(g, stops) {
+    const { W, u } = this;
+    const hz = this.horizon;
+    const low = stops[stops.length - 1];
+    const top = stops[Math.max(0, stops.length - 3)];
+    const ranges = [
+      { par: 0.05, h: 0.34, f: 0.011, col: mixC(mixC(top, low, 0.5), rgb("#1b0b3a"), 0.38), snow: true },
+      { par: 0.12, h: 0.2, f: 0.023, col: mixC(low, rgb("#12061f"), 0.55), snow: false },
+    ];
+    for (const m of ranges) {
+      const off = this.bgX * m.par;
+      const step = 2 * u;
+      g.fillStyle = css(m.col);
+      g.beginPath();
+      g.moveTo(0, hz + u);
+      const peak = (x) => {
+        const v = (x + off) * m.f / u;
+        return hz - hz * m.h * (0.45 + 0.35 * Math.abs(Math.sin(v)) + 0.2 * Math.abs(Math.sin(v * 2.7 + 1.3)));
+      };
+      for (let x = 0; x <= W + step; x += step) g.lineTo(x, Math.round(peak(x) / u) * u);
+      g.lineTo(W, hz + u);
+      g.fill();
+      // lit edge on the sun side and snowcaps on the tall far peaks
+      g.fillStyle = css(mixC(m.col, rgb("#ffffff"), 0.18));
+      for (let x = 0; x <= W; x += step) {
+        const y = Math.round(peak(x) / u) * u, yn = Math.round(peak(x + step) / u) * u;
+        if (yn > y) g.fillRect(x, y, step, u);
+        if (m.snow && y < hz - hz * m.h * 0.82) { g.fillStyle = "rgba(240,240,255,0.55)"; g.fillRect(x, y, step, 2 * u); g.fillStyle = css(mixC(m.col, rgb("#ffffff"), 0.18)); }
+      }
     }
   }
 
@@ -1715,8 +1825,17 @@ export class ChaseScene {
     g.globalAlpha = 1;
 
     // shadow
-    g.fillStyle = "rgba(0,0,0,0.4)";
-    g.fillRect(left + Math.round(w * 0.06), bottom - Math.max(1, Math.round(s)), Math.round(w * 0.88), Math.max(2, Math.round(s * 2)));
+    const shadow = g.createRadialGradient(cx, bottom, 0, cx, bottom, w * 0.6);
+    shadow.addColorStop(0, "rgba(0,0,10,0.55)");
+    shadow.addColorStop(0.7, "rgba(0,0,10,0.3)");
+    shadow.addColorStop(1, "rgba(0,0,10,0)");
+    g.fillStyle = shadow;
+    g.save();
+    g.translate(cx, bottom);
+    g.scale(1, 0.12);
+    g.translate(-cx, -bottom);
+    g.fillRect(cx - w * 0.6, bottom - w * 0.6, w * 1.2, w * 1.2);
+    g.restore();
 
     // nitro flames out of both exhausts, towards the camera
     if (r.nitro && r.boost > 0.05) {
@@ -1738,7 +1857,7 @@ export class ChaseScene {
     g.save();
     g.translate(cx, bottom);
     g.rotate(roll);
-    g.drawImage(frame, Math.round(-w / 2), Math.round(-h), Math.round(w), Math.round(h));
+    g.drawImage(s >= 1.5 ? carArt(frame) : frame, Math.round(-w / 2), Math.round(-h), Math.round(w), Math.round(h));
     g.restore();
     lights.push({ r, cx, bottom, w, h, s, roll });
 
@@ -1768,9 +1887,8 @@ export class ChaseScene {
         const farY = Math.max(this.horizon, bottom - (bottom - this.horizon) * 0.62);
         g.save();
         g.beginPath();
-        g.rect(0, 0, this.W, this.H);
-        for (const o of lights) g.rect(o.cx - o.w / 2, o.bottom - o.h, o.w, o.h); // not over the cars themselves
-        g.clip("evenodd");
+        g.rect(0, 0, this.W, Math.min(...lights.map((o) => o.bottom - o.h * 0.92))); // beams shine ahead, never over the cars
+        g.clip();
         g.fillStyle = `rgba(255,244,200,${(0.14 * amt).toFixed(3)})`;
         g.beginPath();
         g.moveTo(cx - w * 0.42, nearY);
