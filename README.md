@@ -4,14 +4,17 @@ An 8-bit trivia racer. Every question has lots of right answers; the more niche 
 
 The game lives in `public/vroomillion/`; the site's home page (`/`) redirects there. `src/` is the Cloudflare Worker that handles accounts and payments.
 
-## Deploy from your phone
-- dash.cloudflare.com → Workers & Pages → Create application → Import a repository → connect GitHub → pick `crazycobras.io` → project name `crazycobras-io`, deploy command `npx wrangler deploy` → Save and Deploy. Cloudflare redeploys on every push to `main`.
-- Runs on the Cloudflare **Workers Free** plan.
+## Where it runs
+- **Vercel** (project `crazycobras-io`, https://crazycobras-io.vercel.app) serves the game's files from `public/` with the same security headers as `public/_headers` (`vercel.json`). `api/proxy.js` forwards `/api/vroomillion/*` to the Worker (`WORKER_URL`), passing the player's IP in `x-client-ip` with `PROXY_SECRET`, so the Worker's rate limits count each player, not Vercel's servers.
+- **Cloudflare Worker** `crazycobras-io` (https://crazycobras-io.nucleargames8856.workers.dev) runs the API: accounts in the `vroomillion` D1 database, payments, the live answer check and rate limits. `npx wrangler deploy -c wrangler.api.jsonc` deploys it without the static files; plain `npx wrangler deploy` deploys the files too, so the workers.dev address also serves the game.
+- **Settings:** the Worker's plain variables are in `wrangler.jsonc` (`TURNSTILE_SITE_KEY`, `ALLOWED_ORIGINS`, which must list the Vercel address). Secrets live in the Cloudflare dashboard: `STRIPE_SECRET_KEY`, `TURNSTILE_SECRET`, `PROXY_SECRET`. On Vercel: `WORKER_URL`, and `PROXY_SECRET` (the same value as the Worker's).
+- **Turnstile:** the widget (Cloudflare dashboard → Turnstile) must list every address the game runs on.
+- Both run on free plans.
 
 ## How it works
 - **Modes:** 1P is a solo run — your distance is your score; or 2P on one screen (answers are hidden while typing).
 - **Question modes:** CLASSIC (all topics) or GEARHEAD (cars and racing only), picked on the race setup screen.
-- **Live answer check:** an answer that isn't on a prompt's list is looked up on Wikidata by `POST /api/vroomillion/check` (`src/check.js`). It counts if the item found is the right kind of thing for the prompt; the rules are in `src/answer-classes.js`, generated with `node tools/build-answers.mjs --classes` from the same sources as the answer lists. Found answers score CRUISING to DEEP CUT by how widely they're covered, never ONE IN A VROOMILLION. Rate limited by `CHECK_LIMITER` (40 a minute per IP) and cached for a day. In the artifact preview there's no server, so the check finds nothing.
+- **Live answer check:** an answer that isn't on a prompt's list is looked up on Wikidata by `POST /api/vroomillion/check` (`src/check.js`). It counts if the item found is the right kind of thing for the prompt; the rules are in `src/answer-classes.js`, generated with `node tools/build-answers.mjs --classes` from the same sources as the answer lists. Found answers score CRUISING to DEEP CUT by how widely they're covered, never ONE IN A VROOMILLION. Rate limited by `CHECK_LIMITER` (150 a minute per IP) and cached for a day. In the artifact preview there's no server, so the check finds nothing.
 - **Generated prompts:** `tools/prompt-sources.mjs` defines hundreds of whole prompts (cities by country, songs by artist, films by director or actor, animals by family, teams by league, ...). `node tools/build-answers.mjs --prompts` builds `public/vroomillion/js/data-gen.js`, tiering each prompt's answers by how widely covered they are.
 - **Answers:** close typos are fixed silently; extra words in front still count ("front bumper" counts as bumper); wrong answers can be retried until the timer runs out.
 - **Rarity tiers:** Stalled → Traffic → Cruising → Fast Lane → Deep Cut → One in a Vroomillion.
@@ -32,7 +35,7 @@ The game lives in `public/vroomillion/`; the site's home page (`/`) redirects th
 ## Turning on the $5 Unlimited payment
 The game asks the Worker (`src/vroomillion.js`) to open a Stripe Checkout for the logged-in account, and after payment confirms with Stripe that it really went through before marking that account Unlimited. If a buyer closes the tab before coming back, the account is upgraded the next time they open the game. Until the key below is set, the buy button just says payments aren't set up — nobody can be charged.
 
-1. **Merge this branch into `main`** so Cloudflare deploys it. The first deploy creates the `vroomillion` D1 database automatically (free tier); the tables are created on first use.
+1. The Worker and its `vroomillion` D1 database are already set up; the tables are created on first use.
 2. **Stripe dashboard** → Developers → API keys → **Create restricted key**. Give it **Checkout Sessions: Write** and nothing else. Copy it. Start with a **test-mode** key (`rk_test_…`).
 3. **Cloudflare dashboard** → Workers & Pages → `crazycobras-io` → Settings → Variables and Secrets → Add → type **Secret**, name `STRIPE_SECRET_KEY`, value = the key → Deploy. Never put the key in the repo.
 4. Open the game, use your free run, press **GO UNLIMITED**, and pay with Stripe's test card `4242 4242 4242 4242` (any future date, any CVC). You should land on "UNLIMITED UNLOCKED!".
