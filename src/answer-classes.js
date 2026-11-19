@@ -857,6 +857,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a country in North America": {
+  "where": "{ ?i wdt:P31 wd:Q6256; wdt:P30 wd:Q49. }",
+  "tiers": [
+   302,
+   283
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a capital city": {
   "where": "{ ?c wdt:P31 wd:Q6256; wdt:P36 ?i. }",
   "tiers": [
@@ -907,6 +916,15 @@ export const CLASSES = {
   "tiers": [
    169,
    147
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a mountain": {
+  "where": "{ ?i wdt:P31 wd:Q8502. }",
+  "tiers": [
+   90,
+   56
   ],
   "exclude": null,
   "taxa": false
@@ -1046,6 +1064,24 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Best Picture Oscar winner": {
+  "where": "{ ?i wdt:P166 wd:Q102427; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   63,
+   57
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a James Bond film": {
+  "where": "{ ?u rdfs:label \"James Bond\"@en. { ?i wdt:P1441 ?u. } UNION { ?i wdt:P1080 ?u. } UNION { ?i wdt:P179 ?u. } }",
+  "tiers": [
+   59,
+   15
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a Game of Thrones character": {
   "where": "{ ?u rdfs:label \"A Song of Ice and Fire\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
@@ -1091,11 +1127,56 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name an Olympic sport": {
+  "where": "{ ?i wdt:P31 wd:Q212434. }",
+  "tiers": [
+   113,
+   73
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a tennis player": {
+  "where": "{ ?i wdt:P536 ?x.  } UNION { ?i wdt:P597 ?x.  }",
+  "tiers": [
+   94,
+   73
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a basketball player": {
+  "where": "{ ?i wdt:P2685 ?x.  } UNION { ?i wdt:P3542 ?x.  }",
+  "tiers": [
+   58,
+   45
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a boxer": {
+  "where": "{ ?i wdt:P106 wd:Q11338576; wdt:P1967 ?x. }",
+  "tiers": [
+   68,
+   52
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a chess opening": {
   "where": "{ ?i wdt:P31 wd:Q103632. }",
   "tiers": [
    41,
    31
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a US president": {
+  "where": "{ ?i wdt:P39 wd:Q11696; wdt:P31 wd:Q5. }",
+  "tiers": [
+   225,
+   177
   ],
   "exclude": null,
   "taxa": false
@@ -1116,6 +1197,24 @@ export const CLASSES = {
    167
   ],
   "exclude": null,
+  "taxa": false
+ },
+ "Name a poet": {
+  "where": "{ ?i wdt:P106 wd:Q49757; wdt:P800 ?w. ?w wdt:P31/wdt:P279* wd:Q5185279. }",
+  "tiers": [
+   102,
+   48
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an inventor": {
+  "where": "{ ?i wdt:P106 wd:Q205375. }",
+  "tiers": [
+   204,
+   112
+  ],
+  "exclude": "^christopher columbus$",
   "taxa": false
  },
  "Name a Nobel Prize winner in Physics": {
@@ -1141,6 +1240,15 @@ export const CLASSES = {
   "tiers": [
    36,
    17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Chinese food": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q148. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q148. }",
+  "tiers": [
+   40,
+   21
   ],
   "exclude": null,
   "taxa": false
@@ -1204,6 +1312,24 @@ export const CLASSES = {
   "tiers": [
    28,
    25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a British food": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q145. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q145. }",
+  "tiers": [
+   39,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an American food": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q30. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q30. }",
+  "tiers": [
+   45,
+   24
   ],
   "exclude": null,
   "taxa": false
@@ -1305,6 +1431,15 @@ export const CLASSES = {
    52
   ],
   "exclude": null,
+  "taxa": true
+ },
+ "Name a monkey or ape": {
+  "where": "{ ?t wdt:P225 \"Primates\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   56,
+   39
+  ],
+  "exclude": "neanderthal|^homo |denisovan|australopith|paranthropus|ardipithecus",
   "taxa": true
  },
  "Name a wild cat": {
@@ -1550,11 +1685,947 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a motorcycle racer": {
+  "where": "{ ?i wdt:P3928 ?x. }",
+  "tiers": [
+   29,
+   22
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a rally driver": {
+  "where": "{ ?i wdt:P106 wd:Q10842936; wdt:P3927 ?x. }",
+  "tiers": [
+   35,
+   24
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a race car": {
+  "where": "{ ?i wdt:P31 wd:Q673687. }",
+  "tiers": [
+   11,
+   8
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a truck or lorry maker": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q4830453; wdt:P1056/wdt:P279* wd:Q43193. }",
   "tiers": [
    86,
    37
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Alfred Hitchcock film": {
+  "where": "{ ?p rdfs:label \"Alfred Hitchcock\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   44,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Ridley Scott film": {
+  "where": "{ ?p rdfs:label \"Ridley Scott\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   48,
+   37
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Tom Hanks movie": {
+  "where": "{ ?p rdfs:label \"Tom Hanks\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   43,
+   32
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Leonardo DiCaprio movie": {
+  "where": "{ ?p rdfs:label \"Leonardo DiCaprio\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   54,
+   45
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Tom Cruise movie": {
+  "where": "{ ?p rdfs:label \"Tom Cruise\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   51,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Will Smith movie": {
+  "where": "{ ?p rdfs:label \"Will Smith\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   46,
+   39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Johnny Depp movie": {
+  "where": "{ ?p rdfs:label \"Johnny Depp\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   48,
+   34
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Jim Carrey movie": {
+  "where": "{ ?p rdfs:label \"Jim Carrey\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   39,
+   31
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Adam Sandler movie": {
+  "where": "{ ?p rdfs:label \"Adam Sandler\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   33,
+   29
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Dwayne Johnson movie": {
+  "where": "{ ?p rdfs:label \"Dwayne Johnson\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   41,
+   34
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Jackie Chan movie": {
+  "where": "{ ?p rdfs:label \"Jackie Chan\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   40,
+   30
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Arnold Schwarzenegger movie": {
+  "where": "{ ?p rdfs:label \"Arnold Schwarzenegger\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   41,
+   29
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Morgan Freeman movie": {
+  "where": "{ ?p rdfs:label \"Morgan Freeman\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   47,
+   40
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Keanu Reeves movie": {
+  "where": "{ ?p rdfs:label \"Keanu Reeves\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   42,
+   37
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Stephen King book": {
+  "where": "{ ?p rdfs:label \"Stephen King\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   35,
+   23
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Agatha Christie book": {
+  "where": "{ ?p rdfs:label \"Agatha Christie\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   32,
+   28
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Charles Dickens book": {
+  "where": "{ ?p rdfs:label \"Charles Dickens\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   38,
+   22
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Roald Dahl book": {
+  "where": "{ ?p rdfs:label \"Roald Dahl\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   22,
+   9
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Dr. Seuss book": {
+  "where": "{ ?p rdfs:label \"Dr. Seuss\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   4,
+   2
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Terry Pratchett book": {
+  "where": "{ ?p rdfs:label \"Terry Pratchett\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   23,
+   20
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Mark Twain book": {
+  "where": "{ ?p rdfs:label \"Mark Twain\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   11,
+   8
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Nintendo game": {
+  "where": "{ ?s rdfs:label \"Nintendo\"@en. ?i wdt:P123 ?s; wdt:P31 wd:Q7889. }",
+  "tiers": [
+   37,
+   27
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Pokémon game": {
+  "where": "{ ?s rdfs:label \"Pokémon\"@en. ?i wdt:P179 ?s; wdt:P31 wd:Q7889. }",
+  "tiers": [
+   9,
+   3
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a German city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q183. }",
+  "tiers": [
+   158,
+   62
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a French city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q142. }",
+  "tiers": [
+   156,
+   107
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Italian city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q38. }",
+  "tiers": [
+   180,
+   122
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Spanish city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q29. }",
+  "tiers": [
+   87,
+   62
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Japanese city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q17. }",
+  "tiers": [
+   127,
+   71
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Chinese city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q148. }",
+  "tiers": [
+   139,
+   78
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Indian city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q668. }",
+  "tiers": [
+   121,
+   80
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Brazilian city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q155. }",
+  "tiers": [
+   94,
+   56
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Australian city or town": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q408. }",
+  "tiers": [
+   135,
+   68
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Canadian city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q16. }",
+  "tiers": [
+   137,
+   67
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Mexican city": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q96. }",
+  "tiers": [
+   105,
+   84
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a city or town in the UK": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515. ?i wdt:P17 wd:Q145. } UNION { ?i wdt:P31/wdt:P279* wd:Q3957. ?i wdt:P17 wd:Q145. }",
+  "tiers": [
+   123,
+   47
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a La Liga club": {
+  "where": "{ ?i wdt:P118 wd:Q324867. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. } }",
+  "tiers": [
+   88,
+   77
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Serie A club": {
+  "where": "{ ?i wdt:P118 wd:Q15804. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. } }",
+  "tiers": [
+   100,
+   84
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an MLS team": {
+  "where": "{ ?i wdt:P118 wd:Q18543. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. } }",
+  "tiers": [
+   46,
+   43
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an NBA player": {
+  "where": "{ ?i wdt:P106 wd:Q3665646; wdt:P118 wd:Q155223. }",
+  "tiers": [
+   55,
+   32
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Formula 1 driver": {
+  "where": "{ ?i wdt:P106 wd:Q10841764. }",
+  "tiers": [
+   65,
+   40
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cricketer": {
+  "where": "{ ?i wdt:P106 wd:Q12299841. }",
+  "tiers": [
+   54,
+   32
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a rugby player": {
+  "where": "{ ?i wdt:P106 wd:Q14089670. }",
+  "tiers": [
+   41,
+   24
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a baseball player": {
+  "where": "{ ?i wdt:P106 wd:Q10871364. }",
+  "tiers": [
+   46,
+   37
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a pro wrestler": {
+  "where": "{ ?i wdt:P106 wd:Q13474373. }",
+  "tiers": [
+   54,
+   35
+  ],
+  "exclude": "^bart simpson$",
+  "taxa": false
+ },
+ "Name a figure skater": {
+  "where": "{ ?i wdt:P106 wd:Q13219587. }",
+  "tiers": [
+   50,
+   34
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cyclist": {
+  "where": "{ ?i wdt:P106 wd:Q2309784. }",
+  "tiers": [
+   59,
+   45
+  ],
+  "exclude": "^thylacine$",
+  "taxa": false
+ },
+ "Name a swimmer": {
+  "where": "{ ?i wdt:P106 wd:Q10843402. }",
+  "tiers": [
+   59,
+   49
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a sprinter or runner": {
+  "where": "{ ?i wdt:P106 wd:Q4009406. }",
+  "tiers": [
+   57,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a skier": {
+  "where": "{ ?i wdt:P106 wd:Q4144610. }",
+  "tiers": [
+   50,
+   41
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a war": {
+  "where": "{ ?i wdt:P31 wd:Q198. }",
+  "tiers": [
+   111,
+   82
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous battle": {
+  "where": "{ ?i wdt:P31 wd:Q178561. }",
+  "tiers": [
+   80,
+   64
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a British prime minister": {
+  "where": "{ ?i wdt:P39 wd:Q14211. }",
+  "tiers": [
+   107,
+   82
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a pope": {
+  "where": "{ ?i wdt:P39 wd:Q19546. }",
+  "tiers": [
+   122,
+   90
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a king or queen of England": {
+  "where": "{ ?i wdt:P39 wd:Q18810062. }",
+  "tiers": [
+   95,
+   81
+  ],
+  "exclude": "kjbh",
+  "taxa": false
+ },
+ "Name a Canadian prime minister": {
+  "where": "{ ?i wdt:P39 wd:Q839078. }",
+  "tiers": [
+   68,
+   51
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Australian prime minister": {
+  "where": "{ ?i wdt:P39 wd:Q319145. }",
+  "tiers": [
+   77,
+   50
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a French president": {
+  "where": "{ ?i wdt:P39 wd:Q191954. }",
+  "tiers": [
+   128,
+   63
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a bone": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q265868.  } UNION { ?i wdt:P279+ wd:Q265868.  }",
+  "tiers": [
+   79,
+   56
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a moon of Jupiter or Saturn": {
+  "where": "{ ?i wdt:P397 wd:Q319.  } UNION { ?i wdt:P397 wd:Q193.  }",
+  "tiers": [
+   81,
+   67
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a theme park": {
+  "where": "{ ?i wdt:P31 wd:Q2416723. }",
+  "tiers": [
+   30,
+   26
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a roller coaster": {
+  "where": "{ ?i wdt:P31 wd:Q204832. }",
+  "tiers": [
+   7,
+   5
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a museum": {
+  "where": "{ ?i wdt:P31 wd:Q33506. }",
+  "tiers": [
+   88,
+   67
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a university": {
+  "where": "{ ?i wdt:P31 wd:Q3918. }",
+  "tiers": [
+   83,
+   69
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a castle": {
+  "where": "{ ?i wdt:P31 wd:Q23413. }",
+  "tiers": [
+   58,
+   48
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cathedral": {
+  "where": "{ ?i wdt:P31 wd:Q2977. }",
+  "tiers": [
+   40,
+   34
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a stadium": {
+  "where": "{ ?i wdt:P31 wd:Q483110. }",
+  "tiers": [
+   61,
+   52
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a festival": {
+  "where": "{ ?i wdt:P31 wd:Q132241. }",
+  "tiers": [
+   44,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a TV channel": {
+  "where": "{ ?i wdt:P31 wd:Q2001305. }",
+  "tiers": [
+   38,
+   28
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a magician": {
+  "where": "{ ?i wdt:P106 wd:Q15855449. }",
+  "tiers": [
+   58,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a comedian": {
+  "where": "{ ?i wdt:P106 wd:Q245068. }",
+  "tiers": [
+   101,
+   79
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous YouTuber": {
+  "where": "{ ?i wdt:P106 wd:Q17125263. }",
+  "tiers": [
+   68,
+   40
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an architect": {
+  "where": "{ ?i wdt:P106 wd:Q42973. }",
+  "tiers": [
+   174,
+   94
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a sculptor": {
+  "where": "{ ?i wdt:P106 wd:Q1281618. }",
+  "tiers": [
+   195,
+   102
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Norse god": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q16513881.  } UNION { ?i wdt:P31/wdt:P279* wd:Q19606366.  }",
+  "tiers": [
+   62,
+   46
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Egyptian god": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q146083. }",
+  "tiers": [
+   78,
+   58
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Hindu deity": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q979507. }",
+  "tiers": [
+   82,
+   39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous horse": {
+  "where": "{ ?i wdt:P31 wd:Q726. }",
+  "tiers": [
+   13,
+   5
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cereal grain": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q12117.  } UNION { ?i wdt:P279+ wd:Q12117.  }",
+  "tiers": [
+   66,
+   34
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a berry": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q13184.  } UNION { ?i wdt:P279+ wd:Q13184.  }",
+  "tiers": [
+   74,
+   31
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of salad": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q9266.  } UNION { ?i wdt:P279+ wd:Q9266.  }",
+  "tiers": [
+   43,
+   20
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a pie or tart": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q13360264.  } UNION { ?i wdt:P279+ wd:Q13360264.  }",
+  "tiers": [
+   35,
+   19
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of pancake": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q44541.  } UNION { ?i wdt:P279+ wd:Q44541.  }",
+  "tiers": [
+   29,
+   16
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a hot sauce": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q522171.  } UNION { ?i wdt:P279+ wd:Q522171.  }",
+  "tiers": [
+   16,
+   6
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a whisky": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q281.  } UNION { ?i wdt:P279+ wd:Q281.  }",
+  "tiers": [
+   19,
+   17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a beer brand": {
+  "where": "{ ?i wdt:P31 wd:Q15075508. }",
+  "tiers": [
+   22,
+   9
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a perfume": {
+  "where": "{ ?i wdt:P31 wd:Q131746. }",
+  "tiers": [
+   7,
+   5
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a yoga pose": {
+  "where": "{ ?a rdfs:label \"asana\"@en. ?i wdt:P31 ?a. }",
+  "tiers": [
+   19,
+   10
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a weapon": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q728.  } UNION { ?i wdt:P279+ wd:Q728.  }",
+  "tiers": [
+   97,
+   47
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a sword": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q12791.  } UNION { ?i wdt:P279+ wd:Q12791.  }",
+  "tiers": [
+   42,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous statue": {
+  "where": "{ ?i wdt:P31 wd:Q179700. }",
+  "tiers": [
+   71,
+   39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous tower": {
+  "where": "{ ?i wdt:P31 wd:Q12518. }",
+  "tiers": [
+   35,
+   28
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an ocean or sea": {
+  "where": "{ ?i wdt:P31 wd:Q165.  } UNION { ?i wdt:P31 wd:Q9430.  }",
+  "tiers": [
+   194,
+   130
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a waterfall": {
+  "where": "{ ?i wdt:P31 wd:Q34038. }",
+  "tiers": [
+   47,
+   35
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cave": {
+  "where": "{ ?i wdt:P31 wd:Q35509. }",
+  "tiers": [
+   46,
+   23
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a glacier": {
+  "where": "{ ?i wdt:P31 wd:Q35666. }",
+  "tiers": [
+   36,
+   20
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous forest": {
+  "where": "{ ?i wdt:P31 wd:Q4421. }",
+  "tiers": [
+   49,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a train": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q19832486.  } UNION { ?i wdt:P279+ wd:Q19832486.  }",
+  "tiers": [
+   13,
+   8
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a tank": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q12876.  } UNION { ?i wdt:P279+ wd:Q12876.  }",
+  "tiers": [
+   50,
+   35
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a helicopter": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q34486.  } UNION { ?i wdt:P279+ wd:Q34486.  }",
+  "tiers": [
+   42,
+   30
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a programming framework or library": {
+  "where": "{ ?i wdt:P31 wd:Q271680. }",
+  "tiers": [
+   34,
+   26
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a social network": {
+  "where": "{ ?i wdt:P31 wd:Q3220391. }",
+  "tiers": [
+   81,
+   41
   ],
   "exclude": null,
   "taxa": false

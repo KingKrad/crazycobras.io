@@ -3,7 +3,7 @@
 // prompt). min = fewest Wikipedia language editions an item needs. deck: "car" for GEARHEAD only.
 // Entities are looked up by English label (?x rdfs:label "..."@en) so the rules stay readable.
 const by = (label, v = "x") => `?${v} rdfs:label "${label}"@en.`;
-const song = (artist, page, min = 1) => ({ where: `${by(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366.`, min, pages: [page], require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
+const song = (artist, page, min = 1) => ({ exclude: "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$", where: `${by(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) }`, min, pages: [page], require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
 const dish = (countryQ) => ({ where: `{ ?i wdt:P31/wdt:P279* wd:Q746549. } UNION { ?i wdt:P279+ wd:Q746549. } ?i wdt:P495 wd:${countryQ}.`, min: 2 });
 const taxon = (name, min = 12) => ({ where: `?t wdt:P225 "${name}". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432.`, min, taxa: true, strip: ["common "] });
 const league = (leagueLabel, min = 3) => ({ where: `${by(leagueLabel, "l")} ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. }`, min });
@@ -189,15 +189,15 @@ Object.assign(PROMPTS, {
   "Name a Mario game": gamesBy("P179", "Super Mario", 2),
   "Name a Zelda game": gamesBy("P179", "The Legend of Zelda", 2),
   "Name a Pokémon game": gamesBy("P179", "Pokémon", 2),
-  "Name a Friends character": worksIn("Friends"),
-  "Name a Breaking Bad character": worksIn("Breaking Bad"),
-  "Name an Office (US) character": worksIn("The Office"),
-  "Name a Stranger Things character": worksIn("Stranger Things"),
-  "Name a SpongeBob character": worksIn("SpongeBob SquarePants"),
-  "Name a Doctor Who character": worksIn("Doctor Who"),
-  "Name a Toy Story character": worksIn("Toy Story"),
-  "Name a Shrek character": worksIn("Shrek"),
-  "Name a Batman villain": { where: "?i wdt:P1080 wd:Q1152150; wdt:P31/wdt:P279* wd:Q95074. { ?i wdt:P1441 ?w. ?w rdfs:label \"Batman\"@en. } UNION { ?i wdt:P8345 ?w. ?w rdfs:label \"Batman\"@en. }", min: 1 },
+  "Name a Friends character": universe("Friends"),
+  "Name a Breaking Bad character": universe("Breaking Bad"),
+  "Name an Office (US) character": universe("The Office"),
+  "Name a Stranger Things character": universe("Stranger Things"),
+  "Name a SpongeBob character": universe("SpongeBob SquarePants"),
+  "Name a Doctor Who character": universe("Doctor Who"),
+  "Name a Toy Story character": universe("Toy Story"),
+  "Name a Shrek character": universe("Shrek"),
+  "Name a Batman character": { where: "?i wdt:P1080 wd:Q1152150; wdt:P31/wdt:P279* wd:Q95074. { ?i wdt:P1441 ?w. ?w rdfs:label \"Batman\"@en. } UNION { ?i wdt:P8345 ?w. ?w rdfs:label \"Batman\"@en. }", min: 1 },
   "Name a German city": cityOf("Q183", 15),
   "Name a French city": cityOf("Q142", 15),
   "Name an Italian city": cityOf("Q38", 15),
@@ -219,9 +219,9 @@ Object.assign(PROMPTS, {
   "Name a cricketer": job("Q12299841", 20),
   "Name a rugby player": job("Q14089670", 15),
   "Name a baseball player": job("Q10871364", 25),
-  "Name a pro wrestler": job("Q13474373", 15),
+  "Name a pro wrestler": { ...job("Q13474373", 15), exclude: "^bart simpson$" },
   "Name a figure skater": job("Q13219587", 20),
-  "Name a cyclist": job("Q2309784", 30),
+  "Name a cyclist": { ...job("Q2309784", 30), exclude: "^thylacine$" },
   "Name a swimmer": job("Q10843402", 30),
   "Name a sprinter or runner": job("Q4009406", 30),
   "Name a skier": job("Q4144610", 25),
@@ -230,7 +230,7 @@ Object.assign(PROMPTS, {
   "Name an empire": inst("Q48349", 25),
   "Name a British prime minister": held("Q14211"),
   "Name a pope": held("Q19546", 25),
-  "Name a king or queen of England": held("Q18810062"),
+  "Name a king or queen of England": { ...held("Q18810062"), exclude: "kjbh" },
   "Name a Canadian prime minister": held("Q839078"),
   "Name an Australian prime minister": held("Q319145"),
   "Name a French president": held("Q191954"),
@@ -261,7 +261,7 @@ Object.assign(PROMPTS, {
   "Name a Norse god": { where: "{ ?i wdt:P31/wdt:P279* wd:Q16513881. } UNION { ?i wdt:P31/wdt:P279* wd:Q19606366. }", min: 3 },
   "Name an Egyptian god": { where: "?i wdt:P31/wdt:P279* wd:Q146083.", min: 3 },
   "Name a Hindu deity": { where: "?i wdt:P31/wdt:P279* wd:Q979507.", min: 4 },
-  "Name a mythical creature": { where: "?i wdt:P31/wdt:P279* wd:Q2239243.", min: 8 },
+  "Name a mythical being": { where: "?i wdt:P31/wdt:P279* wd:Q2239243.", min: 8 },
   "Name a constellation star": { where: "?i wdt:P31 wd:Q523; wdt:P59 ?c.", min: 10 },
   "Name a dog in a movie or TV show": { where: "?i wdt:P31/wdt:P279* wd:Q21070568.", min: 2 },
   "Name a famous horse": { where: "?i wdt:P31 wd:Q726.", min: 3 },
