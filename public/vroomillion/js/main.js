@@ -277,7 +277,7 @@ function authForm(mode, onDone) {
   const email = emailInput();
   if (mode === "reset") {
     const code = h("input", { type: "text", name: "code", required: true, maxlength: "40", autocomplete: "off", autocapitalize: "characters", spellcheck: "false", placeholder: "XXXXX-XXXXX-XXXXX-XXXXX", "aria-label": "Recovery code" });
-    const password = passwordInput("new-password", "8+ characters");
+    const password = passwordInput("new-password", "10+ characters");
     const submit = h("button", { class: "btn big", type: "submit", text: "SET NEW PASSWORD" });
     form = h("form", { class: "auth-form", novalidate: true },
       h("div", { class: "step-label", text: "FORGOT YOUR PASSWORD?" }),
@@ -295,7 +295,7 @@ function authForm(mode, onDone) {
     return form;
   }
   const signup = mode === "signup";
-  const password = passwordInput(signup ? "new-password" : "current-password", signup ? "8+ characters" : "password");
+  const password = passwordInput(signup ? "new-password" : "current-password", signup ? "10+ characters" : "password");
   const submit = h("button", { class: "btn big", type: "submit", text: signup ? "CREATE ACCOUNT" : "LOG IN" });
   const bots = signup ? botCheck() : null;
   form = h("form", { class: "auth-form", novalidate: true },

@@ -54,3 +54,11 @@ test("x-client-ip is trusted only with the right proxy secret", () => {
   assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1", "x-proxy-secret": "abc123" }), env), "1.1.1.1");
   assert.equal(clientIp(r({ "x-client-ip": "1.1.1.1", "x-proxy-secret": "abc123" }), {}), "9.9.9.9");
 });
+
+import { checkPassword } from "../src/accounts.js";
+
+test("passwords need 10 to 128 characters", () => {
+  assert.match(checkPassword("123456789"), /at least 10/);
+  assert.equal(checkPassword("1234567890"), null);
+  assert.match(checkPassword("x".repeat(129)), /too long/);
+});

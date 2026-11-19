@@ -51,7 +51,8 @@ export function normalizeEmail(raw) {
 
 export function checkPassword(raw) {
   const pw = typeof raw === "string" ? raw : "";
-  if (pw.length < 8) return "Use at least 8 characters for your password.";
+  // 10+ characters: the free plan limits how slow the password hash can be, so passwords carry more of the load
+  if (pw.length < 10) return "Use at least 10 characters for your password.";
   if (pw.length > 128) return "That password is too long (128 characters max).";
   return null;
 }
