@@ -203,7 +203,11 @@ async function classesFile() {
     const GEN = fs.existsSync(genFile) ? (await import(genFile.href + "?" + Date.now())).GEN : {};
     for (const [prompt, src] of Object.entries(PROMPTS)) {
       if (!GEN[prompt]) continue; // only prompts that made it into the game
-      out[prompt] = { where: branches(src.where).map((b) => `{ ${b} }`).join(" UNION "), tiers: GEN[prompt].tiers, exclude: src.exclude || null, taxa: !!src.taxa };
+      // a prompt built from list pages only is checked against its required kinds of thing
+      const where = src.where ? branches(src.where).map((b) => `{ ${b} }`).join(" UNION ")
+        : src.require ? `{ ?i wdt:P31/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }` : null;
+      if (!where) continue;
+      out[prompt] = { where, tiers: GEN[prompt].tiers, exclude: src.exclude || null, taxa: !!src.taxa };
     }
   } catch (e) { console.log("generated prompts not included:", e.message); }
   const file = new URL("../src/answer-classes.js", import.meta.url);

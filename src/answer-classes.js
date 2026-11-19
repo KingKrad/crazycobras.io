@@ -912,6 +912,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a country in South America": {
+  "where": "{ ?i wdt:P31 wd:Q6256; wdt:P30 wd:Q18. }",
+  "tiers": [
+   372,
+   333
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a country in North America": {
   "where": "{ ?i wdt:P31 wd:Q6256; wdt:P30 wd:Q49. }",
   "tiers": [
@@ -971,6 +980,15 @@ export const CLASSES = {
   "tiers": [
    169,
    147
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Canadian province or territory": {
+  "where": "{ ?i wdt:P31 wd:Q11828004.  } UNION { ?i wdt:P31 wd:Q9357527.  }",
+  "tiers": [
+   171,
+   154
   ],
   "exclude": null,
   "taxa": false
@@ -1056,6 +1074,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name an Olympic host city": {
+  "where": "{ ?i wdt:P31/wdt:P279* ?ok. VALUES ?ok { wd:Q515 wd:Q486972 } }",
+  "tiers": [
+   293,
+   245
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a language": {
   "where": "{ ?i wdt:P31 wd:Q1288568. }",
   "tiers": [
@@ -1128,6 +1155,15 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Beyoncé song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Beyoncé\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   25,
+   20
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name a Madonna song": {
   "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Madonna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
@@ -1182,6 +1218,24 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name an animated TV series": {
+  "where": "{ ?k rdfs:label \"animated television series\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   64,
+   39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Netflix series": {
+  "where": "{ ?i wdt:P449 wd:Q907311; wdt:P31/wdt:P279* wd:Q5398426. }",
+  "tiers": [
+   45,
+   26
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a horror movie": {
   "where": "{ ?i wdt:P31 wd:Q11424; wdt:P136 wd:Q200092. }",
   "tiers": [
@@ -1205,6 +1259,15 @@ export const CLASSES = {
   "tiers": [
    59,
    15
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Star Trek character": {
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Star Trek\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   21,
+   20
   ],
   "exclude": null,
   "taxa": false
@@ -1263,6 +1326,24 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name an NHL team": {
+  "where": "{ ?i wdt:P118 wd:Q1215892; wdt:P31/wdt:P279* wd:Q12973014. }",
+  "tiers": [
+   49,
+   47
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Premier League club": {
+  "where": "{ ?i wdt:P31 wd:Q476028; wdt:P118 wd:Q9448. }",
+  "tiers": [
+   103,
+   86
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name an Olympic sport": {
   "where": "{ ?i wdt:P31 wd:Q212434. }",
   "tiers": [
@@ -1277,6 +1358,15 @@ export const CLASSES = {
   "tiers": [
    94,
    73
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous footballer": {
+  "where": "{ ?i wdt:P106 wd:Q937857; wdt:P2446 ?x. }",
+  "tiers": [
+   146,
+   104
   ],
   "exclude": null,
   "taxa": false
@@ -1506,6 +1596,42 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a coffee drink": {
+  "where": "{ ?k rdfs:label \"coffee drink\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   28,
+   14
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a beer style": {
+  "where": "{ ?k rdfs:label \"beer style\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   32,
+   23
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a grape variety": {
+  "where": "{ ?k rdfs:label \"grape variety\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   29,
+   14
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a liqueur or spirit": {
+  "where": "{ ?k rdfs:label \"liqueur\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   25,
+   10
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a type of sausage": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q131419.  } UNION { ?i wdt:P279+ wd:Q131419.  }",
   "tiers": [
@@ -1520,6 +1646,15 @@ export const CLASSES = {
   "tiers": [
    29,
    17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a dumpling": {
+  "where": "{ ?k rdfs:label \"dumpling\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   40,
+   15
   ],
   "exclude": null,
   "taxa": false
@@ -1641,6 +1776,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": true
  },
+ "Name a mineral": {
+  "where": "{ ?i wdt:P31 wd:Q12089225. }",
+  "tiers": [
+   73,
+   37
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a type of rock": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q8063.  } UNION { ?i wdt:P279+ wd:Q8063.  }",
   "tiers": [
@@ -1704,6 +1848,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a famous ship": {
+  "where": "{ ?k rdfs:label \"ocean liner\"@en. ?i wdt:P31 ?k.  } UNION { ?i wdt:P31 wd:Q11446.  }",
+  "tiers": [
+   27,
+   21
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a spacecraft": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q40218.  } UNION { ?i wdt:P279+ wd:Q40218.  }",
   "tiers": [
@@ -1718,6 +1871,15 @@ export const CLASSES = {
   "tiers": [
    70,
    42
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous novel": {
+  "where": "{ ?i wdt:P31 wd:Q7725634; wdt:P7937 wd:Q8261. }",
+  "tiers": [
+   117,
+   86
   ],
   "exclude": null,
   "taxa": false
@@ -1884,6 +2046,33 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Lady Gaga song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Lady Gaga\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   42,
+   39
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Bruno Mars song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Bruno Mars\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   18,
+   12
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Billie Eilish song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Billie Eilish\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   16,
+   13
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name an Ariana Grande song": {
   "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Ariana Grande\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
@@ -2010,6 +2199,15 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Justin Bieber song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Justin Bieber\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   13,
+   13
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name a Bruce Springsteen song": {
   "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Bruce Springsteen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
@@ -2064,6 +2262,15 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Fleetwood Mac song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Fleetwood Mac\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   5,
+   4
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name a Red Hot Chili Peppers song": {
   "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Red Hot Chili Peppers\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
@@ -2091,6 +2298,15 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Radiohead song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Radiohead\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   15,
+   11
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name an U2 song": {
   "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"U2\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
@@ -2109,11 +2325,101 @@ export const CLASSES = {
   "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
+ "Name a Shakira song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Shakira\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   20,
+   15
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Dua Lipa song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Dua Lipa\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   17,
+   14
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Olivia Rodrigo song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Olivia Rodrigo\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   10,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Sabrina Carpenter song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Sabrina Carpenter\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   11,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Kendrick Lamar song": {
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Kendrick Lamar\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   7,
+   3
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Steven Spielberg film": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Steven Spielberg\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   70,
+   49
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a Alfred Hitchcock film": {
   "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Alfred Hitchcock\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    44,
    33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Stanley Kubrick film": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Stanley Kubrick\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   60,
+   43
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Martin Scorsese film": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Martin Scorsese\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   22,
+   9
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Tim Burton film": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Tim Burton\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   53,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Wes Anderson film": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Wes Anderson\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   42,
+   34
   ],
   "exclude": null,
   "taxa": false
@@ -2150,6 +2456,24 @@ export const CLASSES = {
   "tiers": [
    51,
    44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Brad Pitt movie": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Brad Pitt\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   30,
+   20
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Meryl Streep movie": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Meryl Streep\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "tiers": [
+   52,
+   46
   ],
   "exclude": null,
   "taxa": false
@@ -2271,6 +2595,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Jane Austen book": {
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Jane Austen\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "tiers": [
+   46,
+   28
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a Dr. Seuss book": {
   "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Dr. Seuss\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
@@ -2303,6 +2636,24 @@ export const CLASSES = {
   "tiers": [
    37,
    27
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Sega game": {
+  "where": "{ ?s_wp schema:about ?s; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Sega\"@en. ?i wdt:P123|wdt:P8345 ?s; wdt:P31 wd:Q7889. }",
+  "tiers": [
+   28,
+   19
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Mario game": {
+  "where": "{ ?s_wp schema:about ?s; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Super Mario\"@en. ?i wdt:P179|wdt:P8345 ?s; wdt:P31 wd:Q7889. }",
+  "tiers": [
+   39,
+   34
   ],
   "exclude": null,
   "taxa": false
@@ -2343,6 +2694,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Stranger Things character": {
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Stranger Things\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   13,
+   6
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a SpongeBob character": {
   "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"SpongeBob SquarePants\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
@@ -2357,6 +2717,24 @@ export const CLASSES = {
   "tiers": [
    22,
    17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Toy Story character": {
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Toy Story\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   6,
+   4
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Shrek character": {
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Shrek\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   12,
+   2
   ],
   "exclude": null,
   "taxa": false
@@ -2496,6 +2874,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Bundesliga club": {
+  "where": "{ ?i wdt:P118 wd:Q82595. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. } }",
+  "tiers": [
+   89,
+   83
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name an MLS team": {
   "where": "{ ?i wdt:P118 wd:Q18543. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. } }",
   "tiers": [
@@ -2622,6 +3009,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name an empire": {
+  "where": "{ ?k rdfs:label \"empire\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   62,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a British prime minister": {
   "where": "{ ?i wdt:P39 wd:Q14211. }",
   "tiers": [
@@ -2676,6 +3072,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a medicine": {
+  "where": "{ ?k rdfs:label \"medication\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   56,
+   47
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a bone": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q265868.  } UNION { ?i wdt:P279+ wd:Q265868.  }",
   "tiers": [
@@ -2690,6 +3095,15 @@ export const CLASSES = {
   "tiers": [
    81,
    67
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a comet": {
+  "where": "{ ?k rdfs:label \"periodic comet\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   38,
+   28
   ],
   "exclude": null,
   "taxa": false
@@ -2874,6 +3288,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a citrus fruit": {
+  "where": "{ ?i wdt:P171 wd:Q81513. }",
+  "tiers": [
+   18,
+   10
+  ],
+  "exclude": null,
+  "taxa": true
+ },
  "Name a berry": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q13184.  } UNION { ?i wdt:P279+ wd:Q13184.  }",
   "tiers": [
@@ -2946,11 +3369,47 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a hairstyle": {
+  "where": "{ ?k rdfs:label \"hairstyle\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   33,
+   14
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a knot": {
+  "where": "{ ?k rdfs:label \"knot\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   7,
+   4
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a yoga pose": {
   "where": "{ ?a rdfs:label \"asana\"@en. ?i wdt:P31 ?a. }",
   "tiers": [
    19,
    10
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a dance move": {
+  "where": "{ ?k rdfs:label \"dance move\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   11,
+   4
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a skateboarding trick": {
+  "where": "{ ?k rdfs:label \"skateboarding trick\"@en. ?i wdt:P31|wdt:P279 ?k. }",
+  "tiers": [
+   5,
+   3
   ],
   "exclude": null,
   "taxa": false
@@ -2969,6 +3428,15 @@ export const CLASSES = {
   "tiers": [
    42,
    25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous diamond": {
+  "where": "{ ?k rdfs:label \"diamond\"@en. ?i wdt:P31 ?k. }",
+  "tiers": [
+   19,
+   11
   ],
   "exclude": null,
   "taxa": false
