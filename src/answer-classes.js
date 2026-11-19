@@ -839,6 +839,60 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a pizza topping": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q10675206.  }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a breakfast food": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q2095.  }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an insect": {
+  "where": "{ ?t wdt:P225 \"Insecta\". ?i wdt:P171+ ?t. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name an engine type or layout": {
+  "where": "{ ?i wdt:P279+ wd:Q2576663.  } UNION { ?i wdt:P279+ wd:Q44167.  }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a car body style": {
+  "where": "{ ?i wdt:P279+ wd:Q1420. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous road or driving route": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q34442. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a country": {
   "where": "{ ?i wdt:P31 wd:Q6256. }",
   "tiers": [

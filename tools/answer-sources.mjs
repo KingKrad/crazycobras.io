@@ -98,4 +98,12 @@ export const SOURCES = {
   "Name a motorbike brand": { where: "{ ?i wdt:P31/wdt:P279* wd:Q15726210. } UNION { ?i wdt:P452 wd:Q2140665. } UNION { ?i wdt:P1056 wd:Q34493. }", min: 2, pages: ["List of motorcycle manufacturers"] },
   "Name something you'd find inside a car": { where: "{ ?i wdt:P361 wd:Q1420. } UNION { ?i wdt:P279+ wd:Q1428517. } UNION { ?i wdt:P361 wd:Q752870. }", min: 2 },
   "Name a country in Africa": { where: "?i wdt:P31 wd:Q6256; wdt:P30 wd:Q15.", min: 1 },
+  // live check only (checkOnly): the hand-written lists stay as they are, but answers beyond them are
+  // looked up on Wikidata when played. A food counts as a pizza topping or breakfast food; any insect species counts.
+  "Name a pizza topping": { checkOnly: true, where: "{ ?i wdt:P31/wdt:P279* wd:Q2095. } UNION { ?i wdt:P279+ wd:Q2095. } UNION { ?i wdt:P279+ wd:Q10675206. }" },
+  "Name a breakfast food": { checkOnly: true, where: "{ ?i wdt:P31/wdt:P279* wd:Q2095. } UNION { ?i wdt:P279+ wd:Q2095. }" },
+  "Name an insect": { checkOnly: true, where: "?t wdt:P225 \"Insecta\". ?i wdt:P171+ ?t.", taxa: true },
+  "Name an engine type or layout": { checkOnly: true, where: "{ ?i wdt:P279+ wd:Q2576663. } UNION { ?i wdt:P279+ wd:Q44167. }" },
+  "Name a car body style": { checkOnly: true, where: "?i wdt:P279+ wd:Q1420." },
+  "Name a famous road or driving route": { checkOnly: true, where: "?i wdt:P31/wdt:P279* wd:Q34442." },
 };

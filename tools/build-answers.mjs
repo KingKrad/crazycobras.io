@@ -104,7 +104,7 @@ async function fetchPages(src) {
       // Otherwise people, countries and cities linked from list pages (songwriters, settings) are dropped.
       const check = src.require
         // strictKind: only real instances count (drops generic class articles like "cover version" or "single")
-        ? `BIND(EXISTS { ?i ${src.strictKind ? "wdt:P31" : "(wdt:P31|wdt:P279)"}/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }${notKinds(src) ? ` && NOT EXISTS { ${notKinds(src)} }` : ""}${src.performer ? ` && (NOT EXISTS { ?i wdt:P175 ?pp. } || EXISTS { ?i wdt:P175 ?pa. ?pa rdfs:label ${JSON.stringify(src.performer)}@en. })` : ""} AS ?good)`
+        ? `BIND(EXISTS { ?i ${src.strictKind ? "wdt:P31" : "(wdt:P31|wdt:P279)"}/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }${notKinds(src) ? ` && NOT EXISTS { ${notKinds(src)} }` : ""}${src.performer ? ` && (NOT EXISTS { ?i wdt:P175 ?pp. } || EXISTS { ?i wdt:P175 ?pa. ?pa_wp schema:about ?pa; schema:isPartOf <https://en.wikipedia.org/>; schema:name ${JSON.stringify(src.performer)}@en. })` : ""} AS ?good)`
         // anything that is a person, any kind of place, a language, an organisation, an event, a period of
         // time, a chemical or a creative work is never an answer here ("europe", "paris", "water", "winter")
         : `BIND(NOT EXISTS { ?i wdt:P31/wdt:P279* ?bad. VALUES ?bad { wd:Q5 wd:Q2221906 wd:Q34770 wd:Q315 wd:Q43229 wd:Q1190554 wd:Q186081 wd:Q11173 wd:Q79529 wd:Q17537576 wd:Q11862829 wd:Q9174 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
@@ -232,16 +232,16 @@ if (args.includes("--prompts")) {
       const forms = it.forms.filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; });
       if (forms.length) list.push({ n: it.n, entry: forms.join("|") });
     }
-    if (list.length < 20) { console.log(`-- skipped ${q}: only ${list.length} answers`); continue; }
+    if (list.length < 8) { console.log(`-- skipped ${q}: only ${list.length} answers`); continue; }
     const N = list.length;
-    // small closed sets (20-60 answers) split evenly; big ones keep TRAFFIC to the famous few
+    // small closed sets (8-60 answers, e.g. a director's films) split evenly; big ones keep TRAFFIC to the famous few
     const small = N < 60;
     const t1 = small ? Math.round(N * 0.2) : Math.max(6, Math.min(14, Math.round(N * 0.03)));
     const t2 = small ? Math.round(N * 0.42) : t1 + Math.max(6, Math.round(N * 0.1));
     const t3 = small ? Math.round(N * 0.66) : t2 + Math.max(8, Math.round(N * 0.22));
     const tail = list.slice(t3);
     const rare = tail.filter((x) => x.n >= 2).slice(-Math.max(3, Math.round(tail.length * 0.3)));
-    const pick = new Set((rare.length >= 3 ? rare : tail).filter((_, k, arr) => k % Math.max(1, Math.floor(arr.length / 3)) === 0).slice(0, 3).map((x) => x.entry));
+    const pick = new Set((rare.length >= 3 ? rare : tail).filter((_, k, arr) => k % Math.max(1, Math.floor(arr.length / 3)) === 0).slice(0, N < 20 ? 1 : 3).map((x) => x.entry));
     const a = [list.slice(0, t1), list.slice(t1, t2), list.slice(t2, t3), tail.filter((x) => !pick.has(x.entry)), tail.filter((x) => pick.has(x.entry))].map((l) => l.map((x) => x.entry));
     // thresholds for the live check: an item covered as widely as the CRUISING / FAST LANE boundary
     const thresholds = [list[t1]?.n ?? 70, list[t2]?.n ?? 25];
@@ -314,6 +314,7 @@ if (!outArg && fs.existsSync(OUT) && only) existing = (await import(OUT.href + "
 const extra = { ...existing };
 
 for (const [prompt, src] of Object.entries(SOURCES)) {
+  if (src?.checkOnly) continue; // live check rules only, no answer list
   if (!src || (only && !only.includes(prompt))) continue;
   if (!known.has(prompt)) { console.log("?? no such prompt:", prompt); continue; }
   let items;

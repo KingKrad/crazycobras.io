@@ -3,13 +3,16 @@
 // prompt). min = fewest Wikipedia language editions an item needs. deck: "car" for GEARHEAD only.
 // Entities are looked up by English label (?x rdfs:label "..."@en) so the rules stay readable.
 const by = (label, v = "x") => `?${v} rdfs:label "${label}"@en.`;
-const song = (artist, page, min = 1) => ({ exclude: "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$", where: `${by(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) }`, min, pages: [page], performer: artist, require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
+// people, bands and franchises: found by their English Wikipedia article, which names exactly one item
+// (an exact-label lookup can miss: several items share a label, or the label differs from the common name)
+const wp = (title, v = "x") => `?${v}_wp schema:about ?${v}; schema:isPartOf <https://en.wikipedia.org/>; schema:name "${title}"@en.`;
+const song = (artist, page, min = 1) => ({ exclude: "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$", where: `${wp(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) }`, min, pages: [page], performer: artist, require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
 const dish = (countryQ) => ({ where: `{ ?i wdt:P31/wdt:P279* wd:Q746549. } UNION { ?i wdt:P279+ wd:Q746549. } ?i wdt:P495 wd:${countryQ}.`, min: 2 });
 const taxon = (name, min = 12) => ({ where: `?t wdt:P225 "${name}". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432.`, min, taxa: true, strip: ["common "] });
-const league = (leagueLabel, min = 3) => ({ where: `${by(leagueLabel, "l")} ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. }`, min });
+const league = (leagueLabel, min = 3) => ({ where: `${wp(leagueLabel, "l")} ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. }`, min });
 const job = (q, min) => ({ where: `?i wdt:P106 wd:${q}.`, min, surnames: true });
-const universe = (label, min = 1) => ({ where: `${by(label, "u")} { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074.`, min });
-const worksIn = (label, min = 1) => ({ where: `${by(label, "u")} { ?i wdt:P1441 ?u. } UNION { ?i wdt:P1080 ?u. } UNION { ?i wdt:P179 ?u. }`, min });
+const universe = (label, min = 1) => ({ where: `${wp(label, "u")} { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074.`, min });
+const worksIn = (label, min = 1) => ({ where: `${wp(label, "u")} { ?i wdt:P1441 ?u. } UNION { ?i wdt:P1080 ?u. } UNION { ?i wdt:P179 ?u. }`, min });
 const cityIn = (continentQ, min) => ({ where: `?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 ?c. ?c wdt:P30 wd:${continentQ}.`, min });
 const inst = (q, min = 3) => ({ where: `?i wdt:P31 wd:${q}.`, min });
 const kind = (q, min = 2) => ({ where: `{ ?i wdt:P31/wdt:P279* wd:${q}. } UNION { ?i wdt:P279+ wd:${q}. }`, min });
@@ -36,7 +39,7 @@ export const PROMPTS = {
   "Name a skyscraper": inst("Q11303", 12),
   "Name a famous bridge": { where: "?i wdt:P31/wdt:P279* wd:Q12280.", min: 25 },
   "Name an airport": inst("Q1248784", 30),
-  "Name an Olympic host city": { where: "{ ?g wdt:P31 wd:Q159821. } UNION { ?g wdt:P31 wd:Q82414. } ?g wdt:P276 ?i.", min: 1 },
+  "Name an Olympic host city": { pages: ["List of Olympic Games host cities"], require: ["Q515", "Q486972"] },
   "Name a language": inst("Q1288568", 20),
   // music
   "Name a band": inst("Q215380", 30),
@@ -54,16 +57,16 @@ export const PROMPTS = {
   "Name an Ed Sheeran song": song("Ed Sheeran", "List of songs recorded by Ed Sheeran"),
   "Name a musical genre": inst("Q188451", 15),
   "Name a classical composer": { where: "{ ?i wdt:P106 wd:Q36834; wdt:P136/wdt:P279* wd:Q9730. } UNION { ?i wdt:P106 wd:Q36834; wdt:P569 ?b. FILTER(YEAR(?b) < 1870) }", min: 40, surnames: true },
-  "Name an opera": inst("Q1344", 12),
+  "Name an opera": { where: "?i wdt:P136 wd:Q1344.", min: 8, not: ["Q11424", "Q482994"] },
   // screen
   "Name a TV sitcom": { where: "?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238.", min: 6 },
-  "Name an animated TV series": inst("Q581714", 10),
-  "Name a Netflix series": { where: `${by("Netflix", "n")} ?i wdt:P449 ?n; wdt:P31/wdt:P279* wd:Q5398426.`, min: 3 },
+  "Name an animated TV series": { where: `${by("animated television series", "k")} ?i wdt:P31 ?k.`, min: 15 },
+  "Name a Netflix series": { where: "?i wdt:P449 wd:Q907311; wdt:P31/wdt:P279* wd:Q5398426.", min: 8 },
   "Name a horror movie": { where: "?i wdt:P31 wd:Q11424; wdt:P136 wd:Q200092.", min: 20 },
   "Name a Best Picture Oscar winner": { where: "?i wdt:P166 wd:Q102427; wdt:P31/wdt:P279* wd:Q11424.", min: 1 },
   "Name a James Bond film": { ...worksIn("James Bond"), not: ["Q8261", "Q7725634", "Q1667921"] },
   "Name a Star Trek character": universe("Star Trek"),
-  "Name a Lord of the Rings character": universe("Middle-earth"),
+  "Name a Lord of the Rings character": { where: `${wp("The Lord of the Rings", "u")} ?i wdt:P1441 ?u; wdt:P31/wdt:P279* wd:Q95074.`, min: 1 },
   "Name a Game of Thrones character": universe("A Song of Ice and Fire"),
   "Name a Marvel character": { where: "?i wdt:P1080 wd:Q931597; wdt:P31/wdt:P279* wd:Q95074.", min: 6 },
   "Name a DC Comics character": { where: "?i wdt:P1080 wd:Q1152150; wdt:P31/wdt:P279* wd:Q95074.", min: 6 },
@@ -74,14 +77,14 @@ export const PROMPTS = {
   // sport
   "Name an NFL team": league("National Football League", 1),
   "Name an MLB team": league("Major League Baseball", 1),
-  "Name an NHL team": league("National Hockey League", 1),
+  "Name an NHL team": { where: "?i wdt:P118 wd:Q1215892; wdt:P31/wdt:P279* wd:Q12973014.", min: 3 },
   "Name a Premier League club": { where: "?i wdt:P31 wd:Q476028; wdt:P118 wd:Q9448.", min: 3 },
   "Name an Olympic sport": inst("Q212434", 2),
   "Name a tennis player": { where: "{ ?i wdt:P536 ?x. } UNION { ?i wdt:P597 ?x. }", min: 45, surnames: true },
   "Name a famous footballer": { where: "?i wdt:P106 wd:Q937857; wdt:P2446 ?x.", min: 70, surnames: true },
   "Name a basketball player": { where: "{ ?i wdt:P2685 ?x. } UNION { ?i wdt:P3542 ?x. }", min: 30, surnames: true },
   "Name a boxer": { where: "?i wdt:P106 wd:Q11338576; wdt:P1967 ?x.", min: 30, surnames: true },
-  "Name a golfer": job("Q13156709", 25),
+  "Name a golfer": { where: "?i wdt:P106 wd:Q11303721.", min: 25, surnames: true },
   "Name a chess opening": inst("Q103632", 2),
   // people
   "Name a US president": { where: "?i wdt:P39 wd:Q11696; wdt:P31 wd:Q5.", min: 1, surnames: true },
@@ -110,14 +113,14 @@ export const PROMPTS = {
   "Name a pastry": kind("Q477248"),
   "Name a type of sushi": kind("Q46383", 1),
   "Name a type of tea": kind("Q6097", 2),
-  "Name a coffee drink": kind("Q2089195", 2),
-  "Name a beer style": kind("Q8434312", 2),
-  "Name a grape variety": inst("Q10978", 3),
-  "Name a liqueur or spirit": kind("Q2004294", 6),
+  "Name a coffee drink": { where: `${by("coffee drink", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
+  "Name a beer style": { where: `${by("beer style", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 2 },
+  "Name a grape variety": { where: `${by("grape variety", "k")} ?i wdt:P31 ?k.`, min: 3 },
+  "Name a liqueur or spirit": { where: `${by("liqueur", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
   "Name a type of sausage": kind("Q131419", 2),
   "Name a type of rice dish": kind("Q1196152", 2),
   "Name a type of noodle": kind("Q192874", 2),
-  "Name a dumpling": kind("Q1443", 1),
+  "Name a dumpling": { where: `${by("dumpling", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
   // animals and nature
   "Name a shark": taxon("Selachimorpha", 6),
   "Name a snake": taxon("Serpentes", 10),
@@ -132,7 +135,7 @@ export const PROMPTS = {
   "Name a horse breed": inst("Q1160573", 2),
   "Name a mushroom": { where: "?t wdt:P225 \"Agaricomycetes\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432.", min: 15, taxa: true },
   "Name a cactus or succulent": taxon("Cactaceae", 6),
-  "Name a mineral": inst("Q7946", 12),
+  "Name a mineral": inst("Q12089225", 12),
   "Name a type of rock": kind("Q8063", 6),
   "Name a type of cloud": kind("Q8074", 3),
   "Name a star": inst("Q523", 20),
@@ -143,10 +146,10 @@ export const PROMPTS = {
   "Name a video game console": kind("Q8076", 4),
   "Name a website": inst("Q35127", 50),
   "Name a typeface or font": inst("Q17451", 4),
-  "Name a famous ship": inst("Q11446", 25),
+  "Name a famous ship": { where: `{ ${by("ocean liner", "k")} ?i wdt:P31 ?k. } UNION { ?i wdt:P31 wd:Q11446. }`, min: 12 },
   "Name a spacecraft": kind("Q40218", 10),
   "Name an aircraft": kind("Q15056993", 12),
-  "Name a famous novel": inst("Q8261", 40),
+  "Name a famous novel": { where: "?i wdt:P31 wd:Q7725634; wdt:P7937 wd:Q8261.", min: 40 },
   "Name a magazine": inst("Q41298", 20),
   "Name a newspaper": inst("Q11032", 25),
   "Name a comic strip": inst("Q838795", 5),
@@ -168,11 +171,11 @@ export const PROMPTS = {
 
 // ---- second batch ----
 const songsBy = (artist) => song(artist, `List of songs recorded by ${artist}`);
-const filmBy = (prop, person, min = 2) => ({ where: `${by(person, "p")} ?p wdt:P31 wd:Q5. ?i wdt:${prop} ?p; wdt:P31/wdt:P279* wd:Q11424.`, min });
-const bookBy = (author, min = 2) => ({ where: `${by(author, "p")} ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. }`, min });
+const filmBy = (prop, person, min = 2) => ({ where: `${wp(person, "p")} ?p wdt:P31 wd:Q5. ?i wdt:${prop} ?p; wdt:P31/wdt:P279* wd:Q11424.`, min });
+const bookBy = (author, min = 2) => ({ where: `${wp(author, "p")} ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. }`, min });
 const cityOf = (countryQ, min) => ({ where: `?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:${countryQ}.`, min });
 const clubIn = (leagueQ) => ({ where: `?i wdt:P118 wd:${leagueQ}. { ?i wdt:P31/wdt:P279* wd:Q476028. } UNION { ?i wdt:P31/wdt:P279* wd:Q12973014. }`, min: 2 });
-const gamesBy = (prop, label, min = 3) => ({ where: `${by(label, "s")} ?i wdt:${prop} ?s; wdt:P31 wd:Q7889.`, min });
+const gamesBy = (prop, label, min = 3) => ({ where: `${wp(label, "s")} ?i wdt:${prop}|wdt:P8345 ?s; wdt:P31 wd:Q7889.`, min });
 const held = (posQ, min = 1) => ({ where: `?i wdt:P39 wd:${posQ}.`, min, surnames: true });
 
 Object.assign(PROMPTS, {
@@ -227,7 +230,7 @@ Object.assign(PROMPTS, {
   "Name a skier": job("Q4144610", 25),
   "Name a war": inst("Q198", 35),
   "Name a famous battle": inst("Q178561", 35),
-  "Name an empire": inst("Q48349", 25),
+  "Name an empire": { where: `${by("empire", "k")} ?i wdt:P31 ?k.`, min: 1 },
   "Name a British prime minister": held("Q14211"),
   "Name a pope": held("Q19546", 25),
   "Name a king or queen of England": { ...held("Q18810062"), exclude: "kjbh" },
@@ -235,12 +238,12 @@ Object.assign(PROMPTS, {
   "Name an Australian prime minister": held("Q319145"),
   "Name a French president": held("Q191954"),
   "Name a chemical compound": inst("Q11173", 40),
-  "Name a medicine": inst("Q12140", 35),
+  "Name a medicine": { where: `${by("medication", "k")} ?i wdt:P31 ?k.`, min: 30 },
   "Name a bone": kind("Q265868", 5),
   "Name an organ of the body": kind("Q712378", 10),
   "Name a moon of Jupiter or Saturn": { where: "{ ?i wdt:P397 wd:Q319. } UNION { ?i wdt:P397 wd:Q193. }", min: 1 },
   "Name a galaxy": inst("Q318", 10),
-  "Name a comet": inst("Q3559", 3),
+  "Name a comet": { where: `${by("periodic comet", "k")} ?i wdt:P31 ?k.`, min: 3 },
   "Name a theme park": inst("Q2416723", 8),
   "Name a roller coaster": inst("Q204832", 5),
   "Name a museum": inst("Q33506", 40),
@@ -267,7 +270,7 @@ Object.assign(PROMPTS, {
   "Name a famous horse": { where: "?i wdt:P31 wd:Q726.", min: 3 },
   "Name a cereal grain": kind("Q12117", 4),
   "Name a legume or bean": kind("Q145909", 3),
-  "Name a citrus fruit": kind("Q81513", 2),
+  "Name a citrus fruit": { where: "?i wdt:P171 wd:Q81513.", min: 2, taxa: true },
   "Name a berry": kind("Q13184", 3),
   "Name a root vegetable": kind("Q1074003", 2),
   "Name a leafy green": kind("Q20136", 2),
@@ -281,17 +284,17 @@ Object.assign(PROMPTS, {
   "Name a beer brand": inst("Q15075508", 2),
   "Name a perfume": inst("Q131746", 1),
   "Name a sneaker": { where: `${by("sneakers", "s")} ?i wdt:P279|wdt:P31 ?s.`, min: 1 },
-  "Name a hairstyle": kind("Q1373286", 4),
-  "Name a knot": inst("Q1366", 2),
+  "Name a hairstyle": { where: `${by("hairstyle", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
+  "Name a knot": { where: `${by("knot", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
   "Name a yoga pose": { where: `${by("asana", "a")} ?i wdt:P31 ?a.`, min: 1 },
   "Name a martial arts move": kind("Q1418398", 2),
-  "Name a dance move": inst("Q1059939", 2),
-  "Name a skateboarding trick": kind("Q2396166", 1),
+  "Name a dance move": { where: `${by("dance move", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
+  "Name a skateboarding trick": { where: `${by("skateboarding trick", "k")} ?i wdt:P31|wdt:P279 ?k.`, min: 1 },
   "Name a gymnastics move": kind("Q1067216", 1),
   "Name a weapon": kind("Q728", 20),
   "Name a sword": kind("Q12791", 4),
   "Name a gun": inst("Q15142894", 15),
-  "Name a famous diamond": inst("Q1361429", 2),
+  "Name a famous diamond": { where: `${by("diamond", "k")} ?i wdt:P31 ?k.`, min: 2 },
   "Name a famous statue": inst("Q179700", 25),
   "Name a famous tower": inst("Q12518", 20),
   "Name an ocean or sea": { where: "{ ?i wdt:P31 wd:Q165. } UNION { ?i wdt:P31 wd:Q9430. }", min: 15 },
