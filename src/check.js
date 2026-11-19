@@ -16,12 +16,15 @@ export const cleanAnswer = (s) => String(s ?? "")
 
 const sparqlString = (s) => '"' + s.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
 
-export function checkQuery(where, answer) {
+// exact: the item's name or an alias must be the answer itself (for loose rules such as "described as an
+// insect", where a fuzzy search hit like "Elephantomyia" for "elephant" would otherwise pass)
+export function checkQuery(where, answer, exact = false) {
+  const same = exact ? `\n  ?i rdfs:label|skos:altLabel ?m. FILTER(LCASE(STR(?m)) = LCASE(${sparqlString(answer)}))` : "";
   return `SELECT ?l ?n WHERE {
   SERVICE wikibase:mwapi { bd:serviceParam wikibase:endpoint "www.wikidata.org"; wikibase:api "EntitySearch"; mwapi:search ${sparqlString(answer)}; mwapi:language "en"; mwapi:limit "7". ?i wikibase:apiOutputItem mwapi:item. ?ord wikibase:apiOrdinal true. }
   ?i wikibase:sitelinks ?n.
   ?i rdfs:label ?l. FILTER(lang(?l) = "en")
-  FILTER EXISTS { ${where} }
+  FILTER EXISTS { ${where} }${same}
 } ORDER BY ?ord LIMIT 1`;
 }
 
@@ -50,7 +53,7 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
     const res = await fetchImpl(WDQS, {
       method: "POST",
       headers: { Accept: "application/sparql-results+json", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "vroomillion-answer-check/1.0" },
-      body: "query=" + encodeURIComponent(checkQuery(cls.where, answer)),
+      body: "query=" + encodeURIComponent(checkQuery(cls.where, answer, !!cls.exact)),
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {

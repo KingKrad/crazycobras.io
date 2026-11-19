@@ -840,7 +840,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a pizza topping": {
-  "where": "{ ?i wdt:P31/wdt:P279* wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q10675206.  }",
+  "where": "{ ?i (wdt:P31|wdt:P279) ?c. ?c wdt:P279* wd:Q2095. hint:Prior hint:gearing \"forward\". }",
   "tiers": [
    70,
    25
@@ -849,7 +849,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a breakfast food": {
-  "where": "{ ?i wdt:P31/wdt:P279* wd:Q2095.  } UNION { ?i wdt:P279+ wd:Q2095.  }",
+  "where": "{ ?i (wdt:P31|wdt:P279) ?c. ?c wdt:P279* wd:Q2095. hint:Prior hint:gearing \"forward\". }",
   "tiers": [
    70,
    25
@@ -858,13 +858,14 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an insect": {
-  "where": "{ ?t wdt:P225 \"Insecta\". ?i wdt:P171+ ?t. }",
+  "where": "{ ?i schema:description ?d. FILTER(lang(?d) = \"en\" && REGEX(?d, \"insect|beetle|moth|butterfl|wasp|\\\\bbees?\\\\b|\\\\bants?\\\\b|\\\\bfl(y|ies)\\\\b|dragonfl|damselfl|cricket|grasshopper|mantis|mantid|termite|aphid|lice|louse|flea|cicada|cockroach|earwig|weevil|hornet|katydid|locust|midge|mosquito|gnat\", \"i\")) }",
   "tiers": [
    70,
    25
   ],
   "exclude": null,
-  "taxa": true
+  "taxa": false,
+  "exact": true
  },
  "Name an engine type or layout": {
   "where": "{ ?i wdt:P279+ wd:Q2576663.  } UNION { ?i wdt:P279+ wd:Q44167.  }",
@@ -1092,7 +1093,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Taylor Swift song": {
-  "where": "{ ?a rdfs:label \"Taylor Swift\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Taylor Swift\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    28,
    22
@@ -1101,7 +1102,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Michael Jackson song": {
-  "where": "{ ?a rdfs:label \"Michael Jackson\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Michael Jackson\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    36,
    32
@@ -1110,7 +1111,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Queen song": {
-  "where": "{ ?a rdfs:label \"Queen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Queen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    38,
    33
@@ -1119,7 +1120,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Elvis Presley song": {
-  "where": "{ ?a rdfs:label \"Elvis Presley\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Elvis Presley\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    24,
    12
@@ -1128,7 +1129,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Madonna song": {
-  "where": "{ ?a rdfs:label \"Madonna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Madonna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    27,
    25
@@ -1137,7 +1138,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an ABBA song": {
-  "where": "{ ?a rdfs:label \"ABBA\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"ABBA\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    24,
    19
@@ -1146,7 +1147,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Rolling Stones song": {
-  "where": "{ ?a rdfs:label \"The Rolling Stones\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"The Rolling Stones\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    20,
    15
@@ -1155,7 +1156,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Ed Sheeran song": {
-  "where": "{ ?a rdfs:label \"Ed Sheeran\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Ed Sheeran\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    21,
    16
@@ -1200,7 +1201,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a James Bond film": {
-  "where": "{ ?u rdfs:label \"James Bond\"@en. { ?i wdt:P1441 ?u. } UNION { ?i wdt:P1080 ?u. } UNION { ?i wdt:P179 ?u. } }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"James Bond\"@en. { ?i wdt:P1441 ?u. } UNION { ?i wdt:P1080 ?u. } UNION { ?i wdt:P179 ?u. } }",
   "tiers": [
    59,
    15
@@ -1209,7 +1210,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Game of Thrones character": {
-  "where": "{ ?u rdfs:label \"A Song of Ice and Fire\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"A Song of Ice and Fire\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    31,
    19
@@ -1245,7 +1246,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an NFL team": {
-  "where": "{ ?l rdfs:label \"National Football League\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
+  "where": "{ ?l_wp schema:about ?l; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"National Football League\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
   "tiers": [
    46,
    45
@@ -1254,7 +1255,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an MLB team": {
-  "where": "{ ?l rdfs:label \"Major League Baseball\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
+  "where": "{ ?l_wp schema:about ?l; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Major League Baseball\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
   "tiers": [
    40,
    38
@@ -1857,7 +1858,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Elton John song": {
-  "where": "{ ?a rdfs:label \"Elton John\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Elton John\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    19,
    14
@@ -1866,7 +1867,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a David Bowie song": {
-  "where": "{ ?a rdfs:label \"David Bowie\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"David Bowie\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    17,
    11
@@ -1875,7 +1876,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Rihanna song": {
-  "where": "{ ?a rdfs:label \"Rihanna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Rihanna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    28,
    24
@@ -1884,7 +1885,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Ariana Grande song": {
-  "where": "{ ?a rdfs:label \"Ariana Grande\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Ariana Grande\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    21,
    18
@@ -1893,7 +1894,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Eminem song": {
-  "where": "{ ?a rdfs:label \"Eminem\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Eminem\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    15,
    2
@@ -1902,7 +1903,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Kanye West song": {
-  "where": "{ ?a rdfs:label \"Kanye West\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Kanye West\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    18,
    8
@@ -1911,7 +1912,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Oasis song": {
-  "where": "{ ?a rdfs:label \"Oasis\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Oasis\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    13,
    11
@@ -1920,7 +1921,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Nirvana song": {
-  "where": "{ ?a rdfs:label \"Nirvana\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Nirvana\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    21,
    15
@@ -1929,7 +1930,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Metallica song": {
-  "where": "{ ?a rdfs:label \"Metallica\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Metallica\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    25,
    22
@@ -1938,7 +1939,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an AC/DC song": {
-  "where": "{ ?a rdfs:label \"AC/DC\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"AC/DC\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    13,
    10
@@ -1947,7 +1948,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Bon Jovi song": {
-  "where": "{ ?a rdfs:label \"Bon Jovi\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Bon Jovi\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    11,
    9
@@ -1956,7 +1957,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Whitney Houston song": {
-  "where": "{ ?a rdfs:label \"Whitney Houston\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Whitney Houston\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    11,
    8
@@ -1965,7 +1966,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Mariah Carey song": {
-  "where": "{ ?a rdfs:label \"Mariah Carey\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Mariah Carey\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    22,
    19
@@ -1974,7 +1975,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Britney Spears song": {
-  "where": "{ ?a rdfs:label \"Britney Spears\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Britney Spears\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    28,
    24
@@ -1983,7 +1984,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Katy Perry song": {
-  "where": "{ ?a rdfs:label \"Katy Perry\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Katy Perry\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    24,
    19
@@ -1992,7 +1993,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Adele song": {
-  "where": "{ ?a rdfs:label \"Adele\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Adele\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    24,
    20
@@ -2001,7 +2002,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an One Direction song": {
-  "where": "{ ?a rdfs:label \"One Direction\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"One Direction\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    17,
    14
@@ -2010,7 +2011,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Bruce Springsteen song": {
-  "where": "{ ?a rdfs:label \"Bruce Springsteen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Bruce Springsteen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    15,
    8
@@ -2019,7 +2020,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Johnny Cash song": {
-  "where": "{ ?a rdfs:label \"Johnny Cash\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Johnny Cash\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    5,
    3
@@ -2028,7 +2029,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Dolly Parton song": {
-  "where": "{ ?a rdfs:label \"Dolly Parton\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Dolly Parton\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    20,
    11
@@ -2037,7 +2038,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Frank Sinatra song": {
-  "where": "{ ?a rdfs:label \"Frank Sinatra\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Frank Sinatra\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    20,
    8
@@ -2046,7 +2047,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Pink Floyd song": {
-  "where": "{ ?a rdfs:label \"Pink Floyd\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Pink Floyd\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    29,
    19
@@ -2055,7 +2056,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Led Zeppelin song": {
-  "where": "{ ?a rdfs:label \"Led Zeppelin\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Led Zeppelin\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    24,
    17
@@ -2064,7 +2065,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Red Hot Chili Peppers song": {
-  "where": "{ ?a rdfs:label \"Red Hot Chili Peppers\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Red Hot Chili Peppers\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    18,
    16
@@ -2073,7 +2074,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Green Day song": {
-  "where": "{ ?a rdfs:label \"Green Day\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Green Day\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    18,
    11
@@ -2082,7 +2083,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Linkin Park song": {
-  "where": "{ ?a rdfs:label \"Linkin Park\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Linkin Park\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    26,
    19
@@ -2091,7 +2092,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an U2 song": {
-  "where": "{ ?a rdfs:label \"U2\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"U2\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    17,
    14
@@ -2100,7 +2101,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Kylie Minogue song": {
-  "where": "{ ?a rdfs:label \"Kylie Minogue\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "where": "{ ?a_wp schema:about ?a; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Kylie Minogue\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
   "tiers": [
    28,
    21
@@ -2109,7 +2110,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Alfred Hitchcock film": {
-  "where": "{ ?p rdfs:label \"Alfred Hitchcock\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Alfred Hitchcock\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    44,
    33
@@ -2118,7 +2119,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Ridley Scott film": {
-  "where": "{ ?p rdfs:label \"Ridley Scott\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Ridley Scott\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P57 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    48,
    37
@@ -2127,7 +2128,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Tom Hanks movie": {
-  "where": "{ ?p rdfs:label \"Tom Hanks\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Tom Hanks\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    43,
    32
@@ -2136,7 +2137,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Leonardo DiCaprio movie": {
-  "where": "{ ?p rdfs:label \"Leonardo DiCaprio\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Leonardo DiCaprio\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    54,
    45
@@ -2145,7 +2146,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Tom Cruise movie": {
-  "where": "{ ?p rdfs:label \"Tom Cruise\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Tom Cruise\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    51,
    44
@@ -2154,7 +2155,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Will Smith movie": {
-  "where": "{ ?p rdfs:label \"Will Smith\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Will Smith\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    46,
    39
@@ -2163,7 +2164,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Johnny Depp movie": {
-  "where": "{ ?p rdfs:label \"Johnny Depp\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Johnny Depp\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    48,
    34
@@ -2172,7 +2173,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Jim Carrey movie": {
-  "where": "{ ?p rdfs:label \"Jim Carrey\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Jim Carrey\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    39,
    31
@@ -2181,7 +2182,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Adam Sandler movie": {
-  "where": "{ ?p rdfs:label \"Adam Sandler\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Adam Sandler\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    33,
    29
@@ -2190,7 +2191,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Dwayne Johnson movie": {
-  "where": "{ ?p rdfs:label \"Dwayne Johnson\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Dwayne Johnson\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    41,
    34
@@ -2199,7 +2200,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Jackie Chan movie": {
-  "where": "{ ?p rdfs:label \"Jackie Chan\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Jackie Chan\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    40,
    30
@@ -2208,7 +2209,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Arnold Schwarzenegger movie": {
-  "where": "{ ?p rdfs:label \"Arnold Schwarzenegger\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Arnold Schwarzenegger\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    41,
    29
@@ -2217,7 +2218,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Morgan Freeman movie": {
-  "where": "{ ?p rdfs:label \"Morgan Freeman\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Morgan Freeman\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    47,
    40
@@ -2226,7 +2227,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Keanu Reeves movie": {
-  "where": "{ ?p rdfs:label \"Keanu Reeves\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Keanu Reeves\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P161 ?p; wdt:P31/wdt:P279* wd:Q11424. }",
   "tiers": [
    42,
    37
@@ -2235,7 +2236,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Stephen King book": {
-  "where": "{ ?p rdfs:label \"Stephen King\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Stephen King\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    35,
    23
@@ -2244,7 +2245,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Agatha Christie book": {
-  "where": "{ ?p rdfs:label \"Agatha Christie\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Agatha Christie\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    32,
    28
@@ -2253,7 +2254,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Charles Dickens book": {
-  "where": "{ ?p rdfs:label \"Charles Dickens\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Charles Dickens\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    38,
    22
@@ -2262,7 +2263,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Roald Dahl book": {
-  "where": "{ ?p rdfs:label \"Roald Dahl\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Roald Dahl\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    22,
    9
@@ -2271,7 +2272,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Dr. Seuss book": {
-  "where": "{ ?p rdfs:label \"Dr. Seuss\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Dr. Seuss\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    4,
    2
@@ -2280,7 +2281,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Terry Pratchett book": {
-  "where": "{ ?p rdfs:label \"Terry Pratchett\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Terry Pratchett\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    23,
    20
@@ -2289,7 +2290,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Mark Twain book": {
-  "where": "{ ?p rdfs:label \"Mark Twain\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
+  "where": "{ ?p_wp schema:about ?p; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Mark Twain\"@en. ?p wdt:P31 wd:Q5. ?i wdt:P50 ?p. { ?i wdt:P31/wdt:P279* wd:Q7725634. } UNION { ?i wdt:P31/wdt:P279* wd:Q47461344. } }",
   "tiers": [
    11,
    8
@@ -2298,7 +2299,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Nintendo game": {
-  "where": "{ ?s rdfs:label \"Nintendo\"@en. ?i wdt:P123 ?s; wdt:P31 wd:Q7889. }",
+  "where": "{ ?s_wp schema:about ?s; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Nintendo\"@en. ?i wdt:P123|wdt:P8345 ?s; wdt:P31 wd:Q7889. }",
   "tiers": [
    37,
    27
@@ -2307,7 +2308,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Pokémon game": {
-  "where": "{ ?s rdfs:label \"Pokémon\"@en. ?i wdt:P179 ?s; wdt:P31 wd:Q7889. }",
+  "where": "{ ?s_wp schema:about ?s; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Pokémon\"@en. ?i wdt:P179|wdt:P8345 ?s; wdt:P31 wd:Q7889. }",
   "tiers": [
    9,
    3
@@ -2316,7 +2317,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Friends character": {
-  "where": "{ ?u rdfs:label \"Friends\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Friends\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    34,
    3
@@ -2325,7 +2326,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Breaking Bad character": {
-  "where": "{ ?u rdfs:label \"Breaking Bad\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Breaking Bad\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    12,
    2
@@ -2334,7 +2335,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name an Office (US) character": {
-  "where": "{ ?u rdfs:label \"The Office\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"The Office\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    4,
    3
@@ -2343,7 +2344,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a SpongeBob character": {
-  "where": "{ ?u rdfs:label \"SpongeBob SquarePants\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"SpongeBob SquarePants\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    6,
    2
@@ -2352,7 +2353,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a Doctor Who character": {
-  "where": "{ ?u rdfs:label \"Doctor Who\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "where": "{ ?u_wp schema:about ?u; schema:isPartOf <https://en.wikipedia.org/>; schema:name \"Doctor Who\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
   "tiers": [
    22,
    17

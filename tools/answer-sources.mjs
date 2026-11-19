@@ -1,6 +1,10 @@
 // Where extra answers come from: a Wikidata SPARQL pattern that binds ?i for each prompt.
 // min = minimum number of Wikipedia language editions (sitelinks) an item needs, to keep out junk.
 // strip = words removed from the front of labels to make a second accepted form ("ferrari f40" -> "f40").
+// live-check patterns: anything that is (a kind of) food, walking up from the answer (fast) rather than down from "food";
+// insects by their Wikidata description ("species of beetle", "order of insects"): the taxon tree is too deep to walk live
+const FOOD = '?i (wdt:P31|wdt:P279) ?c. ?c wdt:P279* wd:Q2095. hint:Prior hint:gearing "forward".';
+const INSECT = "insect|beetle|moth|butterfl|wasp|\\\\bbees?\\\\b|\\\\bants?\\\\b|\\\\bfl(y|ies)\\\\b|dragonfl|damselfl|cricket|grasshopper|mantis|mantid|termite|aphid|lice|louse|flea|cicada|cockroach|earwig|weevil|hornet|katydid|locust|midge|mosquito|gnat";
 export const SOURCES = {
   "Name a fruit": { where: "?i wdt:P279+ wd:Q3314483.", min: 3, taxa: true, pages: ["List of culinary fruits"] },
   "Name a dog breed": { where: "?i wdt:P31 wd:Q39367.", min: 1, taxa: true, pages: ["List of dog breeds"] },
@@ -100,9 +104,9 @@ export const SOURCES = {
   "Name a country in Africa": { where: "?i wdt:P31 wd:Q6256; wdt:P30 wd:Q15.", min: 1 },
   // live check only (checkOnly): the hand-written lists stay as they are, but answers beyond them are
   // looked up on Wikidata when played. A food counts as a pizza topping or breakfast food; any insect species counts.
-  "Name a pizza topping": { checkOnly: true, where: "{ ?i wdt:P31/wdt:P279* wd:Q2095. } UNION { ?i wdt:P279+ wd:Q2095. } UNION { ?i wdt:P279+ wd:Q10675206. }" },
-  "Name a breakfast food": { checkOnly: true, where: "{ ?i wdt:P31/wdt:P279* wd:Q2095. } UNION { ?i wdt:P279+ wd:Q2095. }" },
-  "Name an insect": { checkOnly: true, where: "?t wdt:P225 \"Insecta\". ?i wdt:P171+ ?t.", taxa: true },
+  "Name a pizza topping": { checkOnly: true, where: FOOD },
+  "Name a breakfast food": { checkOnly: true, where: FOOD },
+  "Name an insect": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "${INSECT}", "i"))` },
   "Name an engine type or layout": { checkOnly: true, where: "{ ?i wdt:P279+ wd:Q2576663. } UNION { ?i wdt:P279+ wd:Q44167. }" },
   "Name a car body style": { checkOnly: true, where: "?i wdt:P279+ wd:Q1420." },
   "Name a famous road or driving route": { checkOnly: true, where: "?i wdt:P31/wdt:P279* wd:Q34442." },
