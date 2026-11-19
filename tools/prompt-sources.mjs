@@ -3,7 +3,7 @@
 // prompt). min = fewest Wikipedia language editions an item needs. deck: "car" for GEARHEAD only.
 // Entities are looked up by English label (?x rdfs:label "..."@en) so the rules stay readable.
 const by = (label, v = "x") => `?${v} rdfs:label "${label}"@en.`;
-const song = (artist, page, min = 1) => ({ exclude: "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$", where: `${by(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) }`, min, pages: [page], require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
+const song = (artist, page, min = 1) => ({ exclude: "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$", where: `${by(artist, "a")} ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) }`, min, pages: [page], performer: artist, require: ["Q7366", "Q134556", "Q2188189", "Q105543609"], strictKind: true, not: ["Q482994", "Q169930"] });
 const dish = (countryQ) => ({ where: `{ ?i wdt:P31/wdt:P279* wd:Q746549. } UNION { ?i wdt:P279+ wd:Q746549. } ?i wdt:P495 wd:${countryQ}.`, min: 2 });
 const taxon = (name, min = 12) => ({ where: `?t wdt:P225 "${name}". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432.`, min, taxa: true, strip: ["common "] });
 const league = (leagueLabel, min = 3) => ({ where: `${by(leagueLabel, "l")} ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. }`, min });

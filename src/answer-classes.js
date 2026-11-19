@@ -1109,6 +1109,15 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a video game character": {
+  "where": "{ ?i wdt:P31 wd:Q1569167. }",
+  "tiers": [
+   65,
+   48
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name an NFL team": {
   "where": "{ ?l rdfs:label \"National Football League\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
   "tiers": [
@@ -1928,6 +1937,60 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Friends character": {
+  "where": "{ ?u rdfs:label \"Friends\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   34,
+   3
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Breaking Bad character": {
+  "where": "{ ?u rdfs:label \"Breaking Bad\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   12,
+   2
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Office (US) character": {
+  "where": "{ ?u rdfs:label \"The Office\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   4,
+   3
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a SpongeBob character": {
+  "where": "{ ?u rdfs:label \"SpongeBob SquarePants\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   6,
+   2
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Doctor Who character": {
+  "where": "{ ?u rdfs:label \"Doctor Who\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   22,
+   17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Batman character": {
+  "where": "{ ?i wdt:P1080 wd:Q1152150; wdt:P31/wdt:P279* wd:Q95074. { ?i wdt:P1441 ?w. ?w rdfs:label \"Batman\"@en. } UNION { ?i wdt:P8345 ?w. ?w rdfs:label \"Batman\"@en. } }",
+  "tiers": [
+   36,
+   22
+  ],
+  "exclude": null,
+  "taxa": false
+ },
  "Name a German city": {
   "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 wd:Q183. }",
   "tiers": [
@@ -2401,6 +2464,15 @@ export const CLASSES = {
   "tiers": [
    82,
    39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a mythical being": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q2239243. }",
+  "tiers": [
+   92,
+   46
   ],
   "exclude": null,
   "taxa": false

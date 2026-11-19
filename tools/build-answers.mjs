@@ -104,7 +104,7 @@ async function fetchPages(src) {
       // Otherwise people, countries and cities linked from list pages (songwriters, settings) are dropped.
       const check = src.require
         // strictKind: only real instances count (drops generic class articles like "cover version" or "single")
-        ? `BIND(EXISTS { ?i ${src.strictKind ? "wdt:P31" : "(wdt:P31|wdt:P279)"}/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }${notKinds(src) ? ` && NOT EXISTS { ${notKinds(src)} }` : ""} AS ?good)`
+        ? `BIND(EXISTS { ?i ${src.strictKind ? "wdt:P31" : "(wdt:P31|wdt:P279)"}/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }${notKinds(src) ? ` && NOT EXISTS { ${notKinds(src)} }` : ""}${src.performer ? ` && (NOT EXISTS { ?i wdt:P175 ?pp. } || EXISTS { ?i wdt:P175 ?pa. ?pa rdfs:label ${JSON.stringify(src.performer)}@en. })` : ""} AS ?good)`
         // anything that is a person, any kind of place, a language, an organisation, an event, a period of
         // time, a chemical or a creative work is never an answer here ("europe", "paris", "water", "winter")
         : `BIND(NOT EXISTS { ?i wdt:P31/wdt:P279* ?bad. VALUES ?bad { wd:Q5 wd:Q2221906 wd:Q34770 wd:Q315 wd:Q43229 wd:Q1190554 wd:Q186081 wd:Q11173 wd:Q79529 wd:Q17537576 wd:Q11862829 wd:Q9174 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
