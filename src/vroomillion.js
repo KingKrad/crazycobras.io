@@ -1,6 +1,6 @@
 // VROOMILLION Unlimited: a one-time $5 Stripe Checkout payment, tied to an account.
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
-import { json, currentUser, publicUser, ensureSchema, readForm } from "./accounts.js";
+import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin } from "./accounts.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -53,9 +53,9 @@ export async function handleCheckout(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   if (!env.STRIPE_SECRET_KEY || !env.DB) return json({ error: "Payments aren't set up yet." }, 503);
 
-  const origin = new URL(request.url).origin;
-  const from = request.headers.get("origin");
-  if (from && from !== origin) return json({ error: "Bad request." }, 403);
+  const site = siteOrigin(request, env);
+  if (!site.ok) return json({ error: "Bad request." }, 403);
+  const origin = site.origin; // Stripe sends the buyer back to the site they paid from
 
   if (env.PAY_LIMITER) {
     const ip = request.headers.get("cf-connecting-ip") || "unknown";

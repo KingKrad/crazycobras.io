@@ -134,13 +134,22 @@ export function newRecoveryCode() {
 const normalizeCode = (raw) => String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 40);
 const hashCode = (code) => sha256("vroomillion-recovery:" + normalizeCode(code));
 
+// The site's own origin, plus any front ends listed in ALLOWED_ORIGINS (for example the Vercel
+// deployment that proxies /api/* here). Browsers send Origin on POSTs; a request from any other
+// site is refused.
+export function siteOrigin(request, env) {
+  const own = new URL(request.url).origin;
+  const from = request.headers.get("origin");
+  if (!from || from === own) return { ok: true, origin: own };
+  const allowed = String(env.ALLOWED_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean);
+  return allowed.includes(from) ? { ok: true, origin: from } : { ok: false, origin: own };
+}
+
 // Shared checks for the sign-up / log-in forms.
 async function guard(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
-  const origin = new URL(request.url).origin;
-  const from = request.headers.get("origin");
-  if (from && from !== origin) return json({ error: "Bad request." }, 403);
+  if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403);
   if (env.AUTH_LIMITER) {
     const ip = request.headers.get("cf-connecting-ip") || "unknown";
     const { success } = await env.AUTH_LIMITER.limit({ key: ip });
