@@ -228,6 +228,47 @@ function wireForm(form, submit, msg, busyText, send, onOk) {
   });
 }
 
+// Cloudflare Turnstile on the sign-up form, when the server has it switched on (/api/vroomillion/config).
+let botCheckKey;
+async function turnstileKey() {
+  if (botCheckKey === undefined) {
+    try { botCheckKey = (await api("config")).body.turnstileSiteKey || null; } catch { botCheckKey = null; }
+  }
+  return botCheckKey;
+}
+let turnstileLoad;
+function loadTurnstile() {
+  turnstileLoad ||= new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.onload = () => resolve(window.turnstile);
+    s.onerror = () => { turnstileLoad = null; reject(new Error("bot check didn't load")); };
+    document.head.append(s);
+  });
+  return turnstileLoad;
+}
+// Returns { el, take() }: el stays empty and take() gives "" when the check is off. A token works
+// once, so take() also resets the widget for the next try.
+function botCheck() {
+  const el = h("div", { class: "bot-check" });
+  let token = "";
+  let ts = null;
+  let id = null;
+  turnstileKey().then(async (key) => {
+    if (!key) return;
+    ts = await loadTurnstile();
+    id = ts.render(el, { sitekey: key, theme: "dark", callback: (t) => { token = t; }, "expired-callback": () => { token = ""; } });
+  }).catch(() => { el.textContent = "The robot check couldn't load. Reload the page to try again."; });
+  const take = () => {
+    const t = token;
+    token = "";
+    if (ts && id != null) ts.reset(id);
+    return t;
+  };
+  return { el, take };
+}
+
 // Create-account / log-in / forgot-password form. mode is "signup", "login" or "reset".
 function authForm(mode, onDone) {
   let form;
@@ -256,16 +297,17 @@ function authForm(mode, onDone) {
   const signup = mode === "signup";
   const password = passwordInput(signup ? "new-password" : "current-password", signup ? "8+ characters" : "password");
   const submit = h("button", { class: "btn big", type: "submit", text: signup ? "CREATE ACCOUNT" : "LOG IN" });
+  const bots = signup ? botCheck() : null;
   form = h("form", { class: "auth-form", novalidate: true },
     authLabel("EMAIL", email), authLabel("PASSWORD", password),
-    submit, msg,
+    bots && bots.el, submit, msg,
     signup ? h("p", { class: "note" }, "Accounts are for players 13 and over. Your email is used only for your account. ",
       h("a", { href: "terms.html", text: "Terms" }), " · ", h("a", { href: "privacy.html", text: "Privacy" })) : null,
     signup ? null : h("button", { class: "link", type: "button", text: "Forgot password?", onclick: () => swap("reset") }),
     h("button", { class: "link", type: "button", text: signup ? "Already have an account? Log in" : "New here? Create an account",
       onclick: () => swap(signup ? "login" : "signup") }));
   wireForm(form, submit, msg, signup ? "Creating your account…" : "Logging in…",
-    () => api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value }) }),
+    () => api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value, ...(bots ? { turnstile: bots.take() } : {}) }) }),
     (body) => {
       account = { email: body.email, unlimited: body.unlimited };
       password.value = "";

@@ -156,7 +156,7 @@ async function guard(request, env) {
     if (!success) return json({ error: "Too many tries — wait a minute and try again." }, 429);
   }
   const len = Number(request.headers.get("content-length") || 0);
-  if (len > 2000) return json({ error: "Bad request." }, 413);
+  if (len > 4000) return json({ error: "Bad request." }, 413);
   return null;
 }
 
@@ -173,10 +173,37 @@ export async function readForm(request, maxBytes = 2000) {
   }
 }
 
+// Cloudflare Turnstile bot check on sign-up. It's on when TURNSTILE_SECRET_KEY (a Worker secret) and
+// TURNSTILE_SITE_KEY (a plain variable) are set; without them sign-up works as before.
+const TURNSTILE_VERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+export async function passesBotCheck(request, env, token, fetchImpl = fetch) {
+  if (!env.TURNSTILE_SECRET_KEY) return true;
+  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token });
+  const ip = request.headers.get("cf-connecting-ip");
+  if (ip) form.set("remoteip", ip);
+  try {
+    const res = await fetchImpl(TURNSTILE_VERIFY, { method: "POST", body: form, signal: AbortSignal.timeout(5000) });
+    const out = await res.json();
+    return out.success === true;
+  } catch {
+    return false;
+  }
+}
+
+// GET /api/vroomillion/config -> settings the page needs before it can show the sign-up form.
+export function handleConfig(request, env) {
+  if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
+  return json({ turnstileSiteKey: env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null });
+}
+
 export async function handleSignup(request, env) {
   const stop = await guard(request, env);
   if (stop) return stop;
-  const body = await readForm(request);
+  const body = await readForm(request, 4000);
+  if (!(await passesBotCheck(request, env, body.turnstile))) {
+    return json({ error: "The robot check didn't go through. Try it again." }, 400);
+  }
   const email = normalizeEmail(body.email);
   if (!email) return json({ error: "Enter a valid email address." }, 400);
   const problem = checkPassword(body.password);
@@ -184,7 +211,9 @@ export async function handleSignup(request, env) {
 
   await ensureSchema(env.DB);
   const exists = await env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(email).first();
-  if (exists) return json({ error: "There's already an account with that email. Log in instead." }, 409);
+  // Kept vague on purpose, so the form doesn't confirm who has an account.
+  const taken = () => json({ error: "Couldn't create an account with that email. If it's yours, log in or reset your password." }, 409);
+  if (exists) return taken();
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iterations = iterationsFor(env);
@@ -195,7 +224,7 @@ export async function handleSignup(request, env) {
       "INSERT INTO users (id, email, pw_hash, pw_salt, pw_iter, recovery_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
     ).bind(id, email, await hashPassword(body.password, salt, iterations), b64(salt), iterations, await hashCode(recoveryCode), Date.now()).run();
   } catch {
-    return json({ error: "There's already an account with that email. Log in instead." }, 409);
+    return taken();
   }
   return json({ email, unlimited: false, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
 }

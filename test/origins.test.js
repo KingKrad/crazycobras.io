@@ -22,3 +22,24 @@ test("readForm ignores bodies over the limit, whatever Content-Length says", asy
   const ok = new Request("https://x/", { method: "POST", body: '{"email":"a@b.co"}' });
   assert.deepEqual(await readForm(ok), { email: "a@b.co" });
 });
+
+import { passesBotCheck, handleConfig } from "../src/accounts.js";
+
+test("bot check is off without keys, and asks Turnstile when on", async () => {
+  const r = new Request("https://x/", { method: "POST", headers: { "cf-connecting-ip": "1.2.3.4" } });
+  assert.equal(await passesBotCheck(r, {}, undefined), true);
+  const env = { TURNSTILE_SECRET_KEY: "s3cret", TURNSTILE_SITE_KEY: "site" };
+  assert.equal(await passesBotCheck(r, env, ""), false);
+  let sent;
+  const ok = async (url, init) => { sent = init.body.toString(); return new Response('{"success":true}'); };
+  assert.equal(await passesBotCheck(r, env, "tok", ok), true);
+  assert.match(sent, /secret=s3cret&response=tok&remoteip=1\.2\.3\.4/);
+  assert.equal(await passesBotCheck(r, env, "tok", async () => new Response('{"success":false}')), false);
+  assert.equal(await passesBotCheck(r, env, "tok", async () => { throw new Error("down"); }), false);
+});
+
+test("config only hands out the site key when the check is fully set up", async () => {
+  const get = new Request("https://x/api/vroomillion/config");
+  assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site" }).json()).turnstileSiteKey, null);
+  assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "s" }).json()).turnstileSiteKey, "site");
+});
