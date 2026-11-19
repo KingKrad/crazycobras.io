@@ -101,6 +101,18 @@ export const sfx = {
   },
   bonk: () => { tone(140, 0.12, { type: "square", vol: 0.22, slide: 0.6 }); tone(95, 0.25, { type: "triangle", vol: 0.18, at: 0.1, slide: 0.7 }); noise(0.15, { vol: 0.1, hp: 300, at: 0.05 }); },
   shift: () => { noise(0.05, { vol: 0.12, hp: 1200 }); tone(320, 0.05, { vol: 0.06 }); },
+  // Exhaust fire lighting up: a rushing whoosh, longer and brighter for rarer answers.
+  whoosh: (t) => {
+    noise(0.35 + t * 0.12, { vol: 0.06 + t * 0.02, hp: 900 });
+    noise(0.2 + t * 0.08, { vol: 0.04 + t * 0.015, hp: 3000, at: 0.05 });
+  },
+  // A backfire on a gear shift: a sharp crack with a low thud under it.
+  backfire: () => {
+    noise(0.06, { vol: 0.22, hp: 400 });
+    tone(55, 0.09, { type: "square", vol: 0.18, slide: 0.5 });
+  },
+  // A STALLED answer: the engine coughs out black smoke.
+  sputter: () => [0, 0.16, 0.34].forEach((at, i) => { noise(0.08, { vol: 0.12 - i * 0.03, hp: 250, at }); tone(80 - i * 12, 0.08, { type: "square", vol: 0.1 - i * 0.02, at }); }),
   // Reveal jingle gets grander with each rarity tier.
   tier: (t) => {
     if (t === 0) { tone(110, 0.3, { type: "sawtooth", vol: 0.18, slide: 0.5 }); noise(0.25, { vol: 0.1, hp: 200 }); return; }

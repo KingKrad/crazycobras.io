@@ -822,26 +822,8 @@ async function runRace(token) {
         color: i ? "#ff4fd8" : "#4fd1ff",
       };
     });
-    scene.onEvent = (type, card) => {
-      if (type === "slam") audio.sfx.tier(card.tier);
-      else if (type === "impact") { audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); }
-      else if (type === "bonk") audio.sfx.bonk();
-    };
-    await scene.smash(smashCards);
-    scene.onEvent = null;
-    document.body.classList.remove("smashing");
-    if (!alive()) return;
-    if (bumped) {
-      audio.sfx.bump();
-      overlay("FENDER BENDER!", "small bad");
-      $("hint").textContent = "FENDER BENDER! SAME ANSWER — BOTH DROP A TIER.";
-      scene.shake = scene.calm ? 0 : 0.4;
-      await sleep(900);
-      if (!alive()) return;
-      overlay("");
-    }
-
-    // burst down the road
+    // The boost starts the moment each car breaks through its card, from the speed it hit it at,
+    // so the car never slows down between the crash and the run up the road.
     const from = race.racers.map((r) => r.dist);
     const gain = race.racers.map((r, i) => metresFor(final[i].tier, r.power, r.useNitro));
     const topTier = Math.max(...final.map((f) => f.tier));
@@ -851,57 +833,92 @@ async function runRace(token) {
       r.elTier.className = "badge t" + final[i].tier;
       r.elTier.textContent = TIERS[final[i].tier].short;
     });
-
-    // rev up...
-    if (topTier > 0) {
-      scene.rev(0.55);
-      audio.sfx.rev();
-      audio.engineSet(0.85);
-      race.racers.forEach((r) => { r.elSpeed.textContent = "REV!"; });
-      await sleep(550);
-      if (!alive()) return;
-    }
-    // ...and launch
     const stage = document.querySelector(".stage");
-    stage.classList.add("launch", "launch-t" + topTier);
-    race.racers.forEach((r, i) => {
-      const nitro = r.useNitro && final[i].tier > 0;
+    const BOOST_MS = [2300, 2400, 2600, 2900, 3400, 4200]; // rarer answers get a longer run
+    const runs = race.racers.map(() => null);
+    const startRun = (i) => {
+      if (runs[i] || !alive()) return;
+      const r = race.racers[i];
+      const tier = final[i].tier;
+      const nitro = r.useNitro && tier > 0;
+      const dur = BOOST_MS[tier] + (nitro ? 300 : 0);
+      runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier };
       scene.racers[i].nitro = nitro;
-      scene.launch(i, final[i].tier, nitro);
-      popGain(i, gain[i], final[i].tier, nitro);
+      scene.launch(i, tier, nitro, dur / 1000);
+      popGain(i, gain[i], tier, nitro);
+      audio.sfx.launch(tier);
+      if (tier >= 2) audio.sfx.whoosh(tier);
+      if (tier === 0) audio.sfx.sputter();
       if (nitro) audio.sfx.nitro();
-    });
-    audio.sfx.launch(topTier);
-    const dur = 2300 + topTier * 180;
-    const gears = 2 + topTier;
-    let gear = 0;
-    const t0 = performance.now();
-    await new Promise((done) => {
+      if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
+    };
+    scene.onEvent = (type, card) => {
+      if (type === "slam") audio.sfx.tier(card.tier);
+      else if (type === "impact") { audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); startRun(card.i); }
+      // STALLED: bounce off the card, then cough black smoke
+      else if (type === "bonk") { audio.sfx.bonk(); setTimeout(() => startRun(card.i), 450); }
+    };
+    let smashed = false;
+    const run = new Promise((done) => {
+      let last = performance.now();
       const step = (now) => {
         if (!alive()) return done();
-        const k = Math.min(1, (now - t0) / dur);
-        const e = 1 - Math.pow(1 - k, 3);
-        const v = 3 * Math.pow(1 - k, 2); // derivative of the ease, 3 → 0
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
         let top = 0;
+        let finished = smashed;
         race.racers.forEach((r, i) => {
+          const R = runs[i];
+          if (!R) { finished = false; return; }
+          const k = Math.min(1, (now - R.t0) / R.dur);
+          if (k < 1) finished = false;
+          const q1 = 1 - k;
+          // speed rises to a peak just after the crash, then eases off; distance is its integral
+          const v = q1 * q1 * (1 + 4 * k);
+          const e = 1 - (2.5 * q1 ** 3 - 1.5 * q1 ** 4);
+          const b = Math.max(R.peak * v, R.b0 * q1 ** 3);
           r.dist = from[i] + gain[i] * e;
           scene.racers[i].dist = r.dist;
-          scene.racers[i].boost = (gain[i] / 1500) * v;
-          top = Math.max(top, scene.racers[i].boost);
+          scene.racers[i].boost = b;
+          top = Math.max(top, b);
           r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
-          r.elSpeed.textContent = Math.round(40 + Math.min(4.5, scene.racers[i].boost) * 85 * r.power) + " KM/H";
+          r.elSpeed.textContent = Math.round(40 + Math.min(4.5, b) * 85 * r.power) + " KM/H";
+          // climb through the gears; Fast Lane and up backfire on each shift
+          const g = Math.min(R.gears - 1, Math.floor(e * R.gears));
+          if (g > R.gear && b > 0.3) {
+            R.gear = g;
+            audio.sfx.shift();
+            if (R.tier >= 3) { scene.backfire(i); audio.sfx.backfire(); }
+          }
+          if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));
         });
-        scene.speed = 0.25 + Math.min(0.75, top * 0.9);
-        // climb through the gears: rpm rises, then drops on each shift
-        const g = Math.min(gears - 1, Math.floor(e * gears));
-        if (g > gear && top > 0.3) { gear = g; audio.sfx.shift(); }
-        const rpm = topTier > 0 ? 0.35 + 0.65 * ((e * gears) % 1) : 0.2;
-        audio.engineSet(Math.max(scene.speed * 0.6, rpm * Math.min(1, top + 0.3)));
-        if (k < 1) requestAnimationFrame(step);
-        else done();
+        if (runs.some(Boolean)) {
+          // ease the road speed towards the boost (never a jump), and pull the camera back with it
+          const target = 0.25 + Math.min(0.75, top * 0.9);
+          scene.speed += (target - scene.speed) * Math.min(1, dt * 5);
+          scene.kick = Math.max(scene.kick, Math.min(1.3, top * 0.45));
+          scene.stretch = Math.max(scene.stretch, Math.min(2, top * 0.7));
+        }
+        if (finished) done();
+        else requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
     });
+    await scene.smash(smashCards);
+    document.body.classList.remove("smashing");
+    if (!alive()) return;
+    smashed = true;
+    // a card that never got hit still launches its car
+    race.racers.forEach((_, i) => { if (!runs[i] && final[i].tier > 0) startRun(i); });
+    if (bumped) {
+      audio.sfx.bump();
+      overlay("FENDER BENDER!", "small bad");
+      $("hint").textContent = "FENDER BENDER! SAME ANSWER — BOTH DROP A TIER.";
+      scene.shake = scene.calm ? 0 : 0.4;
+      setTimeout(() => { if (alive()) overlay(""); }, 900);
+    }
+    await run;
+    scene.onEvent = null;
     stage.classList.remove("launch", "launch-t" + topTier);
     if (!alive()) return;
     race.racers.forEach((r, i) => {
