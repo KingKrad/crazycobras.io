@@ -5,6 +5,7 @@
 // deck: "car" = GEARHEAD mode only, "both" = CLASSIC and GEARHEAD, missing = CLASSIC only.
 
 import { POP_QUESTIONS } from "./data-pop.js";
+import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE } from "./data-more.js";
 import { GEN } from "./data-gen.js";
@@ -623,7 +624,7 @@ const withExtra = (q) => {
 };
 
 // HAND_QUESTIONS: just the hand-written answers (the answer builder uses these).
-export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...POP_QUESTIONS.map((q) => ({ ...q, pop: true }))];
+export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2_QUESTIONS].map((q) => ({ ...q, pop: true }))];
 // Whole prompts generated from Wikidata (tools/prompt-sources.mjs), mixed in with the everyday ones.
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
