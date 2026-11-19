@@ -21,7 +21,7 @@ const sparqlString = (s) => '"' + s.replace(/\\/g, "\\\\").replace(/"/g, '\\"') 
 export function checkQuery(where, answer, exact = false) {
   const same = exact ? `\n  ?i rdfs:label|skos:altLabel ?m. FILTER(LCASE(STR(?m)) = LCASE(${sparqlString(answer)}))` : "";
   return `SELECT ?l ?n WHERE {
-  SERVICE wikibase:mwapi { bd:serviceParam wikibase:endpoint "www.wikidata.org"; wikibase:api "EntitySearch"; mwapi:search ${sparqlString(answer)}; mwapi:language "en"; mwapi:limit "7". ?i wikibase:apiOutputItem mwapi:item. ?ord wikibase:apiOrdinal true. }
+  SERVICE wikibase:mwapi { bd:serviceParam wikibase:endpoint "www.wikidata.org"; wikibase:api "EntitySearch"; mwapi:search ${sparqlString(answer)}; mwapi:language "en"; mwapi:limit "${exact ? 20 : 7}". ?i wikibase:apiOutputItem mwapi:item. ?ord wikibase:apiOrdinal true. }
   ?i wikibase:sitelinks ?n.
   ?i rdfs:label ?l. FILTER(lang(?l) = "en")
   FILTER EXISTS { ${where} }${same}
@@ -49,13 +49,17 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   let found = false;
   let label = "";
   let n = 0;
+  // Wikidata's query service sometimes times out or is briefly busy: one quick retry before giving up
+  const ask = () => fetchImpl(WDQS, {
+    method: "POST",
+    headers: { Accept: "application/sparql-results+json", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "vroomillion-answer-check/1.0" },
+    body: "query=" + encodeURIComponent(checkQuery(cls.where, answer, !!cls.exact)),
+    signal: AbortSignal.timeout(5500),
+  });
   try {
-    const res = await fetchImpl(WDQS, {
-      method: "POST",
-      headers: { Accept: "application/sparql-results+json", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "vroomillion-answer-check/1.0" },
-      body: "query=" + encodeURIComponent(checkQuery(cls.where, answer, !!cls.exact)),
-      signal: AbortSignal.timeout(6000),
-    });
+    let res;
+    try { res = await ask(); } catch { res = null; }
+    if (!res || !res.ok) res = await ask();
     if (res.ok) {
       const row = (await res.json()).results?.bindings?.[0];
       if (row) {

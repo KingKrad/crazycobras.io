@@ -363,3 +363,17 @@ test("a failed lookup doesn't count as a no forever", async () => {
   const res = await ask({ prompt: "Name a sauce or condiment", answer: "mayochup" }, async () => new Response("down", { status: 503 }));
   assert.equal(res.status, 502);
 });
+
+test("live check retries once when Wikidata times out, and exact checks search wider", async () => {
+  let calls = 0;
+  const flaky = async (url, init) => {
+    calls++;
+    if (calls === 1) throw new Error("timeout");
+    return wd([["stag beetle", 40]])(url, init);
+  };
+  const j = await (await ask({ prompt: "Name an insect", answer: "stag beetle" }, flaky)).json();
+  assert.equal(calls, 2);
+  assert.equal(j.found, true);
+  assert.ok(checkQuery("?i wdt:P31 wd:Q1.", "firefly", true).includes('mwapi:limit "20"'));
+  assert.ok(checkQuery("?i wdt:P31 wd:Q1.", "firefly").includes('mwapi:limit "7"'));
+});

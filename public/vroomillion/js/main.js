@@ -888,21 +888,23 @@ async function checkOnline(index, value) {
   const k = index.prompt + "|" + normalize(value);
   if (onlineSeen.has(k)) return onlineSeen.get(k);
   let hit = null;
+  let settled = false; // a real yes/no from the server; a failed lookup is not remembered, so a retry can pass
   try {
     const res = await fetch("/api/vroomillion/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: index.prompt, answer: value }),
-      signal: AbortSignal.timeout(7000),
+      signal: AbortSignal.timeout(12000),
     });
     if (res.ok) {
+      settled = true;
       const j = await res.json();
       if (j.found && typeof j.label === "string") hit = j;
     }
   } catch { /* offline: nothing found */ }
   // "starting with" twists: the real answer must still start with the letter
   if (hit && index.letter && normalize(hit.label)[0] !== index.letter) hit = null;
-  onlineSeen.set(k, hit);
+  if (settled) onlineSeen.set(k, hit);
   return hit;
 }
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
