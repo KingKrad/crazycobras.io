@@ -5,3 +5,5 @@ node_modules/
 .env*
 .DS_Store
 tools/.part*.js
+tools/.gen*.js
+tools/.gtest.js
