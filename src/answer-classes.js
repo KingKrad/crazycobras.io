@@ -838,5 +838,725 @@ export const CLASSES = {
   ],
   "exclude": null,
   "taxa": false
+ },
+ "Name a country": {
+  "where": "{ ?i wdt:P31 wd:Q6256. }",
+  "tiers": [
+   405,
+   374
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a country in Europe": {
+  "where": "{ ?i wdt:P31 wd:Q6256; wdt:P30 wd:Q46. }",
+  "tiers": [
+   397,
+   387
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a capital city": {
+  "where": "{ ?c wdt:P31 wd:Q6256; wdt:P36 ?i. }",
+  "tiers": [
+   322,
+   260
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a city in Europe": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 ?c. ?c wdt:P30 wd:Q46. }",
+  "tiers": [
+   280,
+   112
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a city in Asia": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 ?c. ?c wdt:P30 wd:Q48. }",
+  "tiers": [
+   251,
+   105
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a city in Africa": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 ?c. ?c wdt:P30 wd:Q15. }",
+  "tiers": [
+   186,
+   87
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a city in South America": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q515; wdt:P17 ?c. ?c wdt:P30 wd:Q18. }",
+  "tiers": [
+   177,
+   71
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a US state capital": {
+  "where": "{ ?s wdt:P31 wd:Q35657; wdt:P36 ?i. }",
+  "tiers": [
+   169,
+   147
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a lake": {
+  "where": "{ ?i wdt:P31 wd:Q23397. }",
+  "tiers": [
+   102,
+   61
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an island": {
+  "where": "{ ?i wdt:P31 wd:Q23442. }",
+  "tiers": [
+   131,
+   80
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a desert": {
+  "where": "{ ?i wdt:P31 wd:Q8514. }",
+  "tiers": [
+   92,
+   51
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a volcano": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q8072.  }",
+  "tiers": [
+   71,
+   38
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a national park": {
+  "where": "{ ?i wdt:P31 wd:Q46169. }",
+  "tiers": [
+   60,
+   40
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a skyscraper": {
+  "where": "{ ?i wdt:P31 wd:Q11303. }",
+  "tiers": [
+   58,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous bridge": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q12280. }",
+  "tiers": [
+   71,
+   50
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an airport": {
+  "where": "{ ?i wdt:P31 wd:Q1248784. }",
+  "tiers": [
+   67,
+   51
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a language": {
+  "where": "{ ?i wdt:P31 wd:Q1288568. }",
+  "tiers": [
+   253,
+   116
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a band": {
+  "where": "{ ?i wdt:P31 wd:Q215380. }",
+  "tiers": [
+   106,
+   63
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a rapper": {
+  "where": "{ ?i wdt:P106 wd:Q2252262. }",
+  "tiers": [
+   90,
+   56
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a pop singer": {
+  "where": "{ ?i wdt:P106 wd:Q177220; wdt:P136 wd:Q37073. }",
+  "tiers": [
+   144,
+   64
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a musical genre": {
+  "where": "{ ?i wdt:P31 wd:Q188451. }",
+  "tiers": [
+   104,
+   51
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a TV sitcom": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238. }",
+  "tiers": [
+   49,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a horror movie": {
+  "where": "{ ?i wdt:P31 wd:Q11424; wdt:P136 wd:Q200092. }",
+  "tiers": [
+   59,
+   43
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Game of Thrones character": {
+  "where": "{ ?u rdfs:label \"A Song of Ice and Fire\"@en. { ?i wdt:P1080 ?u. } UNION { ?i wdt:P1441 ?u. } ?i wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   31,
+   19
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a DC Comics character": {
+  "where": "{ ?i wdt:P1080 wd:Q1152150; wdt:P31/wdt:P279* wd:Q95074. }",
+  "tiers": [
+   42,
+   22
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Pixar character": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q95074; wdt:P1441 ?w. ?w wdt:P272 wd:Q127552. }",
+  "tiers": [
+   16,
+   6
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an NFL team": {
+  "where": "{ ?l rdfs:label \"National Football League\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
+  "tiers": [
+   46,
+   45
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an MLB team": {
+  "where": "{ ?l rdfs:label \"Major League Baseball\"@en. ?i wdt:P118 ?l. { ?i wdt:P31/wdt:P279* wd:Q12973014. } UNION { ?i wdt:P31/wdt:P279* wd:Q847017. } }",
+  "tiers": [
+   40,
+   38
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a chess opening": {
+  "where": "{ ?i wdt:P31 wd:Q103632. }",
+  "tiers": [
+   41,
+   31
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Roman emperor": {
+  "where": "{ ?i wdt:P39 wd:Q842606. }",
+  "tiers": [
+   116,
+   93
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a philosopher": {
+  "where": "{ ?i wdt:P106 wd:Q4964182. }",
+  "tiers": [
+   260,
+   167
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Nobel Prize winner in Physics": {
+  "where": "{ ?i wdt:P166 wd:Q38104. }",
+  "tiers": [
+   141,
+   96
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Italian dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q38. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q38. }",
+  "tiers": [
+   45,
+   26
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Mexican dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q96. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q96. }",
+  "tiers": [
+   36,
+   17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Japanese dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q17. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q17. }",
+  "tiers": [
+   37,
+   22
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an Indian dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q668. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q668. }",
+  "tiers": [
+   51,
+   28
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a French dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q142. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q142. }",
+  "tiers": [
+   54,
+   33
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Korean dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q884. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q884. }",
+  "tiers": [
+   13,
+   9
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Thai dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q869. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q869. }",
+  "tiers": [
+   19,
+   13
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Spanish dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q29. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q29. }",
+  "tiers": [
+   45,
+   19
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Greek dish": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q746549. ?i wdt:P495 wd:Q41. } UNION { ?i wdt:P279+ wd:Q746549. ?i wdt:P495 wd:Q41. }",
+  "tiers": [
+   28,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of cake": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q13276.  } UNION { ?i wdt:P279+ wd:Q13276.  }",
+  "tiers": [
+   37,
+   21
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a cookie or biscuit": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q13266.  } UNION { ?i wdt:P279+ wd:Q13266.  }",
+  "tiers": [
+   27,
+   16
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of sushi": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q46383.  } UNION { ?i wdt:P279+ wd:Q46383.  }",
+  "tiers": [
+   11,
+   5
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of tea": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q6097.  } UNION { ?i wdt:P279+ wd:Q6097.  }",
+  "tiers": [
+   49,
+   23
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of sausage": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q131419.  } UNION { ?i wdt:P279+ wd:Q131419.  }",
+  "tiers": [
+   28,
+   16
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of noodle": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q192874.  } UNION { ?i wdt:P279+ wd:Q192874.  }",
+  "tiers": [
+   29,
+   17
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a shark": {
+  "where": "{ ?t wdt:P225 \"Selachimorpha\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   47,
+   27
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a snake": {
+  "where": "{ ?t wdt:P225 \"Serpentes\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   46,
+   25
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a spider": {
+  "where": "{ ?t wdt:P225 \"Araneae\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   24,
+   15
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a butterfly": {
+  "where": "{ ?t wdt:P225 \"Papilionoidea\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   38,
+   23
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a whale or dolphin": {
+  "where": "{ ?t wdt:P225 \"Cetacea\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   66,
+   52
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a wild cat": {
+  "where": "{ ?t wdt:P225 \"Felidae\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   125,
+   91
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name an owl": {
+  "where": "{ ?t wdt:P225 \"Strigiformes\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   68,
+   36
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a parrot": {
+  "where": "{ ?t wdt:P225 \"Psittaciformes\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   53,
+   39
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a frog": {
+  "where": "{ ?t wdt:P225 \"Anura\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   38,
+   19
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a horse breed": {
+  "where": "{ ?i wdt:P31 wd:Q1160573. }",
+  "tiers": [
+   33,
+   15
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a mushroom": {
+  "where": "{ ?t wdt:P225 \"Agaricomycetes\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   42,
+   37
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a cactus or succulent": {
+  "where": "{ ?t wdt:P225 \"Cactaceae\". ?i wdt:P171+ ?t; wdt:P105 wd:Q7432. }",
+  "tiers": [
+   19,
+   14
+  ],
+  "exclude": null,
+  "taxa": true
+ },
+ "Name a type of rock": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q8063.  } UNION { ?i wdt:P279+ wd:Q8063.  }",
+  "tiers": [
+   80,
+   40
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a type of cloud": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q8074.  } UNION { ?i wdt:P279+ wd:Q8074.  }",
+  "tiers": [
+   53,
+   27
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an airline": {
+  "where": "{ ?i wdt:P31 wd:Q46970. }",
+  "tiers": [
+   70,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a smartphone": {
+  "where": "{ ?i wdt:P31 wd:Q19723451. }",
+  "tiers": [
+   41,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a video game console": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q8076.  } UNION { ?i wdt:P279+ wd:Q8076.  }",
+  "tiers": [
+   62,
+   30
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a website": {
+  "where": "{ ?i wdt:P31 wd:Q35127. }",
+  "tiers": [
+   110,
+   94
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a typeface or font": {
+  "where": "{ ?i wdt:P31 wd:Q17451. }",
+  "tiers": [
+   17,
+   8
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a spacecraft": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q40218.  } UNION { ?i wdt:P279+ wd:Q40218.  }",
+  "tiers": [
+   72,
+   39
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an aircraft": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q15056993.  } UNION { ?i wdt:P279+ wd:Q15056993.  }",
+  "tiers": [
+   70,
+   42
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a magazine": {
+  "where": "{ ?i wdt:P31 wd:Q41298. }",
+  "tiers": [
+   65,
+   44
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a newspaper": {
+  "where": "{ ?i wdt:P31 wd:Q11032. }",
+  "tiers": [
+   61,
+   49
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a comic strip": {
+  "where": "{ ?i wdt:P31 wd:Q838795. }",
+  "tiers": [
+   20,
+   14
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an art movement": {
+  "where": "{ ?i wdt:P31 wd:Q968159. }",
+  "tiers": [
+   112,
+   73
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a religion": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q9174. }",
+  "tiers": [
+   175,
+   85
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a currency symbol or coin": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q41207.  } UNION { ?i wdt:P279+ wd:Q41207.  }",
+  "tiers": [
+   52,
+   30
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a sports car": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q274586.  } UNION { ?i wdt:P279+ wd:Q274586.  }",
+  "tiers": [
+   38,
+   27
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an SUV": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q192152.  } UNION { ?i wdt:P279+ wd:Q192152.  }",
+  "tiers": [
+   35,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a supercar": {
+  "where": "{ ?s rdfs:label \"supercar\"@en. ?i wdt:P279|wdt:P31 ?s. }",
+  "tiers": [
+   37,
+   31
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a motorcycle": {
+  "where": "{ ?i wdt:P31 wd:Q23866334. }",
+  "tiers": [
+   16,
+   8
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a racing video game": {
+  "where": "{ ?i wdt:P31 wd:Q7889; wdt:P136 wd:Q860750. }",
+  "tiers": [
+   24,
+   15
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a truck or lorry maker": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q4830453; wdt:P1056/wdt:P279* wd:Q43193. }",
+  "tiers": [
+   86,
+   37
+  ],
+  "exclude": null,
+  "taxa": false
  }
 };

@@ -103,7 +103,8 @@ async function fetchPages(src) {
       // src.require: the linked article must be one of these kinds of thing on Wikidata (a musical, a song, a film...).
       // Otherwise people, countries and cities linked from list pages (songwriters, settings) are dropped.
       const check = src.require
-        ? `BIND(EXISTS { ?i (wdt:P31|wdt:P279)/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } } AS ?good)`
+        // strictKind: only real instances count (drops generic class articles like "cover version" or "single")
+        ? `BIND(EXISTS { ?i ${src.strictKind ? "wdt:P31" : "(wdt:P31|wdt:P279)"}/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }${notKinds(src) ? ` && NOT EXISTS { ${notKinds(src)} }` : ""} AS ?good)`
         // anything that is a person, any kind of place, a language, an organisation, an event, a period of
         // time, a chemical or a creative work is never an answer here ("europe", "paris", "water", "winter")
         : `BIND(NOT EXISTS { ?i wdt:P31/wdt:P279* ?bad. VALUES ?bad { wd:Q5 wd:Q2221906 wd:Q34770 wd:Q315 wd:Q43229 wd:Q1190554 wd:Q186081 wd:Q11173 wd:Q79529 wd:Q17537576 wd:Q11862829 wd:Q9174 wd:Q4830453 wd:Q482994 wd:Q134556 } } AS ?good)`;
@@ -140,6 +141,9 @@ function branches(where) {
   return parts.map((p) => p.trim() + " " + tail);
 }
 
+// src.not: kinds of thing that are never answers for this prompt (albums for a song prompt, novels for films)
+const notKinds = (src) => (src.not?.length ? `?i wdt:P31/wdt:P279* ?nk. VALUES ?nk { ${src.not.map((q) => "wd:" + q).join(" ")} }` : "");
+
 async function fetchPrompt(prompt, src) {
   // step 1: the items and their sitelink counts (cheap); step 2: English labels and aliases in batches
   // "{ A } UNION { B } rest" runs as separate small queries "A rest" and "B rest": far less likely to time out
@@ -147,7 +151,7 @@ async function fetchPrompt(prompt, src) {
   for (const branch of branches(src.where)) {
     let rows;
     try {
-      rows = await sparql(`SELECT ?i ?n WHERE { ${branch} ?i wikibase:sitelinks ?n. FILTER(?n >= ${src.min ?? 1}) }`);
+      rows = await sparql(`SELECT ?i ?n WHERE { ${branch} ?i wikibase:sitelinks ?n. FILTER(?n >= ${src.min ?? 1})${notKinds(src) ? ` FILTER NOT EXISTS { ${notKinds(src)} }` : ""} }`);
     } catch (e) {
       console.log("   (part skipped: " + e.message + ")  " + branch.slice(0, 80));
       continue;
