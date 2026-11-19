@@ -23,7 +23,7 @@ export function checkQuery(where, answer, exact = false) {
   return `SELECT ?l ?n WHERE {
   SERVICE wikibase:mwapi { bd:serviceParam wikibase:endpoint "www.wikidata.org"; wikibase:api "EntitySearch"; mwapi:search ${sparqlString(answer)}; mwapi:language "en"; mwapi:limit "${exact ? 20 : 7}". ?i wikibase:apiOutputItem mwapi:item. ?ord wikibase:apiOrdinal true. }
   ?i wikibase:sitelinks ?n.
-  ?i rdfs:label ?l. FILTER(lang(?l) = "en")
+  ?i rdfs:label ?l. FILTER(lang(?l) IN ("en", "mul")) # many famous names exist only as "mul" labels
   FILTER EXISTS { ${where} }${same}
 } ORDER BY ?ord LIMIT 1`;
 }

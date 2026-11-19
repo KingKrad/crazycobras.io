@@ -9,7 +9,7 @@ import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { HAND3_QUESTIONS } from "./data-hand3.js";
 import { classify } from "./data-cats.js";
 import { EXTRA } from "./data-extra.js";
-import { MORE } from "./data-more.js";
+import { MORE, NICKNAMES } from "./data-more.js";
 import { GEN } from "./data-gen.js";
 import { normalize, FILLER } from "./logic.js";
 
@@ -601,7 +601,29 @@ const CORE_QUESTIONS = [
 // DEEP CUT so far more real answers count. The hand-written tiers come first and always win.
 // data-more.js has extra hand-written answers for prompts Wikidata can't fill well.
 // An extra answer that's already listed anywhere (any spelling) is skipped, so hand-written tiers win.
-const withExtra = (q) => {
+// NICKNAMES: extra spellings on an existing answer ("california|cali"), or a new CRUISING answer.
+const withNicknames = (q) => {
+  const nick = NICKNAMES[q.q];
+  if (!nick) return q;
+  const a = q.a.map((list) => [...list]);
+  const taken = new Set(a.flat().flatMap((e) => e.split("|")).map(normalize));
+  for (const entry of nick) {
+    const [full, ...more] = entry.split("|");
+    const keys = new Set([full, ...more].map(normalize));
+    const fresh = more.filter((m) => { const k = normalize(m); if (!k || taken.has(k)) return false; taken.add(k); return true; });
+    let placed = false;
+    for (const list of a) {
+      // the answer this nickname belongs to: any of its spellings already on the list
+      const i = list.findIndex((e) => e.split("|").some((f) => keys.has(normalize(f))));
+      if (i >= 0) { if (fresh.length) list[i] += "|" + fresh.join("|"); placed = true; break; }
+    }
+    if (!placed && !taken.has(normalize(full))) { a[1].push([full, ...fresh].join("|")); taken.add(normalize(full)); }
+  }
+  return { ...q, a };
+};
+
+const withExtra = (q0) => {
+  const q = withNicknames(q0);
   const add = [MORE[q.q], EXTRA[q.q]].filter(Boolean);
   if (!add.length) return q;
   const seen = new Set(q.a.flat().flatMap((e) => e.split("|")).map(normalize));
@@ -631,4 +653,4 @@ export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
 // each prompt carries its topic (cat) and whether it is niche (hard: HARD MODE only)
-export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED].map((q) => ({ ...q, ...classify(q) }));
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withNicknames)].map((q) => ({ ...q, ...classify(q) }));

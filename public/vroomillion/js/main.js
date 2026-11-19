@@ -88,13 +88,60 @@ function fitScene() {
 }
 
 // Keep the question card above the road so it never hides the cars.
+const TOPIC = { geo: "PLACES", sports: "SPORTS", screen: "SCREEN", music: "MUSIC", food: "FOOD & DRINK", animals: "ANIMALS", everyday: "EVERYDAY", history: "HISTORY & SCIENCE" };
+const topicOf = (q) => (q.deck === "car" ? "CARS" : TOPIC[q.cat] || "TRIVIA");
+
+// "Name a country that borders France" -> lead "NAME A", subject "COUNTRY THAT BORDERS FRANCE";
+// a 'starting with "M"' twist becomes its own chip.
+function showQuestion(q) {
+  const m = q.q.match(/^(Name (?:an?|something|someone|any)\b)\s*(.*)$/i);
+  let subject = m ? m[2] : q.q;
+  const twist = subject.match(/^(.*) starting with "([A-Z])"$/);
+  if (twist) subject = twist[1];
+  $("q-lead").textContent = m ? m[1].toUpperCase() : "";
+  const qEl = $("question");
+  qEl.textContent = subject.toUpperCase();
+  $("q-twist").textContent = twist ? `STARTS WITH ${twist[2]}` : "";
+  $("q-twist").classList.toggle("hidden", !twist);
+  requestAnimationFrame(fitCard);
+}
+
+// shrink the question until it fits on two lines (three on narrow screens)
+function fitQuestion() {
+  const qEl = $("question");
+  qEl.style.fontSize = "";
+  const maxLines = window.innerWidth < 520 ? 3 : 2;
+  let size = parseFloat(getComputedStyle(qEl).fontSize);
+  for (let i = 0; i < 12 && size > 11; i++) {
+    const lines = Math.round(qEl.scrollHeight / (size * 1.35));
+    if (lines <= maxLines) break;
+    size -= 1.5;
+    qEl.style.fontSize = size + "px";
+  }
+}
+
 function fitCard() {
   if (current !== "race") return;
   const card = $("q-card");
   const k = window.innerWidth / scene.W;
   const carsTop = scene.coverTop() * k; // roof + name tag of the nearest car
   const top = card.parentElement.getBoundingClientRect().top;
-  card.style.maxHeight = Math.max(140, Math.floor(carsTop - top - 6)) + "px";
+  const room = Math.max(90, Math.floor(carsTop - top - 6));
+  card.style.maxHeight = room + "px";
+  // the question never scrolls: tighten the card, then shrink the text, until it fits above the cars
+  if (card.classList.contains("revealing")) return;
+  card.classList.remove("tight");
+  fitQuestion();
+  if (card.scrollHeight <= room) return;
+  card.classList.add("tight");
+  const qEl = $("question");
+  let size = parseFloat(getComputedStyle(qEl).fontSize);
+  for (let i = 0; i < 12 && card.scrollHeight > room && size > 12; i++) {
+    size -= 1;
+    qEl.style.fontSize = size + "px";
+  }
+  // still too tall at the smallest readable size: let it overlap the car rather than cut it off
+  if (card.scrollHeight > room) card.style.maxHeight = "none";
 }
 window.addEventListener("resize", fitScene);
 window.visualViewport?.addEventListener("resize", fitScene);
@@ -692,6 +739,8 @@ function startRace(setup) {
   $("reveal").textContent = "";
   $("hint").textContent = "";
   $("question").textContent = "GET READY…";
+  $("q-lead").textContent = "";
+  $("q-twist").classList.add("hidden");
   $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
   $("mode-label").textContent = modeName(save.deck);
@@ -732,7 +781,7 @@ async function runRace(token) {
     // the long tail, fetched when the race started; read on each guess, so it counts as soon as it arrives
     Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
-    $("q-kicker").textContent = `ROUND ${round + 1} OF ${rounds}`;
+    $("q-kicker").textContent = `${topicOf(q)} · ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
     if (!seenList().includes(q.q)) { save.seen = [...seenList(), q.q]; persist(); }
     $("q-hint").classList.remove("hidden");
@@ -742,7 +791,7 @@ async function runRace(token) {
     $("reveal").textContent = "";
     $("hint").textContent = "";
     const qEl = $("question");
-    qEl.textContent = q.q.toUpperCase();
+    showQuestion(q);
     qEl.classList.remove("slam");
     void qEl.offsetWidth;
     qEl.classList.add("slam");
@@ -1266,7 +1315,6 @@ document.addEventListener("click", (e) => {
 });
 $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
-$("btn-gearhead").addEventListener("click", () => { audio.sfx.click(); save.deck = "car"; persist(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });

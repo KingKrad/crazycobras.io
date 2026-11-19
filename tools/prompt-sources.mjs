@@ -30,8 +30,10 @@ export const PROMPTS = {
   "Name a city in South America": cityIn("Q18", 25),
   "Name a US state capital": { where: "?s wdt:P31 wd:Q35657; wdt:P36 ?i.", min: 1 },
   "Name a Canadian province or territory": { where: "{ ?i wdt:P31 wd:Q11828004. } UNION { ?i wdt:P31 wd:Q9357527. }", min: 1 },
-  "Name a mountain": inst("Q8502", 25),
-  "Name a lake": inst("Q23397", 25),
+  // mountains, volcanoes and massifs (Kilimanjaro is filed as a massif); deepMin keeps the long list to named peaks
+  "Name a mountain": { where: "{ ?i wdt:P31 wd:Q8502. } UNION { ?i wdt:P31 wd:Q8072. } UNION { ?i wdt:P31 wd:Q169358. } UNION { ?i wdt:P31 wd:Q1061151. } UNION { ?i wdt:P31 wd:Q429088. } UNION { ?i wdt:P31 wd:Q1595289. }", min: 25, deepMin: 3 },
+  // lakes and their main kinds (Lake Tahoe is a rift lake, the Great Salt Lake a salt lake)
+  "Name a lake": { where: "{ ?i wdt:P31 wd:Q23397. } UNION { ?i wdt:P31 wd:Q211302. } UNION { ?i wdt:P31 wd:Q188025. } UNION { ?i wdt:P31 wd:Q3215290. } UNION { ?i wdt:P31 wd:Q9019918. } UNION { ?i wdt:P31 wd:Q6341928. } UNION { ?i wdt:P31 wd:Q204324. }", min: 25, deepMin: 3 },
   "Name an island": inst("Q23442", 35),
   "Name a desert": inst("Q8514", 6),
   "Name a volcano": { where: "{ ?i wdt:P31/wdt:P279* wd:Q8072. }", min: 12 },
@@ -42,7 +44,8 @@ export const PROMPTS = {
   "Name an Olympic host city": { pages: ["List of Olympic Games host cities"], require: ["Q515", "Q486972"] },
   "Name a language": inst("Q1288568", 20),
   // music
-  "Name a band": inst("Q215380", 30),
+  // musical groups and their common kinds (The Strokes are filed as a rock band)
+  "Name a band": { where: "{ ?i wdt:P31 wd:Q215380. } UNION { ?i wdt:P31 wd:Q5741069. } UNION { ?i wdt:P31 wd:Q216337. } UNION { ?i wdt:P31 wd:Q641066. } UNION { ?i wdt:P31 wd:Q9212979. } UNION { ?i wdt:P31 wd:Q215048. } UNION { ?i wdt:P31 wd:Q19464263. }", min: 30 },
   "Name a rapper": job("Q2252262", 25),
   "Name a pop singer": { where: "?i wdt:P106 wd:Q177220; wdt:P136 wd:Q37073.", min: 25, surnames: true },
   "Name a Taylor Swift song": song("Taylor Swift", "List of songs by Taylor Swift"),
@@ -59,7 +62,7 @@ export const PROMPTS = {
   "Name a classical composer": { where: "{ ?i wdt:P106 wd:Q36834; wdt:P136/wdt:P279* wd:Q9730. } UNION { ?i wdt:P106 wd:Q36834; wdt:P569 ?b. FILTER(YEAR(?b) < 1870) }", min: 40, surnames: true },
   "Name an opera": { where: "?i wdt:P136 wd:Q1344.", min: 8, not: ["Q11424", "Q482994"] },
   // screen
-  "Name a TV sitcom": { where: "?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238.", min: 6 },
+  "Name a TV sitcom": { where: "{ ?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238. } UNION { ?i wdt:P31 wd:Q170238. }", min: 6 },
   "Name an animated TV series": { where: `${by("animated television series", "k")} ?i wdt:P31 ?k.`, min: 15 },
   "Name a Netflix series": { where: "?i wdt:P449 wd:Q907311; wdt:P31/wdt:P279* wd:Q5398426.", min: 8 },
   "Name a horror movie": { where: "?i wdt:P31 wd:Q11424; wdt:P136 wd:Q200092.", min: 20 },

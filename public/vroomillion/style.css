@@ -534,19 +534,32 @@ body[data-screen="race"] .stage.launch-t5::after { animation: inner-rainbow 0.6s
 .race-buttons { justify-self: end; display: flex; gap: 6px; }
 .race-buttons .icon-btn { background: rgba(11, 6, 24, 0.84); }
 
-.race-mid { display: flex; justify-content: center; align-items: flex-start; min-height: 0; padding-top: clamp(0px, 3vh, 40px); }
+.race-mid { display: flex; justify-content: center; align-items: flex-start; min-height: 0; padding-top: clamp(0px, 1.5vh, 20px); }
 .q-card {
-  width: min(660px, 100%);
+  width: min(600px, 100%);
+  text-align: center;
   max-height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: rgba(13, 8, 32, 0.95);
-  padding: clamp(14px, 2.4vw, 26px) clamp(16px, 3vw, 32px);
-  box-shadow: inset 0 0 0 3px #2b1d5c;
+  padding: clamp(10px, 1.6vw, 16px) clamp(12px, 2.4vw, 22px);
+  box-shadow: inset 0 0 0 3px #2b1d5c, inset 0 -3px 0 3px rgba(255, 79, 216, 0.35);
   clip-path: polygon(0 8px, 8px 8px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px));
   animation: card-in 0.3s steps(4) both;
 }
-.q-kicker { font-size: 9px; letter-spacing: 0.35em; color: var(--pink); margin-bottom: 14px; }
-.q-card .question { margin: 0 0 14px; min-height: 0; text-shadow: 3px 3px 0 #000; color: #fff; text-transform: none; font-size: clamp(15px, 3.4vw, 28px); line-height: 1.5; }
+/* the question: a compact banner (topic + round, a small "NAME A" lead, the subject, an optional twist chip) */
+.q-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.q-kicker { font-size: 7px; letter-spacing: 0.2em; color: #0b0618; background: var(--pink); padding: 4px 7px; }
+.q-lead { font-size: 8px; letter-spacing: 0.3em; color: var(--cyan); margin-bottom: 6px; text-shadow: 1px 1px 0 #000; }
+.q-lead:empty { display: none; }
+.q-card .question { margin: 0; min-height: 0; text-shadow: 2px 2px 0 #000; color: #fff; text-transform: none; font-size: clamp(13px, 2.3vw, 21px); line-height: 1.35; text-wrap: balance; overflow-wrap: anywhere; }
+.q-twist { display: inline-block; margin-top: 10px; font-size: 8px; letter-spacing: 0.15em; color: #0b0618; background: var(--yellow); padding: 5px 8px; box-shadow: 2px 2px 0 #000; }
+.q-card .reveal:empty, .q-card .hint:empty { display: none; }
+/* short windows: the same card, packed tighter */
+.q-card.tight { padding-top: 8px; padding-bottom: 8px; }
+.q-card.tight .q-top { margin-bottom: 5px; }
+.q-card.tight .q-hint { display: none; }
+.q-card.tight .q-lead { margin-bottom: 3px; }
+.q-card.tight .q-twist { margin-top: 6px; padding: 3px 6px; }
 /* while answers are shown: the question shrinks to one line and each result is one row */
 .q-card.revealing { padding-top: 12px; padding-bottom: 12px; }
 .q-card.revealing .question { font-size: clamp(9px, 1.6vw, 12px); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 2px 2px 0 #000; }
@@ -561,7 +574,7 @@ body[data-screen="race"] .stage.launch-t5::after { animation: inner-rainbow 0.6s
   #s-race .reveal-card { grid-template-columns: auto minmax(0, 1fr) auto; }
   #s-race .reveal-card .reveal-gain { grid-column: 2 / -1; justify-self: end; }
 }
-.q-hint { font-size: 8px; letter-spacing: 0.15em; color: var(--dim); }
+.q-hint { font-size: 7px; letter-spacing: 0.15em; color: var(--dim); }
 .q-card .reveal { margin-top: 12px; }
 .q-card .hint { margin: 12px 0 0; }
 .q-card .reveal-card { background: rgba(0, 0, 0, 0.35); }
@@ -673,7 +686,9 @@ a.btn { display: inline-block; text-decoration: none; }
 
 /* after answering: only the answer floats over the race, no question, card or hints */
 .q-card.revealing { background: transparent; box-shadow: none; padding: 0; overflow: visible; animation: none; }
-.q-card.revealing .q-kicker,
+.q-card.revealing .q-top,
+.q-card.revealing .q-lead,
+.q-card.revealing .q-twist,
 .q-card.revealing .question,
 .q-card.revealing .q-hint,
 .q-card.revealing .hint { display: none; }

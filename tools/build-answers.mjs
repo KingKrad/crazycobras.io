@@ -163,10 +163,13 @@ async function fetchPrompt(prompt, src) {
   const names = new Map();
   for (let k = 0; k < top.length; k += 300) {
     const batch = top.slice(k, k + 300).map((x) => "wd:" + x.id).join(" ");
-    const rows = await sparql(`SELECT ?i ?l ?alt WHERE { VALUES ?i { ${batch} } ?i rdfs:label ?l. FILTER(lang(?l) = "en") OPTIONAL { ?i skos:altLabel ?alt. FILTER(lang(?alt) = "en") } }`);
+    // Wikidata keeps many names only under "mul" (the same in every language) and drops the English copy:
+    // Kendrick Lamar, Nicki Minaj, Radiohead. An English label wins when there is one.
+    const rows = await sparql(`SELECT ?i ?l ?alt WHERE { VALUES ?i { ${batch} } ?i rdfs:label ?l. FILTER(lang(?l) IN ("en", "mul")) OPTIONAL { ?i skos:altLabel ?alt. FILTER(lang(?alt) IN ("en", "mul")) } }`);
     for (const r of rows) {
       const id = r.i.value.split("/").pop();
       const e = names.get(id) || { label: r.l.value, alts: [] };
+      if (r.l["xml:lang"] === "en") e.label = r.l.value;
       if (r.alt && e.alts.length < 4 && !e.alts.includes(r.alt.value)) e.alts.push(r.alt.value);
       names.set(id, e);
     }
@@ -234,6 +237,49 @@ function deepIndex() {
   console.log("deep index:", Object.keys(index).length, "prompts");
 }
 if (args.includes("--deep-index")) { deepIndex(); process.exit(0); }
+// --deep-mul: add to existing deep files the items whose only name is a "mul" label (missed before the
+// label fix above). One cheap query per prompt branch instead of rebuilding every list.
+if (args.includes("--deep-mul")) {
+  const { PROMPTS } = await import("./prompt-sources.mjs");
+  const genFile = new URL("../public/vroomillion/js/data-gen.js", import.meta.url);
+  const GEN = (await import(genFile.href)).GEN;
+  const todo = [];
+  for (const [q, src] of Object.entries(PROMPTS)) if (GEN[q] && src.where) todo.push([q, src]);
+  for (const [q, src] of Object.entries(SOURCES)) if (src?.where && !/schema:description/.test(src.where)) todo.push([q, src]);
+  const only = args.includes("--only") ? new Set(args[args.indexOf("--only") + 1].split(";")) : null;
+  for (const [q, src] of todo) {
+    if (only && !only.has(q)) continue;
+    const file = new URL(deepSlug(q) + ".json", DEEP_DIR);
+    if (!fs.existsSync(file)) continue;
+    const d = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (d.mul) continue; // already patched
+    const have = new Set(d.a.flatMap(([e]) => e.split("|").map(normalize)));
+    let added = 0;
+    for (const branch of branches(src.where)) {
+      let rows;
+      try {
+        rows = await sparql(`SELECT ?i ?n ?l WHERE { ${branch} ?i wikibase:sitelinks ?n. ?i rdfs:label ?l. FILTER(lang(?l) = "mul") FILTER NOT EXISTS { ?i rdfs:label ?e. FILTER(lang(?e) = "en") }${notKinds(src) ? ` FILTER NOT EXISTS { ${notKinds(src)} }` : ""} }`);
+      } catch (e) { console.log("   (part skipped: " + e.message + ")  " + q); continue; }
+      for (const r of rows) {
+        const label = clean(r.l.value, src);
+        if (!label || have.has(normalize(label))) continue;
+        const forms = [label];
+        if (src.surnames) { const last = label.split(" ").pop(); if (last.length >= 4 && last !== label) forms.push(last); }
+        d.a.push([forms.join("|"), Number(r.n.value)]);
+        have.add(normalize(label));
+        added++;
+      }
+      await sleep(400);
+    }
+    d.a.sort((x, y) => y[1] - x[1]);
+    d.mul = true;
+    fs.writeFileSync(file, JSON.stringify(d));
+    console.log(q + ": +" + added + " (now " + d.a.length + ")");
+  }
+  deepIndex();
+  process.exit(0);
+}
+
 if (args.includes("--deep")) {
   fs.mkdirSync(DEEP_DIR, { recursive: true });
   const { PROMPTS } = await import("./prompt-sources.mjs");
@@ -248,8 +294,11 @@ if (args.includes("--deep")) {
     const file = new URL(deepSlug(q) + ".json", DEEP_DIR);
     if (fs.existsSync(file) && !args.includes("--force")) continue;
     let items;
-    try { items = await fetchPrompt(q, { ...src, min: 0, max: 15000 }); } catch (e) { console.log("!! failed:", q, e.message); continue; }
-    const a = items.filter((x) => x.forms.length).map((x) => [x.forms.join("|"), x.n]);
+    // deepMin: for huge kinds of thing (mountains, paintings) only items with a few sitelinks, or the query times out
+    try { items = await fetchPrompt(q, { ...src, min: src.deepMin ?? 0, max: 15000 }); } catch (e) { console.log("!! failed:", q, e.message); continue; }
+    // word-in-title prompts ("a movie with a number in the title"): keep only titles with the word
+    const title = src.titleRx ? new RegExp(src.titleRx, "i") : null;
+    const a = items.filter((x) => x.forms.length && (!title || title.test(x.forms[0]))).map((x) => [x.forms.join("|"), x.n]);
     if (a.length < 10) { console.log("-- skipped", q, a.length); continue; }
     fs.writeFileSync(file, JSON.stringify({ q, tiers, a }));
     console.log(q + ": " + a.length + " deep answers");

@@ -165,7 +165,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a river": {
-  "where": "{ ?i wdt:P31 wd:Q4022. }",
+  "where": "{ ?i wdt:P31 wd:Q4022.  } UNION { ?i wdt:P31 wd:Q573344.  } UNION { ?i wdt:P31 wd:Q4366834.  } UNION { ?i wdt:P31 wd:Q108822533.  }",
   "tiers": [
    110,
    55
@@ -1357,7 +1357,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a mountain": {
-  "where": "{ ?i wdt:P31 wd:Q8502. }",
+  "where": "{ ?i wdt:P31 wd:Q8502.  } UNION { ?i wdt:P31 wd:Q8072.  } UNION { ?i wdt:P31 wd:Q169358.  } UNION { ?i wdt:P31 wd:Q1061151.  } UNION { ?i wdt:P31 wd:Q429088.  } UNION { ?i wdt:P31 wd:Q1595289.  }",
   "tiers": [
    90,
    56
@@ -1366,7 +1366,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a lake": {
-  "where": "{ ?i wdt:P31 wd:Q23397. }",
+  "where": "{ ?i wdt:P31 wd:Q23397.  } UNION { ?i wdt:P31 wd:Q211302.  } UNION { ?i wdt:P31 wd:Q188025.  } UNION { ?i wdt:P31 wd:Q3215290.  } UNION { ?i wdt:P31 wd:Q9019918.  } UNION { ?i wdt:P31 wd:Q6341928.  } UNION { ?i wdt:P31 wd:Q204324.  }",
   "tiers": [
    102,
    61
@@ -1456,7 +1456,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a band": {
-  "where": "{ ?i wdt:P31 wd:Q215380. }",
+  "where": "{ ?i wdt:P31 wd:Q215380.  } UNION { ?i wdt:P31 wd:Q5741069.  } UNION { ?i wdt:P31 wd:Q216337.  } UNION { ?i wdt:P31 wd:Q641066.  } UNION { ?i wdt:P31 wd:Q9212979.  } UNION { ?i wdt:P31 wd:Q215048.  } UNION { ?i wdt:P31 wd:Q19464263.  }",
   "tiers": [
    106,
    63
@@ -1573,7 +1573,7 @@ export const CLASSES = {
   "taxa": false
  },
  "Name a TV sitcom": {
-  "where": "{ ?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238. }",
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q5398426; wdt:P136 wd:Q170238.  } UNION { ?i wdt:P31 wd:Q170238.  }",
   "tiers": [
    49,
    25
