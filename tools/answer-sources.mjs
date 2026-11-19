@@ -140,4 +140,15 @@ export const SOURCES = {
   "Name an opera": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "\\\\bopera\\\\b", "i"))` },
   "Name a Muppet": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "muppet|sesame street|fraggle", "i"))` },
   "Name a tech company": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "technology|software|electronics|internet|semiconductor|computer|tech company", "i"))` },
+  // word-in-title twists: a real film or song whose title has the right kind of word
+  "Name a movie with a number in the title": { checkOnly: true, where: "?i wdt:P31/wdt:P279* wd:Q11424. hint:Prior hint:gearing \"forward\".", titleRx: "\\d|\\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|dozen)\\b|\\b[ivx]+$" },
+  "Name a song with a colour in the title": { checkOnly: true, where: "{ ?i wdt:P31/wdt:P279* wd:Q7366. hint:Prior hint:gearing \"forward\". } UNION { ?i wdt:P31/wdt:P279* wd:Q134556. hint:Prior hint:gearing \"forward\". }", titleRx: "\\b(red|orange|yellow|green|blue|purple|violet|indigo|pink|black|white|grey|gray|brown|gold|golden|silver|scarlet|crimson|maroon|navy|turquoise|lavender|ruby|amber|ivory|tangerine|lilac|magenta|cyan|teal|emerald|sapphire)\\b" },
+  "Name an animated movie": { checkOnly: true, where: "?i wdt:P31/wdt:P279* wd:Q202866. hint:Prior hint:gearing \"forward\"." },
+  "Name a superhero movie": { checkOnly: true, where: "?i wdt:P136 wd:Q1535153." },
+  "Name a famous athlete": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "athlete|player|footballer|swimmer|sprinter|runner|boxer|golfer|skier|racing driver|cyclist|gymnast|wrestler|cricketer|skater|jockey|fighter|olympian|tennis|rower|sailor|surfer|snowboarder|climber|diver", "i"))` },
+  "Name an NFL player (past or present)": { checkOnly: true, where: "?i wdt:P3561 ?x." },
+  "Name an NHL player (past or present)": { checkOnly: true, where: "?i wdt:P3522 ?x." },
+  "Name a reality TV show": { checkOnly: true, where: "?i wdt:P136 wd:Q182415." },
+  "Name a Christmas song": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "christmas", "i"))` },
+  "Name a boy band or girl group": { checkOnly: true, exact: true, where: `?i schema:description ?d. FILTER(lang(?d) = "en" && REGEX(?d, "boy band|girl group|vocal group|girl band", "i"))` },
 };

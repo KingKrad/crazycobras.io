@@ -1162,6 +1162,101 @@ export const CLASSES = {
   "taxa": false,
   "exact": true
  },
+ "Name a movie with a number in the title": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q11424. hint:Prior hint:gearing \"forward\". }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false,
+  "titleRx": "\\d|\\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|dozen)\\b|\\b[ivx]+$"
+ },
+ "Name a song with a colour in the title": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q7366. hint:Prior hint:gearing \"forward\".  } UNION { ?i wdt:P31/wdt:P279* wd:Q134556. hint:Prior hint:gearing \"forward\".  }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false,
+  "titleRx": "\\b(red|orange|yellow|green|blue|purple|violet|indigo|pink|black|white|grey|gray|brown|gold|golden|silver|scarlet|crimson|maroon|navy|turquoise|lavender|ruby|amber|ivory|tangerine|lilac|magenta|cyan|teal|emerald|sapphire)\\b"
+ },
+ "Name an animated movie": {
+  "where": "{ ?i wdt:P31/wdt:P279* wd:Q202866. hint:Prior hint:gearing \"forward\". }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a superhero movie": {
+  "where": "{ ?i wdt:P136 wd:Q1535153. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a famous athlete": {
+  "where": "{ ?i schema:description ?d. FILTER(lang(?d) = \"en\" && REGEX(?d, \"athlete|player|footballer|swimmer|sprinter|runner|boxer|golfer|skier|racing driver|cyclist|gymnast|wrestler|cricketer|skater|jockey|fighter|olympian|tennis|rower|sailor|surfer|snowboarder|climber|diver\", \"i\")) }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false,
+  "exact": true
+ },
+ "Name an NFL player (past or present)": {
+  "where": "{ ?i wdt:P3561 ?x. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name an NHL player (past or present)": {
+  "where": "{ ?i wdt:P3522 ?x. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a reality TV show": {
+  "where": "{ ?i wdt:P136 wd:Q182415. }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false
+ },
+ "Name a Christmas song": {
+  "where": "{ ?i schema:description ?d. FILTER(lang(?d) = \"en\" && REGEX(?d, \"christmas\", \"i\")) }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false,
+  "exact": true
+ },
+ "Name a boy band or girl group": {
+  "where": "{ ?i schema:description ?d. FILTER(lang(?d) = \"en\" && REGEX(?d, \"boy band|girl group|vocal group|girl band\", \"i\")) }",
+  "tiers": [
+   70,
+   25
+  ],
+  "exclude": null,
+  "taxa": false,
+  "exact": true
+ },
  "Name a country": {
   "where": "{ ?i wdt:P31 wd:Q6256. }",
   "tiers": [

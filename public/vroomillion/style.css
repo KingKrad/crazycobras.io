@@ -269,7 +269,8 @@ h3 { font-weight: normal; }
 /* ---------- modes ---------- */
 .btn.big.gear { background: #b8560b; border-color: #ffe0b8; }
 .btn.big.gear:hover:not(:disabled) { background: #d96a12; }
-.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+@media (max-width: 520px) { .modes { grid-template-columns: 1fr; } }
 .mode { display: flex; flex-direction: column; gap: 6px; padding: 12px 10px; text-align: left; background: var(--panel); border: var(--px) solid var(--line); box-shadow: 0 var(--px) 0 #000; color: var(--dim); }
 .mode:active { transform: translateY(var(--px)); box-shadow: none; }
 .mode-name { font-size: 11px; }
@@ -277,10 +278,12 @@ h3 { font-weight: normal; }
 .mode[aria-pressed="true"] { color: var(--ink); background: var(--panel-2); }
 .mode-classic[aria-pressed="true"] { border-color: var(--cyan); }
 .mode-car[aria-pressed="true"] { border-color: var(--orange); }
+.mode-hard[aria-pressed="true"] { border-color: var(--red); }
 .mode[aria-pressed="true"] .mode-name::before { content: "▶ "; color: var(--yellow); }
 .mode:focus-visible { outline: var(--px) solid var(--yellow); outline-offset: 2px; }
 .mode-tag { font-size: 7px; padding: 3px 5px; border: 2px solid currentColor; color: var(--cyan); }
 .mode-tag.mode-car { color: var(--orange); }
+.mode-tag.mode-hard { color: var(--red); }
 
 /* ---------- pickers ---------- */
 .picker { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; gap: 8px; background: var(--panel); border: var(--px) solid var(--line); padding: 12px 8px; margin-bottom: 14px; }

@@ -186,7 +186,24 @@ test("GEARHEAD and CLASSIC decks each have enough questions", () => {
   assert.ok(classic.length >= ROUNDS * 2);
   assert.ok(car.every((x) => x.deck === "car" || x.deck === "both"));
   assert.ok(classic.every((x) => x.deck !== "car"));
-  assert.equal(car.length + classic.length - QUESTIONS.filter((x) => x.deck === "both").length, QUESTIONS.length);
+  const hard = deckQuestions(QUESTIONS, "hard");
+  assert.ok(hard.length >= ROUNDS * 2, "hard deck " + hard.length);
+  assert.ok(hard.every((x) => x.hard) && classic.every((x) => !x.hard), "niche prompts only in HARD MODE");
+  assert.equal(car.length + classic.length + hard.length - QUESTIONS.filter((x) => x.deck === "both").length, QUESTIONS.length);
+});
+
+test("CLASSIC keeps niche prompts out and leans on geography", () => {
+  const classic = deckQuestions(QUESTIONS, "classic").map((q) => q.q);
+  for (const niche of ["Name a Spice Girls song", "Name a Beatles song", "Name a typeface or font", "Name a Breaking Bad character", "Name a knot"]) assert.ok(!classic.includes(niche), niche);
+  for (const broad of ["Name a country that borders Germany", "Name a Taylor Swift song", "Name an NFL team", "Name a Simpsons character", "Name a movie with a number in the title"]) assert.ok(classic.includes(broad), broad);
+  const deck = deckQuestions(ALL, "classic");
+  const count = {};
+  let seed = 7;
+  const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 300; i++) for (const q of pickFresh(deck, [], ROUNDS, rng)) count[q.cat] = (count[q.cat] || 0) + 1;
+  const total = Object.values(count).reduce((a, b) => a + b, 0);
+  assert.ok(count.geo / total > 0.22, "geography is the biggest share: " + JSON.stringify(count));
+  for (const c of ["sports", "screen", "music"]) assert.ok(count[c] / total > 0.08, c + " gets a fair share");
 });
 
 test("no answer appears in two tiers of the same question", () => {
@@ -246,10 +263,10 @@ test("generated prompts judge strictly and keep rarity tiers", () => {
   if (champs) assert.ok(judge(buildIndex(champs), "hamilton").tier > 0);
 });
 
-test("races use hand-written prompts first and don't repeat a category", () => {
+test("races are mostly plain prompts and don't repeat a category", () => {
   const deck = deckQuestions(ALL, "classic");
   const race = pickFresh(deck, [], ROUNDS);
-  assert.ok(race.every((q) => !q.variant), "hand-written first");
+  assert.equal(new Set(race.map((q) => q.base || q.q)).size, ROUNDS, "one prompt per category");
   const hand = deck.filter((q) => !q.variant).map((q) => q.q);
   const later = pickFresh(deck, hand, ROUNDS);
   assert.equal(later.length, ROUNDS);

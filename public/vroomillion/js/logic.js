@@ -1,3 +1,4 @@
+import { CAT_WEIGHTS } from "./data-cats.js";
 // Pure game rules: answer judging, rarity tiers and payouts. No DOM in here.
 
 export const TIERS = [
@@ -85,7 +86,7 @@ export function makeVariants(questions) {
     }
     options.sort((x, y) => y.count - x.count);
     for (const { L, a } of options.slice(0, VARIANTS_PER_QUESTION)) {
-      out.push({ q: `${q.q} starting with "${L.toUpperCase()}"`, a, deck: q.deck, base: q.q, variant: "start" });
+      out.push({ q: `${q.q} starting with "${L.toUpperCase()}"`, a, deck: q.deck, cat: q.cat, hard: q.hard, minor: q.minor, base: q.q, variant: "start" });
     }
   }
   return out;
@@ -97,17 +98,29 @@ export function pickFresh(deckQs, seen, n, rng = Math.random) {
   const seenSet = new Set(seen);
   const unseen = deckQs.filter((q) => !seenSet.has(q.q));
   const shuffled = pickQuestions(unseen, unseen.length, rng);
-  // stable sort: everyday / pop-culture prompts first, then the other hand-written ones, then twists
-  const rank = (q) => (q.variant ? 2 : q.pop ? 0 : 1);
-  shuffled.sort((x, y) => rank(x) - rank(y));
   const picked = [];
   const bases = new Set();
-  for (const q of shuffled) {
+  const take = (q) => { bases.add(q.base || q.q); picked.push(q); };
+  // topic mix: each round draws a topic by weight (geography the most), then a prompt from it;
+    const pool = shuffled.filter((q) => q.cat);
+  for (let tries = 0; picked.length < n && tries < n * 30 && pool.length; tries++) {
+    const cats = Object.keys(CAT_WEIGHTS).filter((c) => pool.some((q) => q.cat === c && !bases.has(q.base || q.q)));
+    if (!cats.length) break;
+    const total = cats.reduce((t, c) => t + CAT_WEIGHTS[c], 0);
+    let r = rng() * total;
+    const cat = cats.find((c) => (r -= CAT_WEIGHTS[c]) <= 0) || cats[cats.length - 1];
+    const opts = pool.filter((q) => q.cat === cat && !bases.has(q.base || q.q));
+    // within a topic, broad prompts lead: twists and one-artist / one-actor lists come up less
+    const w = (q) => (q.variant ? 0.1 : 1) * (q.minor ? 0.3 : 1); // each prompt has up to 3 twists
+    let r2 = rng() * opts.reduce((t, q) => t + w(q), 0);
+    take(opts.find((q) => (r2 -= w(q)) <= 0) || opts[opts.length - 1]);
+  }
+  // prompts without a topic (older saves, tests): the old order, everyday ones first
+  const rank = (q) => (q.variant ? 2 : q.pop ? 0 : 1);
+  for (const q of [...shuffled].sort((x, y) => rank(x) - rank(y))) {
     if (picked.length >= n) break;
-    const base = q.base || q.q;
-    if (bases.has(base)) continue;
-    bases.add(base);
-    picked.push(q);
+    if (bases.has(q.base || q.q)) continue;
+    take(q);
   }
   for (const q of shuffled) { // top up if a mode has too few categories left
     if (picked.length >= n) break;
@@ -205,9 +218,11 @@ function lookup(index, key, addPlural = true) {
   return null;
 }
 
-// GEARHEAD = car questions only; CLASSIC = everything except the car-only ones.
+// GEARHEAD = car questions only; HARD MODE = the niche prompts; CLASSIC = everything else.
 export function deckQuestions(all, deck) {
-  return deck === "car" ? all.filter((q) => q.deck === "car" || q.deck === "both") : all.filter((q) => q.deck !== "car");
+  if (deck === "car") return all.filter((q) => q.deck === "car" || q.deck === "both");
+  if (deck === "hard") return all.filter((q) => q.hard && q.deck !== "car");
+  return all.filter((q) => q.deck !== "car" && !q.hard);
 }
 
 // ONE IN A VROOMILLION only counts when the answer is spelled exactly right;

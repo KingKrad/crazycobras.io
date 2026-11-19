@@ -195,7 +195,7 @@ async function classesFile() {
     if (src.where) parts.push(...branches(src.where).map((b) => `{ ${b} }`));
     if (src.require) parts.push(`{ ?i (wdt:P31|wdt:P279)/wdt:P279* ?ok. VALUES ?ok { ${src.require.map((q) => "wd:" + q).join(" ")} } }`);
     if (!parts.length) continue;
-    out[prompt] = { where: parts.join(" UNION "), tiers: src.tiers || [70, 25], exclude: src.exclude || null, taxa: !!src.taxa, ...(src.exact ? { exact: true } : {}) };
+    out[prompt] = { where: parts.join(" UNION "), tiers: src.tiers || [70, 25], exclude: src.exclude || null, taxa: !!src.taxa, ...(src.exact ? { exact: true } : {}), ...(src.titleRx ? { titleRx: src.titleRx } : {}) };
   }
   try {
     const { PROMPTS } = await import("./prompt-sources.mjs");

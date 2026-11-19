@@ -463,8 +463,9 @@ function carPicker(mount, getId, setId) {
 
 // ---------- menus ----------
 const MODES = [
-  { id: "classic", name: "CLASSIC", info: "ALL TOPICS" },
+  { id: "classic", name: "CLASSIC", info: "SPORTS, SCREEN, MUSIC, PLACES" },
   { id: "car", name: "GEARHEAD", info: "CARS & RACING ONLY" },
+  { id: "hard", name: "HARD MODE", info: "NICHE & EXPERT" },
 ];
 const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
 
@@ -484,7 +485,7 @@ function renderPromptsLeft(el, startBtn, ready) {
   el.className = "prompts-left" + (left ? "" : " none");
   el.textContent = left
     ? `${left.toLocaleString("en-US")} NEW PROMPT${left === 1 ? "" : "S"} LEFT IN ${modeName(save.deck)}${left < ROUNDS ? ` · LAST RACE IS ${left} ROUND${left === 1 ? "" : "S"}` : ""}`
-    : `YOU'VE PLAYED ALL ${deckQuestions(QUESTIONS, save.deck).length.toLocaleString("en-US")} ${modeName(save.deck)} PROMPTS! START THEM OVER, TRY THE OTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
+    : `YOU'VE PLAYED ALL ${deckQuestions(QUESTIONS, save.deck).length.toLocaleString("en-US")} ${modeName(save.deck)} PROMPTS! START THEM OVER, TRY ANOTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
   el.append(...(left ? [] : [h("button", { class: "btn small restart", type: "button", text: "START THE PROMPTS OVER", onclick: () => {
     audio.sfx.click();
     const mode = new Set(deckQuestions(QUESTIONS, save.deck).map((q) => q.q));
