@@ -682,6 +682,8 @@ async function runRace(token) {
     race.round = round;
     const q = race.questions[round];
     const index = buildIndex(q);
+    index.prompt = q.base || q.q; // the live check knows prompts by their base wording
+    if (q.variant === "start") index.letter = (q.q.match(/"([A-Z])"$/) || [])[1]?.toLowerCase();
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     $("q-kicker").textContent = `ROUND ${round + 1} OF ${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
@@ -879,6 +881,36 @@ function revealCard(r, res, i) {
     h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
 }
 
+// Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated
+// guess doesn't ask again. Offline (or in the preview) it just finds nothing.
+const onlineSeen = new Map();
+async function checkOnline(index, value) {
+  const k = index.prompt + "|" + normalize(value);
+  if (onlineSeen.has(k)) return onlineSeen.get(k);
+  let hit = null;
+  try {
+    const res = await fetch("/api/vroomillion/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: index.prompt, answer: value }),
+      signal: AbortSignal.timeout(7000),
+    });
+    if (res.ok) {
+      const j = await res.json();
+      if (j.found && typeof j.label === "string") hit = j;
+    }
+  } catch { /* offline: nothing found */ }
+  // "starting with" twists: the real answer must still start with the letter
+  if (hit && index.letter && normalize(hit.label)[0] !== index.letter) hit = null;
+  onlineSeen.set(k, hit);
+  return hit;
+}
+// Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
+function onlineTier(hit) {
+  const [t2, t3] = Array.isArray(hit.tiers) ? hit.tiers : [70, 25];
+  return hit.n >= t2 ? 2 : hit.n >= t3 ? 3 : 4;
+}
+
 // Shows the input for one human and resolves with what they typed.
 // Only a right answer (or the timer running out) ends the turn.
 function askAnswer(r, i, token, index) {
@@ -938,6 +970,7 @@ function askAnswer(r, i, token, index) {
     // A typo isn't sent straight away: the fix is shown in the box and they press GO again to use it.
     // Confirming keeps the typo's score (a fixed typo can't be a One in a Vroomillion).
     let suggestion = null;
+    let checking = false;
     const submit = (timedOut = false) => {
       if (finished) return;
       if (token !== raceToken) { end(); return resolve(stalled); }
@@ -960,7 +993,33 @@ function askAnswer(r, i, token, index) {
         input.value = "";
         return resolve(stalled);
       }
-      // Wrong: keep the clock running and let them try again.
+      // Not on our list: ask Wikidata (through our server) before saying no. The clock keeps running.
+      if (index.prompt && value.trim().length >= 3) {
+        if (checking) return;
+        checking = true;
+        $("btn-go").disabled = true;
+        say("CHECKING…", "fix");
+        checkOnline(index, value).then((hit) => {
+          checking = false;
+          $("btn-go").disabled = false;
+          if (finished || token !== raceToken) return;
+          feedback.textContent = "";
+          if (!hit) return reject(value);
+          const found = { tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true };
+          const same = (a) => normalize(a).replace(/ /g, "");
+          if (same(hit.label) === same(value)) return lockIn(found);
+          suggestion = { ...found, corrected: true };
+          input.value = hit.label;
+          say(`DID YOU MEAN "${hit.label.toUpperCase().slice(0, 28)}"? PRESS GO TO USE IT`, "fix");
+          input.focus({ preventScroll: true });
+          input.select();
+        });
+        return;
+      }
+      reject(value);
+    };
+    // Wrong: keep the clock running and let them try again.
+    const reject = (value) => {
       audio.sfx.deny();
       input.classList.remove("shake");
       void input.offsetWidth;

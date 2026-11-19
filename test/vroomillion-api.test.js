@@ -322,3 +322,44 @@ test("checkout requires ticking the no-refunds box and records when it was ticke
   const at = Date.parse(new URLSearchParams(stripeCalls[0].init.body).get("metadata[no_refund_accepted_at]"));
   assert.ok(at >= before - 1000 && at <= Date.now() + 1000);
 });
+
+// ---------- live answer check ----------
+import { handleCheck, checkQuery, cleanAnswer } from "../src/check.js";
+
+const wd = (rows) => async (_url, init) => {
+  wd.last = decodeURIComponent(String(init.body).slice(6));
+  return new Response(JSON.stringify({ results: { bindings: rows.map(([l, n]) => ({ l: { value: l }, n: { value: String(n) } })) } }), { status: 200 });
+};
+const ask = (body, fetchImpl) => handleCheck(new Request("https://x/api/vroomillion/check", { method: "POST", body: JSON.stringify(body) }), {}, fetchImpl);
+
+test("live check accepts a real thing of the right kind (mayochup is a condiment)", async () => {
+  const res = await ask({ prompt: "Name a sauce or condiment", answer: "Mayochup" }, wd([["mayochup", 0]]));
+  const j = await res.json();
+  assert.equal(j.found, true);
+  assert.equal(j.label, "mayochup");
+  assert.equal(j.n, 0);
+  assert.ok(Array.isArray(j.tiers));
+  assert.ok(wd.last.includes('mwapi:search "Mayochup"'), "searches Wikidata for the answer");
+  assert.ok(wd.last.includes("FILTER EXISTS"), "and checks it's the right kind of thing");
+});
+
+test("live check says no when nothing of that kind is found, and for unknown prompts or junk", async () => {
+  assert.equal((await (await ask({ prompt: "Name a sauce or condiment", answer: "banana" }, wd([]))).json()).found, false);
+  let called = false;
+  const spy = async () => { called = true; return new Response("{}"); };
+  assert.equal((await (await ask({ prompt: "Name a made-up thing", answer: "mayochup" }, spy)).json()).found, false);
+  assert.equal((await (await ask({ prompt: "Name a sauce or condiment", answer: "ab" }, spy)).json()).found, false);
+  assert.equal(called, false, "no lookup for unknown prompts or too-short answers");
+  assert.equal((await (await ask({ prompt: "Name a toy", answer: "dildo" }, spy)).json()).found, false, "blocked words never count");
+});
+
+test("live check escapes the answer safely inside the query", () => {
+  const q = checkQuery("?i wdt:P31 wd:Q1.", cleanAnswer('mayo" } ; DROP <x> # \\'));
+  assert.ok(!q.includes('mayo" }'), "a quote can't end the search string");
+  assert.equal(cleanAnswer("  Mayo<script>chup  "), "Mayo script chup");
+});
+
+test("a failed lookup doesn't count as a no forever", async () => {
+  const res = await ask({ prompt: "Name a sauce or condiment", answer: "mayochup" }, async () => new Response("down", { status: 503 }));
+  assert.equal(res.status, 502);
+});
