@@ -11,6 +11,8 @@ The game lives in `public/vroomillion/`; the site's home page (`/`) redirects th
 ## How it works
 - **Modes:** 1P is a solo run — your distance is your score; or 2P on one screen (answers are hidden while typing).
 - **Question modes:** CLASSIC (all topics) or GEARHEAD (cars and racing only), picked on the race setup screen.
+- **Live answer check:** an answer that isn't on a prompt's list is looked up on Wikidata by `POST /api/vroomillion/check` (`src/check.js`). It counts if the item found is the right kind of thing for the prompt; the rules are in `src/answer-classes.js`, generated with `node tools/build-answers.mjs --classes` from the same sources as the answer lists. Found answers score CRUISING to DEEP CUT by how widely they're covered, never ONE IN A VROOMILLION. Rate limited by `CHECK_LIMITER` (40 a minute per IP) and cached for a day. In the artifact preview there's no server, so the check finds nothing.
+- **Generated prompts:** `tools/prompt-sources.mjs` defines hundreds of whole prompts (cities by country, songs by artist, films by director or actor, animals by family, teams by league, ...). `node tools/build-answers.mjs --prompts` builds `public/vroomillion/js/data-gen.js`, tiering each prompt's answers by how widely covered they are.
 - **Answers:** close typos are fixed silently; extra words in front still count ("front bumper" counts as bumper); wrong answers can be retried until the timer runs out.
 - **Rarity tiers:** Stalled → Traffic → Cruising → Fast Lane → Deep Cut → One in a Vroomillion.
 - **Free play (for now):** `FREE_PLAY = true` in `public/vroomillion/js/logic.js` lets everyone race as much as they like and hides the $5 prompts. **Set it to `false` at launch** to bring back the limit below.

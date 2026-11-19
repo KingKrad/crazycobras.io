@@ -228,11 +228,13 @@ if (args.includes("--prompts")) {
       const forms = it.forms.filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; });
       if (forms.length) list.push({ n: it.n, entry: forms.join("|") });
     }
-    if (list.length < 30) { console.log(`-- skipped ${q}: only ${list.length} answers`); continue; }
+    if (list.length < 20) { console.log(`-- skipped ${q}: only ${list.length} answers`); continue; }
     const N = list.length;
-    const t1 = Math.max(6, Math.min(14, Math.round(N * 0.03)));
-    const t2 = t1 + Math.max(6, Math.round(N * 0.1));
-    const t3 = t2 + Math.max(8, Math.round(N * 0.22));
+    // small closed sets (20-60 answers) split evenly; big ones keep TRAFFIC to the famous few
+    const small = N < 60;
+    const t1 = small ? Math.round(N * 0.2) : Math.max(6, Math.min(14, Math.round(N * 0.03)));
+    const t2 = small ? Math.round(N * 0.42) : t1 + Math.max(6, Math.round(N * 0.1));
+    const t3 = small ? Math.round(N * 0.66) : t2 + Math.max(8, Math.round(N * 0.22));
     const tail = list.slice(t3);
     const rare = tail.filter((x) => x.n >= 2).slice(-Math.max(3, Math.round(tail.length * 0.3)));
     const pick = new Set((rare.length >= 3 ? rare : tail).filter((_, k, arr) => k % Math.max(1, Math.floor(arr.length / 3)) === 0).slice(0, 3).map((x) => x.entry));
