@@ -1037,6 +1037,78 @@ export const CLASSES = {
   "exclude": null,
   "taxa": false
  },
+ "Name a Taylor Swift song": {
+  "where": "{ ?a rdfs:label \"Taylor Swift\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   28,
+   22
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Michael Jackson song": {
+  "where": "{ ?a rdfs:label \"Michael Jackson\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   36,
+   32
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Queen song": {
+  "where": "{ ?a rdfs:label \"Queen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   38,
+   33
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Elvis Presley song": {
+  "where": "{ ?a rdfs:label \"Elvis Presley\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   24,
+   12
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Madonna song": {
+  "where": "{ ?a rdfs:label \"Madonna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   27,
+   25
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an ABBA song": {
+  "where": "{ ?a rdfs:label \"ABBA\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   24,
+   19
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Rolling Stones song": {
+  "where": "{ ?a rdfs:label \"The Rolling Stones\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   20,
+   15
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Ed Sheeran song": {
+  "where": "{ ?a rdfs:label \"Ed Sheeran\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   21,
+   16
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
  "Name a musical genre": {
   "where": "{ ?i wdt:P31 wd:Q188451. }",
   "tiers": [
@@ -1728,6 +1800,258 @@ export const CLASSES = {
    37
   ],
   "exclude": null,
+  "taxa": false
+ },
+ "Name an Elton John song": {
+  "where": "{ ?a rdfs:label \"Elton John\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   19,
+   14
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a David Bowie song": {
+  "where": "{ ?a rdfs:label \"David Bowie\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   17,
+   11
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Rihanna song": {
+  "where": "{ ?a rdfs:label \"Rihanna\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   28,
+   24
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Ariana Grande song": {
+  "where": "{ ?a rdfs:label \"Ariana Grande\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   21,
+   18
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Eminem song": {
+  "where": "{ ?a rdfs:label \"Eminem\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   15,
+   2
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Kanye West song": {
+  "where": "{ ?a rdfs:label \"Kanye West\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   18,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Oasis song": {
+  "where": "{ ?a rdfs:label \"Oasis\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   13,
+   11
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Nirvana song": {
+  "where": "{ ?a rdfs:label \"Nirvana\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   21,
+   15
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Metallica song": {
+  "where": "{ ?a rdfs:label \"Metallica\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   25,
+   22
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an AC/DC song": {
+  "where": "{ ?a rdfs:label \"AC/DC\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   13,
+   10
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Bon Jovi song": {
+  "where": "{ ?a rdfs:label \"Bon Jovi\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   11,
+   9
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Whitney Houston song": {
+  "where": "{ ?a rdfs:label \"Whitney Houston\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   11,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Mariah Carey song": {
+  "where": "{ ?a rdfs:label \"Mariah Carey\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   22,
+   19
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Britney Spears song": {
+  "where": "{ ?a rdfs:label \"Britney Spears\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   28,
+   24
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Katy Perry song": {
+  "where": "{ ?a rdfs:label \"Katy Perry\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   24,
+   19
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an Adele song": {
+  "where": "{ ?a rdfs:label \"Adele\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   24,
+   20
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an One Direction song": {
+  "where": "{ ?a rdfs:label \"One Direction\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   17,
+   14
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Bruce Springsteen song": {
+  "where": "{ ?a rdfs:label \"Bruce Springsteen\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   15,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Johnny Cash song": {
+  "where": "{ ?a rdfs:label \"Johnny Cash\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   5,
+   3
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Dolly Parton song": {
+  "where": "{ ?a rdfs:label \"Dolly Parton\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   20,
+   11
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Frank Sinatra song": {
+  "where": "{ ?a rdfs:label \"Frank Sinatra\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   20,
+   8
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Pink Floyd song": {
+  "where": "{ ?a rdfs:label \"Pink Floyd\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   29,
+   19
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Led Zeppelin song": {
+  "where": "{ ?a rdfs:label \"Led Zeppelin\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   24,
+   17
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Red Hot Chili Peppers song": {
+  "where": "{ ?a rdfs:label \"Red Hot Chili Peppers\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   18,
+   16
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Green Day song": {
+  "where": "{ ?a rdfs:label \"Green Day\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   18,
+   11
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Linkin Park song": {
+  "where": "{ ?a rdfs:label \"Linkin Park\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   26,
+   19
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name an U2 song": {
+  "where": "{ ?a rdfs:label \"U2\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   17,
+   14
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
+  "taxa": false
+ },
+ "Name a Kylie Minogue song": {
+  "where": "{ ?a rdfs:label \"Kylie Minogue\"@en. ?i wdt:P175 ?a; wdt:P31/wdt:P279* wd:Q7366. FILTER NOT EXISTS { ?i wdt:P175 ?o. FILTER(?o != ?a) } }",
+  "tiers": [
+   28,
+   21
+  ],
+  "exclude": "piano sonata|^silent night$|^jingle bells$|^white christmas$|^amazing grace$|^the star-spangled banner$",
   "taxa": false
  },
  "Name a Alfred Hitchcock film": {
