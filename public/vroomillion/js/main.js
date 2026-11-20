@@ -170,10 +170,14 @@ window.addEventListener("resize", fitScene);
 window.visualViewport?.addEventListener("resize", fitScene);
 window.visualViewport?.addEventListener("scroll", () => {
   if (current !== "race") return;
+  unscroll();
   document.documentElement.style.setProperty("--vvtop", window.visualViewport.offsetTop + "px");
 });
 // the keyboard opens and closes with the answer box
-$("answer").addEventListener("focus", () => { setTimeout(fitScene, 50); setTimeout(fitScene, 350); });
+// any page scroll during a race (the keyboard opening) snaps straight back
+function unscroll() { if (current === "race" && (window.scrollY || document.documentElement.scrollTop)) window.scrollTo(0, 0); }
+window.addEventListener("scroll", unscroll, { passive: true });
+$("answer").addEventListener("focus", () => { unscroll(); fitScene(); requestAnimationFrame(() => { unscroll(); fitScene(); }); setTimeout(fitScene, 120); setTimeout(fitScene, 350); setTimeout(fitScene, 700); });
 $("answer").addEventListener("blur", () => setTimeout(fitScene, 350));
 
 function attract() {

@@ -474,7 +474,10 @@ footer { margin-top: 28px; text-align: center; font-size: 7px; color: #5d5488; }
 @keyframes throb { 50% { filter: brightness(1.3); } }
 
 /* ---------- full-screen race ---------- */
-body[data-screen="race"] { overflow: hidden; }
+/* the page itself can't scroll during a race: phones otherwise scroll it all the way down when the
+   keyboard opens (the race follows the visible area instead, see fitScene) */
+html:has(body[data-screen="race"]) { overflow: hidden; height: 100%; overscroll-behavior: none; }
+body[data-screen="race"] { overflow: hidden; position: fixed; inset: 0; width: 100%; height: 100%; overscroll-behavior: none; }
 body[data-screen="race"] .topbar, body[data-screen="race"] footer { visibility: hidden; }
 body[data-screen="race"] .stage {
   position: fixed;
