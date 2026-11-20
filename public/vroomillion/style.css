@@ -779,13 +779,25 @@ ol.board li.me { color: #7df9ff; }
 .nick-form input { font: inherit; font-size: 10px; padding: 8px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
 .note.good { color: var(--green); }
 
-/* ---------- phones: keyboard up during a race ---------- */
-body.kb[data-screen="race"] .stage { inset: var(--vvtop, 0px) 0 auto 0; height: var(--strip, 30vh); }
-body.kb #s-race.active { inset: var(--vvtop, 0px) 0 auto 0; height: var(--vvh, 100dvh); padding-top: calc(var(--strip, 30vh) + 6px); gap: 6px; }
+/* ---------- phones: keyboard up during a race ----------
+   The whole road keeps playing behind everything; the prompt floats over the top of it and one tidy
+   answer bar (timer, box, GO, N2O) sits right on the keyboard, like a messaging app. */
+body.kb[data-screen="race"] .stage { inset: var(--vvtop, 0px) 0 auto 0; height: var(--vvh, 100dvh); }
+body.kb #s-race.active { inset: var(--vvtop, 0px) 0 auto 0; height: var(--vvh, 100dvh); padding: 8px 10px 8px; gap: 6px; grid-template-rows: minmax(0, 1fr) auto; }
 body.kb #s-race .race-top { display: none; }
 body.kb #s-race .race-mid { padding-top: 0; }
-body.kb #s-race .q-card { padding-top: 8px; padding-bottom: 8px; }
+body.kb #s-race .q-card { padding: 8px 12px 10px; background: rgba(8, 5, 26, 0.72); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 body.kb #s-race .q-hint { display: none; }
+body.kb #s-race .q-top { margin-bottom: 4px; }
+body.kb #s-race .race-dock { background: rgba(8, 5, 26, 0.82); margin: 0 -10px -8px; padding: 6px 10px 8px; border-top: 2px solid rgba(125, 249, 255, 0.35); }
+body.kb #s-race .answer-row { grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 6px; }
+body.kb #s-race .ring { width: 40px; height: 40px; }
+body.kb #s-race .ring span { font-size: 11px; }
+body.kb #s-race #answer { min-height: 44px; padding: 8px 10px; }
+body.kb #s-race .btn.go { min-height: 44px; padding: 0 12px; font-size: 11px; }
+body.kb #s-race .btn.nitro { grid-column: auto; min-height: 44px; padding: 0 8px; font-size: 7px; }
+body.kb #s-race .timer { margin-top: 6px; }
+body.kb #s-race .feedback { margin-bottom: 4px; }
 
 /* ---------- phones: menus fit without scrolling ---------- */
 @media (max-width: 520px) {

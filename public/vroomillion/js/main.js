@@ -92,16 +92,10 @@ function fitScene() {
   document.body.classList.toggle("kb", kb);
   const iw = Math.max(440, Math.min(840, Math.round(vw / 1.6))); // 16-bit: twice the old art resolution
   const k = vw / iw;
-  if (kb) {
-    const strip = Math.round(Math.min(vh * 0.3, 190));
-    root.setProperty("--strip", strip + "px");
-    const ih = Math.max(110, Math.round(strip / k));
-    scene.resize(iw, ih, ih - 4);
-  } else {
-    const ih = Math.round(vh / k);
-    const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
-    scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
-  }
+  const ih = Math.round(vh / k);
+  // room for the answer bar (one compact row on the keyboard)
+  const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
+  scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
   requestAnimationFrame(fitCard);
 }
 let fullH = 0, fullW = 0; // the tallest the visible area has been at this width (no keyboard)
@@ -1355,7 +1349,8 @@ function askAnswer(r, i, token, index) {
     $("turn").textContent = race.solo ? "" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
     r.useNitro = false;
     const drawNitro = () => {
-      nitroBtn.textContent = r.useNitro ? "NITRO ARMED ×1.5" : `NITRO ×${r.nitro}`;
+      const narrow = window.innerWidth < 520;
+      nitroBtn.textContent = r.useNitro ? (narrow ? "N2O ON" : "NITRO ARMED ×1.5") : `${narrow ? "N2O" : "NITRO"} ×${r.nitro}`;
       nitroBtn.classList.toggle("armed", r.useNitro);
       nitroBtn.disabled = r.nitro < 1 && !r.useNitro;
       r.elNitro.textContent = "N2O " + r.nitro;
