@@ -1356,7 +1356,7 @@ function askAnswer(r, i, token, index) {
       resolve(res);
     };
     // A typo is never sent on its own: the fix shows up as they type, Enter puts it in the box,
-    // and Enter / GO again uses it. A fixed typo keeps its score, but can't be a One in a Vroomillion.
+    // and Enter / GO again uses it. A fixed typo scores the same as the real answer.
     let suggestion = null;
     const offer = (fix) => {
       suggestion = fix;

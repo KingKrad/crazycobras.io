@@ -31,8 +31,8 @@ test("judge ranks obvious answers low and niche answers high", () => {
   assert.equal(judge(fruit, "kiwi").tier, 2);
   assert.ok(judge(fruit, "durian").tier >= 2, "famous for a 'rare' fruit, so tools/rescale-rarity.mjs may move it down");
   assert.equal(judge(fruit, "Jabuticaba").tier, 5);
-  assert.equal(judge(fruit, "jabuticba").tier, 4, "a typo of a Vroomillion answer only scores a Deep Cut");
-  assert.equal(judge(fruit, "jabuticba").capped, true);
+  assert.equal(judge(fruit, "jabuticba").tier, 5, "a fixed typo of a Vroomillion answer is still a Vroomillion");
+  assert.equal(judge(fruit, "jabuticba").corrected, true);
   assert.equal(judge(fruit, "spanner").tier, 0);
   assert.equal(judge(fruit, "").tier, 0);
 });

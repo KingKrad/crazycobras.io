@@ -278,9 +278,8 @@ export function deckQuestions(all, deck) {
   return all.filter((q) => q.deck !== "car" && !q.hard && !q.variant); // CLASSIC: broad prompts only, no "starting with" twists
 }
 
-// ONE IN A VROOMILLION only counts when the answer is spelled exactly right;
-// a corrected typo scores as a DEEP CUT instead.
-const capped = (res) => (res.tier === 5 ? { ...res, tier: 4, capped: true } : res);
+// A corrected typo scores exactly like the answer it was fixed to, ONE IN A VROOMILLION included.
+const capped = (res) => res;
 
 // Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
 // corrected is true when a typo was snapped to the nearest real answer.
