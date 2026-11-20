@@ -418,3 +418,30 @@ test("admins grant and remove Unlimited, give free races back, and see stats", a
   assert.equal(stats.races[0].total, 3);
   assert.equal(stats.races.length, 7);
 });
+
+// ---------- seen prompts ----------
+
+test("seen prompts are kept on the account and follow it to other devices", async () => {
+  const { cookie } = await signup();
+  const seen = async (body, c = cookie) => { const r = await worker.fetch(post("seen", body, { cookie: c }), env()); return { status: r.status, body: await r.json() }; };
+  assert.deepEqual((await seen({})).body.seen, [], "nothing seen yet");
+  assert.deepEqual((await seen({ add: ["Name a fruit", "Name a dog breed"] })).body.seen, ["Name a fruit", "Name a dog breed"]);
+  assert.deepEqual((await seen({ add: ["Name a fruit", "Name a pet"] })).body.seen, ["Name a fruit", "Name a dog breed", "Name a pet"], "no duplicates");
+  // another device: log in again and read the same list
+  const login = await worker.fetch(post("login", { email: "racer@example.com", password: "hunter2hunter2" }), env());
+  assert.deepEqual((await seen({}, cookieOf(login))).body.seen, ["Name a fruit", "Name a dog breed", "Name a pet"]);
+  assert.deepEqual((await seen({ remove: ["Name a dog breed"] })).body.seen, ["Name a fruit", "Name a pet"], "start over removes");
+  // junk is ignored, not stored
+  assert.deepEqual((await seen({ add: [42, "", "x".repeat(500), { a: 1 }] })).body.seen, ["Name a fruit", "Name a pet"]);
+});
+
+test("seen prompts need an account and a request from the site", async () => {
+  const { cookie } = await signup();
+  assert.equal((await worker.fetch(post("seen", { add: ["Name a fruit"] }), env())).status, 401, "no account: the device keeps its own list");
+  assert.equal((await worker.fetch(post("seen", { add: ["Name a fruit"] }, { cookie, origin: "https://evil.test" }), env())).status, 403);
+  assert.equal((await worker.fetch(get("seen", { cookie }), env())).status, 405);
+  const other = await signup("other@example.com");
+  await worker.fetch(post("seen", { add: ["Name a fruit"] }, { cookie }), env());
+  const r = await worker.fetch(post("seen", {}, { cookie: other.cookie }), env());
+  assert.deepEqual((await r.json()).seen, [], "each account has its own list");
+});

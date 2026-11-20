@@ -226,6 +226,7 @@ async function refreshAccount() {
   try {
     const { res, body } = await api("me");
     account = res.ok ? body : null;
+    syncSeen();
     // an admin gave this player today's free races back
     if (account?.freeResetAt > (save.freeResetAt || 0)) {
       if (dayKey(new Date(account.freeResetAt)) === dayKey()) save.freeUsed = 0;
@@ -234,6 +235,7 @@ async function refreshAccount() {
     }
   } catch {
     account = null;
+    accountSeen = null;
   }
   if (current === "title") renderDaily();
   if (current === "paywall") renderPaywall();
@@ -343,7 +345,7 @@ function authForm(mode, onDone) {
     wireForm(form, submit, msg, "Resetting…",
       () => api("reset-password", { method: "POST", body: JSON.stringify({ email: email.value, code: code.value, password: password.value }) }),
       (body) => {
-        account = { email: body.email, unlimited: body.unlimited };
+        account = { email: body.email, unlimited: body.unlimited }; syncSeen();
         form.replaceWith(recoveryPanel(body.recoveryCode, onDone, "Password changed and other devices signed out. Your old recovery code no longer works — here's your new one."));
       });
     return form;
@@ -363,7 +365,7 @@ function authForm(mode, onDone) {
   wireForm(form, submit, msg, signup ? "Creating your account…" : "Logging in…",
     () => api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value, ...(bots ? { turnstile: bots.take() } : {}) }) }),
     (body) => {
-      account = { email: body.email, unlimited: body.unlimited };
+      account = { email: body.email, unlimited: body.unlimited }; syncSeen();
       password.value = "";
       if (body.recoveryCode) form.replaceWith(recoveryPanel(body.recoveryCode, onDone));
       else onDone();
@@ -390,6 +392,7 @@ async function logOut() {
   audio.sfx.click();
   try { await api("logout", { method: "POST" }); } catch { /* offline: nothing to end */ }
   account = null;
+  accountSeen = null;
   show("title");
 }
 
@@ -627,7 +630,61 @@ function modeSwitch(mount, onChange) {
     // modes free players don't get
     m.id !== "classic" && !FREE_PLAY && !unlimitedNow() ? h("span", { class: "mode-lock", text: "UNLIMITED ONLY" }) : null)));
 }
-const seenList = () => (Array.isArray(save.seen) ? save.seen : []);
+// Prompts already raced. Logged in: the account's list (the same on every device, cached in
+// save.acctSeen for a fast start). Not logged in: this device's own list (save.seen).
+// The first time an account logs in on a device, what was played here without one is added to it.
+let accountSeen = null; // the account's list once synced, null when logged out
+const deviceSeen = () => (Array.isArray(save.seen) ? save.seen : []);
+const seenList = () => (account && accountSeen ? accountSeen : deviceSeen());
+let seenQueue = Promise.resolve();
+function sendSeen(change) {
+  const email = account?.email;
+  seenQueue = seenQueue.then(async () => {
+    try {
+      const { res, body } = await api("seen", { method: "POST", body: JSON.stringify(change) });
+      if (!res.ok || account?.email !== email || !Array.isArray(body.seen)) return false;
+      accountSeen = body.seen;
+      save.acctSeen = { email, list: body.seen };
+      persist();
+      return true;
+    } catch { return false; } // offline: the next sync sends everything again
+  });
+  return seenQueue;
+}
+async function syncSeen() {
+  if (!account?.email) { accountSeen = null; return; }
+  const email = account.email;
+  const cached = save.acctSeen?.email === email ? save.acctSeen.list : [];
+  accountSeen = [...cached];
+  const firstHere = save.seenMergedFor !== email;
+  // anything raced while offline, plus (once per device) what was played here without an account
+  const add = [...new Set([...cached, ...(firstHere ? deviceSeen() : [])])];
+  if ((await sendSeen({ add })) && firstHere) { save.seenMergedFor = email; persist(); }
+  if (current === "leagues") renderLeagues();
+  if (current === "versus") renderVersus();
+}
+function markSeen(prompt) {
+  if (account && accountSeen) {
+    if (accountSeen.includes(prompt)) return;
+    accountSeen = [...accountSeen, prompt];
+    save.acctSeen = { email: account.email, list: accountSeen };
+    persist();
+    sendSeen({ add: [prompt] });
+  } else if (!deviceSeen().includes(prompt)) {
+    save.seen = [...deviceSeen(), prompt];
+    persist();
+  }
+}
+function unseeMode(prompts) {
+  if (account && accountSeen) {
+    accountSeen = accountSeen.filter((t) => !prompts.has(t));
+    save.acctSeen = { email: account.email, list: accountSeen };
+    sendSeen({ remove: [...prompts] });
+  } else {
+    save.seen = deviceSeen().filter((t) => !prompts.has(t));
+  }
+  persist();
+}
 const leftInMode = () => promptsLeft(deckQuestions(QUESTIONS, save.deck), seenList());
 
 // "28 NEW PROMPTS LEFT" under the mode switch; when none are left, say what to do instead.
@@ -639,9 +696,7 @@ function renderPromptsLeft(el, startBtn, ready) {
     : `YOU'VE PLAYED ALL ${deckQuestions(QUESTIONS, save.deck).length.toLocaleString("en-US")} ${modeName(save.deck)} PROMPTS! START THEM OVER, TRY ANOTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
   el.append(...(left ? [] : [h("button", { class: "btn small restart", type: "button", text: "START THE PROMPTS OVER", onclick: () => {
     audio.sfx.click();
-    const mode = new Set(deckQuestions(QUESTIONS, save.deck).map((q) => q.q));
-    save.seen = seenList().filter((t) => !mode.has(t));
-    persist();
+    unseeMode(new Set(deckQuestions(QUESTIONS, save.deck).map((q) => q.q)));
     show(current);
   } })]));
   startBtn.disabled = !left;
@@ -852,7 +907,7 @@ async function runRace(token) {
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     $("q-kicker").textContent = `${topicOf(q)} · ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
-    if (!seenList().includes(q.q)) { save.seen = [...seenList(), q.q]; persist(); }
+    markSeen(q.q);
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);
