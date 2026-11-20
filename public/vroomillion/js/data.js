@@ -8,6 +8,7 @@ import { POP_QUESTIONS } from "./data-pop.js";
 import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { HAND3_QUESTIONS } from "./data-hand3.js";
 import { HAND4_QUESTIONS } from "./data-hand4.js";
+import { RARITY } from "./data-rarity.js";
 import { classify } from "./data-cats.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE, NICKNAMES } from "./data-more.js";
@@ -654,4 +655,15 @@ export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
 // each prompt carries its topic (cat) and whether it is niche (hard: HARD MODE only)
-export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map((q) => ({ ...q, ...classify(q) }));
+// RARITY (tools/rescale-rarity.mjs): answers far more famous than their tier, moved to a more common one.
+const withRarity = (q) => {
+  const fix = RARITY[q.q];
+  if (!fix) return q;
+  const a = q.a.map(() => []);
+  q.a.forEach((list, t) => list.forEach((entry) => {
+    const to = fix[normalize(entry.split("|")[0])];
+    a[(to && to - 1 < t ? to : t + 1) - 1].push(entry);
+  }));
+  return a.every((l) => l.length) ? { ...q, a } : q; // never leave a tier empty
+};
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map((q) => ({ ...q, ...classify(q) }));

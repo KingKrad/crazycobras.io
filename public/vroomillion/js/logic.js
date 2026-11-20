@@ -10,21 +10,31 @@ export const TIERS = [
   { id: 5, name: "ONE IN A VROOMILLION", short: "VROOMILLION", metres: 1000, blurb: "Almost nobody alive says that." },
 ];
 
-// Where a race ends up: its total distance decides. The last one is the exclusive area.
-// A starter car tops out around 5,600 m; 9,000 m needs mostly Deep Cuts and a couple of
-// One in a Vroomillions in a fast car.
+// Where a race ends up: its total distance decides, and the car decides how far it CAN go.
+// Each destination needs a car of at least its class (cls): a beater can't reach the Moon however
+// well you answer. Car power multiplies distance (x1 for the Rustbucket up to x5+ for class X), so the
+// better your car, the further the same answers take you.
+export const CLASS_ORDER = ["D", "C", "B", "A", "S", "X"];
+export const classRank = (cls) => Math.max(0, CLASS_ORDER.indexOf(cls));
 export const DESTINATIONS = [
-  { id: "scrapyard", name: "THE SCRAPYARD", min: 0, blurb: "Rust, tyres and a dog that won't stop barking." },
-  { id: "town", name: "SLEEPY TOWN", min: 700, blurb: "One traffic light, and it's always green." },
-  { id: "beach", name: "BEACH BOARDWALK", min: 1500, blurb: "Sun, sand and ice cream on the dashboard." },
-  { id: "city", name: "BIG CITY", min: 2400, blurb: "Bright lights, tall towers, nowhere to park." },
-  { id: "monaco", name: "MONACO HARBOUR", min: 3400, blurb: "Yachts, a casino and a very expensive coffee." },
-  { id: "summit", name: "MOUNTAIN SUMMIT", min: 4500, blurb: "Top of the world. Mind the hairpins." },
-  { id: "volcano", name: "THE VOLCANO", min: 5800, blurb: "Hot tarmac. Very, very hot tarmac." },
-  { id: "moon", name: "THE MOON", min: 7300, blurb: "One small drive for a car, one giant lap for car-kind." },
-  { id: "vroomcity", name: "VROOMILLION CITY", min: 9000, exclusive: true, blurb: "Streets of gold. Hardly anyone ever gets here." },
+  { id: "scrapyard", name: "THE SCRAPYARD", min: 0, cls: "D", blurb: "Rust, tyres and a dog that won't stop barking." },
+  { id: "town", name: "SLEEPY TOWN", min: 1500, cls: "D", blurb: "One traffic light, and it's always green." },
+  { id: "beach", name: "BEACH BOARDWALK", min: 3000, cls: "D", blurb: "Sun, sand and ice cream on the dashboard." },
+  { id: "city", name: "BIG CITY", min: 5000, cls: "C", blurb: "Bright lights, tall towers, nowhere to park." },
+  { id: "monaco", name: "MONACO HARBOUR", min: 8000, cls: "B", blurb: "Yachts, a casino and a very expensive coffee." },
+  { id: "summit", name: "MOUNTAIN SUMMIT", min: 12000, cls: "A", blurb: "Top of the world. Mind the hairpins." },
+  { id: "volcano", name: "THE VOLCANO", min: 17000, cls: "A", blurb: "Hot tarmac. Very, very hot tarmac." },
+  { id: "moon", name: "THE MOON", min: 24000, cls: "S", blurb: "One small drive for a car, one giant lap for car-kind." },
+  { id: "vroomcity", name: "VROOMILLION CITY", min: 32000, cls: "X", exclusive: true, blurb: "Streets of gold. Hardly anyone ever gets here." },
 ];
-export const destinationFor = (metres) => DESTINATIONS.reduce((best, d) => (metres >= d.min ? d : best), DESTINATIONS[0]);
+const canReach = (d, car) => !car || classRank(car.cls) >= classRank(d.cls);
+// the furthest destination this distance reaches in this car
+export const destinationFor = (metres, car = null) =>
+  DESTINATIONS.reduce((best, d) => (metres >= d.min && canReach(d, car) ? d : best), DESTINATIONS[0]);
+// the first destination the distance was enough for but the car wasn't (or null)
+export const blockedBy = (metres, car) => DESTINATIONS.find((d) => metres >= d.min && !canReach(d, car)) || null;
+// the furthest place a car can ever go
+export const carReach = (car) => [...DESTINATIONS].reverse().find((d) => canReach(d, car));
 export const EXCLUSIVE_CAR = "vroomillionaire";
 
 export const ROUNDS = 7;
@@ -47,16 +57,35 @@ export function msUntilTomorrow(now = new Date()) {
 // FREE PLAY: while true, everyone races as often as they like and the $5 prompts are hidden.
 export const FREE_PLAY = false;
 
-// Free players get FREE_RACES solo CLASSIC races a day on each device. VERSUS, GEARHEAD and
-// HARD MODE, and more races, need Unlimited. save.freeDay / save.freeUsed count today's races.
-export const FREE_RACES = 2;
-export const freeUsed = (save, today) => (save.freeDay === today ? save.freeUsed || 0 : 0);
-export const freeLeft = (save, today) => Math.max(0, FREE_RACES - freeUsed(save, today));
-export const isFreeKind = (mode = "solo", deck = "classic") => mode === "solo" && (deck || "classic") === "classic";
+// DAILY RACES: two solo CLASSIC races a day, the same prompts for everyone, free for every player.
+// Everything else (more races, 2P VERSUS, GEARHEAD, HARD MODE, redoing a race) needs Unlimited.
+// save.daily = { day, done: { 1: metres, 2: metres } } on this device.
+export const DAILY_RACES = 2;
+export const dailyDone = (save, today) => (save.daily?.day === today && save.daily.done && typeof save.daily.done === "object" ? save.daily.done : {});
+export const dailyLeft = (save, today) => Math.max(0, DAILY_RACES - Object.keys(dailyDone(save, today)).length);
+export const nextDaily = (save, today) => [1, 2].find((n) => !(n in dailyDone(save, today))) || 0;
+// kind: { daily: 1 | 2 } for a daily race, otherwise { mode, deck } for an Unlimited one
 export const canRace = (save, today, kind = {}, freePlay = FREE_PLAY) =>
-  freePlay || !!save.unlimited || (isFreeKind(kind.mode, kind.deck) && freeLeft(save, today) > 0);
-// one free race used today
-export const useFreeRace = (save, today) => ({ freeDay: today, freeUsed: freeUsed(save, today) + 1 });
+  freePlay || !!save.unlimited || (!!kind.daily && kind.daily <= DAILY_RACES && !(kind.daily in dailyDone(save, today)));
+export const markDaily = (save, today, n, metres = 0) => ({ day: today, done: { ...dailyDone(save, today), [n]: Math.round(metres) } });
+
+// A seeded random number generator, so everyone gets the same daily prompts.
+export function seeded(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return () => {
+    h = (h + 0x6d2b79f5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// Today's two daily races: 2 x n different prompts, picked the same way on every device.
+export function dailyQuestions(deckQs, day, n = ROUNDS) {
+  const ordered = [...deckQs].sort((a, b) => (a.q < b.q ? -1 : a.q > b.q ? 1 : 0)); // not the file order
+  const all = pickFresh(ordered, [], n * 2, seeded("vroomillion-daily-" + day));
+  return [all.slice(0, n), all.slice(n, n * 2)];
+}
 
 // ---- endless prompts ----
 // Besides the hand-written prompts, every category also makes "starting with M",
@@ -406,10 +435,10 @@ export function payout(prize, won, tiers) {
   return { base, bonus, total: base + bonus };
 }
 
-// 1P: cash for a solo run. Pricier cars earn more per metre, so savings snowball
-// towards the hypercars; Deep Cuts and Vroomillions add a percentage on top.
+// 1P: cash for a solo run. Higher-class cars go further AND earn more per metre, so each upgrade
+// pays for the next; Deep Cuts and Vroomillions add a percentage on top.
 export function soloPayout(distance, car, tiers) {
-  const rate = 2 + car.price / 25000;
+  const rate = 2 + classRank(car.cls); // $ per metre: D 2, C 3, B 4, A 5, S 6, X 7
   const base = Math.round(distance * rate);
   const mult = tiers.reduce((m, t) => m + (t === 4 ? 0.1 : t === 5 ? 0.25 : 0), 0);
   const bonus = Math.round(base * mult);

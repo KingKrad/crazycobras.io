@@ -59,7 +59,8 @@
           <li>Type one. The <b>more niche</b> your answer, the further your car blasts down the road.</li>
           <li><b>Almost anything real counts.</b> If your answer isn't on our list, we check it against Wikipedia's database while the clock runs — so Mayochup counts as a condiment. Answers found that way are rare, so they score high.</li>
           <li>Made a small typo? We show the fix in the box — press <b>GO</b> again to use it, or type something else. Not on the list? <b>Try again</b> — keep guessing until the timer runs out.</li>
-          <li>Your distance is your score. Prize money grows with how far you go and how fancy your car is — spend it on faster cars.</li>
+          <li>Your distance is your score, and your car multiplies it: a beater ×1, the best hypercars ×5. Every destination also needs a car class (the Moon needs Class S), so upgrade to go further. Higher classes earn more cash per metre too.</li>
+          <li><b>Daily races:</b> two free races a day, the same prompts for everyone. Unlimited adds numbered races (RACE #1, #2...) in every mode.</li>
           <li><b>No repeats:</b> once you've seen a prompt it never comes back, unless you hit <b>REDO THIS RACE</b> on the results screen to replay the same prompts. CLASSIC has over 400 broad prompts; letter twists like <b>starting with "M"</b> are in HARD MODE.</li>
           <li><b>One in a Vroomillion</b> only counts if it's spelled exactly right — a fixed typo scores as a Deep Cut.</li>
           <li><b>Destinations:</b> your total distance at the end of a race decides where you end up — from the scrapyard to the Moon. Each new place gets a passport stamp. There's an exclusive area at the very top, and getting there unlocks a car you can't buy.</li>
@@ -69,7 +70,7 @@
           <li><b>HARD MODE:</b> the niche stuff: one band's songs, one show's characters, typefaces, knots, chess openings and more.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
           <li>Hit <b>NITRO</b> before you answer for 1.5× distance. Charges depend on your car.</li>
-          <li><b>Free:</b> 2 solo CLASSIC races a day on each device. <b>Unlimited</b> ($5, once) unlocks as many races as you like, plus 2P, GEARHEAD and HARD MODE.</li>
+          <li><b>Free:</b> the 2 daily races. <b>Unlimited</b> ($5, once) unlocks as many races as you like, plus 2P, GEARHEAD and HARD MODE.</li>
         </ol>
         <div class="tiers" id="tier-legend"></div>
         <button class="btn" data-go="title" type="button">BACK</button>
@@ -77,7 +78,11 @@
 
       <section class="screen" id="s-leagues">
         <h2>1P RACE</h2>
-        <p class="note">Seven prompts. Go as far as you can. Your best: <span id="best-solo">—</span></p>
+        <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
+        <h3 class="sub-title">TODAY'S DAILY RACES</h3>
+        <div class="daily-races" id="daily-solo"></div>
+        <p class="note" id="daily-note"></p>
+        <h3 class="sub-title">UNLIMITED RACES</h3>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-solo" role="status"></p>
         <div class="picker" id="picker-solo"></div>
@@ -95,7 +100,7 @@
           <ul class="pay-perks">
             <li>Unlimited races, every day</li>
             <li>1P, 2P versus, CLASSIC, GEARHEAD and HARD MODE</li>
-            <li>Earn cash faster for the hypercars</li>
+            <li>Numbered races on top of the two daily ones</li>
           </ul>
           <div class="pay-step" id="pay-step"></div>
           <p class="pay-msg" id="pay-msg" role="status" aria-live="polite"></p>
@@ -146,7 +151,7 @@
 
       <section class="screen" id="s-garage">
         <h2>GARAGE &amp; SHOWROOM</h2>
-        <p class="note">PWR multiplies your distance. N2O is nitro charges per race.</p>
+        <p class="note">PWR multiplies your distance. Each class reaches further: CLASS C for the city, B for Monaco, A for the mountains, S for the Moon, X for Vroomillion City. N2O is nitro charges per race.</p>
         <div id="garage-list"></div>
         <button class="btn sticky" data-go="title" type="button">BACK</button>
       </section>

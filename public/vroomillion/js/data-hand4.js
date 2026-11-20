@@ -186,6 +186,13 @@ export const HAND4_QUESTIONS = [
     ["piñata stick", "kazoo"],
   ] },
   // ---- food ----
+  { q: "Name a hot sauce", a: [
+    ["tabasco|tabasco sauce", "sriracha|sriracha sauce|huy fong sriracha", "frank's redhot|franks red hot|frank's red hot|franks", "cholula|cholula hot sauce", "buffalo sauce|buffalo"],
+    ["tapatío|tapatio", "valentina", "texas pete", "crystal|crystal hot sauce", "louisiana hot sauce|louisiana", "el yucateco", "harissa", "sambal oelek|sambal", "gochujang", "peri-peri|piri piri|peri peri|nando's peri-peri|nandos", "hot ones|hot ones sauce", "chipotle sauce|chipotle"],
+    ["da bomb|da bomb beyond insanity", "secret aardvark", "yellowbird", "truff|truff hot sauce", "melinda's|melindas", "marie sharp's|marie sharps", "lao gan ma", "chili crisp|chilli crisp", "chili oil|chilli oil", "zhug|zhoug|skhug", "mango habanero", "ghost pepper sauce", "carolina reaper sauce", "salsa macha", "salsa verde", "pico de gallo", "adobo", "doubanjiang", "nam jim", "sweet chilli sauce|sweet chili sauce", "mae ploy", "tiger sauce", "trappey's|trappeys", "pain is good", "dave's insanity|daves insanity sauce", "blair's|blairs"],
+    ["the last dab", "los calientes", "pepper x", "blair's 16 million reserve", "shito", "mojo|mojo picón", "aji amarillo|aji", "llajua", "pili pili", "nam phrik", "kochukaru", "piment oiseau", "matouk's|matouks", "encona", "baron west indian", "grace hot pepper sauce", "dinosaur hot sauce", "pickapeppa", "hellfire", "mad dog 357", "satan's blood", "mother in law's", "bravado spice", "high river sauces", "torchbearer", "queen majesty", "elijah's xtreme", "humble house"],
+    ["derssa", "basbaas cagaar", "chancho en piedra", "salsa de pago"],
+  ] },
   { q: "Name a snack", a: [
     ["chips|crisps|potato chips", "popcorn", "pretzels", "cookies|biscuits", "candy|sweets", "fruit"],
     ["nuts", "crackers", "granola bar|cereal bar", "chocolate", "cheese", "yogurt", "doritos", "nachos", "apple", "trail mix", "beef jerky|jerky"],

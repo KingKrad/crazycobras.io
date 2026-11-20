@@ -445,3 +445,14 @@ test("seen prompts need an account and a request from the site", async () => {
   const r = await worker.fetch(post("seen", {}, { cookie: other.cookie }), env());
   assert.deepEqual((await r.json()).seen, [], "each account has its own list");
 });
+
+test("Unlimited race numbers are counted on the account", async () => {
+  const { cookie } = await signup();
+  const call = async (body) => (await (await worker.fetch(post("seen", body, { cookie }), env())).json()).races;
+  assert.equal(await call({}), 0);
+  assert.equal(await call({ race: true }), 1);
+  assert.equal(await call({ race: true, add: ["Name a fruit"] }), 2);
+  assert.equal(await call({ racesAtLeast: 10 }), 10, "a device that already ran 10 races carries its count up");
+  assert.equal(await call({ racesAtLeast: 3 }), 10, "never goes down");
+  assert.equal(await call({ race: "yes" }), 10, "junk is ignored");
+});

@@ -743,3 +743,15 @@ body.smashing #s-race .race-top, body.smashing #s-race .race-dock, body.smashing
 .btn.share { background: #ff2e88; color: #fff; width: auto; flex: 1 1 auto; }
 .btn.share.tiny { font-size: 7px; padding: 6px 8px; }
 .stamp .share-row { margin-top: 6px; }
+
+/* daily races */
+.sub-title { font-size: 10px; color: var(--yellow); margin: 14px 0 6px; letter-spacing: 1px; }
+.daily-races { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.daily-races .btn { flex: 1 1 200px; }
+.btn.daily-race { background: #7df9ff; color: #000; }
+.btn.daily-race.done { background: #2a2a40; color: #9aa0c8; cursor: default; }
+.mode-tag.mode-daily { background: #7df9ff; color: #000; }
+
+/* car reach */
+.statline .reach { flex-basis: 100%; font-size: 7px; color: #9aa0c8; margin-top: 4px; }
+.arrive-tag.warn { background: #ff7a00; color: #000; }

@@ -3,8 +3,8 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, useFreeRace, freeLeft, isFreeKind, FREE_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
-  DESTINATIONS, destinationFor, EXCLUSIVE_CAR,
+  dayKey, msUntilTomorrow, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
+  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -197,12 +197,12 @@ function renderDaily() {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
   } else if (unlimitedNow()) {
     box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
-  } else if (freeLeft(save, today) > 0) {
-    const n = freeLeft(save, today);
-    box.append(h("div", { class: "daily-line good", text: `${n} FREE 1P RACE${n === 1 ? "" : "S"} LEFT TODAY` }));
+  } else if (dailyLeft(save, today) > 0) {
+    const n = dailyLeft(save, today);
+    box.append(h("div", { class: "daily-line good", text: `${n} DAILY RACE${n === 1 ? "" : "S"} LEFT TODAY · SAME PROMPTS FOR EVERYONE` }));
   } else {
     box.append(
-      h("div", { class: "daily-line", text: `TODAY'S ${FREE_RACES} FREE RACES ARE USED · MORE IN ${timeLeft()}` }),
+      h("div", { class: "daily-line", text: `TODAY'S ${DAILY_RACES} DAILY RACES ARE DONE · NEW ONES IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
   }
 }
@@ -230,7 +230,7 @@ async function refreshAccount() {
     syncSeen();
     // an admin gave this player today's free races back
     if (account?.freeResetAt > (save.freeResetAt || 0)) {
-      if (dayKey(new Date(account.freeResetAt)) === dayKey()) save.freeUsed = 0;
+      if (dayKey(new Date(account.freeResetAt)) === dayKey()) save.daily = { day: dayKey(), done: {} };
       save.freeResetAt = account.freeResetAt;
       persist();
     }
@@ -402,9 +402,9 @@ function openPaywall(reason) { paywallReason = reason; show("paywall"); }
 function renderPaywall() {
   $("pay-lead").textContent = paywallReason === "mode"
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
-    : freeLeft(save, dayKey()) > 0
-      ? "Race as often as you like, in every mode, every day."
-      : `You've used today's ${FREE_RACES} free races. More in ${timeLeft()}.`;
+    : dailyLeft(save, dayKey()) > 0
+      ? "Unlimited races on top of the daily two, in every mode."
+      : `You've played today's ${DAILY_RACES} daily races. New ones in ${timeLeft()}.`;
   $("pay-msg").textContent = "";
   const step = $("pay-step");
   step.textContent = "";
@@ -434,7 +434,7 @@ function renderAccount() {
   }
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
-    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : `FREE PLAYER — ${FREE_RACES} 1P RACES A DAY` }),
+    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : `FREE PLAYER — ${DAILY_RACES} DAILY RACES A DAY` }),
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
     account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
@@ -585,12 +585,13 @@ function spriteCanvas(car, scale = 4) {
 }
 
 function statLine(car) {
-  const pct = Math.round(((car.power - 1) / 0.55) * 100);
+  const pct = Math.round(((car.power - 1) / 5) * 100);
   const bar = h("span", { class: "bar" }, h("span", { class: "bar-fill" }));
   bar.firstChild.style.width = Math.max(4, pct) + "%";
   return h("div", { class: "statline" },
     h("span", { text: "PWR" }), bar, h("span", { class: "num", text: "×" + car.power.toFixed(2) }),
-    h("span", { class: "n2o", text: "N2O " + car.nitro }));
+    h("span", { class: "n2o", text: "N2O " + car.nitro }),
+    h("span", { class: "reach", text: "GOES AS FAR AS " + carReach(car).name }));
 }
 
 // ◀ car ▶ selector over the cars you own.
@@ -645,6 +646,7 @@ function sendSeen(change) {
       const { res, body } = await api("seen", { method: "POST", body: JSON.stringify(change) });
       if (!res.ok || account?.email !== email || !Array.isArray(body.seen)) return false;
       accountSeen = body.seen;
+      if (Number.isInteger(body.races)) accountRaces = Math.max(body.races, accountRaces || 0);
       save.acctSeen = { email, list: body.seen };
       persist();
       return true;
@@ -653,14 +655,14 @@ function sendSeen(change) {
   return seenQueue;
 }
 async function syncSeen() {
-  if (!account?.email) { accountSeen = null; return; }
+  if (!account?.email) { accountSeen = null; accountRaces = null; return; }
   const email = account.email;
   const cached = save.acctSeen?.email === email ? save.acctSeen.list : [];
   accountSeen = [...cached];
   const firstHere = save.seenMergedFor !== email;
   // anything raced while offline, plus (once per device) what was played here without an account
   const add = [...new Set([...cached, ...(firstHere ? deviceSeen() : [])])];
-  if ((await sendSeen({ add })) && firstHere) { save.seenMergedFor = email; persist(); }
+  if ((await sendSeen({ add, ...(firstHere && save.unlRaces ? { racesAtLeast: save.unlRaces } : {}) })) && firstHere) { save.seenMergedFor = email; persist(); }
   if (current === "leagues") renderLeagues();
   if (current === "versus") renderVersus();
 }
@@ -705,16 +707,32 @@ function renderPromptsLeft(el, startBtn, ready) {
   else ready();
 }
 
+// Unlimited races are numbered: RACE #1, RACE #2... (on the account when logged in, else this device)
+let accountRaces = null;
+const racesRun = () => (account && accountRaces != null ? accountRaces : save.unlRaces || 0);
+
 function renderLeagues() {
+  // the two daily races: the same prompts for everyone today, free for every player
+  const daily = $("daily-solo");
+  daily.textContent = "";
+  const done = dailyDone(save, dayKey());
+  for (let n = 1; n <= DAILY_RACES; n++) {
+    const played = n in done;
+    daily.append(h("button", {
+      class: "btn daily-race" + (played ? " done" : ""), type: "button", disabled: played,
+      text: played ? (done[n] ? `DAILY ${n} ✓ ${done[n].toLocaleString("en-US")} M` : `DAILY ${n} ✓ PLAYED`) : `DAILY RACE ${n}`,
+      onclick: () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); },
+    }));
+  }
+  $("daily-note").textContent = dailyLeft(save, dayKey())
+    ? "Same 7 prompts for everyone today. Free, once each."
+    : `Both done. New daily races in ${timeLeft()}.`;
   modeSwitch($("mode-solo"), renderLeagues);
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
   const ok = canRace(me(), dayKey(), { mode: "solo", deck: save.deck });
-  const n = freeLeft(save, dayKey());
   renderPromptsLeft($("left-solo"), $("btn-start-1p"), () => {
-    $("btn-start-1p").textContent = ok
-      ? (FREE_PLAY || unlimitedNow() ? "START RACE" : `START FREE RACE (${n} LEFT)`)
-      : isFreeKind("solo", save.deck) ? "GO UNLIMITED — $5" : `${modeName(save.deck)} IS UNLIMITED — $5`;
+    $("btn-start-1p").textContent = ok ? `START RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "UNLIMITED RACES — $5";
   });
 }
 
@@ -823,14 +841,18 @@ function popGain(i, metres, tier, nitro) {
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
   const today = dayKey();
-  const kind = { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };
+  const daily = setup.daily && !setup.redo ? setup.daily : 0;
+  const kind = daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };
   if (!canRace(me(), today, kind)) {
-    openPaywall(isFreeKind(kind.mode, kind.deck) ? "used" : "mode");
+    if (daily) { show("leagues"); return; } // already played today: the screen says so
+    openPaywall(setup.mode === "solo" && save.deck === "classic" ? "used" : "mode");
     return;
   }
-  const questions = setup.redo && setup.questions?.length
-    ? setup.questions
-    : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS);
+  const questions = daily
+    ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
+    : setup.redo && setup.questions?.length
+      ? setup.questions
+      : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS);
   if (!questions.length) {
     // nothing new left in this mode: back to the setup screen, which explains
     show(setup.mode === "solo" ? "leagues" : "versus");
@@ -838,17 +860,27 @@ function startRace(setup) {
   }
   prefetchDeep(questions.map((q) => q.base || q.q)); // the long-tail answer lists, in the background
   lastSetup = { ...setup, redo: false, questions };
-  if (!unlimitedNow() && !FREE_PLAY) Object.assign(save, useFreeRace(save, today));
+  // a daily race counts as played once it starts; an Unlimited race gets the next number
+  let label;
+  if (daily) {
+    save.daily = markDaily(save, today, daily);
+    label = `DAILY ${daily} OF ${DAILY_RACES}`;
+  } else {
+    const n = racesRun() + 1;
+    save.unlRaces = Math.max(save.unlRaces || 0, n);
+    if (account) { if (accountRaces != null) accountRaces = n; sendSeen({ race: true }); }
+    label = setup.redo ? `RACE #${n} · REDO` : `RACE #${n}`;
+  }
   persist();
   // count the race for the admin stats (no personal data); fails quietly without a server
-  api("race-start", { method: "POST", body: JSON.stringify({ kind: kind.mode === "versus" ? "versus" : "solo-" + (kind.deck || "classic") }) }).catch(() => {});
+  api("race-start", { method: "POST", body: JSON.stringify({ kind: daily ? "solo-classic" : kind.mode === "versus" ? "versus" : "solo-" + (kind.deck || "classic") }) }).catch(() => {});
   const token = ++raceToken;
   const solo = setup.mode === "solo";
   const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
   const racers = solo
     ? [mk("YOU", carById(save.car))]
     : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
-  race = { token, solo, setup, racers, round: 0, questions };
+  race = { token, solo, setup, racers, round: 0, questions, daily, label };
 
   scene = chaseScene; // races use the behind-the-car view
   scene.setRacers(solo
@@ -868,8 +900,8 @@ function startRace(setup) {
   $("q-twist").classList.add("hidden");
   $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
-  $("mode-label").textContent = modeName(save.deck);
-  $("mode-label").className = "mode-tag mode-" + save.deck;
+  $("mode-label").textContent = daily ? label : `${label} · ${modeName(save.deck)}`;
+  $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : save.deck);
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
   $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible
@@ -1080,14 +1112,16 @@ async function runRace(token) {
 // After the last round the road turns into wherever this race's distance has taken you.
 async function arrive(token) {
   const alive = () => token === raceToken;
-  const top = Math.max(...race.racers.map((r) => r.dist));
-  const dest = destinationFor(top);
+  const lead = race.racers.reduce((a, b) => (b.dist > a.dist ? b : a));
+  const top = lead.dist;
+  const dest = destinationFor(top, lead.car);
+  const blocked = blockedBy(top, lead.car); // went far enough, but the car can't go there
   const newStamp = !(dest.id in save.passport);
   save.passport[dest.id] = Math.max(save.passport[dest.id] || 0, Math.round(top));
   const carUnlocked = !!dest.exclusive && !save.owned.includes(EXCLUSIVE_CAR);
   if (carUnlocked) save.owned.push(EXCLUSIVE_CAR);
   persist();
-  race.arrival = { dest, newStamp, carUnlocked, top };
+  race.arrival = { dest, newStamp, carUnlocked, top, car: lead.car, blocked };
 
   $("q-card").classList.add("hidden");
   document.body.classList.add("smashing");
@@ -1101,6 +1135,7 @@ async function arrive(token) {
     h("div", { class: "arrive-name", text: dest.name }),
     h("div", { class: "arrive-blurb", text: dest.blurb }),
     newStamp ? h("div", { class: "arrive-tag", text: "NEW PASSPORT STAMP!" }) : null,
+    blocked ? h("div", { class: "arrive-tag warn", text: `YOUR CAR MAXED OUT · ${blocked.name} NEEDS CLASS ${blocked.cls}` }) : null,
     carUnlocked ? h("div", { class: "arrive-tag gold", text: "THE VROOMILLIONAIRE IS YOURS!" }) : null);
   $("overlay").textContent = "";
   $("overlay").append(card);
@@ -1355,13 +1390,15 @@ function waitNext(label, token) {
   });
 }
 
-function destResult({ dest, newStamp, carUnlocked, top }) {
-  const next = DESTINATIONS.find((d) => d.min > top);
+function destResult({ dest, newStamp, carUnlocked, top, car, blocked }) {
+  const next = DESTINATIONS.find((d) => d.min > dest.min && (d.min > top || blocked === d));
+  const needs = (d) => (car && classRank(car.cls) < classRank(d.cls) ? ` · NEEDS A CLASS ${d.cls} CAR` : "");
   return h("div", { class: "dest-result" + (dest.exclusive ? " exclusive" : "") },
     h("div", { class: "note", text: "THIS RACE TOOK YOU TO" }),
     h("div", { class: "dest-name", text: dest.name }),
     h("div", { class: "note", text: [newStamp ? "NEW PASSPORT STAMP!" : "", carUnlocked ? "GOLD CAR UNLOCKED: THE VROOMILLIONAIRE" : "",
-      next ? `NEXT: ${next.exclusive ? "??? (EXCLUSIVE)" : next.name} AT ${next.min.toLocaleString("en-US")} M` : "YOU'VE BEEN EVERYWHERE."].filter(Boolean).join(" · ") }),
+      blocked ? `YOU WENT FAR ENOUGH FOR ${blocked.name}, BUT IT NEEDS A CLASS ${blocked.cls} CAR` : "",
+      next && next !== blocked ? `NEXT: ${next.exclusive ? "??? (EXCLUSIVE)" : next.name} AT ${next.min.toLocaleString("en-US")} M${needs(next)}` : !next ? "YOU'VE BEEN EVERYWHERE." : ""].filter(Boolean).join(" · ") }),
     h("div", { class: "dest-actions" },
       newStamp || dest.exclusive ? shareButtons(dest, save.passport[dest.id] || top) : null,
       h("button", { class: "btn small", type: "button", text: "OPEN PASSPORT", onclick: () => { audio.sfx.click(); show("passport"); } })));
@@ -1400,7 +1437,7 @@ function renderPassport() {
     root.append(h("div", { class: "stamp" + (best ? " got" : " locked") + (d.exclusive ? " exclusive" : "") },
       cv,
       h("div", { class: "stamp-name", text: best || !d.exclusive ? d.name : "??? EXCLUSIVE ???" }),
-      h("div", { class: "stamp-info", text: best ? `BEST ${best.toLocaleString("en-US")} M` : d.min ? `REACH ${d.min.toLocaleString("en-US")} M IN ONE RACE` : "FINISH ANY RACE" }),
+      h("div", { class: "stamp-info", text: best ? `BEST ${best.toLocaleString("en-US")} M` : d.min ? `REACH ${d.min.toLocaleString("en-US")} M · CLASS ${d.cls}+ CAR` : "FINISH ANY RACE" }),
       best ? h("div", { class: "stamp-mark", text: "VISITED" }) : null,
       best ? shareButtons(d, best, true) : null));
   }
@@ -1420,7 +1457,8 @@ function finish(token) {
     pay = soloPayout(a.dist, a.car, a.tiers);
     newBest = a.dist > save.best;
     if (newBest) save.best = a.dist;
-    title = newBest && save.races > 0 ? "NEW BEST!" : "RUN COMPLETE";
+    title = newBest && save.races > 0 ? "NEW BEST!" : race.daily ? `DAILY RACE ${race.daily} DONE` : "RUN COMPLETE";
+    if (race.daily && dailyDone(save, dayKey())[race.daily] != null) save.daily = markDaily(save, dayKey(), race.daily, a.dist);
     save.vrooms += a.tiers.filter((t) => t === 5).length;
     save.deep += a.tiers.filter((t) => t === 4).length;
   } else {
@@ -1459,7 +1497,7 @@ function finish(token) {
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
     FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
-      h("div", { text: freeLeft(save, dayKey()) > 0 ? `${freeLeft(save, dayKey())} FREE 1P RACE${freeLeft(save, dayKey()) === 1 ? "" : "S"} LEFT TODAY` : `MORE FREE RACES IN ${timeLeft()}` }),
+      h("div", { text: dailyLeft(save, dayKey()) > 0 ? `${dailyLeft(save, dayKey())} DAILY RACE LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },
@@ -1470,7 +1508,8 @@ function finish(token) {
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const left = leftInMode();
-  $("btn-again").textContent = !paid ? "NEW RACE — $5" : left ? "NEW RACE" : "NO NEW PROMPTS";
+  const dailyNext = race.daily && !paid ? nextDaily(save, dayKey()) : 0;
+  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : left ? `RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "NO NEW PROMPTS";
   $("btn-again").disabled = paid && !left;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   show("results");
@@ -1494,7 +1533,12 @@ $("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("pas
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
 $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
-$("btn-again").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: false }); });
+$("btn-again").addEventListener("click", () => {
+  audio.sfx.click();
+  if (!lastSetup) return;
+  const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dayKey()) : 0;
+  startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false });
+});
 $("btn-redo").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true }); });
 $("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
 $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });

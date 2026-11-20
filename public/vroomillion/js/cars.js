@@ -1,7 +1,7 @@
 // The showroom, plus the pixel-art sprite generator.
 // Car names are made up on purpose: real makes and models are trademarks that
 // car makers license to games. Real brands only appear as trivia answers.
-// power = distance multiplier, nitro = boost charges per race.
+// power = distance multiplier (set by class below), nitro = boost charges per race.
 
 const C = (id, name, cls, price, power, nitro, body, color, accent) => ({ id, name, cls, price, power, nitro, body, color, accent });
 
@@ -77,6 +77,15 @@ export const CARS = [
   // can't be bought: reaching VROOMILLION CITY unlocks it
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
 ];
+
+// Power by class: the car really decides how far you get. Within a class, pricier cars sit higher.
+export const POWER_RANGE = { D: [1.0, 1.3], C: [1.45, 1.95], B: [2.1, 2.7], A: [2.9, 3.5], S: [3.7, 4.4], X: [4.7, 5.4] };
+for (const cls of Object.keys(POWER_RANGE)) {
+  const list = CARS.filter((c) => c.cls === cls && !c.exclusive);
+  const [lo, hi] = POWER_RANGE[cls];
+  list.forEach((c, i) => { c.power = Math.round((lo + (list.length > 1 ? (hi - lo) * i / (list.length - 1) : 0)) * 100) / 100; });
+}
+CARS.find((c) => c.exclusive).power = 6.0;
 
 export const carById = (id) => CARS.find((c) => c.id === id) || CARS[0];
 

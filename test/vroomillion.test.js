@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { QUESTIONS } from "../public/vroomillion/js/data.js";
+import { carById } from "../public/vroomillion/js/cars.js";
 import {
   DESTINATIONS, destinationFor,
-  TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, useFreeRace, pickFresh, promptsLeft, makeVariants,
+  TIERS, ROUNDS, classRank, blockedBy, carReach, normalize, buildIndex, judge, metresFor, applyFenderBender,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, dailyQuestions, pickFresh, promptsLeft, makeVariants,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -28,7 +29,7 @@ test("normalize strips case, accents, punctuation and leading articles", () => {
 test("judge ranks obvious answers low and niche answers high", () => {
   assert.equal(judge(fruit, "Apple").tier, 1);
   assert.equal(judge(fruit, "kiwi").tier, 2);
-  assert.equal(judge(fruit, "durian").tier, 4);
+  assert.ok(judge(fruit, "durian").tier >= 2, "famous for a 'rare' fruit, so tools/rescale-rarity.mjs may move it down");
   assert.equal(judge(fruit, "Jabuticaba").tier, 5);
   assert.equal(judge(fruit, "jabuticba").tier, 4, "a typo of a Vroomillion answer only scores a Deep Cut");
   assert.equal(judge(fruit, "jabuticba").capped, true);
@@ -80,8 +81,8 @@ test("a niche answer in a starter car still beats an obvious one in the best car
 test("matching answers cause a fender bender", () => {
   const a = judge(fruit, "durian");
   const [x, y] = applyFenderBender(a, { ...a });
-  assert.equal(x.tier, 3);
-  assert.equal(y.tier, 3);
+  assert.equal(x.tier, a.tier - 1);
+  assert.equal(y.tier, a.tier - 1);
   assert.ok(x.bump);
   const [p, q] = applyFenderBender(judge(fruit, "apple"), judge(fruit, "pear"));
   assert.equal(p.bump, undefined);
@@ -91,22 +92,25 @@ test("matching answers cause a fender bender", () => {
   assert.equal(n.bump, undefined);
 });
 
-test("one free race per day, unlimited races after paying, everything during free play", () => {
+test("two daily races for everyone, Unlimited for everything else, everything during free play", () => {
   const today = dayKey(new Date(2026, 10, 17, 9, 30));
   assert.equal(today, "2026-11-17");
   assert.equal(dayKey(new Date(2026, 0, 5)), "2026-01-05");
   const solo = { mode: "solo", deck: "classic" };
-  assert.ok(canRace({}, today, solo, false), "never raced");
-  assert.ok(canRace({ freeDay: today, freeUsed: 1 }, today, solo, false), "one of two used");
-  assert.ok(!canRace({ freeDay: today, freeUsed: 2 }, today, solo, false), "both used today");
-  assert.ok(canRace({ freeDay: "2026-11-16", freeUsed: 2 }, today, solo, false), "used yesterday: new day, new races");
+  assert.ok(canRace({}, today, { daily: 1 }, false) && canRace({}, today, { daily: 2 }, false), "both daily races are free");
+  assert.ok(!canRace({}, today, solo, false), "a regular race needs Unlimited");
+  const one = { daily: markDaily({}, today, 1, 4321) };
+  assert.deepEqual(one.daily, { day: today, done: { 1: 4321 } });
+  assert.ok(!canRace(one, today, { daily: 1 }, false), "each daily race once");
+  assert.ok(canRace(one, today, { daily: 2 }, false));
+  assert.equal(dailyLeft(one, today), 1);
+  assert.equal(nextDaily(one, today), 2);
+  assert.ok(canRace(one, "2026-11-18", { daily: 1 }, false), "new day, new daily races");
+  assert.ok(!canRace({}, today, { daily: 3 }, false), "only two");
   assert.ok(!canRace({}, today, { mode: "versus", deck: "classic" }, false), "VERSUS needs Unlimited");
   assert.ok(!canRace({}, today, { mode: "solo", deck: "hard" }, false), "HARD MODE needs Unlimited");
-  assert.ok(!canRace({}, today, { mode: "solo", deck: "car" }, false), "GEARHEAD needs Unlimited");
-  assert.ok(canRace({ freeDay: today, freeUsed: 2, unlimited: true }, today, { mode: "versus", deck: "hard" }, false), "unlimited");
-  assert.ok(canRace({ freeDay: today, freeUsed: 2 }, today, solo, true), "free play");
-  assert.deepEqual(useFreeRace({ freeDay: today, freeUsed: 1 }, today), { freeDay: today, freeUsed: 2 });
-  assert.deepEqual(useFreeRace({ freeDay: "2026-11-16", freeUsed: 2 }, today), { freeDay: today, freeUsed: 1 });
+  assert.ok(canRace({ unlimited: true }, today, { mode: "versus", deck: "hard" }, false), "unlimited");
+  assert.ok(canRace({}, today, solo, true), "free play");
   assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
 });
 
@@ -135,13 +139,13 @@ test("prompts seen in one mode stay seen in the other", () => {
   assert.ok(race.length > 0 && race.every((q) => !both.includes(q.q)));
 });
 
-test("solo prize money grows with the car and niche answers", () => {
-  const starter = { price: 0 };
-  const bugatti = { price: 1600000 };
+test("solo prize money grows with the car class and niche answers", () => {
+  const starter = carById("rustbucket");
+  const hyper = carById("chiron");
   assert.deepEqual(soloPayout(3000, starter, [1, 2, 3]), { base: 6000, bonus: 0, total: 6000, rate: 2 });
   assert.equal(soloPayout(3000, starter, [4, 5]).bonus, Math.round(6000 * 0.35));
-  assert.ok(soloPayout(8000, bugatti, [3]).total > 100 * soloPayout(3000, starter, [3]).total / 2);
-  assert.equal(soloPayout(0, bugatti, [0, 0]).total, 0);
+  assert.equal(soloPayout(1000, hyper, [3]).rate, 6, "class S earns $6 a metre");
+  assert.equal(soloPayout(0, hyper, [0, 0]).total, 0);
 });
 
 test("pickQuestions returns distinct questions", () => {
@@ -299,15 +303,29 @@ test("part of a longer answer is fixed to the full answer and scores the same", 
   assert.equal(judge(fruit, "dragon").display, "dragon fruit");
 });
 
-test("destinations get further away and the last one is exclusive and very hard", () => {
-  for (let i = 1; i < DESTINATIONS.length; i++) assert.ok(DESTINATIONS[i].min > DESTINATIONS[i - 1].min);
-  assert.equal(destinationFor(0).id, "scrapyard");
-  assert.equal(destinationFor(3500).id, "monaco");
+test("destinations get further away, need better cars, and the last one is exclusive and very hard", () => {
+  for (let i = 1; i < DESTINATIONS.length; i++) {
+    assert.ok(DESTINATIONS[i].min > DESTINATIONS[i - 1].min);
+    assert.ok(classRank(DESTINATIONS[i].cls) >= classRank(DESTINATIONS[i - 1].cls), "never an easier car further on");
+  }
+  const beater = carById("rustbucket"), hyper = carById("chiron"), legend = carById("golden");
+  assert.equal(destinationFor(0, beater).id, "scrapyard");
+  assert.equal(destinationFor(30000, beater).id, "beach", "a beater can't get past the beach, however far it goes");
+  assert.equal(blockedBy(30000, beater).id, "city");
+  assert.equal(destinationFor(30000, hyper).id, "moon");
+  assert.equal(destinationFor(40000, legend).id, "vroomcity");
+  assert.equal(carReach(beater).id, "beach");
   const top = DESTINATIONS.at(-1);
   assert.ok(top.exclusive);
-  // a starter car answering all Deep Cuts can't get there; mostly Deep Cuts plus two Vroomillions in a fast car can
-  assert.ok(metresFor(4, 1, false) * 7 < top.min);
-  assert.ok(metresFor(4, 1.45, false) * 5 + metresFor(5, 1.45, true) * 2 >= top.min);
+  // the same great answers go much further in a better car
+  const great = metresFor(4, 1, false) * 7;
+  assert.ok(metresFor(4, hyper.power, false) * 7 > 4 * great);
+  // all Deep Cuts in the best buyable car aren't enough; mostly Vroomillions with nitro are
+  assert.ok(metresFor(4, legend.power, false) * 7 < top.min);
+  assert.ok(metresFor(5, legend.power, false) * 4 + metresFor(5, legend.power, true) * 3 >= top.min);
+  // starter car: about 3 races of average answers buys the first class C car
+  const avg = soloPayout(metresFor(2, 1, false) * 4 + metresFor(3, 1, false) * 3, beater, [2, 2, 2, 2, 3, 3, 3]).total;
+  assert.ok(avg * 4 > carById("wrangler").price);
 });
 
 test("category words are dropped only where they fit the prompt", () => {
@@ -333,4 +351,15 @@ test("long-tail (deep) answers count instantly, and long typos snap to them only
   assert.equal(judge(index, "mayoc").tier, 0, "short typos never reach the long tail");
   index.letter = "k";
   assert.equal(judge(index, "mayochup").tier, 0, "starting-with twists still need the letter");
+});
+
+test("daily races are the same for everyone: 2 x 7 different prompts, new each day", () => {
+  const deck = deckQuestions(QUESTIONS, "classic");
+  const [a, b] = dailyQuestions(deck, "2026-11-20");
+  assert.equal(a.length, ROUNDS);
+  assert.equal(b.length, ROUNDS);
+  assert.equal(new Set([...a, ...b].map((q) => q.q)).size, ROUNDS * 2, "14 different prompts");
+  const again = dailyQuestions([...deck].reverse(), "2026-11-20");
+  assert.deepEqual(again[0].map((q) => q.q), a.map((q) => q.q), "the same on every device, whatever the list order");
+  assert.notDeepEqual(dailyQuestions(deck, "2026-11-21")[0].map((q) => q.q), a.map((q) => q.q), "a new set tomorrow");
 });

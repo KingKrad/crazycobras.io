@@ -39,8 +39,13 @@ export async function handleSeen(request, env) {
   const add = prompts(body.add);
   const remove = prompts(body.remove);
   const before = parseSeen(user.seen_prompts);
-  if (!add.length && !remove.length) return json({ seen: before });
+  // Unlimited race numbers (RACE #1, #2...): race: true counts one more; racesAtLeast carries a device's count up
+  let races = Number(user.unl_races) || 0;
+  if (body.race === true) races += 1;
+  if (Number.isInteger(body.racesAtLeast) && body.racesAtLeast > races && body.racesAtLeast < 1e6) races = body.racesAtLeast;
+  const racesChanged = races !== (Number(user.unl_races) || 0);
+  if (!add.length && !remove.length && !racesChanged) return json({ seen: before, races });
   const seen = mergeSeen(before, add, remove);
-  await env.DB.prepare("UPDATE users SET seen_prompts = ? WHERE id = ?").bind(JSON.stringify(seen), user.id).run();
-  return json({ seen });
+  await env.DB.prepare("UPDATE users SET seen_prompts = ?, unl_races = ? WHERE id = ?").bind(JSON.stringify(seen), races, user.id).run();
+  return json({ seen, races });
 }
