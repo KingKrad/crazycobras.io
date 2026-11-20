@@ -9,6 +9,7 @@
 import fs from "node:fs";
 import { execFile } from "node:child_process";
 import { SOURCES } from "./answer-sources.mjs";
+import { DEEP_SOURCES } from "./deep-sources.mjs";
 import { normalize } from "../public/vroomillion/js/logic.js";
 
 const MAIN = new URL("../public/vroomillion/js/data-extra.js", import.meta.url);
@@ -192,7 +193,7 @@ async function fetchPrompt(prompt, src) {
 // item must match, its rarity thresholds and exclusions. Written to src/answer-classes.js.
 async function classesFile() {
   const out = {};
-  for (const [prompt, src] of Object.entries(SOURCES)) {
+  for (const [prompt, src] of [...Object.entries(SOURCES), ...Object.entries(DEEP_SOURCES)]) {
     if (!src) continue;
     const parts = [];
     if (src.where) parts.push(...branches(src.where).map((b) => `{ ${b} }`));
@@ -288,6 +289,7 @@ if (args.includes("--deep")) {
   const todo = [];
   for (const [q, src] of Object.entries(PROMPTS)) if (GEN[q] && src.where) todo.push([q, src, GEN[q].tiers]);
   for (const [q, src] of Object.entries(SOURCES)) if (src?.where && !/schema:description/.test(src.where)) todo.push([q, src, src.tiers || [70, 25]]);
+  for (const [q, src] of Object.entries(DEEP_SOURCES)) todo.push([q, src, src.tiers || [70, 25]]);
   const only = args.includes("--only") ? new Set(args[args.indexOf("--only") + 1].split(";")) : null;
   for (const [q, src, tiers] of todo) {
     if (only && !only.has(q)) continue;
