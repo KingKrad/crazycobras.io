@@ -664,6 +664,13 @@ const withRarity = (q) => {
     const to = fix[normalize(entry.split("|")[0])];
     a[(to && to - 1 < t ? to : t + 1) - 1].push(entry);
   }));
-  return a.every((l) => l.length) ? { ...q, a } : q; // never leave a tier empty
+  // a spelling that's now in a more common tier comes off the rarer entries that share it
+  const seen = new Set();
+  const out = a.map((list) => list.map((entry) => {
+    const forms = entry.split("|").filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; return true; });
+    forms.forEach((f) => seen.add(normalize(f)));
+    return forms.join("|");
+  }).filter(Boolean));
+  return out.every((l) => l.length) ? { ...q, a: out } : q; // never leave a tier empty
 };
 export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map((q) => ({ ...q, ...classify(q) }));

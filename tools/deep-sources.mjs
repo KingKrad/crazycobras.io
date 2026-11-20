@@ -31,6 +31,5 @@ export const DEEP_SOURCES = {
   "Name a type of potato dish": { where: "{ ?i wdt:P31/wdt:P279* wd:Q10514020. } UNION { ?i wdt:P279+ wd:Q10514020. }", tiers: [30, 12] },
   "Name a fruit juice": { where: "{ ?i wdt:P279+ wd:Q20932605. } UNION { ?i wdt:P31 wd:Q20932605. }", tiers: [20, 8] },
   "Name a Looney Tunes character": { where: "{ ?i wdt:P1441 wd:Q622435. } UNION { ?i wdt:P8345 wd:Q622435. }", tiers: [30, 12] },
-  "Name a room in a house": { where: "?i wdt:P279+ wd:Q180516.", tiers: [30, 12] },
   "Name a shape": { where: "?i wdt:P279+ wd:Q815741.", deepMin: 3, tiers: [40, 15] },
 };
