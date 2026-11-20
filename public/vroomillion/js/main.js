@@ -222,6 +222,8 @@ function timeLeft() {
 function renderDaily() {
   const box = $("daily");
   box.textContent = "";
+  // admins get a shortcut to the admin screen right on the title screen (phones included)
+  $("btn-admin-title")?.classList.toggle("hidden", !account?.admin);
   const today = dday();
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
@@ -497,7 +499,7 @@ function renderAdmin() {
       h("div", { class: "note", text: [p.admin ? "ADMIN" : null, p.unlimited ? "UNLIMITED" : "FREE PLAYER", p.paid ? "PAID" : null, "JOINED " + new Date(p.createdAt).toISOString().slice(0, 10)].filter(Boolean).join(" · ") }),
       h("div", { class: "admin-actions" },
         h("button", { class: "btn", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.") }),
-        h("button", { class: "btn", type: "button", text: "GIVE TODAY'S FREE RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their free races reset next time they open the game while logged in.") })));
+        h("button", { class: "btn", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") })));
   };
   const act = async (body, done) => {
     msg.textContent = "Working…";

@@ -833,3 +833,8 @@ body.kb #s-race .feedback { margin-bottom: 4px; }
   body:is([data-screen="leagues"], [data-screen="versus"], [data-screen="garage"], [data-screen="passport"], [data-screen="how"], [data-screen="account"], [data-screen="paywall"], [data-screen="board"], [data-screen="admin"]) .stage { display: none; }
   #s-leagues > .note:first-of-type { display: none; }
 }
+
+/* admin */
+.btn.admin-btn { background: #3a1d00; border-color: var(--orange); color: var(--orange); }
+#s-title .menu .admin-btn { grid-column: 1 / -1; }
+@media (max-width: 520px) { .admin-box input { width: 100%; box-sizing: border-box; } }
