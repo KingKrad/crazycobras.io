@@ -1322,19 +1322,21 @@ function askAnswer(r, i, token, index) {
       if (text) { if (feedback.textContent !== text) say(text, "fix hint"); }
       else if (feedback.classList.contains("hint")) { feedback.textContent = ""; feedback.className = "feedback"; }
     };
+    const liveHints = !!race.daily || save.deck === "classic";
     const onInput = () => {
       audio.sfx.key();
       clearTimeout(prefetch);
       const value = input.value;
       if (suggestion && normalize(value) !== suggestion.key) suggestion = null;
       const res = value.trim().length >= 4 ? judge(index, value) : { tier: 0 };
-      hint(value, res.tier > 0 && res.corrected && !res.partial ? res.display : null);
+      // typing hints only in regular (CLASSIC) races; GEARHEAD and HARD MODE show the fix after Enter
+      if (liveHints) hint(value, res.tier > 0 && res.corrected && !res.partial ? res.display : null);
       if (!index.prompt || value.trim().length < 3 || res.tier > 0) return; // on our list: nothing to look up
       prefetch = setTimeout(() => {
         if (finished || token !== raceToken || input.value !== value) return;
         checkOnline(index, value).then((hit) => {
           const same = (a) => normalize(a).replace(/ /g, "");
-          if (hit && same(hit.label) !== same(value)) hint(value, hit.label);
+          if (liveHints && hit && same(hit.label) !== same(value)) hint(value, hit.label);
         });
       }, 220);
     };
