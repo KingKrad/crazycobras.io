@@ -9,6 +9,7 @@ import {
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
 import { ChaseScene } from "./chase.js";
+import { shareCard, saveShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
@@ -1218,7 +1219,6 @@ function askAnswer(r, i, token, index) {
     // A typo is never sent on its own: the fix shows up as they type, Enter puts it in the box,
     // and Enter / GO again uses it. A fixed typo keeps its score, but can't be a One in a Vroomillion.
     let suggestion = null;
-    let checking = false;
     const offer = (fix) => {
       suggestion = fix;
       input.value = fix.display;
@@ -1241,23 +1241,24 @@ function askAnswer(r, i, token, index) {
         input.value = "";
         return resolve(stalled);
       }
-      // Not on our list: ask Wikidata (through our server) before saying no. The clock keeps running.
+      // Not on our list: a "no" is instant. The online check (started while they typed) carries on
+      // quietly; if it finds the answer was real after all, it still counts. The clock keeps running.
       if (index.prompt && value.trim().length >= 3) {
-        if (checking) return;
-        checking = true;
-        // usually already answered: the lookup started while they were typing
-        const slow = onlineKnown(index, value) ? 0 : setTimeout(() => { $("btn-go").disabled = true; say("CHECKING…", "fix"); }, 250);
+        const same = (a) => normalize(a).replace(/ /g, "");
+        const asFound = (hit) => ({ tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true });
+        if (onlineKnown(index, value)) {
+          const hit = onlineSeen.get(index.prompt + "|" + normalize(value));
+          if (hit) return same(hit.label) === same(value) ? lockIn(asFound(hit)) : offer({ ...asFound(hit), corrected: true });
+          return reject(value);
+        }
+        reject(value);
         checkOnline(index, value).then((hit) => {
-          clearTimeout(slow);
-          checking = false;
-          $("btn-go").disabled = false;
-          if (finished || token !== raceToken) return;
-          feedback.textContent = "";
-          if (!hit) return reject(value);
-          const found = { tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true };
-          const same = (a) => normalize(a).replace(/ /g, "");
-          if (same(hit.label) === same(value)) return lockIn(found);
-          offer({ ...found, corrected: true });
+          if (!hit || finished || token !== raceToken) return;
+          if (same(hit.label) === same(value)) {
+            say(hidden ? "IT COUNTS AFTER ALL!" : `"${hit.label.toUpperCase().slice(0, 24)}" COUNTS AFTER ALL!`, "good");
+            return lockIn(asFound(hit));
+          }
+          if (!input.value.trim()) offer({ ...asFound(hit), corrected: true }); // typo of a real thing: offer the fix
         });
         return;
       }
@@ -1361,7 +1362,29 @@ function destResult({ dest, newStamp, carUnlocked, top }) {
     h("div", { class: "dest-name", text: dest.name }),
     h("div", { class: "note", text: [newStamp ? "NEW PASSPORT STAMP!" : "", carUnlocked ? "GOLD CAR UNLOCKED: THE VROOMILLIONAIRE" : "",
       next ? `NEXT: ${next.exclusive ? "??? (EXCLUSIVE)" : next.name} AT ${next.min.toLocaleString("en-US")} M` : "YOU'VE BEEN EVERYWHERE."].filter(Boolean).join(" · ") }),
-    h("button", { class: "btn small", type: "button", text: "OPEN PASSPORT", onclick: () => { audio.sfx.click(); show("passport"); } }));
+    h("div", { class: "dest-actions" },
+      newStamp || dest.exclusive ? shareButtons(dest, save.passport[dest.id] || top) : null,
+      h("button", { class: "btn small", type: "button", text: "OPEN PASSPORT", onclick: () => { audio.sfx.click(); show("passport"); } })));
+}
+
+// SHARE (the phone's share sheet: TikTok, Instagram, Messages...) and SAVE IMAGE for a passport stamp.
+function shareButtons(dest, best, small = false) {
+  const stamps = () => [Object.keys(save.passport).length, DESTINATIONS.length];
+  const cls = "btn small share" + (small ? " tiny" : "");
+  const busy = async (btn, job, done) => {
+    audio.sfx.click();
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "MAKING…";
+    try { const r = await job(); btn.textContent = r === "saved" || done ? "SAVED!" : label; } catch { btn.textContent = "TRY AGAIN"; }
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = label; }, 2000);
+  };
+  const share = h("button", { class: cls, type: "button", text: small ? "SHARE" : "SHARE STAMP",
+    onclick: () => busy(share, () => shareCard(dest, best, stamps())) });
+  const saveBtn = h("button", { class: cls, type: "button", text: small ? "SAVE" : "SAVE IMAGE",
+    onclick: () => busy(saveBtn, () => saveShareCard(dest, best, stamps()), true) });
+  return h("span", { class: "share-row" }, share, saveBtn);
 }
 
 // The passport: every destination, stamped once you've reached it.
@@ -1378,7 +1401,8 @@ function renderPassport() {
       cv,
       h("div", { class: "stamp-name", text: best || !d.exclusive ? d.name : "??? EXCLUSIVE ???" }),
       h("div", { class: "stamp-info", text: best ? `BEST ${best.toLocaleString("en-US")} M` : d.min ? `REACH ${d.min.toLocaleString("en-US")} M IN ONE RACE` : "FINISH ANY RACE" }),
-      best ? h("div", { class: "stamp-mark", text: "VISITED" }) : null));
+      best ? h("div", { class: "stamp-mark", text: "VISITED" }) : null,
+      best ? shareButtons(d, best, true) : null));
   }
 }
 
