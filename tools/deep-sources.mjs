@@ -3,7 +3,7 @@
 // deepMin: only items with at least this many Wikipedia language editions (huge kinds of thing).
 export const DEEP_SOURCES = {
   "Name a famous composer": { where: "?i wdt:P106 wd:Q36834.", deepMin: 6, tiers: [60, 25] },
-  "Name a famous author": { where: "VALUES ?o { wd:Q36180 wd:Q6625963 wd:Q4853732 wd:Q49757 } ?i wdt:P106 ?o.", deepMin: 12, tiers: [80, 35] },
+  "Name a famous author": { where: "{ ?i wdt:P106 wd:Q6625963. } UNION { ?i wdt:P106 wd:Q4853732. } UNION { ?i wdt:P106 wd:Q36180. }", deepMin: 30, tiers: [80, 35] },
   "Name a famous explorer": { where: "?i wdt:P106 wd:Q11900058.", deepMin: 2, tiers: [60, 25] },
   "Name a famous pirate": { where: "?i wdt:P106 wd:Q10729326.", tiers: [30, 12] },
   "Name a famous guitarist": { where: "?i wdt:P106 wd:Q855091.", deepMin: 8, tiers: [60, 25] },

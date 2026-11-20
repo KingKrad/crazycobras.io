@@ -4,7 +4,7 @@ import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import { carById } from "../public/vroomillion/js/cars.js";
 import {
   DESTINATIONS, destinationFor,
-  TIERS, ROUNDS, classRank, blockedBy, carReach, normalize, buildIndex, judge, metresFor, applyFenderBender,
+  TIERS, ROUNDS, classRank, blockedBy, carReach, tunedCar, upgradeLevel, upgradeCost, normalize, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, dailyQuestions, pickFresh, promptsLeft, makeVariants,
 } from "../public/vroomillion/js/logic.js";
 
@@ -362,4 +362,17 @@ test("daily races are the same for everyone: 2 x 7 different prompts, new each d
   const again = dailyQuestions([...deck].reverse(), "2026-11-20");
   assert.deepEqual(again[0].map((q) => q.q), a.map((q) => q.q), "the same on every device, whatever the list order");
   assert.notDeepEqual(dailyQuestions(deck, "2026-11-21")[0].map((q) => q.q), a.map((q) => q.q), "a new set tomorrow");
+});
+
+test("car upgrades add power and nitro but never change the class", () => {
+  const car = carById("rustbucket");
+  const ups = { rustbucket: { engine: 3, nitro: 2 } };
+  const t = tunedCar(car, ups);
+  assert.equal(t.power, 1.18);
+  assert.equal(t.nitro, car.nitro + 2);
+  assert.equal(t.cls, "D");
+  assert.equal(destinationFor(30000, t).id, "beach", "still can't leave the beach");
+  assert.equal(tunedCar(car, { rustbucket: { engine: 99 } }).power, 1.18, "levels are capped");
+  assert.equal(upgradeLevel({}, "rustbucket", "engine"), 0);
+  assert.ok(upgradeCost(car, "engine", 0) > 0 && upgradeCost(car, "engine", 2) > upgradeCost(car, "engine", 0));
 });
