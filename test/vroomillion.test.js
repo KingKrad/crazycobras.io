@@ -376,3 +376,24 @@ test("car upgrades add power and nitro but never change the class", () => {
   assert.equal(upgradeLevel({}, "rustbucket", "engine"), 0);
   assert.ok(upgradeCost(car, "engine", 0) > 0 && upgradeCost(car, "engine", 2) > upgradeCost(car, "engine", 0));
 });
+
+test("an answer with a word in front of a common answer is never much rarer than it", () => {
+  const breakfast = buildIndex(QUESTIONS.find((x) => x.q === "Name a breakfast food"));
+  assert.equal(judge(breakfast, "pancakes").tier, 1);
+  assert.ok(judge(breakfast, "blueberry pancakes").tier <= 2, "blueberry pancakes at most one above pancakes");
+  const pancake = buildIndex(QUESTIONS.find((x) => x.q === "Name a type of pancake"));
+  assert.equal(judge(pancake, "blueberry pancakes").tier, 1);
+  pancake.deep = new Map([["chocolate chip banana pancake", { tier: 4, display: "chocolate chip banana pancake" }]]);
+  assert.ok(judge(pancake, "chocolate chip banana pancake").tier <= 2, "the long tail too");
+});
+
+test("hand-picked top answers fix Wikidata-built prompts", () => {
+  const tier = (q, a) => judge(buildIndex(QUESTIONS.find((x) => x.q === q)), a).tier;
+  assert.equal(tier("Name a baseball player", "babe ruth"), 1);
+  assert.ok(tier("Name a baseball player", "george h. w. bush") >= 3, "famous, but not as a baseball player");
+  assert.equal(tier("Name a butterfly", "monarch"), 1);
+  assert.equal(tier("Name an airport", "jfk"), 1);
+  assert.equal(tier("Name a type of pancake", "blueberry"), 1);
+  assert.equal(tier("Name a US state capital", "pierre"), 5);
+  for (const q of QUESTIONS) assert.ok(q.a.every((l) => l.length), q.q + " has an empty tier");
+});

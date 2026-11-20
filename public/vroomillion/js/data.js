@@ -9,6 +9,7 @@ import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { HAND3_QUESTIONS } from "./data-hand3.js";
 import { HAND4_QUESTIONS } from "./data-hand4.js";
 import { RARITY } from "./data-rarity.js";
+import { TOP } from "./data-top.js";
 import { classify } from "./data-cats.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE, NICKNAMES } from "./data-more.js";
@@ -673,4 +674,34 @@ const withRarity = (q) => {
   }).filter(Boolean));
   return out.every((l) => l.length) ? { ...q, a: out } : q; // never leave a tier empty
 };
-export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map((q) => ({ ...q, ...classify(q) }));
+// TOP (data-top.js): hand-picked TRAFFIC and CRUISING answers for Wikidata-built prompts. Each listed
+// answer picks up the spellings it already had; what used to be on top but isn't listed drops to FAST LANE.
+// Five lists instead of two replace the whole prompt (small closed sets).
+const withTop = (q) => {
+  const top = TOP[q.q];
+  if (!top) return q;
+  const byKey = new Map();
+  for (const e of q.a.flat()) for (const f of e.split("|")) { const k = normalize(f); if (k && !byKey.has(k)) byKey.set(k, e); }
+  const used = new Set();
+  const take = (entry) => {
+    const forms = entry.split("|");
+    const olds = [...new Set(forms.map((f) => byKey.get(normalize(f))).filter(Boolean))];
+    olds.forEach((o) => used.add(o));
+    return [...new Set([...forms, ...olds.flatMap((o) => o.split("|"))])].join("|");
+  };
+  const picked = top.map((list) => list.map(take));
+  const rest = q.a.map((list) => list.filter((e) => !used.has(e)));
+  const a = picked.length === 5 ? picked : [picked[0], picked[1], [...rest[0], ...rest[1], ...rest[2]], rest[3], rest[4]];
+  // a spelling lives in one tier only: the most common one it was put in
+  const seen = new Set();
+  const out = a.map((list) => list.map((e) => e.split("|").filter((f) => { const k = normalize(f); if (!k || seen.has(k)) return false; seen.add(k); return true; }).join("|")).filter(Boolean));
+  // an empty rarer tier takes the least obvious answers from the tier above (CRUISING keeps at least 6)
+  for (let t = 2; t <= 4; t++) {
+    for (let src = t - 1; src >= 1 && !out[t].length; src--) {
+      const n = Math.min(t === 4 ? 3 : 6, Math.max(0, out[src].length - (src === 1 ? 6 : 1)));
+      if (n) out[t] = out[src].splice(-n);
+    }
+  }
+  return out.every((l) => l.length) ? { ...q, a: out } : q;
+};
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map(withTop).map((q) => ({ ...q, ...classify(q) }));

@@ -281,13 +281,25 @@ export function deckQuestions(all, deck) {
 // A corrected typo scores exactly like the answer it was fixed to, ONE IN A VROOMILLION included.
 const capped = (res) => res;
 
+// "blueberry pancakes" is never much rarer than "pancakes": an answer that ends with a more common answer
+// from the same prompt scores at most one tier above it (the long-tail lists sometimes rank the
+// longer name as obscure).
+function modifierCap(index, key, res) {
+  const ws = key.split(" ");
+  for (let i = 1; i < ws.length; i++) {
+    const tail = lookup(index, ws.slice(i).join(" "));
+    if (tail && tail.tier + 1 < res.tier) return { ...res, tier: tail.tier + 1 };
+  }
+  return res;
+}
+
 // Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
 // corrected is true when a typo was snapped to the nearest real answer.
 export function judge(index, raw) {
   const key = normalize(raw);
   if (!key) return { tier: 0, display: "", key: "" };
   const exact = lookup(index, key);
-  if (exact) return { ...exact, key: normalize(exact.display) };
+  if (exact) return modifierCap(index, key, { ...exact, key: normalize(exact.display) });
 
   // "pine apple" -> "pineapple"
   const joined = key.includes(" ") && lookup(index, key.replace(/ /g, ""));
@@ -320,7 +332,7 @@ export function judge(index, raw) {
   if (index.deep) {
     for (const k of [key, trimmed.join(" "), key.endsWith("s") ? key.slice(0, -1) : null]) {
       const hit = k && index.deep.get(k);
-      if (hit && !(index.letter && normalize(hit.display)[0] !== index.letter)) return { ...hit, key: normalize(hit.display), deep: true };
+      if (hit && !(index.letter && normalize(hit.display)[0] !== index.letter)) return modifierCap(index, k, { ...hit, key: normalize(hit.display), deep: true });
     }
   }
   // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
