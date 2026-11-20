@@ -316,13 +316,17 @@ test("category words are dropped only where they fit the prompt", () => {
   assert.ok(judge(idx("Name a dessert"), "apple pie").tier > 0);
 });
 
-test("long-tail (deep) answers count instantly by exact name, but typos never snap to them", () => {
+test("long-tail (deep) answers count instantly, and long typos snap to them only as a last resort", () => {
   const index = buildIndex(QUESTIONS.find((x) => x.q === "Name a sauce or condiment"));
   index.deep = new Map([["mayochup", { tier: 4, display: "mayochup" }], ["zakarpattia honey", { tier: 4, display: "zakarpattia honey" }]]);
   assert.equal(judge(index, "Mayochup").tier, 4);
   assert.equal(judge(index, "mayochups").tier, 4, "a plural still counts");
   assert.equal(judge(index, "ketchup").tier, 1, "the hand-written tier wins");
-  assert.notEqual(judge(index, "mayochop").display, "mayochup", "no autocorrect into the long tail");
+  const fixed = judge(index, "mayochop");
+  assert.equal(fixed.display, "mayochup", "a typo of a long-tail answer is fixed");
+  assert.ok(fixed.corrected && fixed.tier === 4);
+  assert.equal(judge(index, "ketchap").display.toLowerCase(), "ketchup", "the well-known list is tried first");
+  assert.equal(judge(index, "mayoc").tier, 0, "short typos never reach the long tail");
   index.letter = "k";
   assert.equal(judge(index, "mayochup").tier, 0, "starting-with twists still need the letter");
 });

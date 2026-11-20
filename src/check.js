@@ -48,17 +48,20 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   let found = false;
   let label = "";
   let n = 0;
-  // Wikidata's query service sometimes times out or is briefly busy: one quick retry before giving up
-  const ask = () => fetchImpl(WDQS, {
+  // Wikidata's query service is sometimes briefly busy: retry once if it said no quickly, but never keep
+  // a player waiting more than about 4 seconds in all (the race clock is running).
+  const ask = (ms) => fetchImpl(WDQS, {
     method: "POST",
     headers: { Accept: "application/sparql-results+json", "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "vroomillion-answer-check/1.0" },
     body: "query=" + encodeURIComponent(checkQuery(cls.where, answer, !!cls.exact)),
-    signal: AbortSignal.timeout(5500),
+    signal: AbortSignal.timeout(ms),
   });
   try {
+    const t0 = Date.now();
     let res;
-    try { res = await ask(); } catch { res = null; }
-    if (!res || !res.ok) res = await ask();
+    try { res = await ask(3000); } catch { res = null; }
+    if ((!res || !res.ok) && Date.now() - t0 < 1500) res = await ask(2500);
+    if (!res) return json({ found: false, reason: "lookup failed" }, 504);
     if (res.ok) {
       const row = (await res.json()).results?.bindings?.[0];
       if (row) {

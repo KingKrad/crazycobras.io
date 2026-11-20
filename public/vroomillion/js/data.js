@@ -653,4 +653,4 @@ export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
 // each prompt carries its topic (cat) and whether it is niche (hard: HARD MODE only)
-export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withNicknames)].map((q) => ({ ...q, ...classify(q) }));
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map((q) => ({ ...q, ...classify(q) }));

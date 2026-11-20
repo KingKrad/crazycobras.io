@@ -297,7 +297,23 @@ export function judge(index, raw) {
   // Shown as a fix to confirm, and scores exactly like the full answer.
   const part = index.strict ? null : partialMatch(index, key); // "starting with" twists stay strict
   if (part) return { ...part, key: normalize(part.display), corrected: true, partial: true };
+  // Last try: a typo of something in the long tail ("the old giutarist"). Longer answers only, and the
+  // closest, most covered match wins, so a short typo can't land on an obscure item.
+  const deepFix = index.deep && key.length >= 6 ? deepTypo(index, key) : null;
+  if (deepFix) return capped({ ...deepFix, key: normalize(deepFix.display), corrected: true, deep: true });
   return { tier: 0, display: String(raw).trim().slice(0, 40), key };
+}
+
+function deepTypo(index, key) {
+  const max = Math.min(2, typoAllowance(key.length));
+  let best = null;
+  for (const [cand, hit] of index.deep) {
+    if (cand[0] !== key[0] || Math.abs(cand.length - key.length) > max || cand.length < 6) continue;
+    if (index.letter && normalize(hit.display)[0] !== index.letter) continue;
+    const d = editDistance(key, cand, max, 1);
+    if (d <= max && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
+  }
+  return best && best.hit;
 }
 
 // Words too common to point at one answer on their own.
