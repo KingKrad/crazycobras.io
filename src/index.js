@@ -2,6 +2,7 @@ import { handleCheckout, handleVerify, handleMe } from "./vroomillion.js";
 import { handleCheck } from "./check.js";
 import { handleAdmin, handleRaceStart } from "./admin.js";
 import { handleSeen } from "./seen.js";
+import { handleDailyScore, handleDailyBoard, handleNickname } from "./daily.js";
 import { handleSignup, handleLogin, handleLogout, handleDeleteAccount, handleResetPassword, handleNewRecoveryCode, handleConfig, json } from "./accounts.js";
 
 // API routes for VROOMILLION. Everything else is a static file from public/.
@@ -14,6 +15,9 @@ const ROUTES = {
   "/api/vroomillion/verify": handleVerify,
   "/api/vroomillion/me": handleMe,
   "/api/vroomillion/seen": handleSeen,
+  "/api/vroomillion/daily": handleDailyScore,
+  "/api/vroomillion/daily-board": handleDailyBoard,
+  "/api/vroomillion/nickname": handleNickname,
   "/api/vroomillion/signup": handleSignup,
   "/api/vroomillion/login": handleLogin,
   "/api/vroomillion/logout": handleLogout,

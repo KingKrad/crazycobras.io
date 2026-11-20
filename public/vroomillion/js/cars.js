@@ -86,6 +86,9 @@ for (const cls of Object.keys(POWER_RANGE)) {
   list.forEach((c, i) => { c.power = Math.round((lo + (list.length > 1 ? (hi - lo) * i / (list.length - 1) : 0)) * 100) / 100; });
 }
 CARS.find((c) => c.exclusive).power = 6.0;
+// Prices tuned so an average player buys a class S car (the Moon) after about 40 races.
+const PRICE_SCALE = { A: 1.2, S: 1.45, X: 1.3 };
+for (const c of CARS) if (PRICE_SCALE[c.cls] && c.price) c.price = Math.round(c.price * PRICE_SCALE[c.cls] / 10000) * 10000;
 
 export const carById = (id) => CARS.find((c) => c.id === id) || CARS[0];
 

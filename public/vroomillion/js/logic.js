@@ -37,6 +37,23 @@ export const blockedBy = (metres, car) => DESTINATIONS.find((d) => metres >= d.m
 export const carReach = (car) => [...DESTINATIONS].reverse().find((d) => canReach(d, car));
 export const EXCLUSIVE_CAR = "vroomillionaire";
 
+// ---- car upgrades ----
+// Tune a car you own: ENGINE (+6% power a level, 3 levels) and NITRO (+1 charge a level, 2 levels).
+// Upgrades never change a car's class, so a better class is still needed to reach new places.
+export const UPGRADES = {
+  engine: { name: "ENGINE", levels: 3, cost: [0.3, 0.6, 1.0] },
+  nitro: { name: "NITRO", levels: 2, cost: [0.25, 0.5] },
+};
+const carValue = (car) => Math.max(car.price || 0, 4000);
+export const upgradeLevel = (ups, carId, kind) => Math.max(0, Math.min(UPGRADES[kind].levels, Number(ups?.[carId]?.[kind]) || 0));
+export const upgradeCost = (car, kind, level) => Math.round(carValue(car) * UPGRADES[kind].cost[level] / 100) * 100;
+// the car as it races: power and nitro with its upgrades
+export function tunedCar(car, ups) {
+  const engine = upgradeLevel(ups, car.id, "engine");
+  const nitro = upgradeLevel(ups, car.id, "nitro");
+  return { ...car, power: Math.round(car.power * (1 + 0.06 * engine) * 100) / 100, nitro: car.nitro + nitro, engine, nitroUp: nitro };
+}
+
 export const ROUNDS = 7;
 export const ANSWER_SECONDS = 25;
 export const NITRO_BOOST = 1.5;

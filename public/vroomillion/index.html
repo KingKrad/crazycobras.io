@@ -82,6 +82,7 @@
         <h3 class="sub-title">TODAY'S DAILY RACES</h3>
         <div class="daily-races" id="daily-solo"></div>
         <p class="note" id="daily-note"></p>
+        <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
         <h3 class="sub-title">UNLIMITED RACES</h3>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-solo" role="status"></p>
@@ -135,6 +136,14 @@
         <p class="note">Each race's total distance takes you somewhere. Go further to reach cooler places. <span id="passport-count"></span></p>
         <div class="passport-grid" id="passport-grid"></div>
         <button class="btn" data-go="title" type="button">BACK</button>
+      </section>
+
+      <section class="screen" id="s-board">
+        <h2>TODAY'S LEADERBOARD</h2>
+        <p class="note">Everyone races the same two daily races. Scores reset at midnight UTC.</p>
+        <div class="board-lists" id="board-lists"></div>
+        <div id="board-nick"></div>
+        <button class="btn" data-go="leagues" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-admin">

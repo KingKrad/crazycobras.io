@@ -98,10 +98,10 @@ async function rescale(q) {
     if (it.tier === 3) { if (m1 && it.v >= 2 * m1) to = 2; }
     else if (it.tier === 4) { if (m1 && it.v >= m1) to = 2; else if (m2 && it.v >= m2) to = 3; }
     else if (it.tier === 5) {
-      // a One in a Vroomillion has to be obscure for its prompt
+      // Rarity means "rarely said", not "obscure": Kiribati stays a Vroomillion country. Only an answer as
+      // famous as the prompt's everyday answers (Frank's RedHot for hot sauce) moves down.
       if (m1 && it.v >= m1) to = 2;
       else if (m2 && it.v >= m2) to = 3;
-      else if ((m3 && it.v >= m3) || it.v >= 60000) to = 4;
     }
     if (to < it.tier) { changes[it.key] = to; moved++; }
   }

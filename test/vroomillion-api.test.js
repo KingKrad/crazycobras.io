@@ -72,7 +72,7 @@ test("sign up creates an account, a session cookie and a hashed password", async
   assert.ok(!JSON.stringify(db.sql.prepare("SELECT * FROM sessions").all()).includes(cookie.split("=")[1]), "only a hash of the token is stored");
 
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: false, freeResetAt: 0 });
+  { const j = await me.json(); assert.deepEqual({ email: j.email, unlimited: j.unlimited, freeResetAt: j.freeResetAt, streak: j.streak }, { email: "racer@example.com", unlimited: false, freeResetAt: 0, streak: 0 }); assert.match(j.nickname, /^RACER [A-Z0-9]{4}$/); }
 });
 
 test("sign up rejects bad emails, short passwords and duplicate accounts", async () => {
@@ -188,7 +188,7 @@ test("a paid checkout upgrades the account that bought it", async () => {
   assert.deepEqual(await res.json(), { paid: true }, "the receipt link doesn't reveal the email");
   assert.equal(stripeCalls.at(-1).url, "https://api.stripe.com/v1/checkout/sessions/" + ID);
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true, freeResetAt: 0 });
+  { const j = await me.json(); assert.deepEqual({ email: j.email, unlimited: j.unlimited, freeResetAt: j.freeResetAt, streak: j.streak }, { email: "racer@example.com", unlimited: true, freeResetAt: 0, streak: 0 }); assert.match(j.nickname, /^RACER [A-Z0-9]{4}$/); }
 });
 
 test("unpaid, wrong-price or other-product sessions don't upgrade anyone", async () => {
@@ -215,7 +215,7 @@ test("closing the tab after paying still unlocks on the next visit", async () =>
   db.sql.prepare("UPDATE users SET pending_session = ?").run(ID);
   stripeReply = { body: paidSession(userId()) };
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true, freeResetAt: 0 });
+  { const j = await me.json(); assert.deepEqual({ email: j.email, unlimited: j.unlimited, freeResetAt: j.freeResetAt, streak: j.streak }, { email: "racer@example.com", unlimited: true, freeResetAt: 0, streak: 0 }); assert.match(j.nickname, /^RACER [A-Z0-9]{4}$/); }
   const row = db.sql.prepare("SELECT unlimited, pending_session, paid_session FROM users").get();
   assert.deepEqual({ ...row }, { unlimited: 1, pending_session: null, paid_session: ID });
 });
@@ -455,4 +455,40 @@ test("Unlimited race numbers are counted on the account", async () => {
   assert.equal(await call({ racesAtLeast: 10 }), 10, "a device that already ran 10 races carries its count up");
   assert.equal(await call({ racesAtLeast: 3 }), 10, "never goes down");
   assert.equal(await call({ race: "yes" }), 10, "junk is ignored");
+});
+
+// ---------- daily races ----------
+
+test("daily scores make a leaderboard of nicknames (never emails), one score per race, and a streak", async () => {
+  const a = await signup("a@example.com"), b = await signup("b@example.com");
+  const send = (c, body) => worker.fetch(post("daily", body, { cookie: c }), env());
+  const tiers = [5, 5, 4, 4, 3, 3, 2];
+  let r = await send(a.cookie, { race: 1, metres: 9000, tiers });
+  assert.equal(r.status, 200);
+  assert.deepEqual(await r.json().then((j) => [j.rank, j.streak]), [1, 1]);
+  assert.equal((await (await send(a.cookie, { race: 1, metres: 20000, tiers })).json()).metres, 9000, "the first score counts");
+  r = await send(b.cookie, { race: 1, metres: 12000, tiers });
+  assert.equal((await r.json()).rank, 1, "b beats a");
+  assert.equal((await worker.fetch(post("nickname", { nickname: "Speedy Gonzo" }, { cookie: b.cookie }), env())).status, 200);
+  assert.equal((await worker.fetch(post("nickname", { nickname: "speedy gonzo" }, { cookie: a.cookie }), env())).status, 409, "names are unique");
+  assert.equal((await worker.fetch(post("nickname", { nickname: "x" }, { cookie: a.cookie }), env())).status, 400);
+  assert.equal((await worker.fetch(post("nickname", { nickname: "big shit" }, { cookie: a.cookie }), env())).status, 400, "nothing rude");
+  const board = await (await worker.fetch(get("daily-board?race=1", { cookie: a.cookie }), env())).json();
+  assert.equal(board.players, 2);
+  assert.deepEqual(board.top.map((t) => [t.name, t.metres]), [["Speedy Gonzo", 12000], [board.top[1].name, 9000]]);
+  assert.match(board.top[1].name, /^RACER /);
+  assert.ok(!JSON.stringify(board).includes("@"), "no emails on the board");
+  assert.deepEqual([board.me.rank, board.me.metres], [2, 9000]);
+  assert.equal((await (await worker.fetch(get("daily-board?race=2"), env())).json()).top.length, 0);
+});
+
+test("daily scores refuse impossible distances, guests and other sites", async () => {
+  const { cookie } = await signup();
+  const send = (body, h = {}) => worker.fetch(post("daily", body, { cookie, ...h }), env());
+  assert.equal((await send({ race: 1, metres: 999999, tiers: [5, 5, 5, 5, 5, 5, 5] })).status, 400);
+  assert.equal((await send({ race: 1, metres: 20000, tiers: [1, 1, 1, 1, 1, 1, 1] })).status, 400, "too far for those answers");
+  assert.equal((await send({ race: 3, metres: 100, tiers: [1, 1, 1, 1, 1, 1, 1] })).status, 400);
+  assert.equal((await send({ race: 1, metres: 100, tiers: [1, 1] })).status, 400);
+  assert.equal((await worker.fetch(post("daily", { race: 1, metres: 100, tiers: [1, 1, 1, 1, 1, 1, 1] }), env())).status, 401);
+  assert.equal((await send({ race: 1, metres: 100, tiers: [1, 1, 1, 1, 1, 1, 1] }, { origin: "https://evil.test" })).status, 403);
 });

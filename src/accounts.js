@@ -147,7 +147,12 @@ export const publicUser = (u, env) => ({
   unlimited: u.unlimited === 1 || isAdmin(u, env),
   ...(isAdmin(u, env) ? { admin: true } : {}),
   freeResetAt: u.free_reset_at || 0,
+  // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
+  nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),
+  streak: [today(), today(-1)].includes(u.streak_day) ? Number(u.streak) || 0 : 0,
+  streakDay: u.streak_day || null,
 });
+const today = (offsetDays = 0) => new Date(Date.now() + offsetDays * 86400000).toISOString().slice(0, 10);
 
 // Recovery codes: 20 random characters from an alphabet without look-alikes (~100 bits),
 // shown once, stored only as a SHA-256 hash. They let a player reset a forgotten password.

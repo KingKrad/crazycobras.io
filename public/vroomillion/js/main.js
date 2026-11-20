@@ -3,8 +3,8 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, msUntilTomorrow, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
-  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR,
+  dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
+  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -184,21 +184,25 @@ function renderSound() {
 }
 
 // ---------- daily free run + unlimited ----------
+// Daily races change at midnight UTC, the same moment for everyone (so they can share a leaderboard).
+const dday = () => new Date().toISOString().slice(0, 10);
+const msToUtcMidnight = () => { const n = new Date(); return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() + 1) - n.getTime(); };
 function timeLeft() {
-  const m = Math.ceil(msUntilTomorrow() / 60000);
+  const m = Math.ceil(msToUtcMidnight() / 60000);
   return m >= 60 ? `${Math.floor(m / 60)}H ${m % 60}M` : `${m}M`;
 }
 
 function renderDaily() {
   const box = $("daily");
   box.textContent = "";
-  const today = dayKey();
+  const today = dday();
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
   } else if (unlimitedNow()) {
     box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
   } else if (dailyLeft(save, today) > 0) {
     const n = dailyLeft(save, today);
+    if (streakNow()) box.append(h("div", { class: "daily-line good", text: `STREAK: ${streakNow()} DAY${streakNow() === 1 ? "" : "S"} · KEEP IT GOING TODAY` }));
     box.append(h("div", { class: "daily-line good", text: `${n} DAILY RACE${n === 1 ? "" : "S"} LEFT TODAY · SAME PROMPTS FOR EVERYONE` }));
   } else {
     box.append(
@@ -230,7 +234,7 @@ async function refreshAccount() {
     syncSeen();
     // an admin gave this player today's free races back
     if (account?.freeResetAt > (save.freeResetAt || 0)) {
-      if (dayKey(new Date(account.freeResetAt)) === dayKey()) save.daily = { day: dayKey(), done: {} };
+      if (new Date(account.freeResetAt).toISOString().slice(0, 10) === dday()) save.daily = { day: dday(), done: {} };
       save.freeResetAt = account.freeResetAt;
       persist();
     }
@@ -402,7 +406,7 @@ function openPaywall(reason) { paywallReason = reason; show("paywall"); }
 function renderPaywall() {
   $("pay-lead").textContent = paywallReason === "mode"
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
-    : dailyLeft(save, dayKey()) > 0
+    : dailyLeft(save, dday()) > 0
       ? "Unlimited races on top of the daily two, in every mode."
       : `You've played today's ${DAILY_RACES} daily races. New ones in ${timeLeft()}.`;
   $("pay-msg").textContent = "";
@@ -435,6 +439,7 @@ function renderAccount() {
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
     h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : `FREE PLAYER — ${DAILY_RACES} DAILY RACES A DAY` }),
+    nicknameForm(),
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
     account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
@@ -565,6 +570,7 @@ function show(name) {
   if (name === "versus") renderVersus();
   if (name === "garage") renderGarage();
   if (name === "passport") renderPassport();
+  if (name === "board") renderBoardScreen();
   window.scrollTo({ top: 0 });
 }
 
@@ -584,7 +590,9 @@ function spriteCanvas(car, scale = 4) {
   return cv;
 }
 
-function statLine(car) {
+const tuned = (car) => tunedCar(car, save.upgrades);
+function statLine(car0) {
+  const car = tuned(car0);
   const pct = Math.round(((car.power - 1) / 5) * 100);
   const bar = h("span", { class: "bar" }, h("span", { class: "bar-fill" }));
   bar.firstChild.style.width = Math.max(4, pct) + "%";
@@ -707,6 +715,77 @@ function renderPromptsLeft(el, startBtn, ready) {
   else ready();
 }
 
+// ---------- streaks and the daily leaderboard ----------
+const STREAK_BONUS = 1000; // $ per day of the streak, up to STREAK_CAP days
+const STREAK_CAP = 7;
+// the streak right now: alive if the last daily race was today or yesterday (UTC)
+function streakNow() {
+  const t = dday(), y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const local = save.streak && [t, y].includes(save.streak.day) ? save.streak.count : 0;
+  return Math.max(local, account?.streak || 0);
+}
+
+// One leaderboard (top 10 for a daily race), drawn into el.
+async function drawBoard(el, n) {
+  el.textContent = "";
+  el.append(h("div", { class: "board-title", text: `DAILY RACE ${n} · TOP 10` }));
+  let body;
+  try { ({ body } = await api("daily-board?race=" + n)); } catch { el.append(h("p", { class: "note", text: "Leaderboards work on the VROOMILLION website." })); return; }
+  if (!body.top?.length) { el.append(h("p", { class: "note", text: "Nobody on it yet today. Be the first!" })); return; }
+  const list = h("ol", { class: "board" });
+  body.top.forEach((r, i) => list.append(h("li", { class: body.me && body.me.rank === i + 1 && body.me.name === r.name ? "me" : "" },
+    h("span", { class: "board-rank", text: String(i + 1) }), h("span", { class: "board-name", text: r.name }),
+    h("span", { class: "board-m", text: r.metres.toLocaleString("en-US") + " M" }))));
+  el.append(list);
+  el.append(h("p", { class: "note", text: body.me
+    ? `YOU: #${body.me.rank} OF ${body.players} · ${body.me.metres.toLocaleString("en-US")} M`
+    : `${body.players} PLAYER${body.players === 1 ? "" : "S"} TODAY` + (account ? "" : " · LOG IN TO GET ON THE BOARD") }));
+}
+
+// After a daily race: send the score (logged in), then show the board.
+function dailyBoardSlot(n, racer) {
+  const el = h("div", { class: "board-box" }, h("p", { class: "note", text: "Loading the leaderboard…" }));
+  (async () => {
+    if (account) {
+      try {
+        const { res, body } = await api("daily", { method: "POST", body: JSON.stringify({ race: n, metres: Math.round(racer.dist), tiers: racer.tiers.slice(0, 7) }) });
+        if (res.ok && Number.isInteger(body.streak)) { account.streak = body.streak; account.streakDay = body.day; }
+      } catch { /* offline: just show the board */ }
+    }
+    drawBoard(el, n);
+  })();
+  return el;
+}
+
+function renderBoardScreen() {
+  const root = $("board-lists");
+  root.textContent = "";
+  for (let n = 1; n <= DAILY_RACES; n++) { const el = h("div", { class: "board-box" }); root.append(el); drawBoard(el, n); }
+  const nick = $("board-nick");
+  nick.textContent = "";
+  if (!account) { nick.append(h("p", { class: "note", text: "Log in and finish a daily race to get on the leaderboard." })); return; }
+  nick.append(nicknameForm());
+}
+
+// The name on the leaderboard (never your email).
+function nicknameForm() {
+  const input = h("input", { type: "text", maxlength: "16", minlength: "3", value: account.nickname || "", "aria-label": "Leaderboard name", autocomplete: "off" });
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const form = h("form", { class: "nick-form" },
+    h("label", { class: "note", text: "YOUR LEADERBOARD NAME" }), input,
+    h("button", { class: "btn small", type: "submit", text: "SAVE NAME" }), msg);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    audio.sfx.click();
+    try {
+      const { res, body } = await api("nickname", { method: "POST", body: JSON.stringify({ nickname: input.value }) });
+      msg.textContent = res.ok ? "Saved." : body.error || "Couldn't save that.";
+      if (res.ok) account.nickname = body.nickname;
+    } catch { msg.textContent = "Names work on the VROOMILLION website."; }
+  });
+  return form;
+}
+
 // Unlimited races are numbered: RACE #1, RACE #2... (on the account when logged in, else this device)
 let accountRaces = null;
 const racesRun = () => (account && accountRaces != null ? accountRaces : save.unlRaces || 0);
@@ -715,7 +794,7 @@ function renderLeagues() {
   // the two daily races: the same prompts for everyone today, free for every player
   const daily = $("daily-solo");
   daily.textContent = "";
-  const done = dailyDone(save, dayKey());
+  const done = dailyDone(save, dday());
   for (let n = 1; n <= DAILY_RACES; n++) {
     const played = n in done;
     daily.append(h("button", {
@@ -724,9 +803,10 @@ function renderLeagues() {
       onclick: () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); },
     }));
   }
-  $("daily-note").textContent = dailyLeft(save, dayKey())
+  const st = streakNow();
+  $("daily-note").textContent = (dailyLeft(save, dday())
     ? "Same 7 prompts for everyone today. Free, once each."
-    : `Both done. New daily races in ${timeLeft()}.`;
+    : `Both done. New daily races in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
   modeSwitch($("mode-solo"), renderLeagues);
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
@@ -770,10 +850,34 @@ function renderGarage() {
             onclick: () => buy(car),
           });
       grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") },
-        spriteCanvas(car, 4), h("div", { class: "car-name", text: car.name }), statLine(car), action));
+        spriteCanvas(car, 4), h("div", { class: "car-name", text: car.name }), statLine(car), action,
+        owned ? upgradeRow(car) : null));
     }
     root.append(grid);
   }
+}
+
+// ENGINE / NITRO upgrade buttons on an owned car
+function upgradeRow(car) {
+  return h("div", { class: "upgrades" }, ...Object.entries(UPGRADES).map(([kind, u]) => {
+    const level = upgradeLevel(save.upgrades, car.id, kind);
+    if (level >= u.levels) return h("div", { class: "tag up-max", text: `${u.name} MAX` });
+    const cost = upgradeCost(car, kind, level);
+    return h("button", {
+      class: "btn small up" + (save.cash >= cost ? "" : " poor"), type: "button",
+      text: `${u.name} ${level + 1}/${u.levels} · ${money(cost)}`,
+      "aria-label": `Upgrade ${u.name.toLowerCase()} on ${car.name} for ${money(cost)}`,
+      onclick: () => {
+        if (save.cash < cost) { audio.sfx.deny(); overlay(`NEED ${money(cost - save.cash)} MORE`, "small"); setTimeout(() => current === "garage" && overlay(""), 1200); return; }
+        save.cash -= cost;
+        save.upgrades = { ...(save.upgrades || {}), [car.id]: { ...(save.upgrades?.[car.id] || {}), [kind]: level + 1 } };
+        persist();
+        audio.sfx.buy();
+        renderCash(true);
+        renderGarage();
+      },
+    });
+  }));
 }
 
 function buy(car) {
@@ -840,7 +944,7 @@ function popGain(i, metres, tier, nitro) {
 
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
-  const today = dayKey();
+  const today = dday();
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
   const kind = daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };
   if (!canRace(me(), today, kind)) {
@@ -878,8 +982,8 @@ function startRace(setup) {
   const solo = setup.mode === "solo";
   const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
   const racers = solo
-    ? [mk("YOU", carById(save.car))]
-    : [mk(setup.names[0], carById(setup.cars[0])), mk(setup.names[1], carById(setup.cars[1]))];
+    ? [mk("YOU", tuned(carById(save.car)))]
+    : [mk(setup.names[0], tuned(carById(setup.cars[0]))), mk(setup.names[1], tuned(carById(setup.cars[1])))];
   race = { token, solo, setup, racers, round: 0, questions, daily, label };
 
   scene = chaseScene; // races use the behind-the-car view
@@ -1460,7 +1564,7 @@ function finish(token) {
     newBest = a.dist > save.best;
     if (newBest) save.best = a.dist;
     title = newBest && save.races > 0 ? "NEW BEST!" : race.daily ? `DAILY RACE ${race.daily} DONE` : "RUN COMPLETE";
-    if (race.daily && dailyDone(save, dayKey())[race.daily] != null) save.daily = markDaily(save, dayKey(), race.daily, a.dist);
+    if (race.daily && dailyDone(save, dday())[race.daily] != null) save.daily = markDaily(save, dday(), race.daily, a.dist);
     save.vrooms += a.tiers.filter((t) => t === 5).length;
     save.deep += a.tiers.filter((t) => t === 4).length;
   } else {
@@ -1472,8 +1576,18 @@ function finish(token) {
       save.deep += r.tiers.filter((t) => t === 4).length;
     }
   }
+  // daily race: keep the streak going (days in a row) for a bonus, once a day
+  let streakBonus = 0;
+  if (race.daily) {
+    const t = dday(), y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const st = save.streak || { count: 0, day: null };
+    if (st.day !== t) {
+      save.streak = { count: Math.max(st.day === y ? st.count + 1 : 1, account?.streakDay === y ? (account.streak || 0) + 1 : 0), day: t };
+      streakBonus = STREAK_BONUS * Math.min(STREAK_CAP, save.streak.count);
+    }
+  }
   save.races++;
-  save.cash += pay.total;
+  save.cash += pay.total + streakBonus;
   persist();
 
   const happy = race.solo ? newBest || a.tiers.includes(5) : winner !== -1;
@@ -1492,14 +1606,16 @@ function finish(token) {
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
         race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
     race.arrival ? destResult(race.arrival) : null,
+    race.daily ? dailyBoardSlot(race.daily, a) : null,
     h("div", { class: "payout" },
       h("div", { text: race.solo ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
-      h("div", { class: "payout-total", text: "+" + money(pay.total) }),
+      h("div", { class: "payout-total", text: "+" + money(pay.total + streakBonus) }),
+      streakBonus ? h("div", { class: "note good", text: `${save.streak.count}-DAY STREAK BONUS +${money(streakBonus)}` }) : null,
       h("div", { class: "note", text: race.solo
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
     FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
-      h("div", { text: dailyLeft(save, dayKey()) > 0 ? `${dailyLeft(save, dayKey())} DAILY RACE LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
+      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },
@@ -1510,7 +1626,7 @@ function finish(token) {
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const left = leftInMode();
-  const dailyNext = race.daily && !paid ? nextDaily(save, dayKey()) : 0;
+  const dailyNext = race.daily && !paid ? nextDaily(save, dday()) : 0;
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : left ? `RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "NO NEW PROMPTS";
   $("btn-again").disabled = paid && !left;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
@@ -1538,7 +1654,7 @@ $("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); s
 $("btn-again").addEventListener("click", () => {
   audio.sfx.click();
   if (!lastSetup) return;
-  const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dayKey()) : 0;
+  const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dday()) : 0;
   startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false });
 });
 $("btn-redo").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true }); });
