@@ -775,3 +775,46 @@ ol.board li.me { color: #7df9ff; }
 .nick-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
 .nick-form input { font: inherit; font-size: 10px; padding: 8px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
 .note.good { color: var(--green); }
+
+/* ---------- phones: keyboard up during a race ---------- */
+body.kb[data-screen="race"] .stage { inset: var(--vvtop, 0px) 0 auto 0; height: var(--strip, 30vh); }
+body.kb #s-race.active { inset: var(--vvtop, 0px) 0 auto 0; height: var(--vvh, 100dvh); padding-top: calc(var(--strip, 30vh) + 6px); gap: 6px; }
+body.kb #s-race .race-top { display: none; }
+body.kb #s-race .race-mid { padding-top: 0; }
+body.kb #s-race .q-card { padding-top: 8px; padding-bottom: 8px; }
+body.kb #s-race .q-hint { display: none; }
+
+/* ---------- phones: menus fit without scrolling ---------- */
+@media (max-width: 520px) {
+  .topbar { padding: 6px 0; }
+  .screen { padding-top: 10px; }
+  h2 { margin-bottom: 8px; }
+  #s-title .blink { display: none; }
+  #s-title .menu { grid-template-columns: 1fr 1fr; gap: 8px; }
+  #s-title .menu .btn.big { grid-column: 1 / -1; padding: 12px 10px; font-size: 13px; }
+  #s-title .menu .btn:not(.big) { min-height: 44px; padding: 10px 6px; font-size: 9px; }
+  .daily { margin-top: 10px; gap: 6px; }
+  #s-leagues > .note:first-of-type { margin: 0 0 4px; }
+  .sub-title { margin: 8px 0 6px; }
+  .daily-races { flex-wrap: nowrap; gap: 8px; margin-bottom: 6px; }
+  .daily-races .btn { flex: 1 1 0; padding: 10px 4px; min-height: 44px; font-size: 9px; }
+  #daily-note { margin: 0 0 6px; }
+  .board-btn { min-height: 36px; padding: 6px 8px; margin-bottom: 6px; }
+  .modes { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+  .mode { padding: 8px 6px; gap: 4px; }
+  .mode-name { font-size: 8px; }
+  .mode-info { display: none; }
+  .mode .mode-lock { font-size: 6px; }
+  .prompts-left { margin: 0 0 8px; }
+  .picker { padding: 6px; margin-bottom: 8px; grid-template-columns: 40px minmax(0, 1fr) 40px; }
+  .picker .sprite { max-height: 56px; width: auto; }
+  .picker .car-name { margin: 4px 0; min-height: 0; }
+  .arrow { height: 44px; }
+  .menu.row { grid-template-columns: 2fr 1fr; margin-top: 8px; gap: 8px; }
+  .menu.row .btn.big { font-size: 12px; padding: 12px 8px; }
+  .car-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .car-card { padding: 8px 6px 6px; }
+  /* the big road banner only on the title screen, so the menus fit on one screen */
+  body:is([data-screen="leagues"], [data-screen="versus"], [data-screen="garage"], [data-screen="passport"], [data-screen="how"], [data-screen="account"], [data-screen="paywall"], [data-screen="board"], [data-screen="admin"]) .stage { display: none; }
+  #s-leagues > .note:first-of-type { display: none; }
+}

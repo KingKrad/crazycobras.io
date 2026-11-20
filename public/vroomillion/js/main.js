@@ -77,16 +77,35 @@ function fitScene() {
     return;
   }
   scene = chaseScene;
+  const vv = window.visualViewport;
   const vw = window.innerWidth;
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty("--vvh", vh + "px");
+  const vh = vv ? vv.height : window.innerHeight;
+  // Phone keyboards: the visible area shrinks, and iPhone Safari also scrolls the page up. The race is
+  // pinned to the visible area (--vvtop / --vvh) so it never slides away, and while the keyboard is up
+  // the road shrinks to a strip at the top so the prompt, timer and answer box all fit.
+  if (vw !== fullW) { fullW = vw; fullH = 0; } // turned the phone: measure again
+  fullH = Math.max(fullH, window.innerHeight, vh);
+  const kb = document.activeElement === $("answer") && vh < fullH * 0.78;
+  const root = document.documentElement.style;
+  root.setProperty("--vvh", vh + "px");
+  root.setProperty("--vvtop", (vv ? vv.offsetTop : 0) + "px");
+  document.body.classList.toggle("kb", kb);
   const iw = Math.max(440, Math.min(840, Math.round(vw / 1.6))); // 16-bit: twice the old art resolution
   const k = vw / iw;
-  const ih = Math.round(vh / k);
-  const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
-  scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
+  if (kb) {
+    const strip = Math.round(Math.min(vh * 0.3, 190));
+    root.setProperty("--strip", strip + "px");
+    const ih = Math.max(110, Math.round(strip / k));
+    scene.resize(iw, ih, ih - 4);
+  } else {
+    const ih = Math.round(vh / k);
+    const dock = Math.ceil((vw < 600 ? 150 : 128) / k); // room for the answer bar
+    scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
+  }
   requestAnimationFrame(fitCard);
 }
+let fullH = 0, fullW = 0; // the tallest the visible area has been at this width (no keyboard)
+window.addEventListener("orientationchange", () => setTimeout(fitScene, 300));
 
 // Keep the question card above the road so it never hides the cars.
 const TOPIC = { geo: "PLACES", sports: "SPORTS", screen: "SCREEN", music: "MUSIC", food: "FOOD & DRINK", animals: "ANIMALS", everyday: "EVERYDAY", history: "HISTORY & SCIENCE" };
@@ -125,9 +144,12 @@ function fitCard() {
   if (current !== "race") return;
   const card = $("q-card");
   const k = window.innerWidth / scene.W;
-  const carsTop = scene.coverTop() * k; // roof + name tag of the nearest car
   const top = card.parentElement.getBoundingClientRect().top;
-  const room = Math.max(90, Math.floor(carsTop - top - 6));
+  // keyboard up: everything between the road strip and the answer box; otherwise above the nearest car
+  const limit = document.body.classList.contains("kb")
+    ? $("answer-zone").getBoundingClientRect().top - 6
+    : scene.coverTop() * k; // roof + name tag of the nearest car
+  const room = Math.max(60, Math.floor(limit - top - 6));
   card.style.maxHeight = room + "px";
   // the question never scrolls: tighten the card, then shrink the text, until it fits above the cars
   if (card.classList.contains("revealing")) return;
@@ -146,6 +168,13 @@ function fitCard() {
 }
 window.addEventListener("resize", fitScene);
 window.visualViewport?.addEventListener("resize", fitScene);
+window.visualViewport?.addEventListener("scroll", () => {
+  if (current !== "race") return;
+  document.documentElement.style.setProperty("--vvtop", window.visualViewport.offsetTop + "px");
+});
+// the keyboard opens and closes with the answer box
+$("answer").addEventListener("focus", () => { setTimeout(fitScene, 50); setTimeout(fitScene, 350); });
+$("answer").addEventListener("blur", () => setTimeout(fitScene, 350));
 
 function attract() {
   scene.setRacers([{ car: carById(save.car), label: "P1", color: "#4fd1ff", lane: 1 }]);
