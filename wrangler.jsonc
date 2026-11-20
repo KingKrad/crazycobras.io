@@ -17,7 +17,7 @@
     // the Turnstile widget's public site key (the widget allows this Worker's workers.dev address)
     "TURNSTILE_SITE_KEY": "0x4AAAAAAF1bh5K2zSVbvctP",
     // other front ends allowed to call the API, e.g. the Vercel copy of the site
-    "ALLOWED_ORIGINS": "https://crazycobras-io.vercel.app"
+    "ALLOWED_ORIGINS": "https://vroomillion.vercel.app,https://crazycobras-io.vercel.app"
   },
   "observability": { "enabled": true }
 }
