@@ -4,7 +4,7 @@ import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import {
   DESTINATIONS, destinationFor,
   TIERS, ROUNDS, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, pickFresh, promptsLeft, makeVariants,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, useFreeRace, pickFresh, promptsLeft, makeVariants,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -95,11 +95,18 @@ test("one free race per day, unlimited races after paying, everything during fre
   const today = dayKey(new Date(2026, 10, 17, 9, 30));
   assert.equal(today, "2026-11-17");
   assert.equal(dayKey(new Date(2026, 0, 5)), "2026-01-05");
-  assert.ok(canRace({}, today, false), "never raced");
-  assert.ok(canRace({ lastRunDay: "2026-11-16" }, today, false), "raced yesterday");
-  assert.ok(!canRace({ lastRunDay: today }, today, false), "already raced today");
-  assert.ok(canRace({ lastRunDay: today, unlimited: true }, today, false), "unlimited");
-  assert.ok(canRace({ lastRunDay: today }, today, true), "free play");
+  const solo = { mode: "solo", deck: "classic" };
+  assert.ok(canRace({}, today, solo, false), "never raced");
+  assert.ok(canRace({ freeDay: today, freeUsed: 1 }, today, solo, false), "one of two used");
+  assert.ok(!canRace({ freeDay: today, freeUsed: 2 }, today, solo, false), "both used today");
+  assert.ok(canRace({ freeDay: "2026-11-16", freeUsed: 2 }, today, solo, false), "used yesterday: new day, new races");
+  assert.ok(!canRace({}, today, { mode: "versus", deck: "classic" }, false), "VERSUS needs Unlimited");
+  assert.ok(!canRace({}, today, { mode: "solo", deck: "hard" }, false), "HARD MODE needs Unlimited");
+  assert.ok(!canRace({}, today, { mode: "solo", deck: "car" }, false), "GEARHEAD needs Unlimited");
+  assert.ok(canRace({ freeDay: today, freeUsed: 2, unlimited: true }, today, { mode: "versus", deck: "hard" }, false), "unlimited");
+  assert.ok(canRace({ freeDay: today, freeUsed: 2 }, today, solo, true), "free play");
+  assert.deepEqual(useFreeRace({ freeDay: today, freeUsed: 1 }, today), { freeDay: today, freeUsed: 2 });
+  assert.deepEqual(useFreeRace({ freeDay: "2026-11-16", freeUsed: 2 }, today), { freeDay: today, freeUsed: 1 });
   assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
 });
 

@@ -1,6 +1,6 @@
 // VROOMILLION Unlimited: a one-time $5 Stripe Checkout payment, tied to an account.
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
-import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit } from "./accounts.js";
+import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin } from "./accounts.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -45,7 +45,7 @@ export async function handleMe(request, env) {
       await env.DB.prepare("UPDATE users SET pending_session = NULL WHERE id = ?").bind(user.id).run();
     }
   }
-  return json(publicUser(user));
+  return json(publicUser(user, env));
 }
 
 // POST /api/vroomillion/checkout -> { url } to send the logged-in player to Stripe.
@@ -64,7 +64,7 @@ export async function handleCheckout(request, env) {
 
   const user = await currentUser(request, env);
   if (!user) return json({ error: "Create an account or log in first." }, 401);
-  if (user.unlimited === 1) return json({ error: "This account already has Unlimited." }, 409);
+  if (user.unlimited === 1 || isAdmin(user, env)) return json({ error: "This account already has Unlimited." }, 409);
 
   // All sales are final: the buyer must tick that they understand before paying.
   const body = await readForm(request);

@@ -72,7 +72,7 @@ test("sign up creates an account, a session cookie and a hashed password", async
   assert.ok(!JSON.stringify(db.sql.prepare("SELECT * FROM sessions").all()).includes(cookie.split("=")[1]), "only a hash of the token is stored");
 
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: false });
+  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: false, freeResetAt: 0 });
 });
 
 test("sign up rejects bad emails, short passwords and duplicate accounts", async () => {
@@ -188,7 +188,7 @@ test("a paid checkout upgrades the account that bought it", async () => {
   assert.deepEqual(await res.json(), { paid: true }, "the receipt link doesn't reveal the email");
   assert.equal(stripeCalls.at(-1).url, "https://api.stripe.com/v1/checkout/sessions/" + ID);
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true });
+  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true, freeResetAt: 0 });
 });
 
 test("unpaid, wrong-price or other-product sessions don't upgrade anyone", async () => {
@@ -215,7 +215,7 @@ test("closing the tab after paying still unlocks on the next visit", async () =>
   db.sql.prepare("UPDATE users SET pending_session = ?").run(ID);
   stripeReply = { body: paidSession(userId()) };
   const me = await worker.fetch(get("me", { cookie }), env());
-  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true });
+  assert.deepEqual(await me.json(), { email: "racer@example.com", unlimited: true, freeResetAt: 0 });
   const row = db.sql.prepare("SELECT unlimited, pending_session, paid_session FROM users").get();
   assert.deepEqual({ ...row }, { unlimited: 1, pending_session: null, paid_session: ID });
 });
@@ -376,4 +376,45 @@ test("live check retries once when Wikidata times out, and exact checks search w
   assert.equal(j.found, true);
   assert.ok(checkQuery("?i wdt:P31 wd:Q1.", "firefly", true).includes('mwapi:limit "20"'));
   assert.ok(checkQuery("?i wdt:P31 wd:Q1.", "firefly").includes('mwapi:limit "7"'));
+});
+
+// ---------- admin ----------
+const adminEnv = () => env({ ADMIN_EMAILS: "Boss@Example.com, other@example.com" });
+
+test("admins always have Unlimited, and only they can use the admin API", async () => {
+  const boss = await signup("boss@example.com");
+  const player = await signup("racer@example.com");
+  const me = await (await worker.fetch(get("me", { cookie: boss.cookie }), adminEnv())).json();
+  assert.equal(me.unlimited, true);
+  assert.equal(me.admin, true);
+  const asPlayer = await worker.fetch(post("admin", { action: "stats" }, { cookie: player.cookie }), adminEnv());
+  assert.equal(asPlayer.status, 404, "players can't see the admin API");
+  const loggedOut = await worker.fetch(post("admin", { action: "stats" }), adminEnv());
+  assert.equal(loggedOut.status, 404);
+  const fromElsewhere = await worker.fetch(post("admin", { action: "stats" }, { cookie: boss.cookie, origin: "https://evil.example" }), adminEnv());
+  assert.equal(fromElsewhere.status, 403);
+  const checkout = await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie: boss.cookie }), adminEnv());
+  assert.equal(checkout.status, 409, "admins don't need to buy");
+});
+
+test("admins grant and remove Unlimited, give free races back, and see stats", async () => {
+  const boss = await signup("boss@example.com");
+  await signup("racer@example.com");
+  const call = async (body) => worker.fetch(post("admin", body, { cookie: boss.cookie }), adminEnv());
+  assert.equal((await (await call({ action: "lookup", email: "racer@example.com" })).json()).unlimited, false);
+  assert.equal((await (await call({ action: "set-unlimited", email: "racer@example.com", unlimited: true })).json()).unlimited, true);
+  assert.equal(db.sql.prepare("SELECT unlimited FROM users WHERE email = 'racer@example.com'").get().unlimited, 1);
+  assert.equal((await (await call({ action: "set-unlimited", email: "racer@example.com", unlimited: false })).json()).unlimited, false);
+  const reset = await (await call({ action: "reset-free", email: "racer@example.com" })).json();
+  assert.ok(reset.freeResetAt > 0);
+  assert.equal((await call({ action: "lookup", email: "nobody@example.com" })).status, 404);
+
+  for (const kind of ["solo-classic", "solo-classic", "versus"]) await worker.fetch(post("race-start", { kind }), adminEnv());
+  assert.equal((await worker.fetch(post("race-start", { kind: "bogus" }), adminEnv())).status, 400);
+  const stats = await (await call({ action: "stats" })).json();
+  assert.equal(stats.users, 2);
+  assert.equal(stats.races[0]["solo-classic"], 2);
+  assert.equal(stats.races[0].versus, 1);
+  assert.equal(stats.races[0].total, 3);
+  assert.equal(stats.races.length, 7);
 });

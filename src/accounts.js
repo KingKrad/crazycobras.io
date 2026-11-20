@@ -88,9 +88,16 @@ export async function ensureSchema(db) {
       count INTEGER NOT NULL,
       PRIMARY KEY (bucket, key, win)
     )`),
+    // races started per day and kind, for the admin stats: counts only, nothing about who
+    db.prepare(`CREATE TABLE IF NOT EXISTS race_counts (
+      day TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      n INTEGER NOT NULL,
+      PRIMARY KEY (day, kind)
+    )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   schemaReady = true;
@@ -130,7 +137,17 @@ export async function currentUser(request, env) {
   return row || null;
 }
 
-export const publicUser = (u) => ({ email: u.email, unlimited: u.unlimited === 1 });
+// Admins are the emails listed in the ADMIN_EMAILS secret (comma separated). They always have
+// Unlimited and can use the admin screen (src/admin.js).
+export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email);
+
+// freeResetAt: when an admin last gave this player their free races back (the game resets its count)
+export const publicUser = (u, env) => ({
+  email: u.email,
+  unlimited: u.unlimited === 1 || isAdmin(u, env),
+  ...(isAdmin(u, env) ? { admin: true } : {}),
+  freeResetAt: u.free_reset_at || 0,
+});
 
 // Recovery codes: 20 random characters from an alphabet without look-alikes (~100 bits),
 // shown once, stored only as a SHA-256 hash. They let a player reset a forgotten password.
@@ -297,7 +314,7 @@ export async function handleLogin(request, env) {
     await env.DB.prepare("UPDATE users SET pw_hash = ?, pw_salt = ?, pw_iter = ? WHERE id = ?")
       .bind(await hashPassword(password, salt, want), b64(salt), want, user.id).run();
   }
-  return json(publicUser(user), 200, { "set-cookie": await startSession(env, user.id) });
+  return json(publicUser(user, env), 200, { "set-cookie": await startSession(env, user.id) });
 }
 
 export async function handleLogout(request, env) {
@@ -353,7 +370,7 @@ export async function handleResetPassword(request, env) {
       .bind(await hashPassword(body.password, salt, iterations), b64(salt), iterations, await hashCode(recoveryCode), user.id),
     env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
   ]);
-  return json({ ...publicUser(user), recoveryCode }, 200, { "set-cookie": await startSession(env, user.id) });
+  return json({ ...publicUser(user, env), recoveryCode }, 200, { "set-cookie": await startSession(env, user.id) });
 }
 
 // POST /api/vroomillion/recovery-code { password } -> a new recovery code (the old one stops working).

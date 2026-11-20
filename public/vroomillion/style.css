@@ -723,3 +723,16 @@ body.smashing #s-race .race-top, body.smashing #s-race .race-dock, body.smashing
 .stamp-info { font-size: 7px; color: var(--dim); }
 .stamp-mark { position: absolute; top: 14px; right: 12px; transform: rotate(-12deg); font-size: 8px; color: var(--green); border: 2px solid var(--green); padding: 3px 5px; background: rgba(11, 6, 24, 0.7); }
 .tag.locked { font-size: 7px; color: var(--dim); }
+
+.mode-lock { display: block; margin-top: 6px; font-size: 6px; letter-spacing: 0.15em; color: var(--yellow); }
+
+/* admin screen */
+.admin-box { display: grid; gap: 18px; width: min(560px, 100%); margin: 0 auto 16px; text-align: left; }
+.admin-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.admin-tile { background: rgba(0, 0, 0, 0.35); padding: 10px; text-align: center; box-shadow: inset 0 0 0 2px #2b1d5c; }
+.admin-n { font-size: 16px; color: var(--yellow); margin-bottom: 6px; }
+.admin-races { width: 100%; border-collapse: collapse; font-size: 8px; margin-top: 8px; }
+.admin-races th, .admin-races td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #2b1d5c; }
+.admin-races th:first-child, .admin-races td:first-child { text-align: left; }
+.admin-actions { display: grid; gap: 8px; margin-top: 10px; }
+@media (max-width: 520px) { .admin-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

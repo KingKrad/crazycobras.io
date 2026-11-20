@@ -44,12 +44,19 @@ export function msUntilTomorrow(now = new Date()) {
   return next - now;
 }
 
-// FREE PLAY: while true, everyone races as often as they like and the $5 prompts are
-// hidden. Set to false at launch to bring back one free race a day + Unlimited.
-export const FREE_PLAY = true;
+// FREE PLAY: while true, everyone races as often as they like and the $5 prompts are hidden.
+export const FREE_PLAY = false;
 
-// Free players get one race per day; unlimited players race as often as they like.
-export const canRace = (save, today, freePlay = FREE_PLAY) => freePlay || !!save.unlimited || save.lastRunDay !== today;
+// Free players get FREE_RACES solo CLASSIC races a day on each device. VERSUS, GEARHEAD and
+// HARD MODE, and more races, need Unlimited. save.freeDay / save.freeUsed count today's races.
+export const FREE_RACES = 2;
+export const freeUsed = (save, today) => (save.freeDay === today ? save.freeUsed || 0 : 0);
+export const freeLeft = (save, today) => Math.max(0, FREE_RACES - freeUsed(save, today));
+export const isFreeKind = (mode = "solo", deck = "classic") => mode === "solo" && (deck || "classic") === "classic";
+export const canRace = (save, today, kind = {}, freePlay = FREE_PLAY) =>
+  freePlay || !!save.unlimited || (isFreeKind(kind.mode, kind.deck) && freeLeft(save, today) > 0);
+// one free race used today
+export const useFreeRace = (save, today) => ({ freeDay: today, freeUsed: freeUsed(save, today) + 1 });
 
 // ---- endless prompts ----
 // Besides the hand-written prompts, every category also makes "starting with M",
