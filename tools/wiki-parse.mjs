@@ -51,3 +51,9 @@ export function albumLinks(text) {
   return [...out];
 }
 
+
+// The album's own artist, from its infobox ("| artist = [[Olivia Rodrigo]]"), cleaned. "" if none.
+export function albumArtist(text) {
+  const m = text.match(/\|\s*artist\s*=\s*([^\n]*)/i);
+  return m ? cleanTitle(m[1]) : "";
+}

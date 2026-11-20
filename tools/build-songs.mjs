@@ -10,7 +10,7 @@
 // hand-written and generated tiers in data*.js always win over these.
 import fs from "node:fs";
 import { normalize } from "../public/vroomillion/js/logic.js";
-import { tableSongs, trackSongs, albumLinks } from "./wiki-parse.mjs";
+import { tableSongs, trackSongs, albumLinks, albumArtist } from "./wiki-parse.mjs";
 
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? new Set(args[args.indexOf("--only") + 1].split(";")) : null;
@@ -67,11 +67,20 @@ async function songsBy(artist, extraPages = []) {
     add(tableSongs(p.text));
     for (const a of albumLinks(p.text)) albums.add(a);
   }
-  for (const a of [...albums].slice(0, 80)) {
+  // only the artist's own albums: soundtracks, compilations and tributes they're on bring other people's songs
+  const own = normalize(artist.replace(/^the /i, ""));
+  let used = 0;
+  for (const a of [...albums].slice(0, 120)) {
     const p = await wikitext(a);
-    if (p) add(trackSongs(p.text), true);
+    if (!p) continue;
+    const by = normalize(albumArtist(p.text).replace(/^the /i, ""));
+    if (!by || !(by === own || by.startsWith(own + " and ") || by.startsWith(own + " ") || by.includes(own))) continue;
+    if (/\b(?:various artists|soundtrack|cast)\b/i.test(albumArtist(p.text))) continue;
+    add(trackSongs(p.text), true);
+    used++;
   }
-  return { songs: [...songs.values()], albums: albums.size };
+  albums.used = used;
+  return { songs: [...songs.values()], albums: albums.used ?? 0 };
 }
 
 // ---- run ----
@@ -80,9 +89,12 @@ const targets = Object.entries(PROMPTS).filter(([, v]) => v.performer).map(([q, 
 targets.push(["Name a Beatles song", "The Beatles", ["List of songs recorded by the Beatles"]]);
 const dataFile = new URL("../public/vroomillion/js/data.js", import.meta.url);
 const { QUESTIONS } = await import(dataFile.href);
-for (const [q, artist, pages] of targets) {
+for (let [q, artist, pages] of targets) {
   if (only && !only.has(q)) continue;
-  const question = QUESTIONS.find((x) => x.q === q);
+  // the game may word it "Name a song by The Weeknd"
+  const question = QUESTIONS.find((x) => x.q === q) || QUESTIONS.find((x) => x.q === `Name a song by ${artist}`);
+  if (!question) { console.log("?? no such prompt:", q); continue; }
+  q = question.q;
   const known = new Set((question?.a || []).flat().flatMap((e) => e.split("|")).map(normalize));
   const { songs, albums } = await songsBy(artist, pages);
   const file = new URL(deepSlug(q) + ".json", DEEP_DIR);
