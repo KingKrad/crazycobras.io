@@ -1160,14 +1160,26 @@ function askAnswer(r, i, token, index) {
       input.value = "";
       resolve(res);
     };
-    // A typo is fixed automatically and locked in straight away; the reveal shows the real name.
-    // A fixed typo keeps its score, but can't be a One in a Vroomillion.
+    // A typo is never sent on its own: the fix shows up as they type, Enter puts it in the box,
+    // and Enter / GO again uses it. A fixed typo keeps its score, but can't be a One in a Vroomillion.
+    let suggestion = null;
     let checking = false;
+    const offer = (fix) => {
+      suggestion = fix;
+      input.value = fix.display;
+      audio.sfx.click();
+      say(`DID YOU MEAN "${fix.display.toUpperCase().slice(0, 28)}"? PRESS GO TO USE IT`, "fix");
+      input.focus({ preventScroll: true });
+      input.select();
+    };
     const submit = (timedOut = false) => {
       if (finished) return;
       if (token !== raceToken) { end(); return resolve(stalled); }
       const value = input.value;
+      if (suggestion && normalize(value) === suggestion.key) return lockIn(suggestion);
+      suggestion = null;
       const res = judge(index, value);
+      if (res.tier > 0 && res.corrected && !timedOut) return offer(res);
       if (res.tier > 0) return lockIn(res);
       if (timedOut) {
         end();
@@ -1189,7 +1201,8 @@ function askAnswer(r, i, token, index) {
           if (!hit) return reject(value);
           const found = { tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true };
           const same = (a) => normalize(a).replace(/ /g, "");
-          lockIn(same(hit.label) === same(value) ? found : { ...found, corrected: true });
+          if (same(hit.label) === same(value)) return lockIn(found);
+          offer({ ...found, corrected: true });
         });
         return;
       }
@@ -1211,15 +1224,27 @@ function askAnswer(r, i, token, index) {
     // Look answers up while they type: a short pause after typing an answer that isn't on our list
     // starts the Wikidata check, so by the time they press GO the result is usually already here.
     let prefetch = 0;
+    // The fix for a typo shows the moment it's typed ("DID YOU MEAN ..."), without sending anything.
+    const hint = (value, fix) => {
+      if (input.value !== value || finished) return;
+      const text = fix && `DID YOU MEAN "${fix.toUpperCase().slice(0, 28)}"? PRESS ENTER`;
+      if (text) { if (feedback.textContent !== text) say(text, "fix hint"); }
+      else if (feedback.classList.contains("hint")) { feedback.textContent = ""; feedback.className = "feedback"; }
+    };
     const onInput = () => {
       audio.sfx.key();
       clearTimeout(prefetch);
       const value = input.value;
-      if (!index.prompt || value.trim().length < 3) return;
+      if (suggestion && normalize(value) !== suggestion.key) suggestion = null;
+      const res = value.trim().length >= 4 ? judge(index, value) : { tier: 0 };
+      hint(value, res.tier > 0 && res.corrected && !res.partial ? res.display : null);
+      if (!index.prompt || value.trim().length < 3 || res.tier > 0) return; // on our list: nothing to look up
       prefetch = setTimeout(() => {
         if (finished || token !== raceToken || input.value !== value) return;
-        if (judge(index, value).tier > 0) return; // on our list: nothing to look up
-        checkOnline(index, value);
+        checkOnline(index, value).then((hit) => {
+          const same = (a) => normalize(a).replace(/ /g, "");
+          if (hit && same(hit.label) !== same(value)) hint(value, hit.label);
+        });
       }, 220);
     };
     const toggleNitro = () => {

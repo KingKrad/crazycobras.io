@@ -225,11 +225,11 @@ function lookup(index, key, addPlural = true) {
   return null;
 }
 
-// GEARHEAD = car questions only; HARD MODE = the niche prompts; CLASSIC = everything else.
+// GEARHEAD = car questions only; HARD MODE = the niche prompts and letter twists; CLASSIC = the broad prompts.
 export function deckQuestions(all, deck) {
   if (deck === "car") return all.filter((q) => q.deck === "car" || q.deck === "both");
-  if (deck === "hard") return all.filter((q) => q.hard && q.deck !== "car");
-  return all.filter((q) => q.deck !== "car" && !q.hard);
+  if (deck === "hard") return all.filter((q) => (q.hard || q.variant) && q.deck !== "car");
+  return all.filter((q) => q.deck !== "car" && !q.hard && !q.variant); // CLASSIC: broad prompts only, no "starting with" twists
 }
 
 // ONE IN A VROOMILLION only counts when the answer is spelled exactly right;

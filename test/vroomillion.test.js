@@ -201,8 +201,8 @@ test("GEARHEAD and CLASSIC decks each have enough questions", () => {
 
 test("CLASSIC keeps niche prompts out and leans on geography", () => {
   const classic = deckQuestions(QUESTIONS, "classic").map((q) => q.q);
-  for (const niche of ["Name a Spice Girls song", "Name a Beatles song", "Name a typeface or font", "Name a Breaking Bad character", "Name a knot"]) assert.ok(!classic.includes(niche), niche);
-  for (const broad of ["Name a country that borders Germany", "Name a Taylor Swift song", "Name an NFL team", "Name a Simpsons character", "Name a movie with a number in the title"]) assert.ok(classic.includes(broad), broad);
+  for (const niche of ["Name a Bee Gees song", "Name a chess opening", "Name a typeface or font", "Name a South Park character", "Name a knot"]) assert.ok(!classic.includes(niche), niche);
+  for (const broad of ["Name a Beatles song", "Name a Friends character", "Name a country that borders Germany", "Name a Taylor Swift song", "Name an NFL team", "Name a Simpsons character", "Name a movie with a number in the title"]) assert.ok(classic.includes(broad), broad);
   const deck = deckQuestions(ALL, "classic");
   const count = {};
   let seed = 7;
@@ -270,15 +270,19 @@ test("generated prompts judge strictly and keep rarity tiers", () => {
   if (champs) assert.ok(judge(buildIndex(champs), "hamilton").tier > 0);
 });
 
-test("races are mostly plain prompts and don't repeat a category", () => {
+test("CLASSIC races are broad prompts only, never repeat, and run out instead of recycling", () => {
   const deck = deckQuestions(ALL, "classic");
+  assert.ok(deck.every((q) => !q.variant), "no 'starting with' twists in CLASSIC");
   const race = pickFresh(deck, [], ROUNDS);
   assert.equal(new Set(race.map((q) => q.base || q.q)).size, ROUNDS, "one prompt per category");
-  const hand = deck.filter((q) => !q.variant).map((q) => q.q);
-  const later = pickFresh(deck, hand, ROUNDS);
-  assert.equal(later.length, ROUNDS);
-  assert.ok(later.every((q) => q.variant));
-  assert.equal(new Set(later.map((q) => q.base)).size, ROUNDS, "one prompt per category in a race");
+  const seen = [];
+  for (let i = 0; i < 1000; i++) {
+    const next = pickFresh(deck, seen, ROUNDS);
+    if (!next.length) break;
+    for (const q of next) { assert.ok(!seen.includes(q.q), "repeat: " + q.q); seen.push(q.q); }
+  }
+  assert.equal(seen.length, deck.length, "every prompt is played once before any comes back");
+  assert.ok(deckQuestions(ALL, "hard").some((q) => q.variant), "twists live in HARD MODE");
 });
 
 test("part of a longer answer is fixed to the full answer and scores the same", () => {

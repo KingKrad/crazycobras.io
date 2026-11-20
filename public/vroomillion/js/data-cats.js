@@ -3,32 +3,32 @@
 
 export const CAT_WEIGHTS = { geo: 0.3, sports: 0.14, screen: 0.15, music: 0.13, food: 0.08, animals: 0.07, everyday: 0.07, history: 0.06 };
 
-// Single-artist song prompts kept in CLASSIC: current superstars and the rap giants. Everyone else is HARD MODE.
-const STAR_ARTISTS = /^(Taylor Swift|Drake|Beyoncé|Ed Sheeran|Billie Eilish|Ariana Grande|Dua Lipa|Olivia Rodrigo|Sabrina Carpenter|Bruno Mars|Harry Styles|song by The Weeknd|Justin Bieber|Rihanna|Lady Gaga|Adele|Coldplay|BTS|Eminem|Kanye West|Kendrick Lamar|Travis Scott)\b/;
+// Single-artist song prompts kept in CLASSIC: current superstars, the rap giants and the all-time greats. Everyone else is HARD MODE.
+const STAR_ARTISTS = /^(Taylor Swift|Drake|Beyoncé|Ed Sheeran|Billie Eilish|Ariana Grande|Dua Lipa|Olivia Rodrigo|Sabrina Carpenter|Bruno Mars|Harry Styles|song by The Weeknd|Justin Bieber|Rihanna|Lady Gaga|Adele|Coldplay|BTS|Eminem|Kanye West|Kendrick Lamar|Travis Scott|Beatles|Michael Jackson|Queen|ABBA|Elvis Presley|Christmas|Madonna|Katy Perry|Britney Spears|One Direction|Nirvana|AC\/DC|Metallica|Elton John|Whitney Houston|Mariah Carey|Bon Jovi|Linkin Park|Green Day|Shakira|Oasis|Rolling Stones|Pink Floyd|Spice Girls|Disney)\b/;
 
 // Niche prompts: HARD MODE only (matched against the prompt without "Name a/an ").
 const HARD = new Set([
   // one show's characters (the mega franchises stay in CLASSIC)
-  "South Park character", "Family Guy character", "Friends character", "Office (US) character", "SpongeBob character",
-  "Breaking Bad character", "Doctor Who character", "Game of Thrones character", "Star Trek character", "Stranger Things character", "Muppet",
+  "South Park character", "Family Guy character", 
+  "Doctor Who character", 
   // directors outside the household names, books
   "Alfred Hitchcock film", "Ridley Scott film", "Stanley Kubrick film", "Wes Anderson film", "Martin Scorsese film",
   "Agatha Christie book", "Charles Dickens book", "Terry Pratchett book", "Mark Twain book", "Jane Austen book",
   // sports outside the US big 4, tennis, golf and F1
-  "rugby player", "cyclist", "cricketer", "figure skater", "skier", "swimmer", "sprinter or runner", "boxer", "pro wrestler",
-  "motorcycle racer", "rally driver", "La Liga club", "Serie A club", "Bundesliga club", "MLS team", "Premier League club",
-  "famous footballer", "football (soccer) club",
+  "rugby player", "cyclist", "cricketer", "figure skater", "skier", "sprinter or runner", 
+  "motorcycle racer", "rally driver", "La Liga club", "Serie A club", "Bundesliga club", "MLS team", 
+  
   // specialist food and drink
-  "grape variety", "beer style", "whisky", "liqueur or spirit", "dumpling", "type of sushi", "type of tea", "cereal grain", "beer brand",
+  "grape variety", "beer style", "whisky", "liqueur or spirit", "dumpling", "type of sushi", "cereal grain", 
   // specialist nature
-  "butterfly", "owl", "parrot", "frog", "spider", "cactus or succulent", "mushroom", "famous horse", "mineral", "type of rock", "comet", "moon of Jupiter or Saturn",
+  "cactus or succulent", "mineral", "type of rock", "comet", "moon of Jupiter or Saturn",
   // specialist everything else
-  "typeface or font", "knot", "yoga pose", "hairstyle", "perfume", "chess opening", "programming language", "programming framework or library",
-  "magazine", "newspaper", "TV channel", "comic strip", "skateboarding trick", "dance move", "famous diamond", "weapon", "sword", "tank",
-  "helicopter", "aircraft", "train", "spacecraft", "medicine", "bone", "religion", "currency symbol or coin", "famous ship", "university",
-  "festival", "roller coaster", "Nobel Prize winner in Physics", "philosopher", "poet", "art movement", "sculptor", "architect", "magician",
-  "pope", "empire", "Roman emperor", "Canadian prime minister", "Australian prime minister", "French president", "Hindu deity", "opera",
-  "airport", "glacier", "Egyptian god", "famous novel", "type of cloud", "website", "smartphone", "airline", "language",
+  "typeface or font", "knot", "yoga pose", "chess opening", "programming language", "programming framework or library",
+  "comic strip", "skateboarding trick", 
+  "currency symbol or coin", 
+  "Nobel Prize winner in Physics", "art movement", "sculptor", "architect", 
+  "pope", "Canadian prime minister", "Australian prime minister", "French president", "Hindu deity", "opera",
+  "glacier", 
 ]);
 
 const RULES = [

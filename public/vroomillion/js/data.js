@@ -7,6 +7,7 @@
 import { POP_QUESTIONS } from "./data-pop.js";
 import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { HAND3_QUESTIONS } from "./data-hand3.js";
+import { HAND4_QUESTIONS } from "./data-hand4.js";
 import { classify } from "./data-cats.js";
 import { EXTRA } from "./data-extra.js";
 import { MORE, NICKNAMES } from "./data-more.js";
@@ -648,7 +649,7 @@ const withExtra = (q0) => {
 };
 
 // HAND_QUESTIONS: just the hand-written answers (the answer builder uses these).
-export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2_QUESTIONS, ...HAND3_QUESTIONS].map((q) => ({ ...q, pop: true }))];
+export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2_QUESTIONS, ...HAND3_QUESTIONS, ...HAND4_QUESTIONS].map((q) => ({ ...q, pop: true }))];
 // Whole prompts generated from Wikidata (tools/prompt-sources.mjs), mixed in with the everyday ones.
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
