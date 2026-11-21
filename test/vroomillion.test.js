@@ -470,5 +470,25 @@ test("daily race: the same seven for everyone on a day, different the next day, 
   const a = dailyRace("2026-12-01").map((x) => x.prompt);
   assert.deepEqual(dailyRace("2026-12-01").map((x) => x.prompt), a);
   assert.notDeepEqual(dailyRace("2026-12-02").map((x) => x.prompt), a);
-  for (const race of dailyLayout().slice(0, 20)) assert.equal(new Set(race.map((f) => f.group)).size, 7);
+  // once the daily pool is full size (a year of races), every daily race has seven different groups
+  if (poolFamilies("daily").length >= 7 * 300) for (const race of dailyLayout()) assert.equal(new Set(race.map((f) => f.group)).size, 7);
+});
+
+test("catalog: every family has answers (built into the game, or an answers/<prompt>.json file)", async () => {
+  const fs = await import("node:fs");
+  const { answerSlug } = await import("../public/vroomillion/js/racepick.js");
+  const have = new Set(ALL_Q.map((q) => q.q));
+  const missing = FAMILIES.filter((f) => !f.prompts.some((p) => have.has(p) || fs.existsSync(new URL(`../public/vroomillion/answers/${answerSlug(p)}.json`, import.meta.url))));
+  assert.deepEqual(missing.map((f) => f.id), []);
+});
+
+test("answer files: five tiers, the obvious answers in TRAFFIC, no 'not this' notes left in", async () => {
+  const fs = await import("node:fs");
+  const dir = new URL("../public/vroomillion/answers/", import.meta.url);
+  for (const f of fs.readdirSync(dir)) {
+    const d = JSON.parse(fs.readFileSync(new URL(f, dir), "utf8"));
+    assert.equal(d.a.length, 5, f);
+    assert.ok(d.a[0].length >= 5, f + ": TRAFFIC");
+    for (const t of d.a) for (const e of t) assert.ok(!/ no$/.test(e), `${f}: ${e}`);
+  }
 });

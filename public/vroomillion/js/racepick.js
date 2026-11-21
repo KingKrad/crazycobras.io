@@ -7,6 +7,8 @@
 import { FAMILIES, TOPICS } from "./catalog/index.js";
 
 export const FAM_PREFIX = "F:";
+// the answers for prompts added with the new catalog live one file per prompt: answers/<slug>.json
+export const answerSlug = (q) => q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 export const famKey = (f) => FAM_PREFIX + f.id;
 const byPrompt = new Map(FAMILIES.flatMap((f) => f.prompts.map((p) => [p, f])));
 export const familyOf = (prompt) => byPrompt.get(prompt) || null;
@@ -19,7 +21,8 @@ export const poolFamilies = (mode, fams = FAMILIES) => fams.filter((f) => f.pool
 // seen: the history list; returns families in play order, each with the prompt text to ask
 export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   const pool = POOL[mode] || "main";
-  const fams = poolFamilies(mode, opts.families);
+  // only families with answers on this copy of the game (opts.has: prompt -> bool)
+  const fams = poolFamilies(mode, opts.families).filter((f) => !opts.has || f.prompts.some(opts.has));
   const order = new Map(); // family key -> position in the history (higher = more recent)
   (seen || []).forEach((k, i) => order.set(k, i));
   const fresh = fams.filter((f) => !order.has(famKey(f)));

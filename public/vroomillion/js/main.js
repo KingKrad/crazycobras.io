@@ -11,7 +11,7 @@ import { ChaseScene } from "./chase.js";
 import { shareCard, saveShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
-import { pickRace, dailyRace, famKey, familyOf } from "./racepick.js";
+import { pickRace, dailyRace, famKey, familyOf, answerSlug } from "./racepick.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
 // The answer lists are about 2 MB, so they load in the background while the title screen is up
@@ -677,7 +677,8 @@ async function onlineBegin(st) {
   const o = online;
   online = null; // the race has the room now; the online screen starts fresh next time
   await questionsLoaded;
-  const byText = new Map(QUESTIONS.map((q) => [q.q, q]));
+  if (V2) await Promise.race([loadAnswers(st.prompts), new Promise((r) => setTimeout(r, 6000))]);
+  const byText = { get: (t) => getQ(t) };
   // a prompt this copy of the game doesn't have (an older version): race it on the live check alone
   const questions = st.prompts.map((t) => byText.get(t) || { q: t, a: [[], [], [], [], []], cat: "everyday" });
   const offset = st.now - Date.now(); // server clock minus ours
@@ -1227,13 +1228,31 @@ function modeSwitch(mount, onChange) {
 let qIndex = null;
 const qByText = () => (qIndex && qIndex.size === QUESTIONS.length ? qIndex : (qIndex = new Map(QUESTIONS.map((q) => [q.q, q]))));
 const famKeyOf = (prompt) => { const f = familyOf(prompt); return f ? famKey(f) : prompt; };
+// prompts added with the new catalog keep their answers in answers/<slug>.json, loaded for the race
+const extraQ = new Map();
+const getQ = (p) => qByText().get(p) || extraQ.get(p);
+const hasQ = (p) => qByText().has(p) || extraQ.has(p) || !!familyOf(p)?.src;
+function loadAnswers(prompts) {
+  return Promise.all(prompts.filter((p) => !getQ(p)).map((p) =>
+    fetch("answers/" + answerSlug(p) + ".json").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.a) extraQ.set(p, { cat: "everyday", ...d, q: p }); }).catch(() => {})));
+}
 function v2Questions(picks) {
-  // a prompt this copy has no answers for (a brand-new one): the live check alone judges it
-  return picks.map(({ family, prompt }) => ({ ...(qByText().get(prompt) || { q: prompt, a: [[], [], [], [], []], cat: "everyday" }), fam: famKey(family) }));
+  // a prompt whose answers didn't load: the live check alone judges it
+  return picks.map(({ family, prompt }) => ({ ...(getQ(prompt) || { q: prompt, a: [[], [], [], [], []], cat: "everyday" }), fam: famKey(family) }));
+}
+// pick the race's prompts, load any answer files, then start it
+async function startRaceV2(setup) {
+  await questionsLoaded;
+  const daily = setup.daily && !setup.redo ? setup.daily : 0;
+  const picks = daily ? dailyRace(dday()) : pickRace(save.deck, seenList(), ROUNDS, Math.random, { has: hasQ });
+  overlay("LOADING…", "small");
+  await Promise.race([loadAnswers(picks.map((x) => x.prompt)), new Promise((r) => setTimeout(r, 6000))]);
+  overlay("");
+  startRace({ ...setup, v2questions: v2Questions(picks) });
 }
 // online races: seven prompts fresh for both players (each one's history of families)
 const v2OnlinePrompts = (deck, otherSeen = [], avoid = []) =>
-  pickRace(deck, [...seenList(), ...otherSeen, ...avoid.map(famKeyOf)], ROUNDS, Math.random, { has: (p) => qByText().has(p) }).map((x) => x.prompt);
+  pickRace(deck, [...seenList(), ...otherSeen, ...avoid.map(famKeyOf)], ROUNDS, Math.random, { has: hasQ }).map((x) => x.prompt);
 
 let accountSeen = null; // the account's list once synced, null when logged out
 const deviceSeen = () => (Array.isArray(save.seen) ? save.seen : []);
@@ -1543,6 +1562,11 @@ function popGain(i, metres, tier, nitro) {
 
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
+  if (V2 && !setup.online && !setup.v2questions && !(setup.redo && setup.questions?.length)) {
+    const today = dday();
+    const daily = setup.daily && !setup.redo ? setup.daily : 0;
+    if (canRace(me(), today, daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck })) return startRaceV2(setup);
+  }
   if (!questionsReady) { questionsLoaded.then(() => startRace(setup)); return; }
   const today = dday();
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
@@ -1557,7 +1581,7 @@ function startRace(setup) {
     : setup.redo && setup.questions?.length && !daily
       ? setup.questions
       : V2
-        ? v2Questions(daily ? dailyRace(today) : pickRace(save.deck, seenList(), ROUNDS, Math.random, { has: (p) => qByText().has(p) }))
+        ? setup.v2questions
         : daily
           ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
           : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS, Math.random, { flat: save.deck === "car" });

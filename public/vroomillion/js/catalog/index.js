@@ -6,9 +6,11 @@
 // See existing.js for the line format.
 import { EXISTING } from "./existing.js";
 import { CAR } from "./car.js";
+import { W01 } from "./w01.js";
+import { W02 } from "./w02.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR];
+export const SOURCES = [EXISTING, CAR, W01, W02];
 
 export function parseCatalog(texts) {
   const fams = [];
@@ -18,12 +20,16 @@ export function parseCatalog(texts) {
       const line = raw.trim();
       if (!line || line.startsWith("//")) continue;
       if (line.startsWith("#")) { topic = line.slice(1).trim(); continue; }
-      const [id, level, pools, flags, prompts] = line.split("|").map((s) => s.trim());
+      // new families also carry a Wikidata rule and the obvious answers (tools/build-catalog.mjs)
+      const cols = line.split("|").map((s) => s.trim());
+      if (cols.length !== 5 && cols.length !== 7) throw new Error(`catalog line has ${cols.length} columns (a stray "|"?): ${line.slice(0, 80)}`);
+      const [id, level, pools, flags, prompts, src, top] = cols;
       const fl = flags ? flags.split(/\s+/) : [];
       const carTopic = (fl.find((f) => f.startsWith("c:")) || "").slice(2) || null;
       fams.push({
         id, group: id.split("/")[0], topic, level: Number(level), pools: pools.split(/\s+/),
         single: fl.includes("1"), carTopic, prompts: prompts.split(";").map((s) => s.trim()).filter(Boolean),
+        ...(src ? { src } : {}), ...(top ? { top: top.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
       });
     }
   }

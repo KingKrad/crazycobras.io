@@ -17,6 +17,8 @@ const stampJs = (src) => src
   // the prompt-list worker: new URL("./questions-worker.js", import.meta.url)
   .replace(/(new URL\(\s*["'])(\.\/[\w.-]+\.js)(["']\s*,\s*import\.meta\.url\))/g, (m, a, u, b) => a + tag(u) + b)
   // the long-tail answer lists (deep.js fetches deep/<file> and deep/index.json)
+  // the new catalog's answer files (main.js fetches answers/<slug>.json)
+  .replace(/fetch\("answers\/" \+ answerSlug\(p\) \+ "\.json"\)/g, `fetch("answers/" + answerSlug(p) + ".json?v=${V}")`)
   .replace(/fetch\("deep\/index\.json"\)/g, `fetch("deep/index.json?v=${V}")`)
   .replace(/fetch\("deep\/" \+ index\[p\]\.file\)/g, `fetch("deep/" + index[p].file + "?v=${V}")`);
 

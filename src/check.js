@@ -2,6 +2,7 @@
 // the item it finds is the right kind of thing for the prompt (src/answer-classes.js, generated from
 // the same rules as the answer lists). This is how "mayochup" counts as a condiment.
 import { CLASSES, BLOCK } from "./answer-classes.js";
+import { CATALOG_CLASSES } from "./catalog-classes.js";
 import { json, readForm, clientIp } from "./accounts.js";
 
 const BLOCK_RE = new RegExp(BLOCK, "i");
@@ -36,7 +37,7 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
     if (!success) return json({ found: false, reason: "busy" }, 429);
   }
   const body = await readForm(request, 1000);
-  const cls = CLASSES[String(body?.prompt ?? "")];
+  const cls = CLASSES[String(body?.prompt ?? "")] || CATALOG_CLASSES[String(body?.prompt ?? "")];
   const answer = cleanAnswer(body?.answer);
   if (!cls || answer.length < 3 || !/\p{L}/u.test(answer) || BLOCK_RE.test(answer)) return json({ found: false });
 
