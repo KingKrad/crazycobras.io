@@ -243,7 +243,8 @@ h3 { font-weight: normal; }
 .link { background: none; border: 0; color: var(--dim); font-size: 9px; padding: 10px 4px; text-decoration: underline; }
 
 /* ---------- how to play ---------- */
-.how { padding-left: 24px; margin: 0 0 18px; font-size: 10px; line-height: 2; }
+.how { padding-left: 18px; margin: 0 0 18px; font-size: 10px; line-height: 2; list-style: square; }
+.how li { margin-bottom: 6px; }
 .how b { color: var(--yellow); font-weight: normal; }
 .tiers { display: grid; gap: 8px; margin-bottom: 18px; }
 .tier-row { display: grid; grid-template-columns: minmax(0, 1.4fr) 64px minmax(0, 2fr); align-items: center; gap: 10px; font-size: 8px; }
@@ -892,9 +893,9 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 #s-title .menu .online-btn { grid-column: 1 / -1; }
 
 /* online 1v1 */
-.online-box { display: grid; gap: 12px; }
-.online-card { background: var(--panel); border: var(--px) solid var(--line); padding: 14px; display: grid; gap: 10px; }
-.online-card input { font: inherit; font-size: 12px; padding: 10px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
+.online-box { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.online-card { background: var(--panel); border: var(--px) solid var(--line); padding: 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+.online-card input { font: inherit; font-size: 12px; padding: 10px; width: 100%; box-sizing: border-box; min-width: 0; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
 .online-card .code-in { font-size: 20px; letter-spacing: 0.3em; text-transform: uppercase; text-align: center; }
 .online-card .modes { margin: 0; }
 .race-code { font-size: 34px; letter-spacing: 0.25em; color: var(--yellow); text-align: center; text-shadow: 3px 3px 0 #000; }
@@ -1017,8 +1018,8 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 }
 
 /* race rules: CRAZY MODE and EQUAL CARS */
-.rules { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0; }
-.rule-btn { display: flex; flex-direction: column; gap: 5px; min-width: 200px; padding: 9px 12px; font: inherit; font-size: 8px; color: var(--dim); background: #0b0618; border: 3px solid #2b1d5c; cursor: pointer; text-align: left; }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+.rule-btn { display: flex; flex-direction: column; gap: 5px; min-width: 0; padding: 9px 12px; font: inherit; font-size: 8px; color: var(--dim); background: #0b0618; border: 3px solid #2b1d5c; cursor: pointer; text-align: left; }
 .rule-btn .rule-note { font-size: 6px; line-height: 1.5; }
 .rule-btn.on { color: #fff; border-color: var(--pink); box-shadow: 0 0 14px rgba(255, 79, 216, 0.45); }
 .rule-btn.on .rule-name { color: var(--pink); }

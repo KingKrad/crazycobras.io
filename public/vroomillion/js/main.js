@@ -1143,7 +1143,7 @@ function show(name) {
     attract();
     renderDaily();
     $("stats").textContent = save.races
-      ? `MODE ${modeName(save.deck)} · BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · TURBOS ${save.deep} · VROOMILLIONS ${save.vrooms}`
+      ? `BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · TURBOS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "title") renderWhatsNew();
@@ -1219,14 +1219,14 @@ const MODES = [
 ];
 const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
 
-function modeSwitch(mount, onChange) {
+function modeSwitch(mount, onChange, lockTags = true) {
   mount.textContent = "";
   mount.append(...MODES.map((m) => h("button", {
     class: "mode mode-" + m.id, type: "button", "aria-pressed": String(save.deck === m.id),
-    onclick: () => { save.deck = m.id; persist(); audio.sfx.move(); modeSwitch(mount, onChange); onChange?.(); },
+    onclick: () => { save.deck = m.id; persist(); audio.sfx.move(); modeSwitch(mount, onChange, lockTags); onChange?.(); },
   }, h("span", { class: "mode-name", text: m.name }), h("span", { class: "mode-info", text: m.info }),
     // modes free players don't get
-    m.id !== "classic" && !FREE_PLAY && !unlimitedNow() ? h("span", { class: "mode-lock", text: "UNLIMITED ONLY" }) : null)));
+    lockTags && m.id !== "classic" && !FREE_PLAY && !unlimitedNow() ? h("span", { class: "mode-lock", text: "UNLIMITED ONLY" }) : null)));
 }
 // Prompts already raced. Logged in: the account's list (the same on every device, cached in
 // save.acctSeen for a fast start). Not logged in: this device's own list (save.seen).
@@ -1397,7 +1397,7 @@ function renderLeagues() {
     const played = n in done;
     daily.append(h("button", {
       class: "btn daily-race" + (played ? " done" : ""), type: "button", disabled: played,
-      text: played ? "DAILY" + (done[n] ? ` ✓ ${done[n].toLocaleString("en-US")} M` : " ✓ PLAYED") : "DAILY RACE",
+      text: played ? "TODAY'S DAILY RACE" + (done[n] ? ` ✓ ${done[n].toLocaleString("en-US")} M` : " ✓ PLAYED") : "PLAY TODAY'S DAILY RACE",
       onclick: () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); },
     }));
   }
@@ -1435,7 +1435,7 @@ function ruleToggles(versusRules) {
 }
 
 function renderVersus() {
-  modeSwitch($("mode-2p"), renderVersus);
+  modeSwitch($("mode-2p"), renderVersus, false); // 2P is Unlimited as a whole, so no lock on each mode
   renderPromptsLeft($("left-2p"), $("btn-start-2p"), () => {
     $("btn-start-2p").textContent = canRace(me(), dayKey(), { mode: "versus", deck: save.deck }) ? "START RACE" : "2P IS UNLIMITED — $5";
   });
