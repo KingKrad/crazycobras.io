@@ -628,3 +628,19 @@ test("online 1v1: an Unlimited host makes a room, a friend joins without an acco
   assert.equal(st.next, again.code);
   assert.equal((await on({ action: "join", code: st.next, name: "Pal" })).status, 200);
 });
+
+test("online 1v1, new prompt system: no prompts at create, the friend's history goes to the host, prompts come with start", async () => {
+  const on = (body, h = {}) => worker.fetch(post("online", body, h), env());
+  const host = await signup("host2@example.com");
+  db.sql.prepare("UPDATE users SET unlimited = 1 WHERE email = 'host2@example.com'").run();
+  const room = await (await on({ action: "create", deck: "classic", name: "H", prompts: [] }, { cookie: host.cookie })).json();
+  const g = await (await on({ action: "join", code: room.code, name: "G", seen: ["F:fruit/fruit", "F:dog/dog"] })).json();
+  let st = await (await on({ action: "state", code: room.code, token: room.token })).json();
+  assert.deepEqual(st.guestSeen, ["F:fruit/fruit", "F:dog/dog"]);
+  assert.equal((await (await on({ action: "state", code: room.code, token: g.token })).json()).guestSeen, undefined, "only the host sees it");
+  assert.equal((await on({ action: "start", code: room.code, token: room.token })).status, 400, "start needs the prompts");
+  const prompts = ["a", "b", "c", "d", "e", "f", "g"].map((x) => "Name " + x);
+  st = await (await on({ action: "start", code: room.code, token: room.token, prompts })).json();
+  assert.deepEqual(st.prompts, prompts);
+  assert.equal(st.status, "racing");
+});

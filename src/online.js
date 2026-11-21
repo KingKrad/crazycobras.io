@@ -7,6 +7,9 @@
 //     state  { code, token }                             -> the room, results so far and server time
 //     start  { code, token }                             -> host starts the race (both seats filled)
 //     answer { code, token, round, tier, answer, nitro } -> this player's result for a round
+//   With the new prompt system the host creates with no prompts; the friend joins with their history
+//   of prompt families (seen), the host's state shows it (guestSeen), and the host sends the seven
+//   prompts with start, picked fresh for both players.
 //     rematch { code, token }                            -> the friend asks the host for a rematch
 //   A rematch is a new room: the host sends create with { from, fromToken } (the finished room), and
 //   that room's state then names the new code (next), so the friend's game joins it.
@@ -45,7 +48,7 @@ export async function ensureOnlineSchema(db) {
   // added with rematches; harmless if they're already there (checked once per worker)
   if (columnsChecked.has(db)) return;
   columnsChecked.add(db);
-  for (const col of ["next_code TEXT", "rematch_ask INTEGER NOT NULL DEFAULT 0"]) {
+  for (const col of ["next_code TEXT", "rematch_ask INTEGER NOT NULL DEFAULT 0", "guest_seen TEXT"]) {
     try { await db.prepare(`ALTER TABLE online_rooms ADD COLUMN ${col}`).run(); } catch {}
   }
 }
@@ -57,8 +60,11 @@ async function seatOf(room, token) {
   return h === room.host_hash ? 0 : h === room.guest_hash ? 1 : -1;
 }
 
+const MAX_SEEN = 5000;
+const seenIn = (v) => (Array.isArray(v) ? v : []).filter((k) => typeof k === "string" && k.length <= 80).slice(-MAX_SEEN);
 function view(room, results, seat) {
   return {
+    ...(seat === 0 && room.guest_seen ? { guestSeen: JSON.parse(room.guest_seen) } : {}),
     code: room.code, deck: room.deck, status: room.status, startAt: room.start_at || null, now: Date.now(), seat,
     prompts: JSON.parse(room.prompts),
     players: [
@@ -76,7 +82,7 @@ export async function handleOnline(request, env) {
   if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403);
   // polling while waiting for a friend is about one request a second per player
   if (!(await underLimit(env, "online-ip", clientIp(request, env), 120, 60))) return json({ error: "Slow down." }, 429);
-  const body = await readForm(request, 8000);
+  const body = await readForm(request, 200000); // a friend's history of prompt families comes with join
   const action = String(body.action || "");
   await ensureOnlineSchema(env.DB);
   const db = env.DB;
@@ -89,7 +95,7 @@ export async function handleOnline(request, env) {
     if (!(await underLimit(env, "online-create", user.id, 20, 3600))) return json({ error: "That's a lot of races — try again later." }, 429);
     const deck = DECKS.has(body.deck) ? body.deck : "classic";
     const prompts = (Array.isArray(body.prompts) ? body.prompts : []).slice(0, ROUNDS).map((p) => clean(p, 120)).filter(Boolean);
-    if (prompts.length !== ROUNDS) return json({ error: "Bad request." }, 400);
+    if (prompts.length !== ROUNDS && prompts.length !== 0) return json({ error: "Bad request." }, 400);
     // tidy rooms older than two hours, and their results
     await db.batch([
       db.prepare("DELETE FROM online_rooms WHERE created < ?").bind(now - ROOM_TTL),
@@ -124,8 +130,8 @@ export async function handleOnline(request, env) {
       return json({ error: "Someone already joined that race." }, 409);
     }
     const token = newToken();
-    await db.prepare("UPDATE online_rooms SET guest_hash = ?, guest_name = ?, guest_car = ?, guest_power = ?, guest_nitro = ? WHERE code = ? AND guest_hash IS NULL")
-      .bind(await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0)), code).run();
+    await db.prepare("UPDATE online_rooms SET guest_hash = ?, guest_name = ?, guest_car = ?, guest_power = ?, guest_nitro = ?, guest_seen = ? WHERE code = ? AND guest_hash IS NULL")
+      .bind(await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0)), JSON.stringify(seenIn(body.seen)), code).run();
     const now2 = await db.prepare("SELECT guest_hash FROM online_rooms WHERE code = ?").bind(code).first();
     if (now2.guest_hash !== (await sha(token))) return json({ error: "Someone already joined that race." }, 409);
     return json({ token, seat: 1 });
@@ -141,7 +147,15 @@ export async function handleOnline(request, env) {
   if (action === "start") {
     if (seat !== 0) return json({ error: "Only the player who made the race can start it." }, 403);
     if (!room.guest_hash) return json({ error: "Your friend hasn't joined yet." }, 409);
-    if (room.status === "waiting") await db.prepare("UPDATE online_rooms SET status = 'racing', start_at = ? WHERE code = ?").bind(now + START_DELAY, code).run();
+    if (room.status === "waiting") {
+      // a room made without prompts gets them now, picked by the host's game for both players
+      let prompts = JSON.parse(room.prompts);
+      if (!prompts.length) {
+        prompts = (Array.isArray(body.prompts) ? body.prompts : []).slice(0, ROUNDS).map((p) => clean(p, 120)).filter(Boolean);
+        if (prompts.length !== ROUNDS) return json({ error: "Bad request." }, 400);
+      }
+      await db.prepare("UPDATE online_rooms SET status = 'racing', start_at = ?, prompts = ? WHERE code = ?").bind(now + START_DELAY, JSON.stringify(prompts), code).run();
+    }
     const fresh = await db.prepare("SELECT * FROM online_rooms WHERE code = ?").bind(code).first();
     return json(view(fresh, [], seat));
   }

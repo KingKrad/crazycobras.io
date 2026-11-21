@@ -2,7 +2,7 @@ import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize,
+  dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize, V2,
   DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
 } from "./logic.js";
 import * as audio from "./audio.js";
@@ -11,6 +11,7 @@ import { ChaseScene } from "./chase.js";
 import { shareCard, saveShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
+import { pickRace, dailyRace, famKey, familyOf } from "./racepick.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
 // The answer lists are about 2 MB, so they load in the background while the title screen is up
@@ -576,7 +577,7 @@ function renderOnline() {
     save.onlineName = jName.value.trim().slice(0, 16); persist();
     const car = tuned(carById(save.car));
     try {
-      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro });
+      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro, ...(V2 ? { seen: seenList() } : {}) });
       online = { code: code.value.trim().toUpperCase(), token: out.token, seat: 1, host: false };
       renderOnline();
     } catch (err) { jMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
@@ -600,7 +601,8 @@ function renderOnline() {
       audio.sfx.click(); cMsg.textContent = "Making your race…";
       save.onlineName = cName.value.trim().slice(0, 16); save.onlineDeck = deck; persist();
       await questionsLoaded;
-      const prompts = pickFresh(deckQuestions(QUESTIONS, deck), [], ROUNDS, Math.random, { flat: deck === "car" }).map((q) => q.q);
+      // the new prompt system picks at START, once the friend's history is in
+      const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, deck), [], ROUNDS, Math.random, { flat: deck === "car" }).map((q) => q.q);
       const car = tuned(carById(save.car));
       try {
         const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts });
@@ -657,7 +659,11 @@ function onlineLobby(box) {
       status.textContent = `${st.players[1].name} is here! Start when you're both ready.`;
       actions.append(h("button", { class: "btn big", type: "button", text: "START RACE", onclick: async (e) => {
         e.target.disabled = true; audio.sfx.click();
-        try { const s2 = await onlineCall({ action: "start", code: me.code, token: me.token }); started = true; onlineBegin(s2); } catch (err) { status.textContent = err.message; e.target.disabled = false; }
+        try {
+          if (V2) await questionsLoaded;
+          const prompts = V2 && !st.prompts.length ? v2OnlinePrompts(st.deck, st.guestSeen || []) : undefined;
+          const s2 = await onlineCall({ action: "start", code: me.code, token: me.token, prompts }); started = true; onlineBegin(s2);
+        } catch (err) { status.textContent = err.message; e.target.disabled = false; }
       } }));
     } else status.textContent = `Waiting for ${st.players[0].name} to start · ${modeName(st.deck)}`;
     me.poll = setTimeout(tick, 1500);
@@ -710,7 +716,7 @@ function rematchPoll(r) {
 async function rematchJoin(r) {
   const car = tuned(carById(save.car));
   try {
-    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro });
+    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro, ...(V2 ? { seen: seenList() } : {}) });
     rematch = null; clearTimeout(r.poll);
     online = { code: r.next, token: out.token, seat: 1, host: false };
     show("online");
@@ -728,7 +734,7 @@ async function rematchGo() {
   }
   $("btn-redo").disabled = true; $("btn-redo").textContent = "MAKING REMATCH…";
   await questionsLoaded;
-  const prompts = pickFresh(deckQuestions(QUESTIONS, r.deck), r.prompts, ROUNDS, Math.random, { flat: r.deck === "car" }).map((q) => q.q);
+  const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, r.deck), r.prompts, ROUNDS, Math.random, { flat: r.deck === "car" }).map((q) => q.q);
   const car = tuned(carById(save.car));
   try {
     const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token });
@@ -1217,6 +1223,18 @@ function modeSwitch(mount, onChange) {
 // Prompts already raced. Logged in: the account's list (the same on every device, cached in
 // save.acctSeen for a fast start). Not logged in: this device's own list (save.seen).
 // The first time an account logs in on a device, what was played here without one is added to it.
+// the new prompt system: a picked family -> the question the race engine plays (its answers, if any)
+let qIndex = null;
+const qByText = () => (qIndex && qIndex.size === QUESTIONS.length ? qIndex : (qIndex = new Map(QUESTIONS.map((q) => [q.q, q]))));
+const famKeyOf = (prompt) => { const f = familyOf(prompt); return f ? famKey(f) : prompt; };
+function v2Questions(picks) {
+  // a prompt this copy has no answers for (a brand-new one): the live check alone judges it
+  return picks.map(({ family, prompt }) => ({ ...(qByText().get(prompt) || { q: prompt, a: [[], [], [], [], []], cat: "everyday" }), fam: famKey(family) }));
+}
+// online races: seven prompts fresh for both players (each one's history of families)
+const v2OnlinePrompts = (deck, otherSeen = [], avoid = []) =>
+  pickRace(deck, [...seenList(), ...otherSeen, ...avoid.map(famKeyOf)], ROUNDS, Math.random, { has: (p) => qByText().has(p) }).map((x) => x.prompt);
+
 let accountSeen = null; // the account's list once synced, null when logged out
 const deviceSeen = () => (Array.isArray(save.seen) ? save.seen : []);
 const seenList = () => (account && accountSeen ? accountSeen : deviceSeen());
@@ -1270,7 +1288,7 @@ function unseeMode(prompts) {
   }
   persist();
 }
-const leftInMode = () => promptsLeft(deckQuestions(QUESTIONS, save.deck), seenList());
+const leftInMode = () => V2 ? 1 : promptsLeft(deckQuestions(QUESTIONS, save.deck), seenList());
 
 // "28 NEW PROMPTS LEFT" under the mode switch; when none are left, say what to do instead.
 function renderPromptsLeft(el, startBtn, ready) {
@@ -1536,11 +1554,13 @@ function startRace(setup) {
   }
   const questions = setup.online
     ? setup.questions
-    : daily
-    ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
-    : setup.redo && setup.questions?.length
+    : setup.redo && setup.questions?.length && !daily
       ? setup.questions
-      : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS, Math.random, { flat: save.deck === "car" });
+      : V2
+        ? v2Questions(daily ? dailyRace(today) : pickRace(save.deck, seenList(), ROUNDS, Math.random, { has: (p) => qByText().has(p) }))
+        : daily
+          ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
+          : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS, Math.random, { flat: save.deck === "car" });
   if (!questions.length) {
     // nothing new left in this mode: back to the setup screen, which explains
     show(setup.mode === "solo" ? "leagues" : "versus");
@@ -1636,7 +1656,8 @@ async function runRace(token) {
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     $("q-kicker").textContent = `${topicOf(q)} · ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
-    if (!race.online) markSeen(q.q);
+    if (V2) markSeen(q.fam || famKeyOf(q.q)); // the new system: the whole family, in every race type
+    else if (!race.online) markSeen(q.q);
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);

@@ -409,3 +409,66 @@ test("GEARHEAD is mainly cars and how they work, with the odd racing prompt", ()
   const engine = buildIndex(QUESTIONS.find((x) => x.q === "Name a part of an engine"));
   assert.equal(judge(engine, "spark plugs").tier, 1);
 });
+
+// ---------- the new prompt system: families, groups, topics ----------
+import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies } from "../public/vroomillion/js/racepick.js";
+import { FAMILIES, TOPICS } from "../public/vroomillion/js/catalog/index.js";
+import { QUESTIONS as ALL_Q } from "../public/vroomillion/js/data.js";
+
+test("catalog: every family has a known topic, level and pool, and no prompt is in two families", () => {
+  const seen = new Map();
+  const ids = new Set();
+  for (const f of FAMILIES) {
+    assert.ok(!ids.has(f.id), "duplicate family id " + f.id); ids.add(f.id);
+    assert.ok([1, 2, 3].includes(f.level), f.id + " level");
+    assert.ok(f.pools.every((p) => ["main", "daily", "car", "hard"].includes(p)), f.id + " pools");
+    if (!f.pools.every((p) => p === "car")) assert.ok(TOPICS.includes(f.topic), f.id + " topic " + f.topic);
+    for (const p of f.prompts) { assert.ok(!seen.has(p), `${p} is in ${seen.get(p)} and ${f.id}`); seen.set(p, f.id); }
+    if (f.pools.includes("daily")) assert.ok(!f.pools.some((p) => p === "main" || p === "hard"), f.id + ": daily families are only for the daily race");
+  }
+});
+
+test("catalog: every prompt the game already had is in a family", () => {
+  const missing = ALL_Q.filter((q) => !familyOf(q.q)).map((q) => q.q);
+  assert.deepEqual(missing, []);
+});
+
+test("races: no family twice, no group twice, at most one single, seven topics when the pool allows", () => {
+  for (const mode of ["classic", "car", "hard"]) {
+    let seen = [];
+    const total = poolFamilies(mode).length;
+    for (let r = 0; r < 200 && seen.length + 7 <= total; r++) {
+      const race = pickRace(mode, seen, 7, Math.random);
+      assert.equal(race.length, 7);
+      const keys = race.map((x) => famKey(x.family));
+      assert.ok(keys.every((k) => !seen.includes(k)), `${mode} race ${r + 1} repeats a family while fresh ones are left`);
+      if (mode === "classic") {
+        const groups = race.map((x) => x.family.group);
+        assert.equal(new Set(groups).size, 7, `${mode}: two from one group: ${groups}`);
+        assert.ok(race.filter((x) => x.family.single).length <= 1);
+      }
+      seen = [...seen, ...keys];
+      if (r > 3) break; // a few full races are enough per run; the counts are checked below
+    }
+  }
+  // with plenty left, CLASSIC races cover seven different topics
+  const race = pickRace("classic", [], 7, Math.random);
+  assert.equal(new Set(race.map((x) => x.family.topic)).size, 7);
+});
+
+test("races: once everything is used, the oldest-seen families come back first", () => {
+  const fams = parseTiny();
+  const seen = fams.map((f) => famKey(f)); // all seen, first ones oldest
+  const race = pickRace("classic", seen, 2, () => 0.99, { families: fams });
+  assert.deepEqual(race.map((x) => x.family.id).sort(), ["a/a", "b/b"]);
+});
+function parseTiny() {
+  return ["a", "b", "c", "d"].map((x, i) => ({ id: `${x}/${x}`, group: x, topic: TOPICS[i], level: 1, pools: ["main"], single: false, prompts: ["Name " + x] }));
+}
+
+test("daily race: the same seven for everyone on a day, different the next day, seven groups", () => {
+  const a = dailyRace("2026-12-01").map((x) => x.prompt);
+  assert.deepEqual(dailyRace("2026-12-01").map((x) => x.prompt), a);
+  assert.notDeepEqual(dailyRace("2026-12-02").map((x) => x.prompt), a);
+  for (const race of dailyLayout().slice(0, 20)) assert.equal(new Set(race.map((f) => f.group)).size, 7);
+});

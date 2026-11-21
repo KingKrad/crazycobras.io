@@ -77,10 +77,15 @@ export const FREE_PLAY = false;
 // DAILY RACES: two solo CLASSIC races a day, the same prompts for everyone, free for every player.
 // Everything else (more races, 2P VERSUS, GEARHEAD, HARD MODE, redoing a race) needs Unlimited.
 // save.daily = { day, done: { 1: metres, 2: metres } } on this device.
-export const DAILY_RACES = 2;
+// THE NEW PROMPT SYSTEM (js/catalog, js/racepick.js): prompt families that never repeat, seven topics
+// a race, and one daily race from its own pool. It goes live for everyone when V2_LIVE is true; until
+// then it can be tried on one browser with localStorage "vroomillion.v2" = "1".
+const V2_LIVE = false;
+export const V2 = V2_LIVE || (() => { try { return typeof localStorage !== "undefined" && localStorage.getItem("vroomillion.v2") === "1"; } catch { return false; } })();
+export const DAILY_RACES = V2 ? 1 : 2;
 export const dailyDone = (save, today) => (save.daily?.day === today && save.daily.done && typeof save.daily.done === "object" ? save.daily.done : {});
 export const dailyLeft = (save, today) => Math.max(0, DAILY_RACES - Object.keys(dailyDone(save, today)).length);
-export const nextDaily = (save, today) => [1, 2].find((n) => !(n in dailyDone(save, today))) || 0;
+export const nextDaily = (save, today) => [1, 2].filter((n) => n <= DAILY_RACES).find((n) => !(n in dailyDone(save, today))) || 0;
 // kind: { daily: 1 | 2 } for a daily race, otherwise { mode, deck } for an Unlimited one
 export const canRace = (save, today, kind = {}, freePlay = FREE_PLAY) =>
   freePlay || !!save.unlimited || (!!kind.daily && kind.daily <= DAILY_RACES && !(kind.daily in dailyDone(save, today)));
