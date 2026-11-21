@@ -1,13 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "echo no install needed",
-  "buildCommand": "echo static site",
+  "buildCommand": "node tools/stamp.mjs",
   "outputDirectory": "public",
   "redirects": [
     {
       "source": "/",
       "destination": "/vroomillion/",
-      "permanent": false
+      "permanent": true
     }
   ],
   "headers": [
@@ -37,6 +37,60 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/deep/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/style.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/(.*).html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/vroomillion/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

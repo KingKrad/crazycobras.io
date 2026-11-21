@@ -1,4 +1,3 @@
-import { QUESTIONS as HAND_WRITTEN } from "./data.js";
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
@@ -13,7 +12,17 @@ import { shareCard, saveShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
-const QUESTIONS = [...HAND_WRITTEN, ...makeVariants(HAND_WRITTEN)];
+// The answer lists are about 2 MB, so they load in the background while the title screen is up
+// instead of holding up the first screen. Races wait for them (usually long since done).
+let QUESTIONS = [];
+let questionsReady = false;
+const questionsLoaded = import("./data.js").then(({ QUESTIONS: hand }) => {
+  QUESTIONS = [...hand, ...makeVariants(hand)];
+  questionsReady = true;
+  if (current === "leagues") renderLeagues();
+  if (current === "versus") renderVersus();
+  return QUESTIONS;
+});
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -769,6 +778,13 @@ const leftInMode = () => promptsLeft(deckQuestions(QUESTIONS, save.deck), seenLi
 
 // "28 NEW PROMPTS LEFT" under the mode switch; when none are left, say what to do instead.
 function renderPromptsLeft(el, startBtn, ready) {
+  if (!questionsReady) {
+    el.className = "prompts-left";
+    el.textContent = "LOADING PROMPTS…";
+    startBtn.disabled = true;
+    return; // redrawn when they arrive
+  }
+  startBtn.disabled = false;
   const left = leftInMode();
   el.className = "prompts-left" + (left ? "" : " none");
   el.textContent = left
@@ -1013,6 +1029,7 @@ function popGain(i, metres, tier, nitro) {
 
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
+  if (!questionsReady) { questionsLoaded.then(() => startRace(setup)); return; }
   const today = dday();
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
   const kind = daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };

@@ -1,5 +1,6 @@
 brand
-tools
+tools/*
+!tools/stamp.mjs
 test
 src
 slop-report.md
