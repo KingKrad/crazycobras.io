@@ -684,6 +684,60 @@ async function onlineBegin(st) {
   setTimeout(go, Math.max(0, wait));
 }
 
+// ---------- rematch ----------
+// After an online race both results screens show REMATCH. The host's makes a new room (fresh prompts,
+// same mode) linked to the old one; the friend's asks for one and joins the new room as soon as it
+// exists. Either way both land in the new room's lobby, where the host taps START as usual.
+let rematch = null; // { code, token, seat, deck, name, friend, prompts, asked, ask, next, poll }
+function drawRematch() {
+  const b = $("btn-redo"), r = rematch;
+  if (!r) return;
+  b.disabled = false;
+  if (r.seat === 0) b.textContent = r.ask ? `REMATCH — ${r.friend} WANTS ONE!` : "REMATCH";
+  else if (r.next) b.textContent = `JOIN ${r.friend}'S REMATCH`;
+  else if (r.asked) { b.textContent = `WAITING FOR ${r.friend}…`; b.disabled = true; }
+  else b.textContent = "ASK FOR A REMATCH";
+}
+function rematchPoll(r) {
+  if (rematch !== r || current !== "results") return;
+  onlineCall({ action: "state", code: r.code, token: r.token }).then((st) => {
+    if (rematch !== r) return;
+    r.ask = st.rematchAsk; r.next = st.next;
+    if (r.seat === 1 && r.asked && r.next) return rematchJoin(r);
+    drawRematch();
+  }).catch(() => {}).finally(() => { if (rematch === r && current === "results") r.poll = setTimeout(() => rematchPoll(r), 2000); });
+}
+async function rematchJoin(r) {
+  const car = tuned(carById(save.car));
+  try {
+    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro });
+    rematch = null; clearTimeout(r.poll);
+    online = { code: r.next, token: out.token, seat: 1, host: false };
+    show("online");
+  } catch (err) { overlay(err.message, "small"); r.asked = false; r.next = null; drawRematch(); }
+}
+async function rematchGo() {
+  const r = rematch;
+  if (!r) return;
+  audio.sfx.click();
+  if (r.seat === 1) {
+    if (r.next) return rematchJoin(r);
+    r.asked = true; drawRematch();
+    onlineCall({ action: "rematch", code: r.code, token: r.token }).then((out) => { if (out.next && rematch === r) { r.next = out.next; rematchJoin(r); } }).catch(() => {});
+    return;
+  }
+  $("btn-redo").disabled = true; $("btn-redo").textContent = "MAKING REMATCH…";
+  await questionsLoaded;
+  const prompts = pickFresh(deckQuestions(QUESTIONS, r.deck), r.prompts, ROUNDS, Math.random, { flat: r.deck === "car" }).map((q) => q.q);
+  const car = tuned(carById(save.car));
+  try {
+    const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token });
+    rematch = null; clearTimeout(r.poll);
+    online = { code: out.code, token: out.token, seat: 0, host: true };
+    show("online");
+  } catch (err) { overlay(err.message, "small"); drawRematch(); }
+}
+
 // my result for a round (sent once; retried a couple of times if the network blips)
 function onlineSend(round, res, nitro, tries = 0) {
   const o = race.online;
@@ -2182,10 +2236,16 @@ function finish(token) {
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : left ? `RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "NO NEW PROMPTS";
   $("btn-again").disabled = paid && !left;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
-  // online: "again" goes back to the online screen for a new race with your friend; no redo
-  if (race.online) { $("btn-again").textContent = "NEW ONLINE RACE"; $("btn-again").disabled = false; }
-  $("btn-redo").classList.toggle("hidden", !!race.online);
+  // online: "again" goes back to the online screen; "redo" becomes REMATCH with the same friend
+  if (race.online) {
+    $("btn-again").textContent = "NEW ONLINE RACE"; $("btn-again").disabled = false;
+    const o = race.online;
+    rematch = { code: o.code, token: o.token, seat: o.seat, deck: o.deck, name: o.players[o.seat]?.name || "RACER",
+      friend: (o.players[1 - o.seat]?.name || "FRIEND").toUpperCase(), prompts: race.questions.map((q) => q.q), asked: false, ask: false, next: null };
+    drawRematch();
+  } else { rematch = null; $("btn-redo").disabled = false; }
   show("results");
+  if (rematch) rematchPoll(rematch);
 }
 
 // ---------- wiring ----------
@@ -2202,6 +2262,22 @@ $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
 $("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
+$("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
+$("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
+$("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
+$("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
+$("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
+$("btn-again").addEventListener("click", () => {
+  audio.sfx.click();
+  if (rematch) { clearTimeout(rematch.poll); rematch = null; online = null; return show("online"); }
+  if (!lastSetup) return;
+  const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dday()) : 0;
+  startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false });
+});
+$("btn-redo").addEventListener("click", () => {
+  if (rematch) return rematchGo();
+  audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true });
+});
 $("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
 $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("btn-start-2p").addEventListener("click", () => {

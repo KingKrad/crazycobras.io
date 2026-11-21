@@ -616,4 +616,15 @@ test("online 1v1: an Unlimited host makes a room, a friend joins without an acco
   assert.deepEqual(st.results.map((x) => [x.seat, x.tier, x.answer, x.nitro]), [[0, 4, "durian", true], [1, 1, "apple", false]], "first answer per round counts");
   assert.equal((await on({ action: "state", code: room.code, token: "0".repeat(32) })).status, 403);
   assert.equal((await on({ action: "state", code: "ZZZZZZ", token: g.token })).status, 404);
+  // rematch: the friend asks, the host makes the new room, the friend's game finds it in the old one
+  assert.equal((await (await on({ action: "rematch", code: room.code, token: g.token })).json()).next, null);
+  st = await (await on({ action: "state", code: room.code, token: room.token })).json();
+  assert.equal(st.rematchAsk, true);
+  assert.equal((await on({ action: "create", prompts, from: room.code, fromToken: g.token }, { cookie: host.cookie })).status, 404, "only the host makes the rematch");
+  const again = await (await on({ action: "create", deck: "car", name: "Hosty", prompts, from: room.code, fromToken: room.token }, { cookie: host.cookie })).json();
+  assert.notEqual(again.code, room.code);
+  assert.equal((await on({ action: "create", prompts, from: room.code, fromToken: room.token }, { cookie: host.cookie })).status, 409, "one rematch per race");
+  st = await (await on({ action: "state", code: room.code, token: g.token })).json();
+  assert.equal(st.next, again.code);
+  assert.equal((await on({ action: "join", code: st.next, name: "Pal" })).status, 200);
 });

@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21d",
+    date: "Nov 21, 2026",
+    title: "Rematch + button fixes",
+    items: [
+      "REMATCH after an online 1v1: the host makes a new race with fresh prompts and the friend jumps straight into it. Friends can tap ASK FOR A REMATCH too.",
+      "Fixed: GARAGE, PASSPORT, HOW TO PLAY, QUIT, NEW RACE and REDO buttons work again.",
+    ],
+  },
+  {
     id: "2026-11-21c",
     date: "Nov 21, 2026",
     title: "Automatic updates",

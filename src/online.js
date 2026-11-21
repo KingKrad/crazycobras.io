@@ -7,6 +7,9 @@
 //     state  { code, token }                             -> the room, results so far and server time
 //     start  { code, token }                             -> host starts the race (both seats filled)
 //     answer { code, token, round, tier, answer, nitro } -> this player's result for a round
+//     rematch { code, token }                            -> the friend asks the host for a rematch
+//   A rematch is a new room: the host sends create with { from, fromToken } (the finished room), and
+//   that room's state then names the new code (next), so the friend's game joins it.
 // Tokens are random per player and only their hashes are stored; rooms expire after two hours.
 import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin } from "./accounts.js";
 
@@ -27,6 +30,7 @@ const clean = (v, max) => (typeof v === "string" ? v.replace(/[\u0000-\u001f]/g,
 const name = (v) => clean(v, 16) || "RACER";
 const num = (v, lo, hi, d) => (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
 
+const columnsChecked = new WeakSet();
 export async function ensureOnlineSchema(db) {
   await ensureSchema(db);
   await db.batch([
@@ -38,6 +42,12 @@ export async function ensureOnlineSchema(db) {
       code TEXT NOT NULL, seat INTEGER NOT NULL, round INTEGER NOT NULL, tier INTEGER NOT NULL, answer TEXT,
       nitro INTEGER NOT NULL DEFAULT 0, at INTEGER NOT NULL, PRIMARY KEY (code, seat, round))`),
   ]);
+  // added with rematches; harmless if they're already there (checked once per worker)
+  if (columnsChecked.has(db)) return;
+  columnsChecked.add(db);
+  for (const col of ["next_code TEXT", "rematch_ask INTEGER NOT NULL DEFAULT 0"]) {
+    try { await db.prepare(`ALTER TABLE online_rooms ADD COLUMN ${col}`).run(); } catch {}
+  }
 }
 
 // which seat a token belongs to in a room (or -1)
@@ -55,6 +65,7 @@ function view(room, results, seat) {
       { name: room.host_name, car: room.host_car, power: room.host_power, nitro: room.host_nitro, joined: true },
       { name: room.guest_name || null, car: room.guest_car || null, power: room.guest_power || null, nitro: room.guest_nitro || 0, joined: !!room.guest_hash },
     ],
+    next: room.next_code || null, rematchAsk: !!room.rematch_ask,
     results: results.map((r) => ({ seat: r.seat, round: r.round, tier: r.tier, answer: r.answer, nitro: !!r.nitro })),
   };
 }
@@ -84,12 +95,20 @@ export async function handleOnline(request, env) {
       db.prepare("DELETE FROM online_rooms WHERE created < ?").bind(now - ROOM_TTL),
       db.prepare("DELETE FROM online_results WHERE code NOT IN (SELECT code FROM online_rooms)"),
     ]);
+    // a rematch: only the host of the finished room can make one, once
+    let from = null;
+    if (body.from) {
+      from = await db.prepare("SELECT * FROM online_rooms WHERE code = ? AND created > ?").bind(clean(body.from, 6).toUpperCase(), now - ROOM_TTL).first();
+      if (!from || (await seatOf(from, body.fromToken)) !== 0) return json({ error: "That race has ended. Make a new one." }, 404);
+      if (from.next_code) return json({ error: "You already made a rematch for that race." }, 409);
+    }
     let code = newCode();
     for (let i = 0; i < 5 && (await db.prepare("SELECT 1 FROM online_rooms WHERE code = ?").bind(code).first()); i++) code = newCode();
     const token = newToken();
     await db.prepare(`INSERT INTO online_rooms (code, created, deck, prompts, status, host_hash, host_name, host_car, host_power, host_nitro)
       VALUES (?, ?, ?, ?, 'waiting', ?, ?, ?, ?, ?)`)
       .bind(code, now, deck, JSON.stringify(prompts), await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0))).run();
+    if (from) await db.prepare("UPDATE online_rooms SET next_code = ? WHERE code = ? AND next_code IS NULL").bind(code, from.code).run();
     return json({ code, token, seat: 0 });
   }
 
@@ -133,6 +152,10 @@ export async function handleOnline(request, env) {
     await db.prepare("INSERT OR IGNORE INTO online_results (code, seat, round, tier, answer, nitro, at) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .bind(code, seat, round, tier, clean(body.answer, 40), body.nitro ? 1 : 0, now).run();
     return json({ ok: true });
+  }
+  if (action === "rematch") {
+    if (seat === 1 && !room.rematch_ask) await db.prepare("UPDATE online_rooms SET rematch_ask = 1 WHERE code = ?").bind(code).run();
+    return json({ ok: true, next: room.next_code || null });
   }
   return json({ error: "Unknown action." }, 400);
 }
