@@ -1,0 +1,129 @@
+// The prompt catalog, wave 24 (daily). Format: w01.js.
+export const W24 = `
+# animals
+letter/animalb | 1 | daily | | Name an animal that starts with B | | bear, bat, bee, beaver, bison, buffalo, bull, butterfly, baboon, badger, bobcat, beetle
+letter/animalc | 1 | daily | | Name an animal that starts with C | | cat, cow, camel, cheetah, chicken, crab, crocodile, chimpanzee, cougar, coyote, cobra, crow
+letter/animald | 1 | daily | | Name an animal that starts with D | | dog, deer, dolphin, duck, donkey, dove, dingo, dragonfly, dalmatian, dodo, dinosaur, dormouse
+letter/animalg | 1 | daily | | Name an animal that starts with G | | giraffe, gorilla, goat, goose, gazelle, gecko, grasshopper, guinea pig, gopher, goldfish, gnu, grizzly bear
+letter/animalh | 1 | daily | | Name an animal that starts with H | | horse, hippo, hamster, hyena, hawk, hedgehog, hummingbird, hen, hare, heron, hornet, husky
+letter/animall | 1 | daily | | Name an animal that starts with L | | lion, leopard, lizard, llama, lobster, lamb, ladybug, lemur, lynx, lark, leech, lemming
+letter/animalm | 1 | daily | | Name an animal that starts with M | | monkey, mouse, moose, mole, mule, mosquito, meerkat, macaw, manatee, magpie, mink, mongoose
+letter/animalp | 1 | daily | | Name an animal that starts with P | | pig, panda, penguin, parrot, polar bear, porcupine, puma, peacock, pelican, platypus, poodle, python
+letter/animals | 1 | daily | | Name an animal that starts with S | | snake, shark, sheep, squirrel, seal, skunk, sloth, spider, swan, salmon, snail, starfish
+letter/animalt | 1 | daily | | Name an animal that starts with T | | tiger, turtle, toad, turkey, tortoise, toucan, tarantula, trout, termite, tuna, tapir, t-rex
+letter/animalw | 1 | daily | | Name an animal that starts with W | | whale, wolf, walrus, worm, wombat, woodpecker, wasp, weasel, warthog, wildebeest, wolverine, wren
+letter/animalr | 1 | daily | | Name an animal that starts with R | | rabbit, rat, raccoon, rhino, reindeer, robin, rooster, raven, rattlesnake, ram, rottweiler, roadrunner
+# food
+letter/foodb | 1 | daily | | Name a food that starts with B | | bread, banana, bacon, burger, broccoli, butter, bagel, beans, brownie, burrito, blueberry, biscuit
+letter/foodc | 1 | daily | | Name a food that starts with C | | cheese, cake, chicken, carrot, cookie, corn, cereal, chocolate, cherry, celery, croissant, cupcake
+letter/foodp | 1 | daily | | Name a food that starts with P | | pizza, pasta, pancake, popcorn, potato, pear, peach, pie, pickle, pineapple, pretzel, peas
+letter/foods | 1 | daily | | Name a food that starts with S | | steak, sushi, spaghetti, sandwich, salad, soup, strawberry, sausage, salmon, shrimp, spinach, s'mores
+letter/foodm | 1 | daily | | Name a food that starts with M | | macaroni, mango, muffin, meatballs, mashed potatoes, melon, milkshake, mushroom, marshmallow, meatloaf, mustard, mac and cheese
+letter/foodt | 1 | daily | | Name a food that starts with T | | taco, toast, tomato, turkey, tuna, tofu, tater tots, tortilla, tangerine, tiramisu, truffle, twinkie
+letter/foodg | 2 | daily | | Name a food that starts with G | | grapes, garlic, granola, gravy, guacamole, gum, grapefruit, green beans, gnocchi, gummy bears, gingerbread, goulash
+letter/foodo | 2 | daily | | Name a food that starts with O | | orange, onion, oatmeal, olive, omelet, oreo, oyster, okra, onion rings, oats, octopus, oregano
+# places
+letter/countrys | 1 | daily | | Name a country that starts with S | | spain, sweden, switzerland, south africa, south korea, scotland, saudi arabia, singapore, syria, serbia, somalia, sudan
+letter/countrym | 2 | daily | | Name a country that starts with M | | mexico, morocco, madagascar, malaysia, mongolia, monaco, malta, mali, myanmar, moldova, maldives, mozambique
+letter/countryc | 1 | daily | | Name a country that starts with C | | canada, china, chile, colombia, cuba, cambodia, croatia, costa rica, cameroon, czech republic, cyprus, chad
+letter/countryb | 2 | daily | | Name a country that starts with B | | brazil, belgium, bolivia, bangladesh, bahamas, bulgaria, barbados, bhutan, botswana, belarus, bosnia, bahrain
+letter/countryi | 2 | daily | | Name a country that starts with I | | italy, india, ireland, iceland, iran, iraq, israel, indonesia, ivory coast
+letter/countryn | 2 | daily | | Name a country that starts with N | | norway, nigeria, nepal, new zealand, netherlands, north korea, nicaragua, niger, namibia
+letter/citys | 2 | daily | | Name a US city that starts with S | | seattle, san diego, san francisco, salt lake city, san antonio, st. louis, sacramento, savannah, santa fe, scottsdale, spokane, san jose
+letter/cityb | 2 | daily | | Name a US city that starts with B | | boston, baltimore, buffalo, birmingham, boise, boulder, baton rouge, berkeley, burbank, bakersfield, billings, branson
+# brands
+letter/brands | 1 | daily | | Name a brand that starts with S | | samsung, sony, starbucks, subway, sprite, skittles, spotify, snapchat, sephora, sears, subaru, supreme
+letter/brandn | 1 | daily | | Name a brand that starts with N | | nike, netflix, nintendo, nestle, nissan, nokia, nutella, nordstrom, nerf, new balance, nvidia, the north face
+letter/branda | 1 | daily | | Name a brand that starts with A | | apple, amazon, adidas, audi, asus, arby's, axe, aldi, airbnb, at&t, android, avon
+letter/brandg | 2 | daily | | Name a brand that starts with G | | google, gucci, gap, gatorade, gillette, gmc, gopro, guess, gerber, godiva, grubhub, game boy
+letter/brandm | 1 | daily | | Name a brand that starts with M | | mcdonald's, microsoft, mercedes, m&m's, mattel, marvel, motorola, monster, mountain dew, macy's, mazda, myspace
+# people
+letter/jobp | 1 | daily | | Name a job that starts with P | | police officer, pilot, plumber, painter, pharmacist, photographer, principal, professor, programmer, paramedic, priest, pediatrician
+letter/jobd | 1 | daily | | Name a job that starts with D | | doctor, dentist, driver, dancer, designer, detective, dj, director, dog walker, diver, dietitian, delivery driver
+letter/jobt | 1 | daily | | Name a job that starts with T | | teacher, tailor, trucker, tutor, therapist, taxi driver, translator, technician, ticket taker, tour guide, trainer, typist
+letter/girla | 1 | daily | | Name a girl's name that starts with A | | ashley, amy, anna, alice, amanda, abigail, ava, angela, alexis, audrey, allison, amber
+letter/girlj | 1 | daily | | Name a girl's name that starts with J | | jennifer, jessica, julia, jane, jasmine, jade, jenna, julie, jackie, joy, josephine, jill
+letter/boym | 1 | daily | | Name a boy's name that starts with M | | michael, matthew, mark, mike, max, mason, martin, marcus, miles, mitchell, malcolm, marco
+letter/boyd | 1 | daily | | Name a boy's name that starts with D | | david, daniel, dylan, derek, dennis, donald, dean, dominic, damian, drew, dustin, doug
+initials/same | 2 | daily | | Name a famous person or character whose first and last names start with the same letter | | mickey mouse, marilyn monroe, donald duck, peter parker, bruce banner, lois lane, ronald reagan, kim kardashian, wonder woman, ryan reynolds, peter pan, bugs bunny
+initials/jb | 2 | daily | | Name a famous person or character with the initials J.B. | | justin bieber, jeff bezos, james bond, jack black, jon bon jovi, joe biden, jason bourne, jimmy buffett, james brown, jessica biel, jordan belfort, jack bauer
+initials/mj | 2 | daily | | Name a famous person or character with the initials M.J. | | michael jordan, michael jackson, mary jane, magic johnson, mick jagger, milla jovovich, mike judge, marc jacobs, mary j. blige
+initials/jl | 2 | daily | | Name a famous person or character with the initials J.L. | | jennifer lopez, jennifer lawrence, john lennon, john legend, jay leno, jared leto, jerry lewis, jessica lange, jude law, jack london, jerry lee lewis, jeff lynne
+named6/jimmy | 2 | daily | | Name a famous person or character named Jimmy or Jimi | | jimmy fallon, jimmy kimmel, jimmy carter, jimi hendrix, jimmy buffett, jimmy neutron, jimmy butler, jimmy page, jimmy stewart, jimmy hoffa, jimmy dean, jimmy olsen
+named6/barry | 2 | daily | | Name a famous person or character named Barry or Benny | | barry manilow, barry white, barry bonds, barry allen, barry sanders, benny goodman, benny hill, benny the bull, barry b. benson, barry gibb, benny blanco, barry keoghan
+named6/cody | 2 | daily | | Name a famous person or character named Cody, Corey or Cory | | cody rhodes, cody simpson, corey feldman, corey taylor, corey haim, cody bellinger, cody johnson, cory booker, corey seager, cody martin, cory matthews, cory in the house
+named6/marty | 2 | daily | | Name a famous person or character named Marty or Mickey | | marty mcfly, mickey mouse, mickey mantle, mickey rourke, marty byrde, marty feldman, mickey goldmill, mickey rooney, marty the zebra, mickey hart, marty robbins, mickey smith
+named6/glen | 2 | daily | | Name a famous person or character named Glen, Gus or Gil | | glenn close, glen powell, gus fring, gil grissom, glenn frey, gus grissom, glenn quagmire, gus from psych, glenn from the walking dead, glenn danzig, gus the mouse, glen campbell
+named6/lance | 2 | daily | | Name a famous person or character named Lance or Lenny | | lance armstrong, lance bass, lenny kravitz, lenny leonard, lance stroll, lenny bruce, lenny from of mice and men, lance from voltron, lance reddick, lenny from shark tale, lance burton, lenny dykstra
+named6/wanda | 2 | daily | | Name a famous person or character named Wanda, Winnie or Winona | | wanda maximoff, winnie the pooh, wanda sykes, winnie cooper, winnie harlow, wanda from fairly oddparents, winnie mandela, winona ryder, winona judd, winnie from hocus pocus, wanda from a fish called wanda, winnie the witch
+named6/ellie | 2 | daily | | Name a famous person or character named Ellie or Elle | | elle woods, elle fanning, ellie goulding, ellie from the last of us, ellie sattler, elle macpherson, elle king, ellie kemper, ellie from up, ellie fredricksen, elle duncan, ellie simmonds
+named6/frankie | 2 | daily | | Name a famous person or character named Frankie or Fiona | | frankie valli, frankie muniz, princess fiona, fiona apple, frankie heck, frankie grande, fiona gallagher, frankie avalon, frankie from grace and frankie, fiona shaw, frankie dettori, fiona from shrek
+named6/bobby | 2 | daily | | Name a famous person or character named Bobby or Robbie | | bobby brown, bobby flay, bobby hill, bobby darin, bobby fischer, bobby kennedy, bobby orr, bobby singer, ricky bobby, robbie williams, robbie keane, robbie amell
+named6/dwight | 2 | daily | | Name a famous person or character named Dwight or Duke | | dwight schrute, dwight eisenhower, dwight yoakam, dwight howard, duke ellington, the duke, duke from gi joe, duke of york, duke nukem, dwight gooden, duke silver, duke dennis
+# sports
+letter/sportb | 1 | daily | | Name a sport that starts with B | | baseball, basketball, boxing, bowling, badminton, bobsled, bmx, biathlon, billiards, beach volleyball, bull riding, ballet
+letter/sports | 1 | daily | | Name a sport that starts with S | | soccer, softball, swimming, skiing, surfing, skateboarding, snowboarding, squash, sailing, sumo, skating, shot put
+# objects
+letter/housec | 1 | daily | | Name something in your house that starts with C | | chair, couch, clock, curtains, carpet, cabinet, cup, computer, candle, closet, ceiling fan, crib
+letter/houset | 1 | daily | | Name something in your house that starts with T | | table, tv, toilet, towel, toaster, toothbrush, tub, thermostat, trash can, tissues, teapot, tape
+letter/clothess | 1 | daily | | Name a piece of clothing that starts with S | | shirt, shoes, socks, skirt, sweater, scarf, shorts, sandals, suit, slippers, sneakers, sweatpants
+letter/clothesb | 1 | daily | | Name a piece of clothing that starts with B | | belt, boots, blouse, bra, bikini, beanie, blazer, bow tie, bathrobe, baseball cap, boxers, bandana
+# wild
+rhymed4/wave | 1 | daily | | Name a word that rhymes with "wave" | | cave, gave, save, brave, grave, shave, rave, pave, slave, behave, crave, engrave
+rhymed4/wise | 1 | daily | | Name a word that rhymes with "wise" | | eyes, prize, size, fries, surprise, rise, lies, ties, skies, guys, pies, exercise
+rhymed4/boil | 1 | daily | | Name a word that rhymes with "boil" | | oil, soil, foil, spoil, coil, toil, royal, loyal, broil, roil, tinfoil, turmoil
+rhymed4/song | 1 | daily | | Name a word that rhymes with "song" | | long, strong, wrong, along, ping pong, gong, belong, thong, prong, king kong, hong kong, sarong
+rhymed4/bubble | 1 | daily | | Name a word that rhymes with "bubble" | | trouble, double, rubble, stubble, hubble, bubble trouble, double trouble, hubble bubble
+rhymed4/hammer | 1 | daily | | Name a word that rhymes with "hammer" | | grammar, slammer, stammer, glamour, clamor, yammer, jammer, rammer, crammer, spammer, programmer, sledgehammer
+rhymed4/kettle | 1 | daily | | Name a word that rhymes with "kettle" | | metal, petal, settle, nettle, medal, pedal, meddle, peddle, fettle, unsettle, heavy metal, gold medal
+rhymed4/bottle | 1 | daily | | Name a word that rhymes with "bottle" | | throttle, model, coddle, toddle, waddle, swaddle, mottle, aristotle, full throttle, wattle, noddle, glottal
+rhymed4/zipper | 1 | daily | | Name a word that rhymes with "zipper" | | slipper, flipper, skipper, kipper, clipper, dipper, ripper, nipper, tipper, big dipper, jack the ripper, gripper
+rhymed4/summer | 1 | daily | | Name a word that rhymes with "summer" | | drummer, plumber, bummer, hummer, strummer, comer, newcomer, latecomer, mummer, rummer, dumber
+rhymed4/pillow | 1 | daily | | Name a word that rhymes with "pillow" | | willow, billow, armadillo, peccadillo, cigarillo, weeping willow, brillo, amarillo, tomatillo, kilo, grillo
+rhymed4/wiggle | 1 | daily | | Name a word that rhymes with "wiggle" | | giggle, jiggle, squiggle, niggle, wriggle, sniggle, higgle
+rhymed4/tumble | 1 | daily | | Name a word that rhymes with "tumble" | | rumble, crumble, humble, mumble, bumble, jumble, stumble, grumble, fumble, apple crumble, rough and tumble
+rhymed4/riddle | 1 | daily | | Name a word that rhymes with "riddle" | | middle, fiddle, griddle, little, skittle, whittle, brittle, spittle, diddle, twiddle, hey diddle diddle
+rhymed4/shade | 1 | daily | | Name a word that rhymes with "shade" | | made, lemonade, parade, grade, spade, blade, braid, maid, paid, played, afraid, marmalade
+rhymed4/bench | 1 | daily | | Name a word that rhymes with "bench" | | french, trench, wrench, stench, drench, clench, quench, tench, monkey wrench, entrench
+compound4/ton | 2 | daily | | Name a word that ends in "ton" | | cotton, button, mutton, boston, washington, skeleton, crouton, wonton, carton, badminton, singleton, piston
+compound4/ette | 2 | daily | | Name a word that ends in "ette" | | cigarette, baguette, palette, corvette, roulette, silhouette, kitchenette, barrette, cassette, vinaigrette, majorette, brunette
+compound4/bull | 1 | daily | | Name a word that starts with "bull" | | bulldog, bulldozer, bullfrog, bullseye, bullet, bullpen, bulletin, bullhorn, bully, bullfight, bullwinkle, bullock
+compound4/tion | 1 | daily | | Name a word that ends in "tion" | | station, nation, vacation, lotion, action, motion, potion, fiction, education, question, information, celebration
+compound4/ham | 1 | daily | | Name a word that starts with "ham" | | hamburger, hammer, hamster, hammock, hamlet, hampshire, hamilton, hamper, hammerhead, hamstring, ham sandwich, hamptons
+compound4/mon | 1 | daily | | Name a word that starts with "mon" | | monday, monkey, money, monster, month, monopoly, montana, monument, monk, monarch, monitor, mongoose
+# music
+songe/frankocean | 2 | daily | 1 | Name a Frank Ocean, Khalid or Daniel Caesar song | | thinking bout you, pink + white, nights, ivy, lost, location, young dumb & broke, talk, better, best part, get you, japanese denim
+songe/maryj | 2 | daily | 1 | Name a Mary J. Blige, Boyz II Men or Bobby Brown song | | family affair, real love, be without you, no more drama, end of the road, i'll make love to you, motownphilly, on bended knee, my prerogative, every little step, don't be cruel, humpin' around
+songe/paula | 2 | daily | 1 | Name a Paula Abdul, Gloria Estefan or Debbie Gibson song | | straight up, opposites attract, cold hearted, forever your girl, conga, rhythm is gonna get you, get on your feet, anything for you, words get in the way, electric youth, lost in your eyes, only in my dreams
+songe/urban | 2 | daily | 1 | Name a Keith Urban, Brad Paisley or Dierks Bentley song | | somebody like me, blue ain't your color, you'll think of me, days go by, whiskey lullaby, mud on the tires, celebrity, alcohol, what was i thinkin', drunk on a plane, sideways, 5-1-5-0
+songe/lukebryan | 2 | daily | 1 | Name a Luke Bryan, Thomas Rhett or Kane Brown song | | country girl (shake it for me), play it again, kick the dust up, die a happy man, marry me, look what god gave her, heaven, what ifs, thunder in the rain, rain is a good thing, crash my party, craving you
+songe/miranda | 2 | daily | 1 | Name a Miranda Lambert, Martina McBride or LeAnn Rimes song | | the house that built me, gunpowder & lead, mama's broken heart, independence day, a broken wing, this one's for the girls, how do i live, can't fight the moonlight, blue, i need you, tin man, white liar
+songe/marley | 2 | daily | 1 | Name a Bob Marley, UB40 or Jimmy Buffett song | | three little birds, one love, buffalo soldier, no woman no cry, red red wine, can't help falling in love, kingston town, margaritaville, cheeseburger in paradise, come monday, it's five o'clock somewhere, is this love
+songe/seger | 2 | daily | 1 | Name a ZZ Top, Bob Seger or John Mellencamp song | | la grange, sharp dressed man, legs, gimme all your lovin', old time rock and roll, night moves, turn the page, against the wind, jack & diane, small town, pink houses, hurts so good
+songe/rodstewart | 2 | daily | 1 | Name a Rod Stewart, Billy Idol or Bryan Adams song | | maggie may, da ya think i'm sexy?, forever young, white wedding, rebel yell, mony mony, dancing with myself, summer of '69, heaven, (everything i do) i do it for you, run to you, cuts like a knife
+songe/astley | 2 | daily | 1 | Name a Rick Astley, a-ha or Pet Shop Boys song | | never gonna give you up, together forever, take on me, the sun always shines on tv, west end girls, it's a sin, always on my mind, opportunities, hunting high and low, cry for help, go west, domino dancing
+songe/foreigner | 2 | daily | 1 | Name a Foreigner, Styx or REO Speedwagon song | | i want to know what love is, juke box hero, cold as ice, hot blooded, come sail away, mr. roboto, renegade, babe, keep on loving you, can't fight this feeling, take it on the run, urgent
+songe/blondie | 2 | daily | 1 | Name a Blondie, The Cars or Talking Heads song | | call me, heart of glass, one way or another, rapture, just what i needed, drive, you might think, shake it up, psycho killer, burning down the house, once in a lifetime, road to nowhere
+songe/crows | 2 | daily | 1 | Name a Counting Crows, Third Eye Blind or Hootie & the Blowfish song | | mr. jones, accidentally in love, big yellow taxi, round here, semi-charmed life, jumper, how's it going to be, never let you go, hold my hand, only wanna be with you, let her cry, time
+songe/alanis | 2 | daily | 1 | Name an Alanis Morissette, Sheryl Crow or Jewel song | | ironic, you oughta know, hand in my pocket, all i really want to do, soak up the sun, every day is a winding road, if it makes you happy, you were meant for me, who will save your soul, foolish games, hands, intuition
+songe/amy | 2 | daily | 1 | Name an Amy Winehouse, Norah Jones or Duffy song | | rehab, back to black, valerie, you know i'm no good, don't know why, come away with me, sunrise, mercy, warwick avenue, tears dry on their own, love is a losing game, turn me on
+songe/robbie | 2 | daily | 1 | Name a Robbie Williams, Take That or Westlife song | | angels, rock dj, feel, let me entertain you, back for good, patience, shine, rule the world, flying without wings, you raise me up, swear it again, uptown girl
+songe/ezra | 2 | daily | 1 | Name a George Ezra, James Arthur or Rag'n'Bone Man song | | shotgun, budapest, green green grass, blame it on me, say you won't let go, impossible, train wreck, human, giant, skin, all you ever wanted, paradise
+songe/ludacris | 2 | daily | 1 | Name a Ludacris, Lil Jon or Soulja Boy song | | stand up, money maker, what's your fantasy, get low, yeah!, turn down for what, crank that, kiss me thru the phone, turn my swag on, area codes, roll out, act a fool
+songe/dmx | 2 | daily | 1 | Name a DMX, LL Cool J or Run-DMC song | | x gon' give it to ya, party up, ruff ryders' anthem, mama said knock you out, going back to cali, doin it, walk this way, it's tricky, christmas in hollis, my adidas, king of rock, around the way girl
+songe/hammer | 2 | daily | 1 | Name an MC Hammer, Vanilla Ice or Coolio song | | u can't touch this, 2 legit 2 quit, pray, ice ice baby, ninja rap, play that funky music, gangsta's paradise, fantastic voyage, c u when u get there, 1 2 3 4 (sumpin' new), here comes the hammer, too legit to quit
+# screen
+actore/grant | 2 | daily | 1 | Name a Hugh Grant or Colin Firth movie | | notting hill, love actually, four weddings and a funeral, about a boy, bridget jones's diary, music and lyrics, paddington 2, the king's speech, mamma mia, kingsman, pride and prejudice, 1917
+actore/knightley | 2 | daily | 1 | Name a Keira Knightley or Orlando Bloom movie | | pirates of the caribbean, bend it like beckham, pride and prejudice, atonement, love actually, the imitation game, lord of the rings, troy, kingdom of heaven, elizabethtown, the hobbit, carnival row
+actore/mcadams | 2 | daily | 1 | Name a Rachel McAdams or Amy Adams movie | | the notebook, mean girls, about time, the time traveler's wife, spotlight, doctor strange, enchanted, arrival, julie & julia, the fighter, man of steel, catch me if you can
+actore/theron | 2 | daily | 1 | Name a Charlize Theron or Uma Thurman movie | | monster, mad max fury road, atomic blonde, the italian job, bombshell, the old guard, kill bill, pulp fiction, gattaca, batman & robin, the producers, my super ex-girlfriend
+actore/megryan | 2 | daily | 1 | Name a Meg Ryan or Billy Crystal movie | | when harry met sally, sleepless in seattle, you've got mail, top gun, kate & leopold, city slickers, analyze this, monsters inc, the princess bride, forget paris, mr. saturday night, french kiss
+actore/carell | 2 | daily | 1 | Name a Steve Carell or Vince Vaughn movie or show | | the office, the 40-year-old virgin, despicable me, anchorman, crazy stupid love, little miss sunshine, wedding crashers, dodgeball, old school, the break-up, swingers, fred claus
+actore/icecube | 2 | daily | 1 | Name an Ice Cube or Martin Lawrence movie or show | | friday, barbershop, are we there yet, 21 jump street, ride along, boyz n the hood, bad boys, big momma's house, martin, blue streak, wild hogs, life
+actore/efron | 2 | daily | 1 | Name a Zac Efron or Channing Tatum movie | | high school musical, 17 again, hairspray, neighbors, the greatest showman, baywatch, step up, magic mike, 21 jump street, she's the man, dear john, the vow
+actore/momoa | 2 | daily | 1 | Name a Jason Momoa or Henry Cavill movie or show | | aquaman, game of thrones, dune, fast x, see, a minecraft movie, man of steel, the witcher, enola holmes, mission impossible fallout, the man from uncle, argylle
+actore/banderas | 2 | daily | 1 | Name an Antonio Banderas, Salma Hayek or Penelope Cruz movie | | the mask of zorro, desperado, puss in boots, spy kids, frida, from dusk till dawn, grown ups, wild wild west, vanilla sky, vicky cristina barcelona, volver, blow
+actore/curtis | 2 | daily | 1 | Name a Jamie Lee Curtis or Lindsay Lohan movie | | halloween, true lies, freaky friday, trading places, everything everywhere all at once, knives out, the parent trap, mean girls, herbie fully loaded, just my luck, confessions of a teenage drama queen, a fish called wanda
+actore/kunis | 2 | daily | 1 | Name a Mila Kunis or Ashton Kutcher movie or show | | that '70s show, black swan, ted, friends with benefits, bad moms, forgetting sarah marshall, dude where's my car, the butterfly effect, just married, two and a half men, no strings attached, what happens in vegas
+actore/harrelson | 2 | daily | 1 | Name a Woody Harrelson or Josh Brolin movie or show | | zombieland, the hunger games, white men can't jump, cheers, true detective, no country for old men, avengers infinity war, deadpool 2, the goonies, sicario, dune, venom
+`;
