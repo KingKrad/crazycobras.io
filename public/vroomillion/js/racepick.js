@@ -9,7 +9,7 @@ import { FAMILIES, TOPICS } from "./catalog/index.js";
 export const FAM_PREFIX = "F:";
 // the answers for prompts added with the new catalog live one file per prompt: answers/<slug>.json
 export const answerSlug = (q) => q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-export const famKey = (f) => FAM_PREFIX + f.id;
+export const famKey = (f) => FAM_PREFIX + (f.key || f.id);
 const byPrompt = new Map(FAMILIES.flatMap((f) => f.prompts.map((p) => [p, f])));
 export const familyOf = (prompt) => byPrompt.get(prompt) || null;
 
@@ -32,7 +32,7 @@ export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   const picked = [];
   const ok = (f, strict) => {
     const t = topicOf(f, pool);
-    if (picked.some((p) => p.group === f.group)) return false;
+    if (picked.some((p) => p.group === f.group || famKey(p) === famKey(f))) return false;
     if (f.single && picked.some((p) => p.single)) return false;
     if (strict && picked.some((p) => topicOf(p, pool) === t)) return false;
     return true;
@@ -88,7 +88,8 @@ export function dailyLayout(fams = FAMILIES, n = 7) {
     for (const strict of [true, false, null]) {
       for (let i = 0; i < left.length && race.length < n; i++) {
         const f = left[i];
-        const clash = strict === null ? false : race.some((p) => p.group === f.group || (f.single && p.single) || (strict && p.topic === f.topic));
+        const twin = race.some((p) => famKey(p) === famKey(f)); // never both twins in one race
+        const clash = twin || (strict !== null && race.some((p) => p.group === f.group || (f.single && p.single) || (strict && p.topic === f.topic)));
         if (!clash) { race.push(f); left.splice(i--, 1); }
       }
     }

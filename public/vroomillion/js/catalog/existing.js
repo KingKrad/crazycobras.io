@@ -300,7 +300,7 @@ brand/smartphone | 1 | main | | Name a smartphone
 brand/carbrand | 1 | main car | c:makers | Name a car brand
 # science
 space/planet | 1 | main | | Name a planet, moon or dwarf planet
-space/star | 2 | main | | Name a star in the night sky; Name a constellation
+space/star | 2 | main | | Name a star in the night sky; Name a constellation; Name a zodiac sign
 space/galaxy | 3 | hard | | Name a galaxy; Name a comet; Name a moon of Jupiter or Saturn
 space/spacecraft | 2 | main | | Name a spacecraft
 chem/element | 1 | main | | Name a chemical element
@@ -353,7 +353,6 @@ currency/coin | 3 | hard | | Name a currency symbol or coin
 job/job | 1 | main | | Name a job
 holiday/holiday | 1 | main | | Name a holiday or celebration; Name a festival
 university/university | 2 | main | | Name a university
-sign/zodiac | 1 | main | | Name a zodiac sign
 # wild
 wild/red | 1 | main | | Name something that's red
 wild/party | 1 | main | | Name something at a birthday party

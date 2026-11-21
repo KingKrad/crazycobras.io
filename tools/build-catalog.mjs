@@ -100,8 +100,8 @@ async function main() {
   // hand-written families (no Wikidata rule): their answers are in catalog/hand.js, tiers as written
   for (const f of FAMILIES.filter((x) => !x.src && x.top && (only ? only.has(x.id) : true))) {
     const q = f.prompts[0];
-    const tiersText = HAND[q];
-    if (!tiersText) { thinHand.push(f.id); continue; }
+    // with the AI judge, a hand family may have only its obvious answers (and maybe a tier or two)
+    const tiersText = HAND[q] || ["", "", "", "", ""];
     const a = tiersText.map((t) => t.split(",").map((x) => x.trim()).filter(Boolean));
     if (f.top) a[0] = [...new Set([...f.top, ...a[0]])];
     fs.writeFileSync(new URL(answerSlug(q) + ".json", DIR), JSON.stringify({ q, a, tiers: [999999, 999999], fam: f.id, hand: true }));

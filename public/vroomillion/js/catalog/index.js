@@ -3,14 +3,17 @@
 //   group   a race never has two families from the same group (e.g. two city prompts)
 //   topic   a race has seven different topics
 //   single  one-artist / one-show / one-team style prompts: at most one per race
+//   twin    flag "=group/family": the same family as that one in history (e.g. "a city in Texas" = "a city
+//           in the USA"), so having either uses up both; a race never has both
 // See existing.js for the line format.
 import { EXISTING } from "./existing.js";
 import { CAR } from "./car.js";
 import { W01 } from "./w01.js";
 import { W02 } from "./w02.js";
+import { W03 } from "./w03.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03];
 
 export function parseCatalog(texts) {
   const fams = [];
@@ -26,8 +29,10 @@ export function parseCatalog(texts) {
       const [id, level, pools, flags, prompts, src, top] = cols;
       const fl = flags ? flags.split(/\s+/) : [];
       const carTopic = (fl.find((f) => f.startsWith("c:")) || "").slice(2) || null;
+      // "=other/family" in flags: a twin of that family (same history key: having either uses up both)
+      const twin = (fl.find((f) => f.startsWith("=")) || "").slice(1) || null;
       fams.push({
-        id, group: id.split("/")[0], topic, level: Number(level), pools: pools.split(/\s+/),
+        id, key: twin || id, group: id.split("/")[0], topic, level: Number(level), pools: pools.split(/\s+/),
         single: fl.includes("1"), carTopic, prompts: prompts.split(";").map((s) => s.trim()).filter(Boolean),
         ...(src ? { src } : {}), ...(top ? { top: top.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
       });

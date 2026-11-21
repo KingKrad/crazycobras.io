@@ -428,6 +428,15 @@ test("catalog: every family has a known topic, level and pool, and no prompt is 
   }
 });
 
+test("catalog: a twin points at a real family in the same pools (so 'never similar' holds across Unlimited and daily)", () => {
+  const byId = new Map(FAMILIES.map((f) => [f.id, f]));
+  for (const f of FAMILIES.filter((x) => x.key !== x.id)) {
+    const main = byId.get(f.key);
+    assert.ok(main, `${f.id} is a twin of unknown ${f.key}`);
+    assert.deepEqual([...f.pools].sort(), [...main.pools].sort(), `${f.id} and ${f.key} must share pools`);
+  }
+});
+
 test("catalog: every prompt the game already had is in a family", () => {
   const missing = ALL_Q.filter((q) => !familyOf(q.q)).map((q) => q.q);
   assert.deepEqual(missing, []);
