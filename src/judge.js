@@ -26,7 +26,7 @@ const SCHEMA = {
   },
   required: ["valid", "canonical", "commonness"],
 };
-// how commonly people would give it -> TRAFFIC, CRUISING, FAST LANE, DEEP CUT
+// how commonly people would give it -> TRAFFIC JAM, CRUISING, FAST LANE, TURBO
 const TIER = { "very common": 1, common: 2, uncommon: 3, rare: 4 };
 
 const SYSTEM = `You judge answers in VROOMILLION, a family-friendly trivia game. Each prompt has many right answers; a player typed one that isn't on our list.

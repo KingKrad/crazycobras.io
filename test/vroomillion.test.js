@@ -37,6 +37,11 @@ test("judge ranks obvious answers low and niche answers high", () => {
   assert.equal(judge(fruit, "").tier, 0);
 });
 
+test("typo forgiveness: none under 5 letters, one for 5-9, two for 10+", async () => {
+  const { typoAllowance } = await import("../public/vroomillion/js/logic.js");
+  assert.deepEqual([3, 4, 5, 9, 10, 20].map(typoAllowance), [0, 0, 1, 1, 2, 2]);
+});
+
 test("judge accepts aliases, plurals and small typos", () => {
   assert.equal(judge(fruit, "dragonfruit").display, "dragon fruit");
   assert.equal(judge(fruit, "bananas").tier, 1);

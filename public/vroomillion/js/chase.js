@@ -506,7 +506,8 @@ function gantryText(name) {
 }
 
 // ---- the answer card the car smashes through ----
-const TIER_COL = ["#8a8499", "#d7d3ea", "#4fd1ff", "#5dff8f", "#ffb02e", "#ff4fd8"];
+// rarity colours (style.css --t0..--t5): gray, gray-white, green, blue, purple, gold
+const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
 const FONT_NAME = '"Press Start 2P", monospace';
 if (typeof document !== "undefined" && document.fonts) document.fonts.load('8px "Press Start 2P"').catch(() => {});
 
@@ -572,7 +573,7 @@ function buildCard(card, maxW) {
 
 // how hard each tier hits: shard size, launch speed, how much shards fly at the camera
 // exhaust fire by tier: [outer, middle, core] colours and length as a share of the car's height
-const FIRE = [null, null, ["#ff5a1f", "#ff9a2e", "#ffe27a"], ["#ff4a1a", "#ffb02e", "#fff3b0"], ["#3a7bff", "#8fd3ff", "#ffffff"], ["#ff4fd8", "#ffd23a", "#ffffff"]];
+const FIRE = [null, null, ["#1f9a4a", "#5dff8f", "#e6ffe9"], ["#1f4fd6", "#4f9dff", "#dceaff"], ["#7a2fd6", "#c070ff", "#f3e3ff"], ["#ff9a1f", "#ffd23f", "#ffffff"]];
 const FIRE_LEN = [0, 0, 0.22, 0.4, 0.6, 0.85];
 
 const SMASH = [
@@ -697,15 +698,15 @@ export class ChaseScene {
       const side = k % 2 ? x + w * 0.12 : x + w * 0.88;
       this.particles.push({ x: side + (Math.random() - 0.5) * 6 * u, y: y - 2 * u, vx: (side < x + w / 2 ? -1 : 1) * (20 + Math.random() * 60 * power) * u, vy: (10 + Math.random() * 40) * u, life: 0.8 + Math.random() * 0.7, size: 3 * u, grow: 9 * u, color: k % 3 ? "#d9d6e8" : "#a9a4c0", g: 0, soft: true });
     }
-    // sparks off the underside on fast lanes and up
+    // sparks off the underside on fast lanes and up, in the rarity colour
     if (tier >= 3) {
       for (let k = 0; k < tier * 12; k++) {
-        this.particles.push({ x: x + w * (0.25 + Math.random() * 0.5), y, vx: (Math.random() - 0.5) * 260 * u, vy: (30 + Math.random() * 120) * u, life: 0.5 + Math.random() * 0.4, size: Math.max(1, u * 0.75), color: Math.random() < 0.5 ? "#ffd23a" : "#ff8a2e", g: 220 * u, hot: true });
+        this.particles.push({ x: x + w * (0.25 + Math.random() * 0.5), y, vx: (Math.random() - 0.5) * 260 * u, vy: (30 + Math.random() * 120) * u, life: 0.5 + Math.random() * 0.4, size: Math.max(1, u * 0.75), color: Math.random() < 0.5 ? TIER_COL[tier] : "#ffffff", g: 220 * u, hot: true });
       }
     }
     if (tier >= 4) {
       this.flash = Math.max(this.flash, tier === 5 ? 0.7 : 0.35);
-      this.flashColor = tier === 5 ? "rainbow" : "#ffb02e";
+      this.flashColor = tier === 5 ? "rainbow" : TIER_COL[4];
       this.glow = Math.max(this.glow, tier === 5 ? 3.2 : 2.2);
     }
     if (tier === 5) this.tunnel = Math.max(this.tunnel, 2.8);

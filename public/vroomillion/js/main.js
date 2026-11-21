@@ -978,7 +978,7 @@ async function adminPrompts(body) {
     detail.textContent = "";
     const s = p.stats || { plays: 0, stalls: 0, t1: 0, t2: 0, t3: 0, t4: 0, t5: 0 };
     detail.append(h("div", { class: "signed-in", text: prompt.toUpperCase() }),
-      h("div", { class: "note", text: `PLAYED ${s.plays} · STALLED ${pct(s.stalls, s.plays)} · TRAFFIC ${s.t1} · CRUISING ${s.t2} · FAST LANE ${s.t3} · DEEP CUT ${s.t4} · VROOMILLION ${s.t5}` }),
+      h("div", { class: "note", text: `PLAYED ${s.plays} · STALLED ${pct(s.stalls, s.plays)} · TRAFFIC JAM ${s.t1} · CRUISING ${s.t2} · FAST LANE ${s.t3} · TURBO ${s.t4} · VROOMILLION ${s.t5}` }),
       p.answers.length ? h("table", { class: "admin-races" }, h("tr", {}, h("th", { text: "ANSWER" }), h("th", { text: "TIER" }), h("th", { text: "TIMES" })),
         ...p.answers.map((a) => h("tr", {}, h("td", { text: a.answer }), h("td", { text: TIERS[a.tier].short }), h("td", { text: String(a.n) })))) : h("p", { class: "note", text: "No answers counted yet." }));
     detail.scrollIntoView({ block: "nearest" });
@@ -1147,7 +1147,7 @@ function show(name) {
     attract();
     renderDaily();
     $("stats").textContent = save.races
-      ? `MODE ${modeName(save.deck)} · BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
+      ? `MODE ${modeName(save.deck)} · BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · TURBOS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "title") renderWhatsNew();
@@ -1532,7 +1532,7 @@ function renderLegend() {
   const root = $("tier-legend");
   for (const t of [...TIERS].reverse()) {
     root.append(h("div", { class: "tier-row" },
-      h("span", { class: "badge t" + t.id, text: t.name }),
+      tierBadge(t.id, "span"),
       h("span", { class: "tier-m", text: t.metres + " M" }),
       h("span", { class: "tier-blurb", text: t.blurb })));
   }
@@ -1561,7 +1561,7 @@ function popGain(i, metres, tier, nitro) {
   const at = scene.anchor(i);
   const el = h("div", { class: `gain-pop gp${tier}` },
     h("span", { class: "gain-m", text: tier ? `+${metres.toLocaleString("en-US")} M` : "STALLED" }),
-    tier >= 4 ? h("span", { class: "gain-tag", text: tier === 5 ? "VROOMILLION!" : "DEEP CUT!" }) : null,
+    tier >= 3 ? h("span", { class: "gain-tag", text: tier === 5 ? "VROOMILLION!" : tier === 4 ? "TURBO! ULTRA RARE" : "RARE!" }) : null,
     nitro ? h("span", { class: "gain-tag nitro", text: "NITRO!" }) : null);
   el.style.left = (at.x * 100).toFixed(1) + "%";
   el.style.top = (at.y * 100).toFixed(1) + "%";
@@ -1735,7 +1735,7 @@ async function runRace(token) {
       return {
         who: race.solo ? "" : r.name.toUpperCase(),
         answer: (res.display || "NO ANSWER").toUpperCase(),
-        tierName: TIERS[res.tier].name + (res.bump ? " (BUMPED)" : ""),
+        tierName: TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "") + (res.bump ? " (BUMPED)" : ""),
         gain: res.tier ? `+${m.toLocaleString("en-US")} M${r.useNitro ? " NITRO" : ""}` : "0 M",
         tier: res.tier,
         color: i ? "#ff4fd8" : "#4fd1ff",
@@ -1908,12 +1908,18 @@ async function arrive(token) {
   document.body.classList.remove("smashing");
 }
 
+// A tier badge: the name, with its rarity word (COMMON ... LEGENDARY) underneath, in the rarity colour.
+function tierBadge(tier, tag = "div", short = false) {
+  const t = TIERS[tier];
+  return h(tag, { class: "badge t" + tier }, short ? t.short : t.name, tier ? h("span", { class: "rarity", text: t.rarity }) : null);
+}
+
 function revealCard(r, res, i) {
   const t = TIERS[res.tier];
   return h("div", { class: `reveal-card p${i + 1} tier${res.tier}` },
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
-    h("div", { class: "badge t" + res.tier, text: t.name }),
+    tierBadge(res.tier),
     h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
 }
 
@@ -2019,6 +2025,7 @@ function askAnswer(r, i, token, index) {
     // A typo is never sent on its own: the fix shows up as they type, Enter puts it in the box,
     // and Enter / GO again uses it. A fixed typo scores the same as the real answer.
     let suggestion = null;
+    let checking = false; // an online check is running for the last GO; further presses wait for it
     const offer = (fix) => {
       suggestion = fix;
       input.value = fix.display;
@@ -2041,38 +2048,40 @@ function askAnswer(r, i, token, index) {
         input.value = "";
         return resolve(stalled);
       }
-      // Not on our list: a "no" is instant. The online check (started while they typed) carries on
-      // quietly; if it finds the answer was real after all, it still counts. The clock keeps running.
+      // Not on our list: ask the online check (usually already started while they typed) and give one
+      // verdict. CHECKING… shows meanwhile; after 3 s with no answer it's a no, so there's never a
+      // wrong-then-right flip. A late "yes" is still remembered for the next time someone tries it.
       if (index.prompt && value.trim().length >= 3) {
         const same = (a) => normalize(a).replace(/ /g, "");
         const asFound = (hit) => ({ tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true });
-        if (onlineKnown(index, value)) {
-          const hit = onlineSeen.get(index.prompt + "|" + normalize(value));
+        const verdict = (hit) => {
           if (hit) return same(hit.label) === same(value) ? lockIn(asFound(hit)) : offer({ ...asFound(hit), corrected: true });
           return reject(value);
-        }
-        reject(value);
-        checkOnline(index, value).then((hit) => {
-          if (!hit || finished || token !== raceToken) return;
-          if (same(hit.label) === same(value)) {
-            say(hidden ? "IT COUNTS AFTER ALL!" : `"${hit.label.toUpperCase().slice(0, 24)}" COUNTS AFTER ALL!`, "good");
-            return lockIn(asFound(hit));
-          }
-          if (!input.value.trim()) offer({ ...asFound(hit), corrected: true }); // typo of a real thing: offer the fix
+        };
+        if (onlineKnown(index, value)) return verdict(onlineSeen.get(index.prompt + "|" + normalize(value)));
+        if (checking) return;
+        checking = true;
+        say("CHECKING…", "checking");
+        Promise.race([checkOnline(index, value), new Promise((r) => setTimeout(() => r(null), 3000))]).then((hit) => {
+          checking = false;
+          if (finished || token !== raceToken) return;
+          // they've started typing something new meanwhile: a "no" doesn't wipe it
+          if (!hit && normalize(input.value) !== normalize(value)) return reject(value, true);
+          verdict(hit);
         });
         return;
       }
       reject(value);
     };
     // Wrong: keep the clock running and let them try again.
-    const reject = (value) => {
+    const reject = (value, keepInput = false) => {
       audio.sfx.deny();
       input.classList.remove("shake");
       void input.offsetWidth;
       input.classList.add("shake");
       if (!value.trim()) say("TYPE SOMETHING!", "bad");
       else say(hidden ? "NOT ON THE LIST — TRY AGAIN!" : `"${value.trim().toUpperCase().slice(0, 24)}" ISN'T ON THE LIST — TRY AGAIN!`, "bad");
-      input.value = "";
+      if (!keepInput) input.value = "";
       input.focus({ preventScroll: true });
     };
     const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
@@ -2284,7 +2293,7 @@ function finish(token) {
         h("div", { class: "log-q", text: `${i + 1}. ${row.q.toUpperCase()}` }),
         ...race.racers.map((r, pi) => h("div", { class: `log-a p${pi + 1}` },
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
-          h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short }),
+          tierBadge(r.log[i].tier, "span", true),
           reportLink(row.q, r.log[i])))))),
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });

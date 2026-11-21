@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21g",
+    date: "Nov 21, 2026",
+    title: "Clearer rarity",
+    items: [
+      "New rarity colors and names: TRAFFIC JAM (common, gray), CRUISING (uncommon, green), FAST LANE (rare, blue), TURBO (ultra rare, purple), ONE IN A VROOMILLION (legendary, gold).",
+      "Your car's exhaust and sparks now glow in the rarity color of your answer.",
+      "No more wrong-then-right: answers that aren't on our list show CHECKING… and then one verdict.",
+      "Typo fixing is a little stricter: short words have to be spelled right.",
+    ],
+  },
+  {
     id: "2026-11-21f",
     date: "Nov 21, 2026",
     title: "Online 1v1 fix",

@@ -2,12 +2,12 @@ import { CAT_WEIGHTS } from "./data-cats.js";
 // Pure game rules: answer judging, rarity tiers and payouts. No DOM in here.
 
 export const TIERS = [
-  { id: 0, name: "STALLED", short: "STALL", metres: 0, blurb: "Not on the list. The engine coughs." },
-  { id: 1, name: "TRAFFIC", short: "TRAFFIC", metres: 120, blurb: "Everybody says that one." },
-  { id: 2, name: "CRUISING", short: "CRUISE", metres: 280, blurb: "Solid, but you've got company." },
-  { id: 3, name: "FAST LANE", short: "FAST", metres: 480, blurb: "Not many think of that." },
-  { id: 4, name: "DEEP CUT", short: "DEEP CUT", metres: 720, blurb: "Now that's niche." },
-  { id: 5, name: "ONE IN A VROOMILLION", short: "VROOMILLION", metres: 1000, blurb: "Almost nobody alive says that." },
+  { id: 0, name: "STALLED", short: "STALL", rarity: "NOT ON THE LIST", metres: 0, blurb: "Not on the list. The engine coughs." },
+  { id: 1, name: "TRAFFIC JAM", short: "TRAFFIC", rarity: "COMMON", metres: 120, blurb: "Everybody says that one." },
+  { id: 2, name: "CRUISING", short: "CRUISING", rarity: "UNCOMMON", metres: 280, blurb: "Solid, but you've got company." },
+  { id: 3, name: "FAST LANE", short: "FAST LANE", rarity: "RARE", metres: 480, blurb: "Not many think of that." },
+  { id: 4, name: "TURBO", short: "TURBO", rarity: "ULTRA RARE", metres: 720, blurb: "Now that's niche." },
+  { id: 5, name: "ONE IN A VROOMILLION", short: "VROOMILLION", rarity: "LEGENDARY", metres: 1000, blurb: "Almost nobody alive says that." },
 ];
 
 // Where a race ends up: its total distance decides, and the car decides how far it CAN go.
@@ -273,7 +273,7 @@ export function editDistance(a, b, max, subCost = 1) {
 }
 
 // How many typos to forgive for an answer of this length.
-export const typoAllowance = (len) => (len >= 12 ? 3 : len >= 8 ? 2 : len >= 4 ? 1 : 0);
+export const typoAllowance = (len) => (len >= 10 ? 2 : len >= 5 ? 1 : 0);
 
 // Words that just name the category, so "nile river" means "nile".
 // The first group can always be dropped; the rest only when the prompt itself uses the word
