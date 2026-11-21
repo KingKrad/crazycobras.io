@@ -304,12 +304,20 @@ const unlimitedNow = () => account?.unlimited === true;
 const me = () => ({ ...save, unlimited: unlimitedNow() });
 
 // Talk to the account API. Throws "offline" when there's no server (e.g. the artifact preview).
+// A request that never reaches the server (a dropped connection, or a phone pausing the page while you
+// switch apps) is tried once more, then reported in plain words instead of the browser's "Load failed".
+const NET_ERROR = "Couldn't reach the server. Check your connection and try again.";
 async function api(path, options = {}) {
-  const res = await fetch("/api/vroomillion/" + path, {
+  const go = () => fetch("/api/vroomillion/" + path, {
     cache: "no-store",
     ...options,
     headers: options.body ? { "content-type": "application/json" } : {},
   });
+  let res;
+  try { res = await go(); } catch {
+    await new Promise((r) => setTimeout(r, 800));
+    try { res = await go(); } catch { const e = new Error(NET_ERROR); e.network = true; throw e; }
+  }
   if (!(res.headers.get("content-type") || "").includes("json")) throw new Error("offline");
   return { res, body: await res.json().catch(() => ({})) };
 }
@@ -643,8 +651,10 @@ function onlineLobby(box) {
     if (current !== "online" || online !== me || started) return;
     let st;
     try { st = await onlineCall({ action: "state", code: me.code, token: me.token }); } catch (err) {
-      status.textContent = err.message;
-      if (err.status === 404 || err.status === 403) { online = null; }
+      // the room is gone or not ours: stop. Anything else (a dropped connection, a busy server): keep trying.
+      if (err.status === 404 || err.status === 403) { status.textContent = err.message; online = null; return; }
+      status.textContent = "Connection lost. Reconnecting…";
+      me.poll = setTimeout(tick, 2500);
       return;
     }
     me.deck = st.deck;

@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21f",
+    date: "Nov 21, 2026",
+    title: "Online 1v1 fix",
+    items: [
+      "Fixed: the online lobby could stop with \"Load failed\" after switching apps (for example to send the race link). It now reconnects by itself.",
+      "If the connection drops, the game tries again and tells you in plain words instead.",
+    ],
+  },
+  {
     id: "2026-11-21e",
     date: "Nov 21, 2026",
     title: "All-new prompts",
