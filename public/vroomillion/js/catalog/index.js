@@ -20,9 +20,10 @@ import { W09 } from "./w09.js";
 import { W10 } from "./w10.js";
 import { W11 } from "./w11.js";
 import { W12 } from "./w12.js";
+import { W13 } from "./w13.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13];
 
 export function parseCatalog(texts) {
   const fams = [];
