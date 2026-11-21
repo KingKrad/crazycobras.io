@@ -1,0 +1,114 @@
+// The prompt catalog, wave 23 (daily). Format: w01.js.
+export const W23 = `
+# music
+songe/mumford | 2 | daily | 1 | Name a Mumford & Sons, Lumineers or Florence + the Machine song | | little lion man, i will wait, the cave, ho hey, ophelia, stubborn love, dog days are over, shake it out, you've got the love, cleopatra
+songe/trainor | 2 | daily | 1 | Name a Meghan Trainor, Jason Derulo or Charlie Puth song | | all about that bass, lips are movin, dear future husband, talk dirty, want to want me, whatcha say, savage love, attention, see you again, we don't talk anymore, one call away, marvin gaye
+songe/carlyrae | 2 | daily | 1 | Name a Carly Rae Jepsen, Ellie Goulding or Bebe Rexha song | | call me maybe, i really like you, run away with me, love me like you do, burn, lights, starry eyed, meant to be, i'm good (blue), i'm a mess, me myself and i, in the name of love
+songe/tears | 2 | daily | 1 | Name a Tears for Fears, The Cure or Depeche Mode song | | everybody wants to rule the world, shout, mad world, head over heels, friday i'm in love, just like heaven, lovesong, boys don't cry, enjoy the silence, personal jesus, just can't get enough, people are people
+songe/doors | 2 | daily | 1 | Name a song by The Doors, Jimi Hendrix or Janis Joplin | | light my fire, riders on the storm, break on through, people are strange, roadhouse blues, purple haze, all along the watchtower, hey joe, foxy lady, piece of my heart, me and bobby mcgee, mercedes benz
+songe/diamond | 2 | daily | 1 | Name a Neil Diamond, Barry Manilow or Lionel Richie song | | sweet caroline, cracklin' rosie, i'm a believer, america, copacabana, mandy, can't smile without you, all night long, hello, dancing on the ceiling, easy, endless love
+songe/motown2 | 2 | daily | 1 | Name a Marvin Gaye, Diana Ross or Smokey Robinson song | | let's get it on, what's going on, sexual healing, ain't no mountain high enough, i heard it through the grapevine, upside down, i'm coming out, baby love, the tracks of my tears, my girl, the tears of a clown, i second that emotion
+songe/jamesbrown | 2 | daily | 1 | Name a James Brown, Ray Charles or Otis Redding song | | i got you (i feel good), get up offa that thing, papa's got a brand new bag, sex machine, hit the road jack, georgia on my mind, what'd i say, i got a woman, (sittin' on) the dock of the bay, try a little tenderness, respect, these arms of mine
+songe/crooner | 2 | daily | 1 | Name a Dean Martin, Louis Armstrong or Nat King Cole song | | that's amore, everybody loves somebody, volare, ain't that a kick in the head, what a wonderful world, hello dolly, la vie en rose, unforgettable, the christmas song, mona lisa, l-o-v-e, when you're smiling
+songe/zachbryan | 2 | daily | 1 | Name a Zach Bryan, Jelly Roll or Lainey Wilson song | | something in the orange, i remember everything, burn burn burn, heading south, need a favor, save me, son of a sinner, wild as her, watermelon moonshine, heart like a truck, things a man oughta know, hang tight honey
+songe/shaboozey | 2 | daily | 1 | Name a Shaboozey, Benson Boone or Teddy Swims song | | a bar song (tipsy), good news, beautiful things, slow it down, in the stars, ghost town, lose control, the door, bad dreams, mystical magical, goodbye's her name
+songe/rosalia | 2 | daily | 1 | Name a Rosalía, Peso Pluma or Selena Quintanilla song | | despechá, malamente, con altura, la noche de anoche, ella baila sola, lady gaga, bidi bidi bom bom, como la flor, amor prohibido, dreaming of you, i could fall in love
+songe/skz | 2 | daily | 1 | Name a Stray Kids, EXO or BIGBANG song | | god's menu, maniac, thunderous, s-class, growl, love shot, monster, call me baby, fantastic baby, bang bang bang, lies, haru haru
+songe/ricky | 2 | daily | 1 | Name a Rascal Flatts, Lady A or The Chicks song | | life is a highway, bless the broken road, my wish, what hurts the most, need you now, american honey, just a kiss, wide open spaces, goodbye earl, not ready to make nice, landslide, cowboy take me away
+songe/brooks | 2 | daily | 1 | Name a Brooks & Dunn, Alan Jackson or George Strait song | | boot scootin' boogie, neon moon, chattahoochee, remember when, it's five o'clock somewhere, where were you, amarillo by morning, carrying your love with me, all my ex's live in texas, the chair, write this down, red dirt road
+songe/jackjohnson | 2 | daily | 1 | Name a Jack Johnson, Jason Mraz or John Mayer song | | banana pancakes, better together, upside down, i'm yours, i won't give up, lucky, your body is a wonderland, gravity, slow dancing in a burning room, daughters, waiting on the world to change, sitting waiting wishing
+songe/sheeran2 | 2 | daily | 1 | Name a Niall Horan, Louis Tomlinson or Zayn song | | slow hands, this town, nice to meet ya, heaven, back to you, walls, pillowtalk, dusk till dawn, let me, two of us, flicker, still got time
+songe/disco | 2 | daily | 1 | Name a disco song | | stayin' alive, i will survive, dancing queen, y.m.c.a., le freak, september, boogie wonderland, hot stuff, last dance, funkytown, disco inferno, night fever
+# screen
+actore/hardy | 2 | daily | 1 | Name a Tom Hardy or Christian Bale movie | | venom, mad max fury road, inception, the revenant, dunkirk, the dark knight, american psycho, ford v ferrari, the fighter, vice, the prestige, batman begins
+actore/mcconaughey | 2 | daily | 1 | Name a Matthew McConaughey or Jake Gyllenhaal movie | | interstellar, dallas buyers club, how to lose a guy in 10 days, the wolf of wall street, sing, nightcrawler, donnie darko, brokeback mountain, prisoners, spider-man far from home, the day after tomorrow, road house
+actore/phoenix | 2 | daily | 1 | Name a Joaquin Phoenix or Adam Driver movie | | joker, gladiator, walk the line, her, signs, napoleon, marriage story, house of gucci, star wars, ferrari, megalopolis, paterson
+actore/kidman | 2 | daily | 1 | Name a Nicole Kidman or Cate Blanchett movie | | moulin rouge, the others, big little lies, being the ricardos, lord of the rings, blue jasmine, elizabeth, tár, the aviator, cinderella, ocean's 8, babygirl
+actore/weaver | 2 | daily | 1 | Name a Sigourney Weaver or Jodie Foster movie | | alien, aliens, ghostbusters, avatar, galaxy quest, the silence of the lambs, panic room, contact, taxi driver, freaky friday, nyad, the accused
+actore/whoopi | 2 | daily | 1 | Name a Whoopi Goldberg or Goldie Hawn movie | | sister act, ghost, the color purple, the lion king, overboard, private benjamin, the first wives club, death becomes her, bird on a wire, foul play, snatched, the sugarland express
+actore/hoffman | 2 | daily | 1 | Name a Dustin Hoffman or Robert De Niro movie | | rain man, tootsie, the graduate, meet the parents, hook, kramer vs kramer, goodfellas, taxi driver, raging bull, the godfather part ii, the irishman, casino
+actore/devito | 2 | daily | 1 | Name a Danny DeVito or Joe Pesci movie | | matilda, twins, batman returns, hercules, the lorax, junior, home alone, my cousin vinny, goodfellas, casino, lethal weapon 2, the irishman
+actore/foxx | 2 | daily | 1 | Name a Jamie Foxx or Idris Elba movie | | ray, django unchained, collateral, soul, annie, baby driver, beasts of no nation, the suicide squad, thor, zootopia, pacific rim, finding dory
+actore/boseman | 2 | daily | 1 | Name a Chadwick Boseman or Michael B. Jordan movie | | black panther, 42, get on up, da 5 bloods, marshall, ma rainey's black bottom, creed, sinners, fruitvale station, just mercy, chronicle, fantastic four
+actore/pugh | 2 | daily | 1 | Name a Florence Pugh, Sydney Sweeney or Jenna Ortega movie or show | | little women, midsommar, black widow, oppenheimer, dune part two, anyone but you, euphoria, the white lotus, madame web, wednesday, scream, beetlejuice beetlejuice
+actore/cumberbatch | 2 | daily | 1 | Name a Benedict Cumberbatch or Tom Hiddleston movie or show | | doctor strange, sherlock, the imitation game, 1917, the power of the dog, loki, thor, kong skull island, the night manager, avengers, war horse, crimson peak
+actore/bond | 2 | daily | 1 | Name a Daniel Craig, Pierce Brosnan or Sean Connery movie | | casino royale, skyfall, knives out, glass onion, goldeneye, mamma mia, mrs. doubtfire, the thomas crown affair, goldfinger, the rock, the untouchables, indiana jones and the last crusade
+actore/gibson | 2 | daily | 1 | Name a Mel Gibson or Kevin Costner movie | | braveheart, lethal weapon, mad max, what women want, signs, the patriot, dances with wolves, field of dreams, the bodyguard, robin hood prince of thieves, waterworld, yellowstone
+actore/travolta | 2 | daily | 1 | Name a John Travolta or Patrick Swayze movie | | grease, saturday night fever, pulp fiction, face/off, hairspray, look who's talking, dirty dancing, ghost, road house, point break, the outsiders, red dawn
+actore/farley | 2 | daily | 1 | Name a Chris Farley, David Spade or Rob Schneider movie | | tommy boy, black sheep, beverly hills ninja, joe dirt, dickie roberts, grown ups, the hot chick, deuce bigalow, the animal, the benchwarmers, the emperor's new groove, coneheads
+actore/mcgregor | 2 | daily | 1 | Name an Ewan McGregor, Mark Hamill or Gary Oldman movie or show | | star wars, trainspotting, moulin rouge, big fish, obi-wan kenobi, the darkest hour, the dark knight, harry potter, léon the professional, dracula, air force one, kingsman
+actore/russell | 2 | daily | 1 | Name a Kurt Russell or Sally Field movie | | escape from new york, tombstone, the thing, big trouble in little china, tango & cash, the hateful eight, forrest gump, mrs. doubtfire, steel magnolias, smokey and the bandit, norma rae, the amazing spider-man
+# wild
+palin/word | 3 | daily | | Name a word that's spelled the same backwards | | mom, dad, wow, noon, level, racecar, kayak, civic, radar, madam, refer, pop
+soundletter/word | 3 | daily | | Name a word that sounds like a letter of the alphabet | | bee, sea, see, tea, pea, eye, you, why, are, queue, jay, oh
+contains/qu | 2 | daily | | Name a word with "qu" in it | | queen, quick, quiet, quiz, question, squirrel, square, quarter, quilt, squash, liquid, earthquake
+contains/x | 2 | daily | | Name a word with an "x" in it | | box, fox, six, taxi, x-ray, wax, max, mix, relax, exit, next, axe
+contains/z | 2 | daily | | Name a word with a "z" in it | | zoo, zebra, pizza, zero, zipper, buzz, lazy, crazy, maze, prize, freeze, puzzle
+contains/oo | 1 | daily | | Name a word with "oo" in it | | moon, book, food, cool, boot, school, foot, pool, spoon, zoo, good, balloon
+prefix/un | 1 | daily | | Name a word that starts with "un" | | under, undo, unhappy, unicorn, uniform, unlock, unusual, unfair, unknown, united, universe, unpack
+prefix/re | 1 | daily | | Name a word that starts with "re" | | red, read, real, ready, remote, recycle, return, repeat, rest, record, recipe, report
+prefix/dis | 2 | daily | | Name a word that starts with "dis" | | disney, dish, disco, disease, discover, disagree, disappear, disgusting, distance, disk, discount, disaster
+prefix/micro | 2 | daily | | Name a word that starts with "micro" or "tele" | | microwave, microphone, microscope, microsoft, microchip, telephone, television, telescope, telepathy, teleport, telegram, telemundo
+suffix/ology | 2 | daily | | Name a word that ends in "ology" | | biology, psychology, technology, zoology, geology, astrology, mythology, apology, ecology, archaeology, sociology, anthology
+suffix/phone | 2 | daily | | Name a word that ends in "phone" | | telephone, microphone, headphone, saxophone, xylophone, smartphone, iphone, megaphone, cell phone, earphone, gramophone, payphone
+suffix/ster | 2 | daily | | Name a word that ends in "ster" | | monster, lobster, hamster, toaster, sister, rooster, coaster, gangster, oyster, youngster, roller coaster, dumpster
+suffix/less | 1 | daily | | Name a word that ends in "less" | | homeless, careless, useless, wireless, endless, hopeless, fearless, sleeveless, priceless, helpless, harmless, clueless
+suffix/ful | 1 | daily | | Name a word that ends in "ful" | | beautiful, wonderful, careful, helpful, cheerful, colorful, thankful, peaceful, handful, mouthful, grateful, playful
+suffix/ville | 2 | daily | | Name a place that ends in "ville" or "burg" | | nashville, louisville, jacksonville, knoxville, smallville, whoville, margaritaville, pittsburgh, gettysburg, hamburg, st. petersburg, johannesburg
+compound4/hot | 1 | daily | | Name a word or phrase that starts with "hot" | | hot dog, hot tub, hot sauce, hotshot, hot chocolate, hot air balloon, hotel, hot wheels, hot pocket, hot spring, hot potato, hot rod
+compound4/big | 1 | daily | | Name something that starts with "big" or "little" | | big foot, big mac, big ben, big bird, big apple, big dipper, little mermaid, little league, little women, little caesars, little red riding hood, little rock
+compound4/red | 1 | daily | | Name something that starts with "red" or "white" | | red carpet, red bull, red lobster, redwood, red sox, red velvet, white house, whiteboard, white castle, white claw, snow white, white chocolate
+compound4/new | 2 | daily | | Name something that starts with "new" | | new york, new jersey, newspaper, newborn, new orleans, new zealand, new mexico, new year, newcastle, new hampshire, new balance, newton
+compound4/saint | 2 | daily | | Name a place that starts with "San", "Santa" or "Saint" | | san diego, san francisco, san antonio, san jose, santa monica, santa barbara, santa fe, st. louis, st. lucia, san juan, santa cruz, saint petersburg
+rhymed4/saw | 1 | daily | | Name a word that rhymes with "saw" | | jaw, law, raw, claw, draw, paw, straw, flaw, thaw, slaw, seesaw, outlaw
+rhymed4/line | 1 | daily | | Name a word that rhymes with "line" | | fine, mine, nine, pine, wine, sign, shine, spine, dine, vine, valentine, porcupine
+rhymed4/round | 1 | daily | | Name a word that rhymes with "round" | | sound, ground, found, pound, mound, hound, bound, wound, around, playground, background, compound
+rhymed4/brush | 1 | daily | | Name a word that rhymes with "brush" | | rush, crush, blush, hush, mush, flush, slush, plush, gush, lush, thrush, toothbrush
+rhymed4/dust | 1 | daily | | Name a word that rhymes with "dust" | | must, trust, rust, just, crust, bust, gust, thrust, adjust, disgust, robust
+rhymed4/six | 1 | daily | | Name a word that rhymes with "six" | | mix, fix, kicks, sticks, tricks, bricks, picks, licks, chicks, flicks, licorice sticks, remix
+rhymed4/sad | 1 | daily | | Name a word that rhymes with "sad" | | dad, mad, bad, glad, had, pad, lad, fad, rad, grad, add, plaid
+rhymed4/couch | 1 | daily | | Name a word that rhymes with "couch" | | ouch, pouch, slouch, grouch, crouch, vouch
+rhymed4/stuff | 1 | daily | | Name a word that rhymes with "stuff" | | puff, rough, tough, enough, cuff, fluff, bluff, huff, buff, gruff, muff, scuff
+rhymed4/room | 1 | daily | | Name a word that rhymes with "room" | | broom, boom, zoom, doom, bloom, gloom, groom, tomb, vroom, perfume, mushroom, costume
+rhymed4/five | 1 | daily | | Name a word that rhymes with "five" | | dive, drive, hive, live, alive, jive, arrive, thrive, strive, survive, chive, high five
+rhymed4/face | 1 | daily | | Name a word that rhymes with "face" | | race, place, space, case, base, lace, chase, grace, vase, ace, pace, brace
+rhymed4/berry | 1 | daily | | Name a word that rhymes with "berry" | | cherry, merry, very, ferry, fairy, hairy, scary, dairy, jerry, carry, marry, terry
+rhymed4/letter | 1 | daily | | Name a word that rhymes with "letter" | | better, sweater, wetter, setter, getter, debtor, go-getter, trendsetter, jet-setter, red setter, irish setter, pacesetter
+rhymed4/noodle | 1 | daily | | Name a word that rhymes with "noodle" | | poodle, doodle, strudel, oodle, kit and caboodle, yankee doodle, labradoodle, goldendoodle, canoodle, flapdoodle, snickerdoodle
+rhymed4/rattle | 1 | daily | | Name a word that rhymes with "rattle" | | battle, cattle, seattle, tattle, prattle, chattel, saddle, paddle, straddle, skedaddle, waddle, addle
+rhymed4/yellow | 1 | daily | | Name a word that rhymes with "yellow" | | hello, fellow, jello, cello, mellow, bellow, marshmallow, othello, portobello, hello kitty, mello yello
+rhymed4/silly | 1 | daily | | Name a word that rhymes with "silly" | | billy, chilly, lily, hilly, frilly, philly, willy, milly, tilly, piccadilly, willy-nilly, daffodilly
+rhymed4/caught | 1 | daily | | Name a word that rhymes with "caught" | | taught, bought, thought, brought, fought, sought, ought, naught, distraught, onslaught, overwrought, astronaut
+# objects
+verbd4/sharpen | 2 | daily | | Name something people sharpen | | pencil, knife, scissors, an axe, a sword, skates, a saw, crayons, a lawn mower blade, eyeliner, skills, a razor
+verbd4/break | 1 | daily | | Name something people break by accident | | glass, a phone, a plate, a vase, a mirror, a bone, a window, a promise, a nail, a pencil, a cup, a toy
+verbd4/can | 1 | daily | | Name something that comes in a can | | soda, soup, beans, tuna, beer, corn, paint, peaches, whipped cream, tomatoes, cat food, spam
+verbd4/box | 1 | daily | | Name something that comes in a box | | cereal, pizza, shoes, crackers, tissues, chocolates, a toy, cookies, mac and cheese, a phone, cake mix, a new tv
+verbd4/bag | 1 | daily | | Name something that comes in a bag | | chips, popcorn, candy, bread, flour, rice, coffee, ice, potatoes, apples, marshmallows
+verbd4/tube | 2 | daily | | Name something that comes in a tube or a spray can | | toothpaste, lotion, glue, sunscreen, lipstick, paint, frosting, hairspray, whipped cream, deodorant, spray paint, bug spray
+# wild
+whatkind/popcorn | 2 | daily | | Name something people put on popcorn or ice cream | | butter, salt, caramel, cheese, chocolate sauce, sprinkles, whipped cream, a cherry, nuts, hot fudge, candy, cinnamon sugar
+whatkind/toast | 1 | daily | | Name something people put on toast | | butter, jam, peanut butter, avocado, honey, nutella, cinnamon sugar, cream cheese, eggs, beans, marmalade, cheese
+whatkind/soup | 2 | daily | | Name something people put in soup or chili | | noodles, carrots, chicken, potatoes, beans, onions, celery, crackers, cheese, sour cream, rice, beef
+whatkind/cereal | 1 | daily | | Name something people put on cereal or oatmeal | | milk, sugar, bananas, berries, honey, raisins, brown sugar, cinnamon, nuts, yogurt, maple syrup, peanut butter
+whatkind/fridge | 1 | daily | | Name something people keep in the freezer | | ice cream, ice, frozen pizza, peas, popsicles, chicken, steak, waffles, fish sticks, vodka, frozen fruit, ice packs
+whatkind/glovebox | 2 | daily | | Name something people keep in their glove box or car trunk | | registration, napkins, sunglasses, a manual, insurance card, a flashlight, a spare tire, jumper cables, groceries, an umbrella, a first aid kit, a tire jack
+whatkind/nightstand | 1 | daily | | Name something people keep on their nightstand | | lamp, phone, alarm clock, glasses, a book, water, a charger, tissues, lotion, remote, a candle, a picture
+whatkind/pocket | 1 | daily | | Name something people keep in their pocket | | phone, keys, wallet, gum, money, lip balm, a pen, tissues, a lighter, change, earbuds, a receipt
+whatkind/desk | 1 | daily | | Name something people keep on their desk at work | | computer, phone, pens, a stapler, coffee mug, photos, notepad, a plant, a calendar, a lamp, sticky notes, snacks
+# people
+whend4/rain | 1 | daily | | Name something people do on a rainy day | | watch movies, read, nap, play board games, bake, stay inside, drink hot chocolate, jump in puddles, play video games, take a bath, do puzzles, sleep in
+whend4/stuck | 2 | daily | | Name something people do when they're stuck in traffic | | honk, listen to music, sing, check their phone, call someone, sigh, eat snacks, yell, change lanes, look for a shortcut, pick their nose, daydream
+whend4/power | 2 | daily | | Name something people do when the power goes out | | light candles, use a flashlight, play board games, go to bed, check the fuse box, tell stories, call the power company, eat ice cream before it melts, read, use their phone, complain, look outside
+sayd4/hurt | 1 | daily | | Name something people yell when they stub their toe | | ouch, ow, oh no, argh, dang it, son of a gun, owie, shoot, darn, why, ahh, yikes
+sayd4/phone | 1 | daily | | Name something people say when they answer the phone | | hello, hi, yes, who is this, what's up, hey, this is, speaking, good morning, how can i help you, yo, can i call you back
+sayd4/hello | 1 | daily | | Name a way to say hello | | hi, hey, hello, what's up, howdy, yo, hola, good morning, sup, greetings, bonjour, aloha
+sayd4/thanks | 2 | daily | | Name a way to say thank you or sorry | | thanks, thank you, thanks a lot, cheers, much appreciated, gracias, merci, sorry, my bad, i apologize, excuse me, pardon me
+sayd4/kidcar | 1 | daily | | Name something kids say on a long car ride | | are we there yet, i'm bored, i have to pee, i'm hungry, he's touching me, how much longer, can we stop, i'm thirsty, i feel sick, stop it, can i have the ipad, i'm tired
+sayd4/gamer | 2 | daily | | Name something people say during a video game | | gg, noob, one more game, lag, let's go, i'm dead, cover me, it's not fair, respawn, headshot, rage quit, pause
+reasond4/late | 1 | daily | | Name an excuse for being late | | traffic, overslept, alarm didn't go off, car trouble, the dog ate it, i got lost, the bus was late, i couldn't find my keys, the train was late, my kid was sick, bad weather, i forgot
+reasond4/cry | 1 | daily | | Name a reason people cry | | sadness, happiness, pain, a breakup, a sad movie, a funeral, onions, stress, laughing, a wedding, getting hurt, missing someone
+reasond4/laugh | 1 | daily | | Name a reason people laugh | | a joke, being tickled, a funny movie, embarrassment, nervousness, a meme, a comedian, a funny video, someone falling, a pun, a prank, friends
+reasond4/move | 1 | daily | | Name a reason people move to a new city | | a job, school, family, love, cheaper rent, better weather, a fresh start, retirement, adventure, being closer to family, a bigger house, the military
+reasond4/party | 1 | daily | | Name a reason to throw a party | | a birthday, graduation, a wedding, new year's, a retirement, a promotion, the super bowl, halloween, a housewarming, a baby shower, an anniversary, just because
+`;
