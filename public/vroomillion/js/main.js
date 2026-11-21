@@ -1033,6 +1033,32 @@ function renderUpdates() {
   try { if (CHANGELOG[0]) localStorage.setItem(LOG_SEEN_KEY, CHANGELOG[0].id); } catch {}
 }
 
+// ---------- auto-update ----------
+// Each deploy writes its version to version.json (tools/stamp.mjs). When a newer one is out, the page
+// reloads itself to pick it up: right away on menu screens, or as soon as the player is back on one
+// (never mid-race, in an online room, or while filling in a form). Progress is saved first.
+const BUILD = "dev";
+const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues"]);
+let updateReady = null;
+function reloadForUpdate() {
+  if (!updateReady || !SAFE_TO_RELOAD.has(current) || online) return;
+  // once per version per tab, in case the CDN is still serving the old page for a moment
+  try { if (sessionStorage.getItem("vroomillion.reloaded") === updateReady) return; sessionStorage.setItem("vroomillion.reloaded", updateReady); } catch {}
+  try { if (backupTimer) sendBackup(); } catch {}
+  overlay("NEW UPDATE!", "ok");
+  setTimeout(() => location.reload(), 600);
+}
+async function checkForUpdate() {
+  if (BUILD === "dev" || updateReady) return reloadForUpdate();
+  try {
+    const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    const v = r.ok ? (await r.json()).v : null;
+    if (v && v !== BUILD) { updateReady = v; reloadForUpdate(); }
+  } catch {}
+}
+setInterval(checkForUpdate, 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(); });
+
 let current = "title";
 function show(name) {
   current = name;
@@ -1054,6 +1080,7 @@ function show(name) {
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (name === "title") renderWhatsNew();
+  if (updateReady) setTimeout(reloadForUpdate, 300);
   if (name === "updates") renderUpdates();
   if (name === "leagues") renderLeagues();
   if (name === "paywall") renderPaywall();
