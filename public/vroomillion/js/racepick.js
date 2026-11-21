@@ -82,17 +82,32 @@ export function dailyLayout(fams = FAMILIES, n = 7) {
   const sorted = [...pool].sort((a, b) => (a.id < b.id ? -1 : 1));
   const rng = seeded("vroomillion-daily-v2");
   const left = shuffle(sorted, rng);
+  // Big groups (and the one-per-race "single" prompts) go first, so they are spread over every race
+  // instead of piling up in the last ones.
+  const groupLeft = {}, topicLeft = {};
+  let singlesLeft = 0;
+  for (const f of left) { groupLeft[f.group] = (groupLeft[f.group] || 0) + 1; topicLeft[f.topic] = (topicLeft[f.topic] || 0) + 1; if (f.single) singlesLeft++; }
   const races = [];
   while (left.length >= n) {
+    const racesLeft = Math.floor(left.length / n);
+    const weight = (f) => groupLeft[f.group] / racesLeft + (f.single ? singlesLeft / racesLeft : 0) + topicLeft[f.topic] / racesLeft;
+    const order = left.map((f, i) => ({ f, i, w: weight(f) })).sort((a, b) => b.w - a.w || a.i - b.i);
     const race = [];
-    for (const strict of [true, false, null]) {
-      for (let i = 0; i < left.length && race.length < n; i++) {
-        const f = left[i];
+    // Topics: each topic gets its fair share of the seven slots (a topic with lots of prompts left may
+    // take two or three), then the caps loosen one step at a time. Groups and singles stay strict until
+    // the very last pass.
+    const share = (t) => Math.max(1, Math.ceil(topicLeft[t] / racesLeft));
+    for (const extra of [0, 1, 2, 3, 4, 5, 6, null]) {
+      for (const o of order) {
+        if (race.length >= n) break;
+        const f = o.f;
+        if (race.includes(f)) continue;
         const twin = race.some((p) => famKey(p) === famKey(f)); // never both twins in one race
-        const clash = twin || (strict !== null && race.some((p) => p.group === f.group || (f.single && p.single) || (strict && p.topic === f.topic)));
-        if (!clash) { race.push(f); left.splice(i--, 1); }
+        const clash = twin || (extra !== null && (race.some((p) => p.group === f.group || (f.single && p.single)) || race.filter((p) => p.topic === f.topic).length >= share(f.topic) + extra));
+        if (!clash) race.push(f);
       }
     }
+    for (const f of race) { left.splice(left.indexOf(f), 1); groupLeft[f.group]--; topicLeft[f.topic]--; if (f.single) singlesLeft--; }
     races.push(race);
   }
   return races;

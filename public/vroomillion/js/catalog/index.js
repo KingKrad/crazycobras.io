@@ -36,9 +36,10 @@ import { W25 } from "./w25.js";
 import { W26 } from "./w26.js";
 import { W27 } from "./w27.js";
 import { W28 } from "./w28.js";
+import { W29 } from "./w29.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28, W29];
 
 export function parseCatalog(texts) {
   const fams = [];
