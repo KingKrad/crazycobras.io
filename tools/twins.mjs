@@ -10,8 +10,8 @@ import { normalize } from "../public/vroomillion/js/logic.js";
 const th = Number(process.argv[2] || 0.5);
 // pairs looked at and kept apart on purpose: different questions that share answers only because one list
 // is huge (every animal is in "Name a mammal" / "an animal in the ocean"), or GEARHEAD's car-only overlap
-const OK = [/^animal\//, /^(maker|model|engine|parts|care|racing|culture)\//, /^pepper\//];
-const BIG = new Set(["mammal/mammal", "sea/sea", "reptile/reptile", "vehicle/aircraft", "wild/legs", "brand/carbrand", "game/videogame", "street/street"]);
+const OK = [/^[a-z0-9]+\/(chars|places|things|mobs|items|spells|types|vehicles)$/, /^animal\//, /^(maker|model|engine|parts|care|racing|culture)\//, /^pepper\//];
+const BIG = new Set(["character/cartoon", "character/superhero", "mammal/mammal", "sea/sea", "reptile/reptile", "vehicle/aircraft", "wild/legs", "brand/carbrand", "game/videogame", "street/street"]);
 const byQ = new Map(QUESTIONS.map((q) => [q.q, q]));
 const keysOf = (entries) => new Set(entries.flatMap((e) => e.split("|").map(normalize)).filter((k) => k && k.length > 2));
 const fams = FAMILIES.map((f) => {
