@@ -3,7 +3,7 @@
 import { ChaseScene } from "./chase.js";
 
 const W = 1080, H = 1350;
-const SITE = "vroomillion.vercel.app";
+const SITE = "vroomillion.com";
 const FONT = '"Press Start 2P", ui-monospace, monospace';
 
 // Long names over two lines, so the big text never runs off the card.
