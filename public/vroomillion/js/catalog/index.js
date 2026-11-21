@@ -11,9 +11,10 @@ import { CAR } from "./car.js";
 import { W01 } from "./w01.js";
 import { W02 } from "./w02.js";
 import { W03 } from "./w03.js";
+import { W04 } from "./w04.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02, W03];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04];
 
 export function parseCatalog(texts) {
   const fams = [];
