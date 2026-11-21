@@ -39,19 +39,59 @@ const fresh = () => ({
   races: 0, wins: 0, vrooms: 0, deep: 0, best: 0, lastRunDay: null, seen: [],
   passport: {}, // destination id -> best distance there
 });
-let save = fresh();
-try {
-  const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
-  if (raw && Array.isArray(raw.owned)) save = { ...save, ...raw };
-} catch { /* private mode or bad data: start fresh */ }
-if (!save.passport || typeof save.passport !== "object") save.passport = {};
-if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
-// Unlimited comes from the logged-in account on the server, never from this save.
-delete save.unlimited;
-delete save.receipt;
-const persist = () => {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* ignore */ }
+// Progress is saved on this device whether or not there's an account. Three copies keep it safe:
+// the main save, a backup copy on the device (a damaged save never overwrites a good one), and a copy
+// on the server under an anonymous device ID, which brings it back if the browser loses its storage
+// (iPhone Safari clears a site's data after 7 days without a visit).
+const BACKUP_KEY = SAVE_KEY + ".backup";
+const readSave = (key) => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || "null");
+    return raw && typeof raw === "object" && Array.isArray(raw.owned) ? raw : null;
+  } catch { return null; }
 };
+const tidy = (s) => {
+  if (!s.passport || typeof s.passport !== "object") s.passport = {};
+  if (!s.owned.includes(s.car)) s.car = s.owned[0] || "rustbucket";
+  // Unlimited comes from the logged-in account on the server, never from this save.
+  delete s.unlimited;
+  delete s.receipt;
+  return s;
+};
+const stored = readSave(SAVE_KEY) || readSave(BACKUP_KEY);
+let save = tidy({ ...fresh(), ...(stored || {}) });
+let backupTimer = 0;
+const persist = () => {
+  save.savedAt = Date.now();
+  const text = JSON.stringify(save);
+  try { localStorage.setItem(SAVE_KEY, text); localStorage.setItem(BACKUP_KEY, text); } catch { /* storage full or private mode */ }
+  // the server copy, a few seconds after the last change
+  clearTimeout(backupTimer);
+  backupTimer = setTimeout(sendBackup, 4000);
+};
+function sendBackup() {
+  clearTimeout(backupTimer);
+  backupTimer = 0;
+  try {
+    fetch("/api/vroomillion/device-save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ save }), keepalive: true }).catch(() => {});
+  } catch { /* offline or no server */ }
+}
+// leaving the page: send a pending backup straight away
+addEventListener("pagehide", () => { if (backupTimer) sendBackup(); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && backupTimer) sendBackup(); });
+// ask the browser not to clear the game's storage (Chrome and Firefox honour this)
+navigator.storage?.persist?.().catch(() => {});
+// nothing saved on this device: get this device's progress back from the server, if it has a copy
+const restoring = stored ? Promise.resolve(false) : fetch("/api/vroomillion/device-save", { cache: "no-store" })
+  .then((r) => (r.ok && (r.headers.get("content-type") || "").includes("json") ? r.json() : null))
+  .then((body) => {
+    if (!body?.save || !Array.isArray(body.save.owned) || readSave(SAVE_KEY)) return false;
+    save = tidy({ ...fresh(), ...body.save });
+    try { const t = JSON.stringify(save); localStorage.setItem(SAVE_KEY, t); localStorage.setItem(BACKUP_KEY, t); } catch { /* ignore */ }
+    return true;
+  })
+  .catch(() => false);
+if (stored) persist(); // keeps the server copy and the backup up to date from the first visit
 
 // ---------- scene loop ----------
 // Menus show a side-on banner; races use the behind-the-car road. Both draw on one canvas.
@@ -1713,3 +1753,5 @@ renderCash(false);
 renderLegend();
 show("title");
 refreshAccount();
+// progress brought back from the server copy: redraw with it
+restoring.then((ok) => { if (ok && current !== "race") { renderCash(); show(current); } });

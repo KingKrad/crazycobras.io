@@ -492,3 +492,29 @@ test("daily scores refuse impossible distances, guests and other sites", async (
   assert.equal((await worker.fetch(post("daily", { race: 1, metres: 100, tiers: [1, 1, 1, 1, 1, 1, 1] }), env())).status, 401);
   assert.equal((await send({ race: 1, metres: 100, tiers: [1, 1, 1, 1, 1, 1, 1] }, { origin: "https://evil.test" })).status, 403);
 });
+
+// ---------- device save backup ----------
+
+test("device progress is backed up under an anonymous cookie and comes back", async () => {
+  const save = { cash: 12345, owned: ["rustbucket", "wrangler"], car: "wrangler", passport: { beach: 3100 } };
+  let r = await worker.fetch(get("device-save"), env());
+  assert.deepEqual(await r.json(), { save: null }, "nothing saved yet");
+  r = await worker.fetch(post("device-save", { save }), env());
+  assert.equal(r.status, 200);
+  const cookie = cookieOf(r);
+  assert.match(cookie, /^vroom_device=[a-f0-9]{32}$/);
+  assert.match(r.headers.get("set-cookie"), /HttpOnly; Secure; SameSite=Lax; Max-Age=34560000/);
+  r = await worker.fetch(get("device-save", { cookie }), env());
+  assert.deepEqual((await r.json()).save, save, "the same device gets its progress back");
+  r = await worker.fetch(post("device-save", { save: { ...save, cash: 99 } }, { cookie }), env());
+  assert.equal(cookieOf(r), cookie, "same device, same ID");
+  assert.equal((await (await worker.fetch(get("device-save", { cookie }), env())).json()).save.cash, 99);
+  assert.deepEqual(await (await worker.fetch(get("device-save", { cookie: "vroom_device=" + "0".repeat(32) }), env())).json(), { save: null }, "another device's ID finds nothing");
+});
+
+test("device saves refuse junk, huge saves and other sites", async () => {
+  assert.equal((await worker.fetch(post("device-save", { save: { cash: 5 } }), env())).status, 400, "not a save");
+  assert.equal((await worker.fetch(post("device-save", { save: [1, 2] }), env())).status, 400);
+  assert.equal((await worker.fetch(post("device-save", { save: { owned: ["x"], pad: "x".repeat(130000) } }), env())).status, 400, "too big is dropped");
+  assert.equal((await worker.fetch(post("device-save", { save: { owned: ["x"] } }, { origin: "https://evil.test" }), env())).status, 403);
+});
