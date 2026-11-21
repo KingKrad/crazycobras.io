@@ -16,8 +16,14 @@ import { prefetchDeep, deepAnswers } from "./deep.js";
 // instead of holding up the first screen. Races wait for them (usually long since done).
 let QUESTIONS = [];
 let questionsReady = false;
-const questionsLoaded = import("./data.js").then(({ QUESTIONS: hand }) => {
-  QUESTIONS = [...hand, ...makeVariants(hand)];
+const buildHere = () => import("./data.js").then(({ QUESTIONS: hand }) => [...hand, ...makeVariants(hand)]);
+const buildInWorker = () => new Promise((resolve, reject) => {
+  const w = new Worker(new URL("./questions-worker.js", import.meta.url), { type: "module" });
+  w.onmessage = (e) => { resolve(e.data); w.terminate(); };
+  w.onerror = (e) => { e.preventDefault?.(); w.terminate(); reject(new Error("worker failed")); };
+});
+const questionsLoaded = (typeof Worker === "function" ? buildInWorker().catch(buildHere) : buildHere()).then((all) => {
+  QUESTIONS = all;
   questionsReady = true;
   if (current === "leagues") renderLeagues();
   if (current === "versus") renderVersus();

@@ -113,13 +113,6 @@ const LETTERS = "abcdefghijklmnopqrstuvwxyz";
 const VARIANT_MIN = 8;
 const VARIANTS_PER_QUESTION = 3;
 
-function filterQuestion(q, test) {
-  return q.a.map((list) => list.flatMap((entry) => {
-    const forms = entry.split("|").filter((f) => { const k = normalize(f); return k && test(k); });
-    return forms.length ? [forms.join("|")] : [];
-  }));
-}
-
 function goodVariant(a) {
   const count = a.flat().length;
   const rare = a[2].length + a[3].length + a[4].length;
@@ -132,10 +125,27 @@ export function makeVariants(questions) {
   for (const q of questions) {
     // Only "starting with" twists, and only the few letters with the most answers, so they
     // stay a light seasoning on top of the hand-written prompts.
+    // One pass over the answers, sorting each spelling by its first letter (fast enough for phones).
+    const byLetter = new Map(); // letter -> five tiers of entries
+    q.a.forEach((list, t) => {
+      for (const entry of list) {
+        const groups = new Map();
+        for (const f of entry.split("|")) {
+          const L = normalize(f)[0];
+          if (!L || !LETTERS.includes(L)) continue;
+          if (!groups.has(L)) groups.set(L, []);
+          groups.get(L).push(f);
+        }
+        for (const [L, forms] of groups) {
+          if (!byLetter.has(L)) byLetter.set(L, [[], [], [], [], []]);
+          byLetter.get(L)[t].push(forms.join("|"));
+        }
+      }
+    });
     const options = [];
     for (const L of LETTERS) {
-      const a = filterQuestion(q, (k) => k[0] === L);
-      if (goodVariant(a)) options.push({ L, a, count: a.flat().length });
+      const a = byLetter.get(L);
+      if (a && goodVariant(a)) options.push({ L, a, count: a.flat().length });
     }
     options.sort((x, y) => y.count - x.count);
     for (const { L, a } of options.slice(0, VARIANTS_PER_QUESTION)) {
