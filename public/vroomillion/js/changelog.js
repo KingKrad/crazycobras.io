@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21c",
+    date: "Nov 21, 2026",
+    title: "Automatic updates",
+    items: [
+      "The game now updates itself: when a new version is out, it reloads on its own the next time you're on a menu.",
+      "It never interrupts a race or an online room, and your progress is saved first.",
+    ],
+  },
+  {
     id: "2026-11-21b",
     date: "Nov 21, 2026",
     title: "Online 1v1 + What's New",

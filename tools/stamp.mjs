@@ -21,6 +21,12 @@ const stampJs = (src) => src
   .replace(/fetch\("deep\/" \+ index\[p\]\.file\)/g, `fetch("deep/" + index[p].file + "?v=${V}")`);
 
 const jsDir = path.join(ROOT, "js");
+// this deploy's version, for the in-game auto-update check
+fs.writeFileSync(path.join(ROOT, "version.json"), JSON.stringify({ v: V }) + "\n");
+{
+  const m = path.join(jsDir, "main.js");
+  fs.writeFileSync(m, fs.readFileSync(m, "utf8").replace('const BUILD = "dev";', `const BUILD = ${JSON.stringify(V)};`));
+}
 for (const f of fs.readdirSync(jsDir).filter((f) => f.endsWith(".js"))) {
   const p = path.join(jsDir, f);
   fs.writeFileSync(p, stampJs(fs.readFileSync(p, "utf8")));
