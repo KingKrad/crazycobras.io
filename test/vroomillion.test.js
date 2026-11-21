@@ -91,18 +91,27 @@ test("a niche answer in a starter car still beats an obvious one in the best car
   assert.ok(metresFor(3, 1.0, false) > metresFor(2, 1.55, false));
 });
 
-test("matching answers cause a fender bender", () => {
+test("matching answers cause a fender bender: a coin toss, and the loser gets half", async () => {
+  const { tossWinner, roundMetres } = await import("../public/vroomillion/js/logic.js");
   const a = judge(fruit, "durian");
-  const [x, y] = applyFenderBender(a, { ...a });
-  assert.equal(x.tier, a.tier - 1);
-  assert.equal(y.tier, a.tier - 1);
-  assert.ok(x.bump);
+  const [x, y] = applyFenderBender(a, { ...a }, 1);
+  assert.equal(x.tier, a.tier, "the rarity stays");
+  assert.equal(y.tier, a.tier);
+  assert.ok(x.bump && y.bump);
+  assert.equal(x.toss, "lost");
+  assert.equal(y.toss, "won");
+  assert.equal(roundMetres(x, 1, false), Math.round(metresFor(a.tier, 1, false) / 2), "the loser of the toss gets half");
+  assert.equal(roundMetres(y, 1, false), metresFor(a.tier, 1, false));
   const [p, q] = applyFenderBender(judge(fruit, "apple"), judge(fruit, "pear"));
   assert.equal(p.bump, undefined);
   assert.equal(q.tier, 1);
   const [m, n] = applyFenderBender(judge(fruit, "zzz"), judge(fruit, "zzz"));
   assert.equal(m.tier, 0);
   assert.equal(n.bump, undefined);
+  // online: both games work the toss out the same way from the room code and round
+  assert.equal(tossWinner("ABC123:3"), tossWinner("ABC123:3"));
+  const wins = new Set(Array.from({ length: 20 }, (_, i) => tossWinner("ROOM:" + i)));
+  assert.deepEqual([...wins].sort(), [0, 1], "both sides can win");
 });
 
 test("one daily race for everyone, Unlimited for everything else, everything during free play", () => {

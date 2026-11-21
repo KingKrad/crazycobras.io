@@ -75,6 +75,8 @@ export const sfx = {
   nitro: () => { noise(0.5, { vol: 0.2, hp: 1500 }); tone(200, 0.5, { type: "sawtooth", vol: 0.12, slide: 4 }); },
   cash: () => [N.E5, N.G5, N.C6, N.E6].forEach((f, i) => tone(f, 0.08, { vol: 0.13, at: i * 0.05 })),
   buy: () => [N.C5, N.E5, N.G5, N.C6, N.G5, N.C6].forEach((f, i) => tone(f, 0.1, { vol: 0.15, at: i * 0.08 })),
+  flip: () => [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.54, 0.63, 0.72, 0.81, 0.9].forEach((at, i) => tone(1500 + (i % 2) * 300, 0.03, { vol: 0.07, at })),
+  ding: () => { tone(1320, 0.25, { vol: 0.16 }); tone(1980, 0.35, { vol: 0.1, at: 0.04 }); },
   bump: () => { noise(0.2, { vol: 0.3, hp: 300 }); tone(90, 0.2, { type: "square", vol: 0.2, slide: 0.5 }); },
   win: () => [N.C5, N.C5, N.C5, N.E5, N.G5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f, i === 7 ? 0.5 : 0.11, { vol: 0.18, at: i * 0.12 })),
   lose: () => [N.G4, N.F4, N.E4, N.C4].forEach((f, i) => tone(f, 0.25, { type: "triangle", vol: 0.22, at: i * 0.22 })),

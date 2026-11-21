@@ -1,6 +1,6 @@
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
-  TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES,
+  TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
   dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize, V2,
   DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
@@ -1749,8 +1749,11 @@ async function runRace(token) {
         if (!alive()) return;
       }
     }
-    const final = race.solo ? results : applyFenderBender(results[0], results[1]);
+    // same answer: a FENDER BENDER, and a coin toss for the points (online, both games land it the same way)
+    const winner = race.online ? tossWinner(`${race.online.code}:${round}`) : tossWinner();
+    const final = race.solo ? results : applyFenderBender(results[0], results[1], winner);
     const bumped = final.some((f) => f.bump);
+    if (bumped) { await coinToss(winner); if (!alive()) return; }
 
     // reveal: everything else fades, the answer slams into the middle and the car smashes through it
     $("answer-zone").classList.add("hidden");
@@ -1759,11 +1762,11 @@ async function runRace(token) {
     document.body.classList.add("smashing");
     const smashCards = final.map((res, i) => {
       const r = race.racers[i];
-      const m = metresFor(res.tier, r.power, r.useNitro, race.crazy);
+      const m = roundMetres(res, r.power, r.useNitro, race.crazy);
       return {
         who: race.solo ? "" : r.name.toUpperCase(),
         answer: (res.display || "NO ANSWER").toUpperCase(),
-        tierName: TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "") + (res.bump ? " (BUMPED)" : ""),
+        tierName: TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "") + (res.bump ? (res.half ? " · LOST TOSS, HALF" : " · WON THE TOSS") : ""),
         gain: res.tier ? `+${m.toLocaleString("en-US")} M${r.useNitro ? " NITRO" : ""}` : "0 M",
         tier: res.tier,
         color: i ? "#ff4fd8" : "#4fd1ff",
@@ -1772,7 +1775,7 @@ async function runRace(token) {
     // The boost starts the moment each car breaks through its card, from the speed it hit it at,
     // so the car never slows down between the crash and the run up the road.
     const from = race.racers.map((r) => r.dist);
-    const gain = race.racers.map((r, i) => metresFor(final[i].tier, r.power, r.useNitro, race.crazy));
+    const gain = race.racers.map((r, i) => roundMetres(final[i], r.power, r.useNitro, race.crazy));
     const topTier = Math.max(...final.map((f) => f.tier));
     race.racers.forEach((r, i) => {
       r.tiers.push(final[i].tier);
@@ -1860,7 +1863,6 @@ async function runRace(token) {
     if (bumped) {
       audio.sfx.bump();
       overlay("FENDER BENDER!", "small bad");
-      $("hint").textContent = "FENDER BENDER! SAME ANSWER — BOTH DROP A TIER.";
       scene.shake = scene.calm ? 0 : 0.4;
       setTimeout(() => { if (alive()) overlay(""); }, 900);
     }
@@ -1888,7 +1890,8 @@ async function runRace(token) {
     requestAnimationFrame(fitCard);
 
     const best = Math.max(...final.map((f) => f.tier));
-    $("hint").textContent = (bumped ? "FENDER BENDER — BOTH DROPPED A TIER. " : "") + (best >= 5
+    const tossWon = final.findIndex((f) => f.toss === "won");
+    $("hint").textContent = (bumped ? `FENDER BENDER — ${race.racers[tossWon].name.toUpperCase()} WON THE TOSS, ${race.racers[1 - tossWon].name.toUpperCase()} GOT HALF. ` : "") + (best >= 5
       ? "THAT'S AS NICHE AS IT GETS."
       : `A RARE ONE HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
@@ -1943,13 +1946,43 @@ function tierBadge(tier, tag = "div", short = false) {
   return h(tag, { class: "badge t" + tier }, short ? t.short : t.name, tier ? h("span", { class: "rarity", text: t.rarity }) : null);
 }
 
+// FENDER BENDER coin toss: a pixel coin in both players' colours spins up and lands on the winner.
+function coinToss(winner) {
+  return new Promise((resolve) => {
+    const [a, b] = race.racers;
+    const face = (r, cls) => h("div", { class: "coin-face " + cls }, h("span", { text: r.name.toUpperCase().slice(0, 10) }));
+    const coin = h("div", { class: "coin" }, face(a, "p1"), face(b, "p2"));
+    const result = h("div", { class: "coin-result" });
+    const box = h("div", { class: "coin-toss" }, h("div", { class: "coin-title", text: "FENDER BENDER!" }),
+      h("div", { class: "coin-sub", text: "SAME ANSWER · COIN TOSS FOR THE POINTS" }), h("div", { class: "coin-stage" }, coin), result);
+    const o = $("overlay");
+    o.textContent = "";
+    o.append(box);
+    audio.sfx.bump();
+    setTimeout(() => audio.sfx.flip(), 300);
+    const quick = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const turns = 6 * 360 + (winner ? 180 : 0); // an odd half turn shows player 2's side
+    const spin = coin.animate([
+      { transform: "translateY(0) rotateY(0deg)" },
+      { transform: `translateY(-90px) rotateY(${turns / 2}deg)`, offset: 0.5 },
+      { transform: `translateY(0) rotateY(${turns}deg)` },
+    ], { duration: quick ? 200 : 1500, delay: 300, easing: "cubic-bezier(0.3, 0.6, 0.4, 1)", fill: "forwards" });
+    spin.finished.catch(() => {}).then(() => {
+      audio.sfx.ding();
+      result.textContent = `${race.racers[winner].name.toUpperCase()} WINS THE TOSS! ${race.racers[1 - winner].name.toUpperCase()} GETS HALF.`;
+      box.classList.add("landed", "w" + (winner + 1));
+      setTimeout(() => { o.textContent = ""; resolve(); }, 1400);
+    });
+  });
+}
+
 function revealCard(r, res, i) {
   const t = TIERS[res.tier];
   return h("div", { class: `reveal-card p${i + 1} tier${res.tier}` },
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
     tierBadge(res.tier),
-    h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
+    h("div", { class: "reveal-gain", text: `+${roundMetres(res, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? (res.half ? " · LOST THE TOSS, HALF" : " · WON THE TOSS") : "") }));
 }
 
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated

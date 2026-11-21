@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21j",
+    date: "Nov 21, 2026",
+    title: "Fender bender coin toss",
+    items: [
+      "Same answer as your opponent? A coin flips on screen to decide who keeps the points. The loser of the toss gets half.",
+      "Works in same-screen 2P and online 1v1, and both players always see the coin land the same way.",
+    ],
+  },
+  {
     id: "2026-11-21i",
     date: "Nov 21, 2026",
     title: "Crazy Mode + Equal Cars",

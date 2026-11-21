@@ -1022,3 +1022,17 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .rule-btn .rule-note { font-size: 6px; line-height: 1.5; }
 .rule-btn.on { color: #fff; border-color: var(--pink); box-shadow: 0 0 14px rgba(255, 79, 216, 0.45); }
 .rule-btn.on .rule-name { color: var(--pink); }
+
+/* FENDER BENDER coin toss */
+.coin-toss { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 22px; background: rgba(11, 6, 24, 0.92); border: 4px solid var(--red); box-shadow: 0 0 30px rgba(255, 59, 92, 0.45); text-align: center; }
+.coin-title { font-size: clamp(14px, 4vw, 24px); color: var(--red); text-shadow: 2px 2px 0 #000; }
+.coin-sub { font-size: 7px; color: var(--dim); }
+.coin-stage { perspective: 600px; padding: 96px 0 6px; }
+.coin { position: relative; width: 96px; height: 96px; transform-style: preserve-3d; }
+.coin-face { position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; font-size: 8px; color: #0b0618; padding: 10px; word-break: break-all; }
+.coin-face.p1 { background: radial-gradient(circle, #9be7ff 0 45%, #4fd1ff 46% 70%, #1a8fbf 71%); box-shadow: inset 0 0 0 4px #0b0618; }
+.coin-face.p2 { background: radial-gradient(circle, #ffb3ef 0 45%, #ff4fd8 46% 70%, #b8239a 71%); box-shadow: inset 0 0 0 4px #0b0618; transform: rotateY(180deg); }
+.coin-result { min-height: 2em; font-size: 9px; color: #fff; }
+.coin-toss.landed.w1 .coin-result { color: var(--cyan); }
+.coin-toss.landed.w2 .coin-result { color: var(--pink); }
+.coin-toss.landed .coin-result { animation: slam 0.3s cubic-bezier(0.2, 1.6, 0.4, 1) both; }

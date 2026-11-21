@@ -469,13 +469,24 @@ export const effectTier = (tier, crazy = false) => (crazy && tier ? 6 - tier : t
 // "cars don't matter" in a 1v1: everyone drives like a x1 car with 2 nitro charges
 export const EQUAL_CAR = { power: 1, nitro: 2 };
 
-// Two racers giving the same answer rub doors: both drop one tier (never below TRAFFIC).
-export function applyFenderBender(a, b) {
+// Two racers giving the same answer rub doors: a FENDER BENDER. A coin toss decides who keeps the
+// points; the loser of the toss gets half. winner: 0 or 1 (see tossWinner).
+export function applyFenderBender(a, b, winner = 0) {
   if (a.tier > 0 && b.tier > 0 && a.key === b.key) {
-    return [{ ...a, tier: Math.max(1, a.tier - 1), bump: true }, { ...b, tier: Math.max(1, b.tier - 1), bump: true }];
+    return [a, b].map((r, i) => ({ ...r, bump: true, toss: i === winner ? "won" : "lost", half: i !== winner }));
   }
   return [a, b];
 }
+// The coin. Online both games must land the same way, so it's worked out from text both sides know
+// (the room code and the round); on one screen it's just random.
+export function tossWinner(seedText = null) {
+  if (seedText == null) return Math.random() < 0.5 ? 0 : 1;
+  let h = 2166136261;
+  for (let i = 0; i < seedText.length; i++) { h ^= seedText.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0) % 2;
+}
+// distance for a round, with the fender-bender halving for the loser of the toss
+export const roundMetres = (res, power, nitro, crazy = false) => Math.round(metresFor(res.tier, power, nitro, crazy) * (res.half ? 0.5 : 1));
 
 export function pickQuestions(all, n, rng = Math.random) {
   const pool = [...all];
