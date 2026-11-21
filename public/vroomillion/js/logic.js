@@ -1,4 +1,3 @@
-import { CAT_WEIGHTS } from "./data-cats.js";
 // Pure game rules: answer judging, rarity tiers and payouts. No DOM in here.
 
 export const TIERS = [
@@ -74,147 +73,19 @@ export function msUntilTomorrow(now = new Date()) {
 // FREE PLAY: while true, everyone races as often as they like and the $5 prompts are hidden.
 export const FREE_PLAY = false;
 
-// DAILY RACES: two solo CLASSIC races a day, the same prompts for everyone, free for every player.
-// Everything else (more races, 2P VERSUS, GEARHEAD, HARD MODE, redoing a race) needs Unlimited.
-// save.daily = { day, done: { 1: metres, 2: metres } } on this device.
-// THE NEW PROMPT SYSTEM (js/catalog, js/racepick.js): prompt families that never repeat, seven topics
-// a race, and one daily race from its own pool. It goes live for everyone when V2_LIVE is true; until
-// then it can be tried on one browser with localStorage "vroomillion.v2" = "1".
-const V2_LIVE = true;
-export const V2 = V2_LIVE || (() => { try { return typeof localStorage !== "undefined" && localStorage.getItem("vroomillion.v2") === "1"; } catch { return false; } })();
-export const DAILY_RACES = V2 ? 1 : 2;
+// THE DAILY RACE: one free race a day, the same prompts for everyone. Everything else (more races,
+// 2P VERSUS, online, GEARHEAD, HARD MODE, redoing a race) needs Unlimited.
+// save.daily = { day, done: { 1: metres } } on this device.
+// Prompts come from the catalog (js/catalog, js/racepick.js): families that never repeat, seven topics a
+// race, and one free daily race a day from its own pool.
+export const DAILY_RACES = 1;
 export const dailyDone = (save, today) => (save.daily?.day === today && save.daily.done && typeof save.daily.done === "object" ? save.daily.done : {});
 export const dailyLeft = (save, today) => Math.max(0, DAILY_RACES - Object.keys(dailyDone(save, today)).length);
 export const nextDaily = (save, today) => [1, 2].filter((n) => n <= DAILY_RACES).find((n) => !(n in dailyDone(save, today))) || 0;
-// kind: { daily: 1 | 2 } for a daily race, otherwise { mode, deck } for an Unlimited one
+// kind: { daily: 1 } for the daily race, otherwise { mode, deck } for an Unlimited one
 export const canRace = (save, today, kind = {}, freePlay = FREE_PLAY) =>
   freePlay || !!save.unlimited || (!!kind.daily && kind.daily <= DAILY_RACES && !(kind.daily in dailyDone(save, today)));
 export const markDaily = (save, today, n, metres = 0) => ({ day: today, done: { ...dailyDone(save, today), [n]: Math.round(metres) } });
-
-// A seeded random number generator, so everyone gets the same daily prompts.
-export function seeded(text) {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  return () => {
-    h = (h + 0x6d2b79f5) | 0;
-    let t = Math.imul(h ^ (h >>> 15), 1 | h);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-// Today's two daily races: 2 x n different prompts, picked the same way on every device.
-export function dailyQuestions(deckQs, day, n = ROUNDS) {
-  const ordered = [...deckQs].sort((a, b) => (a.q < b.q ? -1 : a.q > b.q ? 1 : 0)); // not the file order
-  const all = pickFresh(ordered, [], n * 2, seeded("vroomillion-daily-" + day));
-  return [all.slice(0, n), all.slice(n, n * 2)];
-}
-
-// ---- endless prompts ----
-// Besides the hand-written prompts, every category also makes "starting with M",
-// "ending in A" and "with exactly 6 letters" prompts from its own answer lists,
-// keeping the same rarity tiers. Only variants with enough answers (and some rare
-// ones) are used, so there are about a thousand prompts.
-const LETTERS = "abcdefghijklmnopqrstuvwxyz";
-const VARIANT_MIN = 8;
-const VARIANTS_PER_QUESTION = 3;
-
-function goodVariant(a) {
-  const count = a.flat().length;
-  const rare = a[2].length + a[3].length + a[4].length;
-  const easier = a[0].length + a[1].length + a[2].length;
-  return count >= VARIANT_MIN && rare >= 3 && easier >= 2;
-}
-
-export function makeVariants(questions) {
-  const out = [];
-  for (const q of questions) {
-    // Only "starting with" twists, and only the few letters with the most answers, so they
-    // stay a light seasoning on top of the hand-written prompts.
-    // One pass over the answers, sorting each spelling by its first letter (fast enough for phones).
-    const byLetter = new Map(); // letter -> five tiers of entries
-    q.a.forEach((list, t) => {
-      for (const entry of list) {
-        const groups = new Map();
-        for (const f of entry.split("|")) {
-          const L = normalize(f)[0];
-          if (!L || !LETTERS.includes(L)) continue;
-          if (!groups.has(L)) groups.set(L, []);
-          groups.get(L).push(f);
-        }
-        for (const [L, forms] of groups) {
-          if (!byLetter.has(L)) byLetter.set(L, [[], [], [], [], []]);
-          byLetter.get(L)[t].push(forms.join("|"));
-        }
-      }
-    });
-    const options = [];
-    for (const L of LETTERS) {
-      const a = byLetter.get(L);
-      if (a && goodVariant(a)) options.push({ L, a, count: a.flat().length });
-    }
-    options.sort((x, y) => y.count - x.count);
-    for (const { L, a } of options.slice(0, VARIANTS_PER_QUESTION)) {
-      out.push({ q: `${q.q} starting with "${L.toUpperCase()}"`, a, deck: q.deck, cat: q.cat, hard: q.hard, minor: q.minor, base: q.q, variant: "start" });
-    }
-  }
-  return out;
-}
-
-// No repeats: a prompt this browser has seen never comes back. Hand-written prompts
-// come first; a race never uses two prompts built from the same category if it can help it.
-// opts.flat (GEARHEAD): no topic mix, every prompt by its own weight, so the rarer racing prompts stay rare.
-export function pickFresh(deckQs, seen, n, rng = Math.random, opts = {}) {
-  const seenSet = new Set(seen);
-  const unseen = deckQs.filter((q) => !seenSet.has(q.q));
-  const shuffled = pickQuestions(unseen, unseen.length, rng);
-  const picked = [];
-  const bases = new Set();
-  const take = (q) => { bases.add(q.base || q.q); picked.push(q); };
-  const w = (q) => (q.variant ? 0.1 : 1) * (q.minor ? 0.3 : 1);
-  if (opts.flat) {
-    const pool = [...shuffled];
-    while (picked.length < n && pool.length) {
-      const opts2 = pool.filter((q) => !bases.has(q.base || q.q));
-      const list = opts2.length ? opts2 : pool;
-      let r = rng() * list.reduce((t, q) => t + w(q), 0);
-      const q = list.find((x) => (r -= w(x)) <= 0) || list[list.length - 1];
-      pool.splice(pool.indexOf(q), 1);
-      take(q);
-    }
-    return picked;
-  }
-  // topic mix: each round draws a topic by weight (geography the most), then a prompt from it;
-    const pool = shuffled.filter((q) => q.cat);
-  for (let tries = 0; picked.length < n && tries < n * 30 && pool.length; tries++) {
-    const cats = Object.keys(CAT_WEIGHTS).filter((c) => pool.some((q) => q.cat === c && !bases.has(q.base || q.q)));
-    if (!cats.length) break;
-    const total = cats.reduce((t, c) => t + CAT_WEIGHTS[c], 0);
-    let r = rng() * total;
-    const cat = cats.find((c) => (r -= CAT_WEIGHTS[c]) <= 0) || cats[cats.length - 1];
-    const opts = pool.filter((q) => q.cat === cat && !bases.has(q.base || q.q));
-    // within a topic, broad prompts lead: twists and one-artist / one-actor lists come up less
-    let r2 = rng() * opts.reduce((t, q) => t + w(q), 0);
-    take(opts.find((q) => (r2 -= w(q)) <= 0) || opts[opts.length - 1]);
-  }
-  // prompts without a topic (older saves, tests): the old order, everyday ones first
-  const rank = (q) => (q.variant ? 2 : q.pop ? 0 : 1);
-  for (const q of [...shuffled].sort((x, y) => rank(x) - rank(y))) {
-    if (picked.length >= n) break;
-    if (bases.has(q.base || q.q)) continue;
-    take(q);
-  }
-  for (const q of shuffled) { // top up if a mode has too few categories left
-    if (picked.length >= n) break;
-    if (!picked.includes(q)) picked.push(q);
-  }
-  return picked;
-}
-
-export const promptsLeft = (deckQs, seen) => {
-  const seenSet = new Set(seen);
-  return deckQs.filter((q) => !seenSet.has(q.q)).length;
-};
-
 
 export function normalize(s) {
   return String(s)
@@ -297,13 +168,6 @@ function lookup(index, key, addPlural = true) {
     if (hit) return hit;
   }
   return null;
-}
-
-// GEARHEAD = car questions only; HARD MODE = the niche prompts and letter twists; CLASSIC = the broad prompts.
-export function deckQuestions(all, deck) {
-  if (deck === "car") return all.filter((q) => q.deck === "car" || q.deck === "both");
-  if (deck === "hard") return all.filter((q) => (q.hard || q.variant) && q.deck !== "car");
-  return all.filter((q) => q.deck !== "car" && !q.hard && !q.variant); // CLASSIC: broad prompts only, no "starting with" twists
 }
 
 // A corrected typo scores exactly like the answer it was fixed to, ONE IN A VROOMILLION included.
@@ -487,15 +351,6 @@ export function tossWinner(seedText = null) {
 }
 // distance for a round, with the fender-bender halving for the loser of the toss
 export const roundMetres = (res, power, nitro, crazy = false) => Math.round(metresFor(res.tier, power, nitro, crazy) * (res.half ? 0.5 : 1));
-
-export function pickQuestions(all, n, rng = Math.random) {
-  const pool = [...all];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, n);
-}
 
 // 2P: the winner's prize. tiers = the tier this racer hit each round.
 export function payout(prize, won, tiers) {

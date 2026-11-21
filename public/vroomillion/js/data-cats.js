@@ -1,7 +1,5 @@
-// Every prompt gets a topic (for the CLASSIC mix) and niche ones are sent to HARD MODE.
-// CLASSIC leans on geography, then sports, screen and music, with a little of everything else.
+// Every built-in prompt gets a topic, and niche ones are marked for HARD MODE.
 
-export const CAT_WEIGHTS = { geo: 0.3, sports: 0.14, screen: 0.15, music: 0.13, food: 0.08, animals: 0.07, everyday: 0.07, history: 0.06 };
 
 // Single-artist song prompts kept in CLASSIC: current superstars, the rap giants and the all-time greats. Everyone else is HARD MODE.
 const STAR_ARTISTS = /^(Taylor Swift|Drake|Beyoncé|Ed Sheeran|Billie Eilish|Ariana Grande|Dua Lipa|Olivia Rodrigo|Sabrina Carpenter|Bruno Mars|Harry Styles|song by The Weeknd|Justin Bieber|Rihanna|Lady Gaga|Adele|Coldplay|BTS|Eminem|Kanye West|Kendrick Lamar|Travis Scott|Beatles|Michael Jackson|Queen|ABBA|Elvis Presley|Christmas|Madonna|Katy Perry|Britney Spears|One Direction|Nirvana|AC\/DC|Metallica|Elton John|Whitney Houston|Mariah Carey|Bon Jovi|Linkin Park|Green Day|Shakira|Oasis|Rolling Stones|Pink Floyd|Spice Girls|Disney)\b/;

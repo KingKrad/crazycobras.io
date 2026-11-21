@@ -5,7 +5,7 @@ import { carById } from "../public/vroomillion/js/cars.js";
 import {
   DESTINATIONS, destinationFor,
   TIERS, ROUNDS, classRank, blockedBy, carReach, tunedCar, upgradeLevel, upgradeCost, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, dailyQuestions, pickFresh, promptsLeft, makeVariants, DAILY_RACES,
+  payout, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, DAILY_RACES,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -136,31 +136,6 @@ test("one daily race for everyone, Unlimited for everything else, everything dur
   assert.equal(msUntilTomorrow(new Date(2026, 10, 17, 23, 0, 0)), 60 * 60 * 1000);
 });
 
-test("a prompt never comes back, even after the mode runs out", () => {
-  const deck = deckQuestions(QUESTIONS, "classic");
-  const seen = [];
-  const lengths = [];
-  for (;;) {
-    const race = pickFresh(deck, seen, ROUNDS);
-    if (!race.length) break;
-    assert.equal(new Set(race.map((q) => q.q)).size, race.length, "no repeats within a race");
-    for (const q of race) assert.ok(!seen.includes(q.q), "never shown twice: " + q.q);
-    seen.push(...race.map((q) => q.q));
-    lengths.push(race.length);
-    assert.equal(promptsLeft(deck, seen), deck.length - seen.length);
-  }
-  assert.equal(seen.length, deck.length, "every prompt was played exactly once");
-  assert.ok(lengths.slice(0, -1).every((n) => n === ROUNDS), "full races until the last one");
-  assert.equal(lengths.at(-1), deck.length % ROUNDS || ROUNDS, "the last race uses whatever is left");
-  assert.deepEqual(pickFresh(deck, seen, ROUNDS), [], "nothing new once every prompt is played");
-});
-
-test("prompts seen in one mode stay seen in the other", () => {
-  const both = QUESTIONS.filter((q) => q.deck === "both").map((q) => q.q);
-  const race = pickFresh(deckQuestions(QUESTIONS, "car"), both, ROUNDS);
-  assert.ok(race.length > 0 && race.every((q) => !both.includes(q.q)));
-});
-
 test("solo prize money grows with the car class and niche answers", () => {
   const starter = carById("rustbucket");
   const hyper = carById("chiron");
@@ -168,12 +143,6 @@ test("solo prize money grows with the car class and niche answers", () => {
   assert.equal(soloPayout(3000, starter, [4, 5]).bonus, Math.round(6000 * 0.35));
   assert.equal(soloPayout(1000, hyper, [3]).rate, 6, "class S earns $6 a metre");
   assert.equal(soloPayout(0, hyper, [0, 0]).total, 0);
-});
-
-test("pickQuestions returns distinct questions", () => {
-  const picked = pickQuestions(QUESTIONS, ROUNDS);
-  assert.equal(picked.length, ROUNDS);
-  assert.equal(new Set(picked).size, ROUNDS);
 });
 
 test("payout rewards winning and niche answers", () => {
@@ -212,33 +181,6 @@ test("a trailing category word is ignored", () => {
   assert.equal(judge(q("Name a tree"), "oak tree").display, "oak");
 });
 
-test("GEARHEAD and CLASSIC decks each have enough questions", () => {
-  const car = deckQuestions(QUESTIONS, "car");
-  const classic = deckQuestions(QUESTIONS, "classic");
-  assert.ok(car.length >= ROUNDS * 2, "car deck " + car.length);
-  assert.ok(classic.length >= ROUNDS * 2);
-  assert.ok(car.every((x) => x.deck === "car" || x.deck === "both"));
-  assert.ok(classic.every((x) => x.deck !== "car"));
-  const hard = deckQuestions(QUESTIONS, "hard");
-  assert.ok(hard.length >= ROUNDS * 2, "hard deck " + hard.length);
-  assert.ok(hard.every((x) => x.hard) && classic.every((x) => !x.hard), "niche prompts only in HARD MODE");
-  assert.equal(car.length + classic.length + hard.length - QUESTIONS.filter((x) => x.deck === "both").length, QUESTIONS.length);
-});
-
-test("CLASSIC keeps niche prompts out and leans on geography", () => {
-  const classic = deckQuestions(QUESTIONS, "classic").map((q) => q.q);
-  for (const niche of ["Name a Bee Gees song", "Name a chess opening", "Name a typeface or font", "Name a South Park character", "Name a knot"]) assert.ok(!classic.includes(niche), niche);
-  for (const broad of ["Name a Beatles song", "Name a Friends character", "Name a country that borders Germany", "Name a Taylor Swift song", "Name an NFL team", "Name a Simpsons character", "Name a movie with a number in the title"]) assert.ok(classic.includes(broad), broad);
-  const deck = deckQuestions(ALL, "classic");
-  const count = {};
-  let seed = 7;
-  const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 300; i++) for (const q of pickFresh(deck, [], ROUNDS, rng)) count[q.cat] = (count[q.cat] || 0) + 1;
-  const total = Object.values(count).reduce((a, b) => a + b, 0);
-  assert.ok(count.geo / total > 0.22, "geography is the biggest share: " + JSON.stringify(count));
-  for (const c of ["sports", "screen", "music"]) assert.ok(count[c] / total > 0.08, c + " gets a fair share");
-});
-
 test("no answer appears in two tiers of the same question", () => {
   for (const x of QUESTIONS) {
     const seen = new Map();
@@ -249,66 +191,6 @@ test("no answer appears in two tiers of the same question", () => {
       seen.set(k, t);
     })));
   }
-});
-
-// ---------- endless prompts ----------
-const VARIANTS = makeVariants(QUESTIONS);
-const ALL = [...QUESTIONS, ...VARIANTS];
-
-test("mostly hand-written prompts, a few 'starting with' twists, each with a unique text", () => {
-  const classic = deckQuestions(ALL, "classic");
-  const car = deckQuestions(ALL, "car");
-  assert.ok(classic.filter((q) => !q.variant).length >= 80, "hand-written classic");
-  assert.ok(classic.length >= 300, "classic " + classic.length);
-  assert.ok(car.length >= 80, "gearhead " + car.length);
-  assert.equal(new Set(ALL.map((q) => q.q)).size, ALL.length);
-  assert.ok(VARIANTS.every((v) => v.variant === "start"), "no 'ending in' or 'exactly N letters' prompts");
-  const perBase = new Map();
-  for (const v of VARIANTS) perBase.set(v.base, (perBase.get(v.base) || 0) + 1);
-  assert.ok([...perBase.values()].every((n) => n <= 3), "at most 3 twists per category");
-});
-
-test("every generated prompt has enough answers and every answer fits its rule", () => {
-  for (const v of VARIANTS) {
-    assert.ok(v.a.flat().length >= 8, v.q);
-    assert.ok(v.a[2].length + v.a[3].length + v.a[4].length >= 3, v.q);
-    const letter = (v.q.match(/"([A-Z])"$/) || [])[1]?.toLowerCase();
-    const n = Number((v.q.match(/exactly (\d+) letters$/) || [])[1]);
-    for (const entry of v.a.flat()) for (const f of entry.split("|")) {
-      const k = normalize(f);
-      if (v.variant === "start") assert.equal(k[0], letter, `${v.q}: ${f}`);
-      if (v.variant === "end") assert.equal(k.at(-1), letter, `${v.q}: ${f}`);
-      if (v.variant === "length") assert.ok(!k.includes(" ") && k.length === n, `${v.q}: ${f}`);
-    }
-  }
-});
-
-test("generated prompts judge strictly and keep rarity tiers", () => {
-  const fruitB = VARIANTS.find((v) => v.q === 'Name a fruit starting with "B"');
-  assert.ok(fruitB, "fruit / B exists");
-  const idx = buildIndex(fruitB);
-  assert.equal(judge(idx, "banana").tier, 1);
-  assert.equal(judge(idx, "ripe banana").tier, 0, "no extra words in front for generated prompts");
-  assert.equal(judge(idx, "apple").tier, 0, "a fruit that doesn't start with B is not on the list");
-  assert.equal(judge(idx, "blueberry").tier, 2, "rarity carries over");
-  // a person can be named by surname when it fits the letter
-  const champs = VARIANTS.find((v) => v.base === "Name a famous racing driver (any series)" && v.variant === "start" && v.q.endsWith('"H"'));
-  if (champs) assert.ok(judge(buildIndex(champs), "hamilton").tier > 0);
-});
-
-test("CLASSIC races are broad prompts only, never repeat, and run out instead of recycling", () => {
-  const deck = deckQuestions(ALL, "classic");
-  assert.ok(deck.every((q) => !q.variant), "no 'starting with' twists in CLASSIC");
-  const race = pickFresh(deck, [], ROUNDS);
-  assert.equal(new Set(race.map((q) => q.base || q.q)).size, ROUNDS, "one prompt per category");
-  const seen = [];
-  for (let i = 0; i < 1000; i++) {
-    const next = pickFresh(deck, seen, ROUNDS);
-    if (!next.length) break;
-    for (const q of next) { assert.ok(!seen.includes(q.q), "repeat: " + q.q); seen.push(q.q); }
-  }
-  assert.equal(seen.length, deck.length, "every prompt is played once before any comes back");
-  assert.ok(deckQuestions(ALL, "hard").some((q) => q.variant), "twists live in HARD MODE");
 });
 
 test("part of a longer answer is fixed to the full answer and scores the same", () => {
@@ -375,17 +257,6 @@ test("long-tail (deep) answers count instantly, and long typos snap to them only
   assert.equal(judge(index, "mayochup").tier, 0, "starting-with twists still need the letter");
 });
 
-test("daily races are the same for everyone: 2 x 7 different prompts, new each day", () => {
-  const deck = deckQuestions(QUESTIONS, "classic");
-  const [a, b] = dailyQuestions(deck, "2026-11-20");
-  assert.equal(a.length, ROUNDS);
-  assert.equal(b.length, ROUNDS);
-  assert.equal(new Set([...a, ...b].map((q) => q.q)).size, ROUNDS * 2, "14 different prompts");
-  const again = dailyQuestions([...deck].reverse(), "2026-11-20");
-  assert.deepEqual(again[0].map((q) => q.q), a.map((q) => q.q), "the same on every device, whatever the list order");
-  assert.notDeepEqual(dailyQuestions(deck, "2026-11-21")[0].map((q) => q.q), a.map((q) => q.q), "a new set tomorrow");
-});
-
 test("car upgrades add power and nitro but never change the class", () => {
   const car = carById("rustbucket");
   const ups = { rustbucket: { engine: 3, nitro: 2 } };
@@ -420,19 +291,7 @@ test("hand-picked top answers fix Wikidata-built prompts", () => {
   for (const q of QUESTIONS) assert.ok(q.a.every((l) => l.length), q.q + " has an empty tier");
 });
 
-test("GEARHEAD is mainly cars and how they work, with the odd racing prompt", () => {
-  const deck = deckQuestions([...QUESTIONS, ...makeVariants(QUESTIONS)], "car");
-  assert.ok(deck.filter((q) => !q.variant).length >= 70);
-  let racing = 0;
-  let seed = 11;
-  const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 200; i++) for (const q of pickFresh(deck, [], ROUNDS, rng, { flat: true })) if (q.minor) racing++;
-  assert.ok(racing / 200 < 1, "less than one racing prompt a race on average: " + racing / 200);
-  const engine = buildIndex(QUESTIONS.find((x) => x.q === "Name a part of an engine"));
-  assert.equal(judge(engine, "spark plugs").tier, 1);
-});
-
-// ---------- the new prompt system: families, groups, topics ----------
+// ---------- prompt families, groups, topics ----------
 import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies } from "../public/vroomillion/js/racepick.js";
 import { FAMILIES, TOPICS } from "../public/vroomillion/js/catalog/index.js";
 import { QUESTIONS as ALL_Q } from "../public/vroomillion/js/data.js";

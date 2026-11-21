@@ -1,8 +1,8 @@
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
-  pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
-  dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize, V2,
+  payout, soloPayout, exampleAnswer,
+  dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, DAILY_RACES, FREE_PLAY, normalize,
   DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
 } from "./logic.js";
 import * as audio from "./audio.js";
@@ -13,12 +13,11 @@ import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
 import { pickRace, dailyRace, famKey, familyOf, answerSlug } from "./racepick.js";
 
-// hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
-// The answer lists are about 2 MB, so they load in the background while the title screen is up
+// The built-in answer lists (the game's original prompts, now part of the catalog) are about 2 MB, so they load in the background while the title screen is up
 // instead of holding up the first screen. Races wait for them (usually long since done).
 let QUESTIONS = [];
 let questionsReady = false;
-const buildHere = () => import("./data.js").then(({ QUESTIONS: hand }) => [...hand, ...makeVariants(hand)]);
+const buildHere = () => import("./data.js").then(({ QUESTIONS: hand }) => hand);
 const buildInWorker = () => new Promise((resolve, reject) => {
   const w = new Worker(new URL("./questions-worker.js", import.meta.url), { type: "module" });
   w.onmessage = (e) => { resolve(e.data); w.terminate(); };
@@ -159,8 +158,6 @@ let fullH = 0, fullW = 0; // the tallest the visible area has been at this width
 window.addEventListener("orientationchange", () => setTimeout(fitScene, 300));
 
 // Keep the question card above the road so it never hides the cars.
-const TOPIC = { geo: "PLACES", sports: "SPORTS", screen: "SCREEN", music: "MUSIC", food: "FOOD & DRINK", animals: "ANIMALS", everyday: "EVERYDAY", history: "HISTORY & SCIENCE" };
-const topicOf = (q) => (q.deck === "car" ? "CARS" : TOPIC[q.cat] || "TRIVIA");
 
 // "Name a country that borders France" -> lead "NAME A", subject "COUNTRY THAT BORDERS FRANCE";
 // a 'starting with "M"' twist becomes its own chip.
@@ -293,7 +290,7 @@ function renderDaily() {
     box.append(h("div", { class: "daily-line good", text: `${n} DAILY RACE${n === 1 ? "" : "S"} LEFT TODAY · SAME PROMPTS FOR EVERYONE` }));
   } else {
     box.append(
-      h("div", { class: "daily-line", text: DAILY_RACES === 1 ? `TODAY'S DAILY RACE IS DONE · A NEW ONE IN ${timeLeft()}` : `TODAY'S ${DAILY_RACES} DAILY RACES ARE DONE · NEW ONES IN ${timeLeft()}` }),
+      h("div", { class: "daily-line", text: `TODAY'S DAILY RACE IS DONE · A NEW ONE IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
   }
 }
@@ -504,7 +501,7 @@ function renderPaywall() {
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
     : dailyLeft(save, dday()) > 0
       ? "Unlimited races on top of the daily two, in every mode."
-      : (DAILY_RACES === 1 ? `You've played today's daily race. A new one in ${timeLeft()}.` : `You've played today's ${DAILY_RACES} daily races. New ones in ${timeLeft()}.`);
+      : `You've played today's daily race. A new one in ${timeLeft()}.`;
   $("pay-msg").textContent = "";
   const step = $("pay-step");
   step.textContent = "";
@@ -534,7 +531,7 @@ function renderAccount() {
   }
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
-    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : (DAILY_RACES === 1 ? "FREE PLAYER — 1 DAILY RACE A DAY" : `FREE PLAYER — ${DAILY_RACES} DAILY RACES A DAY`) }),
+    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : "FREE PLAYER — 1 DAILY RACE A DAY" }),
     nicknameForm(),
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
     account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
@@ -585,7 +582,7 @@ function renderOnline() {
     save.onlineName = jName.value.trim().slice(0, 16); persist();
     const car = tuned(carById(save.car));
     try {
-      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro, ...(V2 ? { seen: seenList() } : {}) });
+      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro, seen: seenList() });
       online = { code: code.value.trim().toUpperCase(), token: out.token, seat: 1, host: false };
       renderOnline();
     } catch (err) { jMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
@@ -609,8 +606,7 @@ function renderOnline() {
       audio.sfx.click(); cMsg.textContent = "Making your race…";
       save.onlineName = cName.value.trim().slice(0, 16); save.onlineDeck = deck; persist();
       await questionsLoaded;
-      // the new prompt system picks at START, once the friend's history is in
-      const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, deck), [], ROUNDS, Math.random, { flat: deck === "car" }).map((q) => q.q);
+      const prompts = []; // picked at START, once the friend's history is in
       const car = tuned(carById(save.car));
       try {
         const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts, crazy: !!save.crazy, equalCars: !!save.equalCars });
@@ -670,8 +666,8 @@ function onlineLobby(box) {
       actions.append(h("button", { class: "btn big", type: "button", text: "START RACE", onclick: async (e) => {
         e.target.disabled = true; audio.sfx.click();
         try {
-          if (V2) await questionsLoaded;
-          const prompts = V2 && !st.prompts.length ? v2OnlinePrompts(st.deck, st.guestSeen || []) : undefined;
+          await questionsLoaded;
+          const prompts = !st.prompts.length ? v2OnlinePrompts(st.deck, st.guestSeen || []) : undefined;
           const s2 = await onlineCall({ action: "start", code: me.code, token: me.token, prompts }); started = true; onlineBegin(s2);
         } catch (err) { status.textContent = err.message; e.target.disabled = false; }
       } }));
@@ -687,7 +683,7 @@ async function onlineBegin(st) {
   const o = online;
   online = null; // the race has the room now; the online screen starts fresh next time
   await questionsLoaded;
-  if (V2) await Promise.race([loadAnswers(st.prompts), new Promise((r) => setTimeout(r, 6000))]);
+  await Promise.race([loadAnswers(st.prompts), new Promise((r) => setTimeout(r, 6000))]);
   const byText = { get: (t) => getQ(t) };
   // a prompt this copy of the game doesn't have (an older version): race it on the live check alone
   const questions = st.prompts.map((t) => byText.get(t) || { q: t, a: [[], [], [], [], []], cat: "everyday" });
@@ -727,7 +723,7 @@ function rematchPoll(r) {
 async function rematchJoin(r) {
   const car = tuned(carById(save.car));
   try {
-    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro, ...(V2 ? { seen: seenList() } : {}) });
+    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro, seen: seenList() });
     rematch = null; clearTimeout(r.poll);
     online = { code: r.next, token: out.token, seat: 1, host: false };
     show("online");
@@ -745,7 +741,7 @@ async function rematchGo() {
   }
   $("btn-redo").disabled = true; $("btn-redo").textContent = "MAKING REMATCH…";
   await questionsLoaded;
-  const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, r.deck), r.prompts, ROUNDS, Math.random, { flat: r.deck === "car" }).map((q) => q.q);
+  const prompts = []; // the host picks fresh ones at START
   const car = tuned(carById(save.car));
   try {
     const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token, crazy: !!r.crazy, equalCars: !!r.equal });
@@ -1308,42 +1304,13 @@ function markSeen(prompt) {
     persist();
   }
 }
-function unseeMode(prompts) {
-  if (account && accountSeen) {
-    accountSeen = accountSeen.filter((t) => !prompts.has(t));
-    save.acctSeen = { email: account.email, list: accountSeen };
-    sendSeen({ remove: [...prompts] });
-  } else {
-    save.seen = deviceSeen().filter((t) => !prompts.has(t));
-  }
-  persist();
-}
-const leftInMode = () => V2 ? 1 : promptsLeft(deckQuestions(QUESTIONS, save.deck), seenList());
-
-// "28 NEW PROMPTS LEFT" under the mode switch; when none are left, say what to do instead.
+// The count of fresh prompts left is hidden (they never run out: once every one is seen, the oldest come
+// back), so this only holds the start button until the prompts have loaded.
 function renderPromptsLeft(el, startBtn, ready) {
-  if (!questionsReady) {
-    el.className = "prompts-left";
-    el.textContent = "LOADING PROMPTS…";
-    startBtn.disabled = true;
-    return; // redrawn when they arrive
-  }
-  startBtn.disabled = false;
-  // the new prompt system never runs out (old prompts come back once all are seen), and the count is hidden
-  if (V2) { el.className = "prompts-left"; el.textContent = ""; ready(); return; }
-  const left = leftInMode();
-  el.className = "prompts-left" + (left ? "" : " none");
-  el.textContent = left
-    ? `${left.toLocaleString("en-US")} NEW PROMPT${left === 1 ? "" : "S"} LEFT IN ${modeName(save.deck)}${left < ROUNDS ? ` · LAST RACE IS ${left} ROUND${left === 1 ? "" : "S"}` : ""}`
-    : `YOU'VE PLAYED ALL ${deckQuestions(QUESTIONS, save.deck).length.toLocaleString("en-US")} ${modeName(save.deck)} PROMPTS! START THEM OVER, TRY ANOTHER MODE, OR REDO A RACE FROM ITS RESULTS SCREEN.`;
-  el.append(...(left ? [] : [h("button", { class: "btn small restart", type: "button", text: "START THE PROMPTS OVER", onclick: () => {
-    audio.sfx.click();
-    unseeMode(new Set(deckQuestions(QUESTIONS, save.deck).map((q) => q.q)));
-    show(current);
-  } })]));
-  startBtn.disabled = !left;
-  if (!left) startBtn.textContent = "NO NEW PROMPTS";
-  else ready();
+  el.className = "prompts-left";
+  el.textContent = questionsReady ? "" : "LOADING PROMPTS…";
+  startBtn.disabled = !questionsReady;
+  if (questionsReady) ready();
 }
 
 // ---------- streaks and the daily leaderboard ----------
@@ -1359,7 +1326,7 @@ function streakNow() {
 // One leaderboard (top 10 for a daily race), drawn into el.
 async function drawBoard(el, n) {
   el.textContent = "";
-  el.append(h("div", { class: "board-title", text: DAILY_RACES === 1 ? "DAILY RACE · TOP 10" : `DAILY RACE ${n} · TOP 10` }));
+  el.append(h("div", { class: "board-title", text: "DAILY RACE · TOP 10" }));
   let body;
   try { ({ body } = await api("daily-board?race=" + n)); } catch { el.append(h("p", { class: "note", text: "Leaderboards work on the VROOMILLION website." })); return; }
   if (!body.top?.length) { el.append(h("p", { class: "note", text: "Nobody on it yet today. Be the first!" })); return; }
@@ -1422,7 +1389,7 @@ let accountRaces = null;
 const racesRun = () => (account && accountRaces != null ? accountRaces : save.unlRaces || 0);
 
 function renderLeagues() {
-  // the two daily races: the same prompts for everyone today, free for every player
+  // the daily race: the same prompts for everyone today, free for every player
   const daily = $("daily-solo");
   daily.textContent = "";
   const done = dailyDone(save, dday());
@@ -1430,14 +1397,14 @@ function renderLeagues() {
     const played = n in done;
     daily.append(h("button", {
       class: "btn daily-race" + (played ? " done" : ""), type: "button", disabled: played,
-      text: played ? (DAILY_RACES === 1 ? "DAILY" : `DAILY ${n}`) + (done[n] ? ` ✓ ${done[n].toLocaleString("en-US")} M` : " ✓ PLAYED") : DAILY_RACES === 1 ? "DAILY RACE" : `DAILY RACE ${n}`,
+      text: played ? "DAILY" + (done[n] ? ` ✓ ${done[n].toLocaleString("en-US")} M` : " ✓ PLAYED") : "DAILY RACE",
       onclick: () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); },
     }));
   }
   const st = streakNow();
   $("daily-note").textContent = (dailyLeft(save, dday())
-    ? (DAILY_RACES === 1 ? "Same 7 prompts for everyone today. Free, once a day." : "Same 7 prompts for everyone today. Free, once each.")
-    : DAILY_RACES === 1 ? `Done. A new daily race in ${timeLeft()}.` : `Both done. New daily races in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
+    ? "Same 7 prompts for everyone today. Free, once a day."
+    : `Done. A new daily race in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
   modeSwitch($("mode-solo"), renderLeagues);
   const rules1p = $("rules-solo");
   rules1p.textContent = "";
@@ -1597,7 +1564,7 @@ function popGain(i, metres, tier, nitro, crazy = false) {
 
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
-  if (V2 && !setup.online && !setup.v2questions && !(setup.redo && setup.questions?.length)) {
+  if (!setup.online && !setup.v2questions && !(setup.redo && setup.questions?.length)) {
     const today = dday();
     const daily = setup.daily && !setup.redo ? setup.daily : 0;
     if (canRace(me(), today, daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck })) return startRaceV2(setup);
@@ -1615,11 +1582,7 @@ function startRace(setup) {
     ? setup.questions
     : setup.redo && setup.questions?.length && !daily
       ? setup.questions
-      : V2
-        ? setup.v2questions
-        : daily
-          ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
-          : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS, Math.random, { flat: save.deck === "car" });
+      : setup.v2questions || [];
   if (!questions.length) {
     // nothing new left in this mode: back to the setup screen, which explains
     show(setup.mode === "solo" ? "leagues" : "versus");
@@ -1633,7 +1596,7 @@ function startRace(setup) {
     label = "ONLINE 1V1";
   } else if (daily) {
     save.daily = markDaily(save, today, daily);
-    label = DAILY_RACES === 1 ? "DAILY RACE" : `DAILY ${daily} OF ${DAILY_RACES}`;
+    label = "DAILY RACE";
   } else {
     const n = racesRun() + 1;
     save.unlRaces = Math.max(save.unlRaces || 0, n);
@@ -1717,10 +1680,9 @@ async function runRace(token) {
     Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     // the new prompt system shows no topic label (it would give the answer space away)
-    $("q-kicker").textContent = V2 ? `PROMPT ${round + 1}/${rounds}` : `${topicOf(q)} · ${round + 1}/${rounds}`;
+    $("q-kicker").textContent = `PROMPT ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
-    if (V2) markSeen(q.fam || famKeyOf(q.q)); // the new system: the whole family, in every race type
-    else if (!race.online) markSeen(q.q);
+    markSeen(q.fam || famKeyOf(q.q)); // the whole family, in every race type
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);
@@ -2472,7 +2434,7 @@ function finish(token) {
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
     FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
-      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE${dailyLeft(save, dday()) === 1 ? "" : "S"} LEFT TODAY` : (DAILY_RACES === 1 ? `NEW DAILY RACE IN ${timeLeft()}` : `NEW DAILY RACES IN ${timeLeft()}`) }),
+      h("div", { text: dailyLeft(save, dday()) > 0 ? "TODAY'S DAILY RACE IS STILL WAITING" : `NEW DAILY RACE IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },
@@ -2483,10 +2445,9 @@ function finish(token) {
           reportLink(row.q, r.log[i])))))),
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
-  const left = leftInMode();
   const dailyNext = race.daily && !paid ? nextDaily(save, dday()) : 0;
-  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : left ? `RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "NO NEW PROMPTS";
-  $("btn-again").disabled = paid && !left;
+  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
+  $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   // online: "again" goes back to the online screen; "redo" becomes REMATCH with the same friend
   if (race.online) {
