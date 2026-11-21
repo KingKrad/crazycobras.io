@@ -147,13 +147,27 @@ export function makeVariants(questions) {
 
 // No repeats: a prompt this browser has seen never comes back. Hand-written prompts
 // come first; a race never uses two prompts built from the same category if it can help it.
-export function pickFresh(deckQs, seen, n, rng = Math.random) {
+// opts.flat (GEARHEAD): no topic mix, every prompt by its own weight, so the rarer racing prompts stay rare.
+export function pickFresh(deckQs, seen, n, rng = Math.random, opts = {}) {
   const seenSet = new Set(seen);
   const unseen = deckQs.filter((q) => !seenSet.has(q.q));
   const shuffled = pickQuestions(unseen, unseen.length, rng);
   const picked = [];
   const bases = new Set();
   const take = (q) => { bases.add(q.base || q.q); picked.push(q); };
+  const w = (q) => (q.variant ? 0.1 : 1) * (q.minor ? 0.3 : 1);
+  if (opts.flat) {
+    const pool = [...shuffled];
+    while (picked.length < n && pool.length) {
+      const opts2 = pool.filter((q) => !bases.has(q.base || q.q));
+      const list = opts2.length ? opts2 : pool;
+      let r = rng() * list.reduce((t, q) => t + w(q), 0);
+      const q = list.find((x) => (r -= w(x)) <= 0) || list[list.length - 1];
+      pool.splice(pool.indexOf(q), 1);
+      take(q);
+    }
+    return picked;
+  }
   // topic mix: each round draws a topic by weight (geography the most), then a prompt from it;
     const pool = shuffled.filter((q) => q.cat);
   for (let tries = 0; picked.length < n && tries < n * 30 && pool.length; tries++) {
@@ -164,7 +178,6 @@ export function pickFresh(deckQs, seen, n, rng = Math.random) {
     const cat = cats.find((c) => (r -= CAT_WEIGHTS[c]) <= 0) || cats[cats.length - 1];
     const opts = pool.filter((q) => q.cat === cat && !bases.has(q.base || q.q));
     // within a topic, broad prompts lead: twists and one-artist / one-actor lists come up less
-    const w = (q) => (q.variant ? 0.1 : 1) * (q.minor ? 0.3 : 1); // each prompt has up to 3 twists
     let r2 = rng() * opts.reduce((t, q) => t + w(q), 0);
     take(opts.find((q) => (r2 -= w(q)) <= 0) || opts[opts.length - 1]);
   }

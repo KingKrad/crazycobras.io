@@ -655,7 +655,7 @@ function carPicker(mount, getId, setId) {
 // ---------- menus ----------
 const MODES = [
   { id: "classic", name: "CLASSIC", info: "SPORTS, SCREEN, MUSIC, PLACES" },
-  { id: "car", name: "GEARHEAD", info: "CARS & RACING ONLY" },
+  { id: "car", name: "GEARHEAD", info: "CARS & HOW THEY WORK" },
   { id: "hard", name: "HARD MODE", info: "NICHE & EXPERT" },
 ];
 const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
@@ -985,7 +985,7 @@ function startRace(setup) {
     ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
     : setup.redo && setup.questions?.length
       ? setup.questions
-      : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS);
+      : pickFresh(deckQuestions(QUESTIONS, save.deck), seenList(), ROUNDS, Math.random, { flat: save.deck === "car" });
   if (!questions.length) {
     // nothing new left in this mode: back to the setup screen, which explains
     show(setup.mode === "solo" ? "leagues" : "versus");

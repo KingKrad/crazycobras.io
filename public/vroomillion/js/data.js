@@ -8,6 +8,7 @@ import { POP_QUESTIONS } from "./data-pop.js";
 import { HAND2_QUESTIONS } from "./data-hand2.js";
 import { HAND3_QUESTIONS } from "./data-hand3.js";
 import { HAND4_QUESTIONS } from "./data-hand4.js";
+import { CAR_QUESTIONS } from "./data-car.js";
 import { RARITY } from "./data-rarity.js";
 import { TOP } from "./data-top.js";
 import { classify } from "./data-cats.js";
@@ -651,11 +652,13 @@ const withExtra = (q0) => {
 };
 
 // HAND_QUESTIONS: just the hand-written answers (the answer builder uses these).
-export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2_QUESTIONS, ...HAND3_QUESTIONS, ...HAND4_QUESTIONS].map((q) => ({ ...q, pop: true }))];
+export const HAND_QUESTIONS = [...CORE_QUESTIONS, ...[...POP_QUESTIONS, ...HAND2_QUESTIONS, ...HAND3_QUESTIONS, ...HAND4_QUESTIONS, ...CAR_QUESTIONS].map((q) => ({ ...q, pop: true }))];
 // Whole prompts generated from Wikidata (tools/prompt-sources.mjs), mixed in with the everyday ones.
 const handNames = new Set(HAND_QUESTIONS.map((q) => q.q));
 const GENERATED = Object.values(GEN).filter((q) => !handNames.has(q.q)).map(({ tiers, ...q }) => ({ ...q, pop: true }));
 // each prompt carries its topic (cat) and whether it is niche (hard: HARD MODE only)
+const RACING = /race|racing|racer|formula 1|f1|motorsport|rally|driver|motorbike|motorcycle|track|road or driving route/i;
+
 // RARITY (tools/rescale-rarity.mjs): answers far more famous than their tier, moved to a more common one.
 const withRarity = (q) => {
   const fix = RARITY[q.q];
@@ -704,4 +707,6 @@ const withTop = (q) => {
   }
   return out.every((l) => l.length) ? { ...q, a: out } : q;
 };
-export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map(withTop).map((q) => ({ ...q, ...classify(q) }));
+export const QUESTIONS = [...HAND_QUESTIONS.map(withExtra), ...GENERATED.map(withExtra)].map(withRarity).map(withTop).map((q) => ({ ...q, ...classify(q) }))
+  // GEARHEAD is mainly cars and how they work: racing and motorbike prompts come up less often there
+  .map((q) => (q.deck !== "car" || !RACING.test(q.q) ? q : { ...q, minor: true }));

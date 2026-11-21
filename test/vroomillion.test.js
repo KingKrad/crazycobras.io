@@ -397,3 +397,15 @@ test("hand-picked top answers fix Wikidata-built prompts", () => {
   assert.equal(tier("Name a US state capital", "pierre"), 5);
   for (const q of QUESTIONS) assert.ok(q.a.every((l) => l.length), q.q + " has an empty tier");
 });
+
+test("GEARHEAD is mainly cars and how they work, with the odd racing prompt", () => {
+  const deck = deckQuestions([...QUESTIONS, ...makeVariants(QUESTIONS)], "car");
+  assert.ok(deck.filter((q) => !q.variant).length >= 70);
+  let racing = 0;
+  let seed = 11;
+  const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 200; i++) for (const q of pickFresh(deck, [], ROUNDS, rng, { flat: true })) if (q.minor) racing++;
+  assert.ok(racing / 200 < 1, "less than one racing prompt a race on average: " + racing / 200);
+  const engine = buildIndex(QUESTIONS.find((x) => x.q === "Name a part of an engine"));
+  assert.equal(judge(engine, "spark plugs").tier, 1);
+});
