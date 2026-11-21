@@ -629,6 +629,21 @@ test("online 1v1: an Unlimited host makes a room, a friend joins without an acco
   assert.equal((await on({ action: "join", code: st.next, name: "Pal" })).status, 200);
 });
 
+test("online 1v1 rules: CRAZY MODE and EQUAL CARS are set by the host and seen by both", async () => {
+  const on = (body, h = {}) => worker.fetch(post("online", body, h), env());
+  const host = await signup("host3@example.com");
+  db.sql.prepare("UPDATE users SET unlimited = 1 WHERE email = 'host3@example.com'").run();
+  const plain = await (await on({ action: "create", deck: "classic", name: "H", prompts: [] }, { cookie: host.cookie })).json();
+  let st = await (await on({ action: "state", code: plain.code, token: plain.token })).json();
+  assert.equal(st.crazy, false);
+  assert.equal(st.equalCars, false);
+  const room = await (await on({ action: "create", deck: "classic", name: "H", prompts: [], crazy: true, equalCars: true }, { cookie: host.cookie })).json();
+  const g = await (await on({ action: "join", code: room.code, name: "G" })).json();
+  st = await (await on({ action: "state", code: room.code, token: g.token })).json();
+  assert.equal(st.crazy, true);
+  assert.equal(st.equalCars, true);
+});
+
 test("online 1v1, new prompt system: no prompts at create, the friend's history goes to the host, prompts come with start", async () => {
   const on = (body, h = {}) => worker.fetch(post("online", body, h), env());
   const host = await signup("host2@example.com");

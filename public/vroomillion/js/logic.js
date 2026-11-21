@@ -459,9 +459,15 @@ function partialMatch(index, key) {
   return bestOf(hits);
 }
 
-export function metresFor(tier, power, nitro) {
-  return Math.round(TIERS[tier].metres * power * (nitro ? NITRO_BOOST : 1));
+// CRAZY MODE turns the ladder upside down: the most obvious answer scores the most. STALLED is still 0.
+export const CRAZY_METRES = [0, 1000, 720, 480, 280, 120];
+export function metresFor(tier, power, nitro, crazy = false) {
+  return Math.round((crazy ? CRAZY_METRES[tier] : TIERS[tier].metres) * power * (nitro ? NITRO_BOOST : 1));
 }
+// how big the effects are for a scored answer: the rarity normally, the payout in CRAZY MODE
+export const effectTier = (tier, crazy = false) => (crazy && tier ? 6 - tier : tier);
+// "cars don't matter" in a 1v1: everyone drives like a x1 car with 2 nitro charges
+export const EQUAL_CAR = { power: 1, nitro: 2 };
 
 // Two racers giving the same answer rub doors: both drop one tier (never below TRAFFIC).
 export function applyFenderBender(a, b) {

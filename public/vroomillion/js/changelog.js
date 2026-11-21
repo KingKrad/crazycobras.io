@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21i",
+    date: "Nov 21, 2026",
+    title: "Crazy Mode + Equal Cars",
+    items: [
+      "CRAZY MODE: the scoring flips, so the most obvious answer goes furthest. Switch it on before an unlimited race or a 1v1.",
+      "EQUAL CARS for 1v1s: turn the cars off and both players score x1 with 2 nitro, whatever they drive. Online, the host picks.",
+      "Crazy runs are just for fun: they don't set your best or stamp your passport. The daily race is always normal.",
+    ],
+  },
+  {
     id: "2026-11-21h",
     date: "Nov 21, 2026",
     title: "A real passport",

@@ -82,6 +82,8 @@
           <li><b>HARD MODE:</b> the niche stuff: one band's songs, one show's characters, typefaces, knots, chess openings and more.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
           <li>Hit <b>NITRO</b> before you answer for 1.5× distance. Charges depend on your car.</li>
+          <li><b>CRAZY MODE:</b> flip it on for unlimited races and 1v1s and the scoring turns upside down: the most obvious answer goes furthest. Just for fun, so it never sets your best or stamps your passport, and the daily race is always normal.</li>
+          <li><b>EQUAL CARS:</b> in a 1v1 you can switch the cars off: both of you score ×1 with 2 nitro charges, whatever you drive. Online, the host picks.</li>
           <li><b>Free:</b> the daily race. <b>Unlimited</b> ($5, once) unlocks as many races as you like, plus 2P, GEARHEAD and HARD MODE.</li>
         </ol>
         <div class="tiers" id="tier-legend"></div>
@@ -98,6 +100,7 @@
         <h3 class="sub-title">UNLIMITED RACES</h3>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-solo" role="status"></p>
+        <div id="rules-solo"></div>
         <div class="picker" id="picker-solo"></div>
         <div class="menu row">
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
@@ -127,6 +130,7 @@
         <p class="note">Answers are hidden while you type. No peeking.</p>
         <div class="modes" id="mode-2p" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-2p" role="status"></p>
+        <div id="rules-2p"></div>
         <div class="versus-grid">
           <div class="vs-col p1">
             <label>PLAYER 1 <input id="name-p1" maxlength="10" value="P1" autocomplete="off" spellcheck="false"></label>

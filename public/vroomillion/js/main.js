@@ -1,6 +1,6 @@
 import { CARS, CLASSES, carById, carSprite } from "./cars.js";
 import {
-  TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender,
+  TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES,
   pickQuestions, payout, soloPayout, exampleAnswer, deckQuestions,
   dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, dailyQuestions, DAILY_RACES, pickFresh, promptsLeft, makeVariants, FREE_PLAY, normalize, V2,
   DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
@@ -613,12 +613,12 @@ function renderOnline() {
       const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, deck), [], ROUNDS, Math.random, { flat: deck === "car" }).map((q) => q.q);
       const car = tuned(carById(save.car));
       try {
-        const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts });
+        const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts, crazy: !!save.crazy, equalCars: !!save.equalCars });
         online = { code: out.code, token: out.token, seat: 0, host: true };
           renderOnline();
       } catch (err) { cMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
     } });
-    create.append(h("p", { class: "note", text: "Pick the prompts, then send your friend the code or link." }), cName, modes, go, cMsg);
+    create.append(h("p", { class: "note", text: "Pick the prompts, then send your friend the code or link." }), cName, modes, ruleToggles(true), go, cMsg);
   }
   box.append(...(linkCode ? [join, create] : [create, join]),
     h("p", { class: "note", text: `You race in your ${carById(save.car).name}. Same seven prompts for both of you; rarer answers drive further.` }));
@@ -694,7 +694,7 @@ async function onlineBegin(st) {
   const offset = st.now - Date.now(); // server clock minus ours
   const wait = st.startAt - offset - Date.now() - 2100; // the 3-2-1 takes about 2.1 s
   const go = () => startRace({
-    mode: "versus", online: { code: o.code, token: o.token, seat: o.seat, deck: st.deck, players: st.players },
+    mode: "versus", online: { code: o.code, token: o.token, seat: o.seat, deck: st.deck, players: st.players }, crazy: !!st.crazy, equal: !!st.equalCars,
     questions, names: st.players.map((p, i) => (i === o.seat ? "YOU" : (p.name || "FRIEND").toUpperCase())), cars: st.players.map((p) => p.car || "rustbucket"),
   });
   overlay(wait > 600 ? "GET READY!" : "", "small");
@@ -748,7 +748,7 @@ async function rematchGo() {
   const prompts = V2 ? [] : pickFresh(deckQuestions(QUESTIONS, r.deck), r.prompts, ROUNDS, Math.random, { flat: r.deck === "car" }).map((q) => q.q);
   const car = tuned(carById(save.car));
   try {
-    const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token });
+    const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token, crazy: !!r.crazy, equalCars: !!r.equal });
     rematch = null; clearTimeout(r.poll);
     online = { code: out.code, token: out.token, seat: 0, host: true };
     show("online");
@@ -1329,6 +1329,8 @@ function renderPromptsLeft(el, startBtn, ready) {
     return; // redrawn when they arrive
   }
   startBtn.disabled = false;
+  // the new prompt system never runs out (old prompts come back once all are seen), and the count is hidden
+  if (V2) { el.className = "prompts-left"; el.textContent = ""; ready(); return; }
   const left = leftInMode();
   el.className = "prompts-left" + (left ? "" : " none");
   el.textContent = left
@@ -1437,6 +1439,9 @@ function renderLeagues() {
     ? (DAILY_RACES === 1 ? "Same 7 prompts for everyone today. Free, once a day." : "Same 7 prompts for everyone today. Free, once each.")
     : DAILY_RACES === 1 ? `Done. A new daily race in ${timeLeft()}.` : `Both done. New daily races in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
   modeSwitch($("mode-solo"), renderLeagues);
+  const rules1p = $("rules-solo");
+  rules1p.textContent = "";
+  rules1p.append(ruleToggles(false));
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
   const ok = canRace(me(), dayKey(), { mode: "solo", deck: save.deck });
@@ -1446,11 +1451,30 @@ function renderLeagues() {
 }
 
 const versus = { p1: save.car, p2: save.car };
+// Race rules the player can switch: CRAZY MODE (unlimited races and 1v1, never the daily race) and,
+// for 1v1, whether the cars matter. Kept on the save, so they stick between races.
+function ruleToggles(versusRules) {
+  const box = h("div", { class: "rules" });
+  const draw = () => {
+    box.textContent = "";
+    const toggle = (key, label, on, off) => h("button", { class: "rule-btn" + (save[key] ? " on" : ""), type: "button", "aria-pressed": String(!!save[key]),
+      onclick: () => { audio.sfx.click(); save[key] = !save[key]; persist(); draw(); } },
+      h("span", { class: "rule-name", text: `${label}: ${save[key] ? "ON" : "OFF"}` }), h("span", { class: "rule-note", text: save[key] ? on : off }));
+    box.append(toggle("crazy", "CRAZY MODE", "Flipped! The most obvious answer scores most", "Rarer answers score more"));
+    if (versusRules) box.append(toggle("equalCars", "EQUAL CARS", "Cars don't matter: both x1, 2 nitro", "Your car's power and nitro count"));
+  };
+  draw();
+  return box;
+}
+
 function renderVersus() {
   modeSwitch($("mode-2p"), renderVersus);
   renderPromptsLeft($("left-2p"), $("btn-start-2p"), () => {
     $("btn-start-2p").textContent = canRace(me(), dayKey(), { mode: "versus", deck: save.deck }) ? "START RACE" : "2P IS UNLIMITED — $5";
   });
+  const rules2p = $("rules-2p");
+  rules2p.textContent = "";
+  rules2p.append(ruleToggles(true));
   versus.p1 = save.car;
   versus.p2 = save.car;
   carPicker($("picker-p1"), () => versus.p1, (id) => { versus.p1 = id; });
@@ -1558,11 +1582,11 @@ function hudCard(r, i) {
 }
 
 // "+720 M" bursting up from a car, sized by how rare the answer was.
-function popGain(i, metres, tier, nitro) {
+function popGain(i, metres, tier, nitro, crazy = false) {
   const at = scene.anchor(i);
   const el = h("div", { class: `gain-pop gp${tier}` },
     h("span", { class: "gain-m", text: tier ? `+${metres.toLocaleString("en-US")} M` : "STALLED" }),
-    tier >= 3 ? h("span", { class: "gain-tag", text: tier === 5 ? "VROOMILLION!" : tier === 4 ? "TURBO! ULTRA RARE" : "RARE!" }) : null,
+    tier >= 3 ? h("span", { class: "gain-tag", text: crazy ? (tier === 5 ? "CRAZY!" : tier === 4 ? "NICE!" : "OK!") : tier === 5 ? "VROOMILLION!" : tier === 4 ? "TURBO! ULTRA RARE" : "RARE!" }) : null,
     nitro ? h("span", { class: "gain-tag nitro", text: "NITRO!" }) : null);
   el.style.left = (at.x * 100).toFixed(1) + "%";
   el.style.top = (at.y * 100).toFixed(1) + "%";
@@ -1631,7 +1655,10 @@ function startRace(setup) {
     if (p.power) r.power = p.power;
     if (Number.isInteger(p.nitro)) r.nitro = p.nitro;
   });
-  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null };
+  // 1v1 with "cars don't matter": everyone races as a x1 car with 2 nitro charges (the car still shows)
+  if (!solo && setup.equal) racers.forEach((r) => { r.power = EQUAL_CAR.power; r.nitro = EQUAL_CAR.nitro; });
+  const crazy = !!setup.crazy && !daily; // CRAZY MODE never applies to the daily race
+  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy };
 
   scene = chaseScene; // races use the behind-the-car view
   scene.setRacers(solo
@@ -1651,7 +1678,7 @@ function startRace(setup) {
   $("q-twist").classList.add("hidden");
   $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
-  $("mode-label").textContent = daily ? label : `${label} · ${modeName(setup.online ? setup.online.deck : save.deck)}`;
+  $("mode-label").textContent = daily ? label : `${label} · ${modeName(setup.online ? setup.online.deck : save.deck)}` + (crazy ? " · CRAZY" : "") + (!solo && setup.equal ? " · EQUAL CARS" : "");
   $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : save.deck);
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
@@ -1732,7 +1759,7 @@ async function runRace(token) {
     document.body.classList.add("smashing");
     const smashCards = final.map((res, i) => {
       const r = race.racers[i];
-      const m = metresFor(res.tier, r.power, r.useNitro);
+      const m = metresFor(res.tier, r.power, r.useNitro, race.crazy);
       return {
         who: race.solo ? "" : r.name.toUpperCase(),
         answer: (res.display || "NO ANSWER").toUpperCase(),
@@ -1745,7 +1772,7 @@ async function runRace(token) {
     // The boost starts the moment each car breaks through its card, from the speed it hit it at,
     // so the car never slows down between the crash and the run up the road.
     const from = race.racers.map((r) => r.dist);
-    const gain = race.racers.map((r, i) => metresFor(final[i].tier, r.power, r.useNitro));
+    const gain = race.racers.map((r, i) => metresFor(final[i].tier, r.power, r.useNitro, race.crazy));
     const topTier = Math.max(...final.map((f) => f.tier));
     race.racers.forEach((r, i) => {
       r.tiers.push(final[i].tier);
@@ -1759,13 +1786,13 @@ async function runRace(token) {
     const startRun = (i) => {
       if (runs[i] || !alive()) return;
       const r = race.racers[i];
-      const tier = final[i].tier;
+      const tier = effectTier(final[i].tier, race.crazy); // the size of the effects: the payout, not the rarity, in CRAZY MODE
       const nitro = r.useNitro && tier > 0;
       const dur = BOOST_MS[tier] + (nitro ? 300 : 0);
       runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier };
       scene.racers[i].nitro = nitro;
       scene.launch(i, tier, nitro, dur / 1000);
-      popGain(i, gain[i], tier, nitro);
+      popGain(i, gain[i], tier, nitro, race.crazy);
       audio.sfx.launch(tier);
       if (tier >= 2) audio.sfx.whoosh(tier);
       if (tier === 0) audio.sfx.sputter();
@@ -1880,9 +1907,10 @@ async function arrive(token) {
   const top = lead.dist;
   const dest = destinationFor(top, lead.car);
   const blocked = blockedBy(top, lead.car); // went far enough, but the car can't go there
-  const newStamp = !(dest.id in save.passport);
-  save.passport[dest.id] = Math.max(save.passport[dest.id] || 0, Math.round(top));
-  const carUnlocked = !!dest.exclusive && !save.owned.includes(EXCLUSIVE_CAR);
+  // CRAZY MODE is for fun: it shows where you'd have got to, but doesn't stamp the passport or unlock cars
+  const newStamp = !race.crazy && !(dest.id in save.passport);
+  if (!race.crazy) save.passport[dest.id] = Math.max(save.passport[dest.id] || 0, Math.round(top));
+  const carUnlocked = !race.crazy && !!dest.exclusive && !save.owned.includes(EXCLUSIVE_CAR);
   if (carUnlocked) save.owned.push(EXCLUSIVE_CAR);
   persist();
   race.arrival = { dest, newStamp, carUnlocked, top, car: lead.car, blocked };
@@ -1921,7 +1949,7 @@ function revealCard(r, res, i) {
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
     tierBadge(res.tier),
-    h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
+    h("div", { class: "reveal-gain", text: `+${metresFor(res.tier, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? " · BUMPED −1" : "") }));
 }
 
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated
@@ -2356,7 +2384,7 @@ function finish(token) {
   let newBest = false;
   if (race.solo) {
     pay = soloPayout(a.dist, a.car, a.tiers);
-    newBest = a.dist > save.best;
+    newBest = !race.crazy && a.dist > save.best; // a CRAZY MODE run never sets your best
     if (newBest) save.best = a.dist;
     title = newBest && save.races > 0 ? "NEW BEST!" : race.daily ? `DAILY RACE ${race.daily} DONE` : "RUN COMPLETE";
     if (race.daily && dailyDone(save, dday())[race.daily] != null) save.daily = markDaily(save, dday(), race.daily, a.dist);
@@ -2432,7 +2460,7 @@ function finish(token) {
     $("btn-again").textContent = "NEW ONLINE RACE"; $("btn-again").disabled = false;
     const o = race.online;
     rematch = { code: o.code, token: o.token, seat: o.seat, deck: o.deck, name: o.players[o.seat]?.name || "RACER",
-      friend: (o.players[1 - o.seat]?.name || "FRIEND").toUpperCase(), prompts: race.questions.map((q) => q.q), asked: false, ask: false, next: null };
+      friend: (o.players[1 - o.seat]?.name || "FRIEND").toUpperCase(), prompts: race.questions.map((q) => q.q), asked: false, ask: false, next: null, crazy: race.crazy, equal: !!race.setup.equal };
     drawRematch();
   } else { rematch = null; $("btn-redo").disabled = false; }
   show("results");
@@ -2469,12 +2497,12 @@ $("btn-redo").addEventListener("click", () => {
   if (rematch) return rematchGo();
   audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true });
 });
-$("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
+$("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo", crazy: !!save.crazy }); });
 $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("btn-start-2p").addEventListener("click", () => {
   audio.sfx.click();
   const clean = (id, fallback) => ($(id).value.trim().toUpperCase().slice(0, 10) || fallback);
-  startRace({ mode: "versus", names: [clean("name-p1", "P1"), clean("name-p2", "P2")], cars: [versus.p1, versus.p2] });
+  startRace({ mode: "versus", names: [clean("name-p1", "P1"), clean("name-p2", "P2")], cars: [versus.p1, versus.p2], crazy: !!save.crazy, equal: !!save.equalCars });
 });
 function toggleSound() {
   save.muted = !save.muted;

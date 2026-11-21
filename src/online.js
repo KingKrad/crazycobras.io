@@ -2,7 +2,7 @@
 // room and shares its code or link; the friend joins with just a name, no account. Both games get the
 // same seven prompts, start together, and swap each round's result through here.
 //   POST /api/vroomillion/online { action, ... }
-//     create { deck, name, car, power, nitro, prompts }  -> { code, token, seat: 0 }      host only
+//     create { deck, name, car, power, nitro, prompts, crazy?, equalCars? }  -> { code, token, seat: 0 }      host only
 //     join   { code, name, car, power, nitro }           -> { token, seat: 1, ... }
 //     state  { code, token }                             -> the room, results so far and server time
 //     start  { code, token }                             -> host starts the race (both seats filled)
@@ -48,7 +48,7 @@ export async function ensureOnlineSchema(db) {
   // added with rematches; harmless if they're already there (checked once per worker)
   if (columnsChecked.has(db)) return;
   columnsChecked.add(db);
-  for (const col of ["next_code TEXT", "rematch_ask INTEGER NOT NULL DEFAULT 0", "guest_seen TEXT"]) {
+  for (const col of ["next_code TEXT", "rematch_ask INTEGER NOT NULL DEFAULT 0", "guest_seen TEXT", "crazy INTEGER NOT NULL DEFAULT 0", "equal_cars INTEGER NOT NULL DEFAULT 0"]) {
     try { await db.prepare(`ALTER TABLE online_rooms ADD COLUMN ${col}`).run(); } catch {}
   }
 }
@@ -65,7 +65,7 @@ const seenIn = (v) => (Array.isArray(v) ? v : []).filter((k) => typeof k === "st
 function view(room, results, seat) {
   return {
     ...(seat === 0 && room.guest_seen ? { guestSeen: JSON.parse(room.guest_seen) } : {}),
-    code: room.code, deck: room.deck, status: room.status, startAt: room.start_at || null, now: Date.now(), seat,
+    code: room.code, deck: room.deck, crazy: !!room.crazy, equalCars: !!room.equal_cars, status: room.status, startAt: room.start_at || null, now: Date.now(), seat,
     prompts: JSON.parse(room.prompts),
     players: [
       { name: room.host_name, car: room.host_car, power: room.host_power, nitro: room.host_nitro, joined: true },
@@ -114,6 +114,8 @@ export async function handleOnline(request, env) {
     await db.prepare(`INSERT INTO online_rooms (code, created, deck, prompts, status, host_hash, host_name, host_car, host_power, host_nitro)
       VALUES (?, ?, ?, ?, 'waiting', ?, ?, ?, ?, ?)`)
       .bind(code, now, deck, JSON.stringify(prompts), await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0))).run();
+    // the host's race rules: CRAZY MODE (obvious answers score most) and "cars don't matter" (both x1, 2 nitro)
+    if (body.crazy || body.equalCars) await db.prepare("UPDATE online_rooms SET crazy = ?, equal_cars = ? WHERE code = ?").bind(body.crazy ? 1 : 0, body.equalCars ? 1 : 0, code).run();
     if (from) await db.prepare("UPDATE online_rooms SET next_code = ? WHERE code = ? AND next_code IS NULL").bind(code, from.code).run();
     return json({ code, token, seat: 0 });
   }

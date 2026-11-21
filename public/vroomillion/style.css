@@ -1015,3 +1015,10 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
   .pp-book, .pp-leaf, .pp-book.single .pp-leaf { transition-duration: 0.01s; }
   .pp-sticker, .pp-ink, .pp-viewer-box, .pp-sticker.lift { animation-duration: 0.01s; }
 }
+
+/* race rules: CRAZY MODE and EQUAL CARS */
+.rules { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0; }
+.rule-btn { display: flex; flex-direction: column; gap: 5px; min-width: 200px; padding: 9px 12px; font: inherit; font-size: 8px; color: var(--dim); background: #0b0618; border: 3px solid #2b1d5c; cursor: pointer; text-align: left; }
+.rule-btn .rule-note { font-size: 6px; line-height: 1.5; }
+.rule-btn.on { color: #fff; border-color: var(--pink); box-shadow: 0 0 14px rgba(255, 79, 216, 0.45); }
+.rule-btn.on .rule-name { color: var(--pink); }

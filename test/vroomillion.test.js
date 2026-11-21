@@ -37,6 +37,14 @@ test("judge ranks obvious answers low and niche answers high", () => {
   assert.equal(judge(fruit, "").tier, 0);
 });
 
+test("CRAZY MODE flips the ladder: obvious answers score most, a stall is still nothing", async () => {
+  const { metresFor, effectTier, CRAZY_METRES } = await import("../public/vroomillion/js/logic.js");
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map((t) => metresFor(t, 1, false, true)), [0, 1000, 720, 480, 280, 120]);
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map((t) => metresFor(t, 1, false)), [0, 120, 280, 480, 720, 1000]);
+  assert.equal(metresFor(1, 2, true, true), Math.round(CRAZY_METRES[1] * 2 * 1.5));
+  assert.deepEqual([0, 1, 5].map((t) => effectTier(t, true)), [0, 5, 1]);
+});
+
 test("typo forgiveness: none under 5 letters, one for 5-9, two for 10+", async () => {
   const { typoAllowance } = await import("../public/vroomillion/js/logic.js");
   assert.deepEqual([3, 4, 5, 9, 10, 20].map(typoAllowance), [0, 0, 1, 1, 2, 2]);
