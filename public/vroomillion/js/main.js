@@ -10,6 +10,7 @@ import { Scene } from "./scene.js";
 import { ChaseScene } from "./chase.js";
 import { shareCard, saveShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
+import { CHANGELOG } from "./changelog.js";
 
 // hand-written prompts plus the "starting with" / "ending in" / "exactly N letters" ones made from them
 // The answer lists are about 2 MB, so they load in the background while the title screen is up
@@ -1010,6 +1011,28 @@ async function buyUnlimited() {
   btn.disabled = false;
 }
 
+// WHAT'S NEW: the latest update on the title screen, every update on its own screen
+const LOG_SEEN_KEY = "vroomillion.log-seen";
+function logItems(entry) { return h("ul", { class: "log-items" }, ...entry.items.map((t) => h("li", { text: t }))); }
+function renderWhatsNew() {
+  const box = $("whats-new");
+  const latest = CHANGELOG[0];
+  box.textContent = "";
+  if (!latest) return;
+  let seen = null;
+  try { seen = localStorage.getItem(LOG_SEEN_KEY); } catch {}
+  const head = h("p", { class: "log-head" }, h("span", { text: "WHAT'S NEW" }), " ", h("span", { class: "log-date", text: latest.date }));
+  if (seen !== latest.id) head.append(" ", h("span", { class: "soon-tag", text: "NEW" }));
+  box.append(head, h("p", { class: "log-title", text: latest.title }), logItems(latest),
+    h("button", { class: "btn small", type: "button", "data-go": "updates", text: "ALL UPDATES" }));
+}
+function renderUpdates() {
+  const list = $("updates-list");
+  list.textContent = "";
+  for (const e of CHANGELOG) list.append(h("div", { class: "log-entry" }, h("p", { class: "log-head" }, h("span", { class: "log-date", text: e.date })), h("p", { class: "log-title", text: e.title }), logItems(e)));
+  try { if (CHANGELOG[0]) localStorage.setItem(LOG_SEEN_KEY, CHANGELOG[0].id); } catch {}
+}
+
 let current = "title";
 function show(name) {
   current = name;
@@ -1030,6 +1053,8 @@ function show(name) {
       ? `MODE ${modeName(save.deck)} · BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · DEEP CUTS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
+  if (name === "title") renderWhatsNew();
+  if (name === "updates") renderUpdates();
   if (name === "leagues") renderLeagues();
   if (name === "paywall") renderPaywall();
   if (name === "account") renderAccount();
