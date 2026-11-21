@@ -1,0 +1,114 @@
+// The prompt catalog, wave 27 (daily). Format: w01.js.
+export const W27 = `
+# animals
+letter/dogb | 2 | daily | | Name a dog breed that starts with B | | beagle, boxer, bulldog, border collie, bichon frise, basset hound, bloodhound, bernese mountain dog, boston terrier, borzoi, bull terrier, belgian malinois
+letter/dogp | 2 | daily | | Name a dog breed that starts with P | | poodle, pug, pomeranian, pit bull, pekingese, pointer, papillon, pinscher, portuguese water dog, pembroke welsh corgi, plott hound, puli
+letter/birdcp | 2 | daily | | Name a bird that starts with C or P | | crow, cardinal, canary, condor, crane, cockatoo, parrot, penguin, pelican, peacock, pigeon, puffin
+letter/seas | 1 | daily | | Name a sea creature that starts with S | | shark, seal, starfish, squid, sea turtle, seahorse, stingray, swordfish, sea lion, shrimp, sardine, sea urchin
+letter/animaluvxyz | 3 | daily | | Name an animal that starts with U, V, Y or Z | | zebra, yak, vulture, viper, vole, yellowjacket, zebu, urchin, vampire bat, umbrellabird, yorkie, vicuna
+# food
+letter/dessertc | 1 | daily | | Name a dessert that starts with C | | cake, cookie, cupcake, cheesecake, chocolate, creme brulee, cobbler, churro, cannoli, crumble, custard, cotton candy
+letter/dessertbp | 1 | daily | | Name a dessert that starts with B or P | | brownie, banana split, baklava, bread pudding, blondie, biscotti, pie, pudding, pavlova, parfait, popsicle, panna cotta
+letter/fruitp | 1 | daily | | Name a fruit or vegetable that starts with P | | pear, peach, plum, pineapple, potato, pumpkin, peas, pepper, papaya, pomegranate, parsnip, persimmon
+letter/fruitc | 1 | daily | | Name a fruit or vegetable that starts with C | | cherry, carrot, cabbage, cucumber, celery, corn, cauliflower, cantaloupe, cranberry, coconut, clementine, chard
+letter/fruitb | 1 | daily | | Name a fruit or vegetable that starts with B | | banana, blueberry, broccoli, beet, blackberry, beans, brussels sprouts, bell pepper, bok choy, butternut squash, boysenberry, breadfruit
+letter/foodijq | 2 | daily | | Name a food that starts with I, J or Q | | ice cream, italian sausage, jello, jam, jalapeno, jerky, jelly beans, quesadilla, quiche, quinoa, jambalaya, irish stew
+# places
+letter/cityusacd | 1 | daily | | Name a US city that starts with C or D | | chicago, cleveland, cincinnati, charlotte, columbus, charleston, dallas, denver, detroit, des moines, durham, dayton
+letter/cityusapo | 1 | daily | | Name a US city that starts with P or O | | philadelphia, phoenix, pittsburgh, portland, providence, plano, orlando, omaha, oakland, oklahoma city, ocala, olympia
+letter/cityusamn | 1 | daily | | Name a US city that starts with M or N | | miami, memphis, milwaukee, minneapolis, mobile, madison, nashville, new orleans, new york, newark, norfolk, naples
+letter/worldcr | 2 | daily | | Name a city anywhere in the world that starts with C or R | | cairo, chicago, cape town, copenhagen, rome, rio de janeiro, riyadh, reykjavik, cancun, calgary, rotterdam, rabat
+# brands
+letter/brandr | 1 | daily | | Name a brand that starts with R | | rolex, ray-ban, red bull, reebok, ritz, rolls-royce, reese's, roku, revlon, ralph lauren, ram, red lobster
+letter/brandvw | 1 | daily | | Name a brand that starts with V or W | | visa, volkswagen, verizon, vans, versace, vaseline, walmart, wendy's, whole foods, wrangler, wilson, wd-40
+letter/brandb | 1 | daily | | Name a brand that starts with B | | burger king, bmw, barbie, budweiser, best buy, ben & jerry's, burberry, bose, buick, band-aid, blockbuster, bic
+# people
+letter/presjhw | 3 | daily | | Name a US president whose last name starts with J, H or W | | jefferson, jackson, johnson, harrison, hoover, harding, hayes, washington, wilson
+letter/prestrb | 3 | daily | | Name a US president whose last name starts with T, R or B | | truman, taft, tyler, taylor, trump, roosevelt, reagan, bush, biden, buchanan
+letter/celebs | 1 | daily | | Name a celebrity whose last name starts with S | | taylor swift, will smith, emma stone, britney spears, meryl streep, sylvester stallone, adam sandler, harry styles, ed sheeran, jessica simpson, martha stewart, jerry seinfeld
+letter/celebj | 1 | daily | | Name a celebrity whose last name starts with J | | michael jackson, michael jordan, lebron james, dwayne johnson, angelina jolie, mick jagger, kendall jenner, nick jonas, elton john, hugh jackman, steve jobs, scarlett johansson
+letter/celebb | 1 | daily | | Name a celebrity whose last name starts with B | | justin bieber, tom brady, usain bolt, sandra bullock, david beckham, david bowie, jeff bezos, orlando bloom, tyra banks, halle berry, christian bale, jack black
+letter/jobr | 2 | daily | | Name a job that starts with R | | reporter, realtor, receptionist, referee, radio host, rancher, rapper, researcher, roofer, rabbi, rideshare driver, park ranger
+letter/joba | 1 | daily | | Name a job that starts with A | | actor, artist, architect, astronaut, accountant, athlete, author, assistant, animator, attorney, auctioneer, agent
+letter/girll | 1 | daily | | Name a girl's name that starts with L | | lauren, lisa, laura, lily, lucy, linda, leah, layla, lindsay, lola, luna, lydia
+letter/girlr | 1 | daily | | Name a girl's name that starts with R | | rachel, rebecca, rose, ruby, rita, rosa, riley, robin, renee, raven, regina, rylee
+letter/girlc | 1 | daily | | Name a girl's name that starts with C | | chloe, charlotte, claire, caroline, catherine, chelsea, cassie, cindy, carly, christina, courtney, cara
+letter/girlb | 1 | daily | | Name a girl's name that starts with B | | brittany, bella, brooke, bethany, barbara, betty, bianca, bonnie, brenda, becky, bailey, beth
+letter/boya | 1 | daily | | Name a boy's name that starts with A | | adam, aaron, alex, andrew, anthony, austin, aiden, alan, arthur, andy, alexander, adrian
+letter/boys | 1 | daily | | Name a boy's name that starts with S | | sam, steve, scott, sean, simon, seth, spencer, stephen, samuel, shane, sebastian, stanley
+letter/boyn | 1 | daily | | Name a boy's name that starts with N | | nick, nathan, noah, neil, nolan, nate, nicholas, norman, ned, nelson, niko, nigel
+letter/boyg | 1 | daily | | Name a boy's name that starts with G | | george, greg, gary, gabriel, grant, gavin, glen, gordon, graham, gus, garrett, gene
+named6/barney | 2 | daily | | Name a famous person or character named Bart or Barney | | barney the dinosaur, barney stinson, barney rubble, bart simpson, barney fife, bart starr, barney frank, bart scott, barney gumble, bart allen, bart bass, barney from the flintstones
+named6/lou | 2 | daily | | Name a famous person or character named Lou or Louis | | lou gehrig, louis armstrong, lou reed, louis tomlinson, lou ferrigno, louis vuitton, lou holtz, louis xiv, louis pasteur, lou bega, louis theroux, lou costello
+named6/hector | 2 | daily | | Name a famous person or character named Hector or Homer | | homer simpson, hector salamanca, hector from troy, hector camacho, homer the greek poet, homer hickam, hector elizondo, hector bellerin, homer price, hector from coco, homer winslow, homer bailey
+named6/rex | 2 | daily | | Name a famous person or character named Rex or Reggie | | reggie jackson, reggie miller, reggie bush, rex ryan, rex from toy story, reggie watts, rex orange county, rex harrison, reggie white, rex the wonder dog, reggie from archie, rex tillerson
+named6/luna | 2 | daily | | Name a famous person or character named Lana or Luna | | lana del rey, luna lovegood, lana kane, lana turner, luna from sailor moon, lana condor, lana parrilla, lana lang, luna loud, lana from total drama, lana wachowski, luna the dog
+named6/ivan | 2 | daily | | Name a famous person or character named Ivan or Igor | | ivan drago, igor from frankenstein, ivan the terrible, igor stravinsky, ivan rodriguez, ivan lendl, ivan from the one and only ivan, igor from the cartoon, ivan perisic, ivan rakitic, igor shesterkin
+named6/abe | 2 | daily | | Name a famous person or character named Abe or Abraham | | abraham lincoln, abe simpson, abe vigoda, abe from oddworld, abraham van helsing, abe froman, abraham from the bible, abe sapien, abe lemons, abraham maslow, abe from shining time station, honest abe
+# sports
+letter/sportfgr | 1 | daily | | Name a sport that starts with F, G or R | | football, fencing, frisbee, field hockey, golf, gymnastics, rugby, rowing, racquetball, running, rodeo, rock climbing
+# objects
+letter/kitchensp | 1 | daily | | Name a kitchen item that starts with S or P | | spoon, spatula, sink, stove, sponge, strainer, pan, pot, plate, peeler, pitcher, pepper grinder
+objwith3/cork | 2 | daily | | Name something with a cork | | wine bottle, champagne bottle, bulletin board, dartboard, fishing bobber, pop gun, coaster, cork board, flip-flops, yoga block, a message in a bottle, a baseball
+objwith3/crank | 2 | daily | | Name something with a crank | | jack-in-the-box, music box, pencil sharpener, can opener, old car window, ice cream maker, pasta maker, fishing reel, pepper grinder, salad spinner, a well, a hand-crank radio
+objwith3/filter | 2 | daily | | Name something with a filter | | coffee maker, fish tank, air purifier, pool, vacuum, water pitcher, furnace, face mask, cigarette, dryer, instagram, dishwasher
+uses/blanket | 1 | daily | | Name something you can do with a blanket | | cuddle, sleep, build a fort, have a picnic, wear it as a cape, keep warm, hide under it, sit on it at the beach, swaddle a baby, cover the couch, watch a movie, make a ghost costume
+uses/towel | 1 | daily | | Name something you can do with a towel | | dry off, snap someone, wrap your hair, lie on it at the beach, wear it as a cape, wipe up a spill, wipe sweat, polish a car, wave it, sit on it, make a towel animal, throw in the towel
+uses/box | 1 | daily | | Name something you can do with a cardboard box | | build a fort, ship something, move, sled down a hill, store toys, make a robot costume, recycle it, sit in it, make a car, make a playhouse, make a spaceship, give it to a cat
+uses/stick | 1 | daily | | Name something you can do with a stick | | play fetch, roast marshmallows, draw in the sand, use it to walk, poke a fire, play hockey, sword fight, drum, build a fort, make a slingshot, use it as a magic wand, knock down a pinata
+letter/instrumentgho | 2 | daily | | Name a musical instrument that starts with G, H or O | | guitar, gong, glockenspiel, harp, harmonica, horn, harpsichord, oboe, organ, ocarina, handbells, hurdy-gurdy
+# science
+letter/bodytn | 1 | daily | | Name a body part that starts with T or N | | toe, tooth, tongue, thumb, throat, thigh, temple, nose, neck, nail, nostril, navel
+# people
+whend5/car | 1 | daily | | Name something people do in the car | | sing, eat, talk on the phone, listen to music, put on makeup, sleep, argue, text, play car games, read, look at maps, pick their nose
+whend5/cooking | 1 | daily | | Name something people do while cooking | | taste the food, listen to music, sing, burn something, drink wine, dance, cry from onions, watch tv, talk on the phone, clean up, sneak bites, set off the smoke alarm
+whend5/reception | 1 | daily | | Name something people do at a wedding reception | | dance, eat cake, give toasts, drink, throw the bouquet, cry, the first dance, take photos, sign the guestbook, do the chicken dance, cut the cake, catch the garter
+whend5/newyearsday | 2 | daily | | Name something people do on New Year's Day | | watch the parade, nurse a hangover, make resolutions, sleep in, watch football, eat black-eyed peas, go to the gym, take down decorations, do a polar plunge, write the wrong year, call family, start a diet
+# places
+where3/dealership | 2 | daily | | Name something you'd see at a car dealership | | salespeople, new cars, test drives, balloons, free coffee, price stickers, a showroom, financing, keys, a service center, brochures, an inflatable tube man
+where3/rally | 2 | daily | | Name something you'd see at a protest or rally | | signs, chanting, crowds, megaphones, police, flags, banners, speeches, marching, t-shirts, news crews, cameras
+# screen
+letter/cartoondg | 1 | daily | | Name a cartoon character that starts with D or G | | donald duck, daffy duck, dora, dory, dumbo, garfield, goofy, the grinch, gumball, gru, daphne, droopy
+letter/moviegh | 1 | daily | | Name a movie whose title starts with G or H | | gladiator, grease, ghostbusters, gremlins, goodfellas, grown ups, home alone, hook, hercules, halloween, hairspray, happy gilmore
+letter/herobw | 1 | daily | | Name a superhero or villain that starts with B or W | | batman, black panther, black widow, bane, beast, blue beetle, wolverine, wonder woman, wasp, war machine, the winter soldier, white walker
+actore/chastain | 2 | daily | 1 | Name a Jessica Chastain or Octavia Spencer movie | | the help, zero dark thirty, interstellar, the martian, mama, it chapter two, hidden figures, the shape of water, ma, fruitvale station, the eyes of tammy faye, molly's game
+actore/selleck | 2 | daily | 1 | Name a Tom Selleck or Burt Reynolds movie or show | | magnum p.i., three men and a baby, blue bloods, quigley down under, mr. baseball, smokey and the bandit, deliverance, boogie nights, the longest yard, the cannonball run, striptease, friends
+actore/pegg | 2 | daily | 1 | Name a Simon Pegg or Nick Frost movie | | shaun of the dead, hot fuzz, the world's end, mission impossible, star trek, paul, spaced, run fatboy run, attack the block, the boat that rocked, snow white and the huntsman
+actore/bateman | 2 | daily | 1 | Name a Jason Bateman or Jason Sudeikis movie or show | | arrested development, ozark, horrible bosses, juno, game night, identity thief, ted lasso, we're the millers, hall pass, zootopia, the angry birds movie, saturday night live
+actore/cranston | 2 | daily | 1 | Name a Bryan Cranston or Aaron Paul movie or show | | breaking bad, malcolm in the middle, godzilla, argo, trumbo, the infiltrator, el camino, westworld, need for speed, bojack horseman, eye in the sky, a long way down
+actore/poehler | 2 | daily | 1 | Name an Amy Poehler or Tina Fey movie or show | | parks and recreation, mean girls, 30 rock, baby mama, sisters, inside out, blades of glory, date night, wine country, unbreakable kimmy schmidt, saturday night live, admission
+actore/wiig | 2 | daily | 1 | Name a Kristen Wiig or Maya Rudolph movie or show | | bridesmaids, despicable me, ghostbusters, wonder woman 1984, the secret life of walter mitty, how to train your dragon, grown ups, luca, the good place, idiocracy, loot, saturday night live
+actore/liamh | 2 | daily | 1 | Name a Liam Hemsworth or Josh Hutcherson movie | | the hunger games, the last song, independence day resurgence, the expendables 2, bridge to terabithia, journey to the center of the earth, zathura, five nights at freddy's, the kids are all right, red dawn, the dressmaker, isn't it romantic
+# music
+songe/carpenters | 2 | daily | 1 | Name a song by The Carpenters, Bread or America | | close to you, we've only just begun, top of the world, rainy days and mondays, yesterday once more, make it with you, if, everything i own, a horse with no name, sister golden hair, ventura highway, tin man
+songe/steelydan | 2 | daily | 1 | Name a Steely Dan or Doobie Brothers song | | reelin' in the years, do it again, peg, rikki don't lose that number, deacon blues, hey nineteen, china grove, listen to the music, black water, long train runnin', what a fool believes, takin' it to the streets
+songe/envogue | 2 | daily | 1 | Name an En Vogue, SWV or Salt-N-Pepa song | | hold on, my lovin', free your mind, don't let go, weak, right here, i'm so into you, push it, shoop, whatta man, let's talk about sex, none of your business
+songe/lauryn | 2 | daily | 1 | Name a Lauryn Hill, Fugees or Erykah Badu song | | doo wop (that thing), ex-factor, everything is everything, killing me softly, ready or not, fu-gee-la, on & on, bag lady, tyrone, didn't cha know, love of my life, the sweetest thing
+songe/aaliyah | 2 | daily | 1 | Name an Aaliyah, Brandy or Monica song | | try again, are you that somebody, rock the boat, one in a million, the boy is mine, have you ever, almost doesn't count, sittin' up in my room, angel of mine, the first night, so gone, don't take it personal
+songe/furtado | 2 | daily | 1 | Name a Nelly Furtado or Fergie song | | i'm like a bird, promiscuous, maneater, say it right, turn off the light, all good things, big girls don't cry, glamorous, fergalicious, london bridge, clumsy, a little party never killed nobody
+songe/hanson | 2 | daily | 1 | Name a Hanson, Aaron Carter or Jesse McCartney song | | mmmbop, where's the love, weird, i will come to you, aaron's party, i want candy, that's how i beat shaq, crush on you, beautiful soul, leavin', she's no you, right where you want me
+songe/jamestaylor | 2 | daily | 1 | Name a James Taylor, Carole King or Cat Stevens song | | fire and rain, carolina in my mind, you've got a friend, sweet baby james, it's too late, i feel the earth move, natural woman, so far away, wild world, father and son, peace train, moonshadow
+songe/neilyoung | 2 | daily | 1 | Name a Neil Young, Crosby, Stills & Nash or Joni Mitchell song | | heart of gold, harvest moon, rockin' in the free world, old man, teach your children, suite: judy blue eyes, our house, big yellow taxi, both sides now, a case of you, river, help me
+# wild
+letter/colourgrst | 2 | daily | | Name a color that starts with G, R, S or T | | green, gray, gold, red, rose, ruby, silver, scarlet, salmon, teal, tan, turquoise
+letter/wordv | 1 | daily | | Name a word that starts with V | | van, vase, very, video, violin, vote, volcano, vampire, vacation, vegetable, voice, vanilla
+letter/wordw | 1 | daily | | Name a word that starts with W | | water, window, winter, wolf, word, world, white, wish, wind, wagon, worm, wedding
+letter/wordo | 1 | daily | | Name a word that starts with O | | orange, ocean, octopus, oven, owl, open, office, old, onion, olive, orbit, oasis
+contains/row | 1 | daily | | Name a word with "row" in it | | arrow, throw, crow, grow, row, borrow, tomorrow, sorrow, narrow, eyebrow, growl, scarecrow
+contains/eat | 1 | daily | | Name a word with "eat" in it | | eat, meat, seat, heat, beat, wheat, sweater, theater, great, treat, creature, repeat
+prefix/ex | 1 | daily | | Name a word that starts with "ex" | | exit, exam, excuse, extra, exercise, explain, explode, expensive, expert, example, excited, explore
+suffix/ment | 1 | daily | | Name a word that ends in "ment" | | moment, apartment, basement, government, payment, movement, argument, comment, element, cement, tournament, pavement
+rhymed4/hunt | 1 | daily | | Name a word that rhymes with "hunt" | | front, stunt, blunt, grunt, punt, runt, shunt, brunt, bunt, upfront, storefront, waterfront
+rhymed4/crib | 1 | daily | | Name a word that rhymes with "crib" | | rib, fib, bib, lib, nib, squib, ad lib, glib, jib, sib, prime rib, women's lib
+rhymed4/crab | 1 | daily | | Name a word that rhymes with "crab" | | cab, lab, jab, grab, tab, stab, slab, scab, blab, drab, kebab, rehab
+rhymed4/job | 1 | daily | | Name a word that rhymes with "job" | | rob, mob, knob, sob, blob, slob, snob, cob, lob, bob, glob, corn on the cob
+rhymed4/moth | 1 | daily | | Name a word that rhymes with "moth" | | cloth, broth, froth, sloth, goth, troth, washcloth, tablecloth, behemoth, loincloth, dishcloth, bone broth
+rhymed4/stove | 1 | daily | | Name a word that rhymes with "stove" | | drove, grove, cove, wove, clove, strove, trove, mauve, rove, interwove, treasure trove, garlic clove
+rhymed4/merge | 1 | daily | | Name a word that rhymes with "merge" | | surge, urge, verge, purge, emerge, splurge, diverge, dirge, serge, submerge, converge, scourge
+rhymed4/pinch | 1 | daily | | Name a word that rhymes with "pinch" | | inch, cinch, winch, finch, flinch, clinch, lynch, grinch, the grinch
+rhymed4/garden | 1 | daily | | Name a word that rhymes with "garden" | | pardon, harden, warden, carton, marten, barton, partin', startin', spartan, martin, olive garden, beg your pardon
+rhymed4/chicken | 1 | daily | | Name a word that rhymes with "chicken" | | thicken, quicken, stricken, sicken, kickin', lickin', pickin', tickin', stickin', dickens, finger lickin', slickin'
+rhymed4/jacket | 1 | daily | | Name a word that rhymes with "jacket" | | racket, bracket, packet, placket, tax bracket, smack it, crack it, hack it, pack it, attack it, back it, ketchup packet
+rhymed4/water | 1 | daily | | Name a word that rhymes with "water" | | daughter, otter, hotter, slaughter, potter, squatter, plotter, blotter, totter, harry potter, spotter, trotter
+rhymed4/voice | 1 | daily | | Name a word that rhymes with "voice" | | choice, rejoice, joyce, rolls-royce, invoice, first choice, multiple choice, pro-choice, by choice, top choice
+`;
