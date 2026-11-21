@@ -5,6 +5,7 @@
 //   3. at most one "one artist / one show" style prompt
 // The history is a list of family ids ("F:<id>"), oldest first.
 import { FAMILIES, TOPICS } from "./catalog/index.js";
+import { DAILY_START, DAILY_ORDER } from "./catalog/daily-order.js";
 
 export const FAM_PREFIX = "F:";
 // the answers for prompts added with the new catalog live one file per prompt: answers/<slug>.json
@@ -113,7 +114,24 @@ export function dailyLayout(fams = FAMILIES, n = 7) {
   return races;
 }
 let layout = null;
+const byId = new Map(FAMILIES.map((f) => [f.id, f]));
 export function dailyRace(day, fams = FAMILIES) {
+  // the fixed order (catalog/daily-order.js), counted from its start day
+  if (fams === FAMILIES && DAILY_ORDER.length) {
+    const n = DAILY_ORDER.length;
+    const idx = (((dayNumber(day) - dayNumber(DAILY_START)) % n) + n) % n;
+    const race = DAILY_ORDER[idx].split(",").map((id) => byId.get(id)).filter(Boolean);
+    // a family removed since: fill its place with one from the same pool that fits the race
+    if (race.length < 7) {
+      const rng = seeded("vroomillion-daily-fill-" + idx);
+      for (const f of shuffle(poolFamilies("daily"), rng)) {
+        if (race.length >= 7) break;
+        if (!race.some((p) => p === f || p.group === f.group || famKey(p) === famKey(f) || (p.single && f.single))) race.push(f);
+      }
+    }
+    const rng = seeded("vroomillion-daily-words-" + idx);
+    return race.map((f) => ({ family: f, prompt: choosePrompt(f, rng) }));
+  }
   if (!layout || fams !== FAMILIES) layout = dailyLayout(fams);
   const races = layout;
   if (!races.length) return [];

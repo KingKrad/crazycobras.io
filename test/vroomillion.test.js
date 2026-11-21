@@ -483,6 +483,24 @@ test("daily race: the same seven for everyone on a day, different the next day, 
   if (poolFamilies("daily").length >= 7 * 300) for (const race of dailyLayout()) assert.equal(new Set(race.map((f) => f.group)).size, 7);
 });
 
+test("daily order: fixed, every daily family at most once, seven groups a race, new families laid out", async () => {
+  const { DAILY_START, DAILY_ORDER } = await import("../public/vroomillion/js/catalog/daily-order.js");
+  const byId = new Map(FAMILIES.map((f) => [f.id, f]));
+  const seen = new Set();
+  for (const line of DAILY_ORDER) {
+    const ids = line.split(",");
+    assert.equal(ids.length, 7, line);
+    for (const id of ids) { assert.ok(!seen.has(id), "twice: " + id); seen.add(id); }
+    const fams = ids.map((id) => byId.get(id)).filter(Boolean);
+    assert.equal(new Set(fams.map((f) => f.group)).size, fams.length, line);
+  }
+  // nearly every listed family still exists, and nearly every daily family is listed (run tools/daily-order.mjs)
+  assert.ok([...seen].filter((id) => !byId.has(id)).length < 20);
+  assert.ok(poolFamilies("daily").filter((f) => !seen.has(f.id)).length < 7, "run node tools/daily-order.mjs");
+  // the start day gets the first line
+  assert.deepEqual(dailyRace(DAILY_START).map((x) => x.family.id), DAILY_ORDER[0].split(","));
+});
+
 test("catalog: every family has answers (built into the game, or an answers/<prompt>.json file)", async () => {
   const fs = await import("node:fs");
   const { answerSlug } = await import("../public/vroomillion/js/racepick.js");

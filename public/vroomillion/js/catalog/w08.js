@@ -67,7 +67,7 @@ hard/speech | 3 | hard | | Name a famous speech or quote from history | | i have
 hard/tragedy | 3 | hard | | Name a Shakespeare character | | hamlet, romeo, juliet, macbeth, lady macbeth, othello, iago, king lear, puck, falstaff, prospero, ophelia
 hard/pharaoh | 3 | hard | | Name an Egyptian pharaoh or ancient ruler | | tutankhamun, cleopatra, ramses ii, nefertiti, hatshepsut, akhenaten, khufu, cheops, thutmose, menes, ptolemy, sneferu
 hard/dynasty | 3 | hard | | Name a Chinese dynasty or ancient empire | | ming, qing, han, tang, song, qin, yuan, zhou, roman empire, ottoman empire, persian empire, mongol empire
-hard/mathematician | 3 | hard | | Name a famous mathematician | surnames min=40 w:?i wdt:P106 wd:Q170790. | pythagoras, euclid, isaac newton, archimedes, euler, gauss, fibonacci, alan turing, descartes, pascal, ramanujan, fermat
+hard/mathematician | 3 | hard |  | Name a famous mathematician |  | pythagoras, euclid, isaac newton, archimedes, euler, gauss, fibonacci, alan turing, descartes, pascal, ramanujan, fermat
 hard/particle | 3 | hard | | Name a subatomic particle | | proton, neutron, electron, quark, photon, neutrino, positron, muon, higgs boson, gluon, boson, meson
 hard/law | 3 | hard | | Name a famous scientific law or theory | | gravity, relativity, evolution, the big bang, newton's laws, thermodynamics, quantum mechanics, plate tectonics, germ theory, string theory, ohm's law, boyle's law
 hard/organelle | 3 | hard | | Name a part of a cell | | nucleus, mitochondria, cell membrane, cytoplasm, ribosome, chloroplast, cell wall, vacuole, golgi apparatus, endoplasmic reticulum, lysosome, dna
