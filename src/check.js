@@ -55,7 +55,7 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   let verdict = wd.found ? { found: true, label: wd.label, n: wd.n, tiers: cls.tiers } : { found: false };
   // 2. The AI judge, for catalog prompts Wikidata didn't settle
   if (!verdict.found && judge) {
-    try { verdict = await judgeAnswer(env, prompt, answer); } catch { return json({ found: false, reason: "judge failed" }, 504); }
+    try { verdict = await judgeAnswer(env, prompt, answer, request); } catch { return json({ found: false, reason: "judge failed" }, 504); }
   }
   const out = json(verdict);
   out.headers.set("Cache-Control", "public, max-age=86400");

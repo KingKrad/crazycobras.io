@@ -20,5 +20,7 @@
     // other front ends allowed to call the API, e.g. the Vercel copy of the site
     "ALLOWED_ORIGINS": "https://vroomillion.com,https://www.vroomillion.com,https://vroomillion.vercel.app,https://crazycobras-io.vercel.app"
   },
+  // Workers AI, for the answer judge (src/judge.js); free daily allowance, capped in code
+  "ai": { "binding": "AI" },
   "observability": { "enabled": true }
 }
