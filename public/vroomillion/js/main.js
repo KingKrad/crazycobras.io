@@ -8,7 +8,7 @@ import {
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
 import { ChaseScene } from "./chase.js";
-import { shareCard, saveShareCard } from "./share.js";
+import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
 import { pickRace, dailyRace, famKey, familyOf, answerSlug } from "./racepick.js";
@@ -1160,6 +1160,7 @@ function show(name) {
   if (name === "versus") renderVersus();
   if (name === "garage") renderGarage();
   if (name === "passport") renderPassport();
+  if (name !== "passport") closeStamp();
   if (name === "board") renderBoardScreen();
   if (name === "online") renderOnline();
   window.scrollTo({ top: 0 });
@@ -2200,24 +2201,148 @@ function shareButtons(dest, best, small = false) {
   return h("span", { class: "share-row" }, share, saveBtn);
 }
 
-// The passport: every destination, stamped once you've reached it.
+// The passport: a little book. The cover opens, pages flip (buttons, swipe, arrow keys, or tap a
+// side of the book), and every place you've reached is a sticker. Tap a sticker to see its picture big,
+// with SHARE and SAVE. Wide screens show two pages at a time, phones one.
+let ppTurn = null; // the open passport's page turner, for the arrow keys
 function renderPassport() {
   const root = $("passport-grid");
   root.textContent = "";
+  root.className = "pp-wrap";
   const got = Object.keys(save.passport).length;
   $("passport-count").textContent = `${got} OF ${DESTINATIONS.length} STAMPS`;
-  for (const d of DESTINATIONS) {
-    const best = save.passport[d.id];
-    const cv = h("canvas", { class: "stamp-art", width: 192, height: 108, "aria-hidden": "true" });
-    try { const sc = new ChaseScene(cv); sc.resize(192, 108, 100); sc.preview(d.id); } catch { /* preview is decoration only */ }
-    root.append(h("div", { class: "stamp" + (best ? " got" : " locked") + (d.exclusive ? " exclusive" : "") },
-      cv,
-      h("div", { class: "stamp-name", text: best || !d.exclusive ? d.name : "??? EXCLUSIVE ???" }),
-      h("div", { class: "stamp-info", text: best ? `BEST ${best.toLocaleString("en-US")} M` : d.min ? `REACH ${d.min.toLocaleString("en-US")} M · CLASS ${d.cls}+ CAR` : "FINISH ANY RACE" }),
-      best ? h("div", { class: "stamp-mark", text: "VISITED" }) : null,
-      best ? shareButtons(d, best, true) : null));
+  const narrow = window.innerWidth < 720;
+  const page = (cls, ...kids) => h("div", { class: "pp-page " + cls }, ...kids);
+  const pages = [ppIdPage(got, page)];
+  for (let k = 0; k < DESTINATIONS.length; k += 2) {
+    pages.push(page("pp-visas", h("div", { class: "pp-head", text: `VISAS · ${pages.length}` }),
+      h("div", { class: "pp-stamps" }, ...DESTINATIONS.slice(k, k + 2).map((d, n) => ppSticker(d, k + n, got)))));
   }
+  const cover = h("div", { class: "pp-cover" },
+    h("div", { class: "pp-crest" }, h("span", { class: "pp-wheel" })),
+    h("div", { class: "pp-cover-title", text: "VROOMILLION" }),
+    h("div", { class: "pp-cover-sub", text: "PASSPORT" }),
+    h("div", { class: "pp-cover-count", text: `${got} / ${DESTINATIONS.length} STAMPS` }),
+    h("div", { class: "pp-cover-tap", text: "TAP TO OPEN" }));
+  const endpaper = () => page("pp-end", h("div", { class: "pp-seal", text: "VROOM" }), h("div", { class: "pp-note", text: "MORE PLACES THE FURTHER YOU DRIVE" }));
+  const faces = [cover, ...pages];
+  const leaves = [];
+  if (narrow) for (const f of faces) leaves.push([f, page("pp-blank")]);
+  else for (let i = 0; i < faces.length; i += 2) leaves.push([faces[i], faces[i + 1] || endpaper()]);
+  const els = leaves.map(([front, back]) => h("div", { class: "pp-leaf" }, h("div", { class: "pp-face front" }, front), h("div", { class: "pp-face back" }, back)));
+  const book = h("div", { class: "pp-book" + (narrow ? " single" : "") }, ...els);
+  const prev = h("button", { class: "btn small", type: "button", text: "PREV" });
+  const next = h("button", { class: "btn small", type: "button", text: "NEXT" });
+  const label = h("span", { class: "pp-label" });
+  let flipped = 0;
+  const draw = () => {
+    els.forEach((el, i) => { el.classList.toggle("flipped", i < flipped); if (!el.classList.contains("turning")) el.style.zIndex = String(i < flipped ? i + 1 : leaves.length - i); });
+    book.classList.toggle("closed", flipped === 0);
+    book.classList.toggle("ended", flipped === leaves.length);
+    prev.disabled = flipped === 0;
+    next.disabled = flipped === leaves.length;
+    label.textContent = flipped === 0 ? "CLOSED" : flipped === leaves.length ? "THE END" : narrow ? `PAGE ${flipped} OF ${leaves.length - 1}` : `PAGES ${flipped * 2 - 1}–${flipped * 2}`;
+  };
+  const turn = (dir) => {
+    const n = Math.max(0, Math.min(leaves.length, flipped + dir));
+    if (n === flipped) return;
+    const el = els[dir > 0 ? flipped : n]; // the leaf that's moving goes over the others while it turns
+    el.classList.add("turning");
+    el.style.zIndex = "60";
+    setTimeout(() => { el.classList.remove("turning"); draw(); }, 760);
+    flipped = n;
+    audio.sfx.click();
+    draw();
+  };
+  ppTurn = turn;
+  prev.addEventListener("click", () => turn(-1));
+  next.addEventListener("click", () => turn(1));
+  // tap the right side to go on, the left to go back; swipe works too
+  let downX = null;
+  book.addEventListener("pointerdown", (e) => { downX = e.clientX; });
+  book.addEventListener("pointerup", (e) => {
+    if (downX == null) return;
+    const dx = e.clientX - downX;
+    downX = null;
+    if (e.target.closest(".pp-sticker")) return;
+    if (Math.abs(dx) > 40) return turn(dx < 0 ? 1 : -1);
+    const box = book.getBoundingClientRect();
+    if (flipped === 0) return turn(1);
+    turn(e.clientX - box.left > box.width * (narrow ? 0.3 : 0.5) ? 1 : -1);
+  });
+  root.append(book, h("div", { class: "pp-nav" }, prev, label, next));
+  draw();
 }
+
+// the inside cover: who you are and how far you've gone
+function ppIdPage(got, page) {
+  const name = (account?.nickname && !/^RACER /.test(account.nickname) ? account.nickname : save.onlineName || "DRIVER").toUpperCase();
+  const car = carById(save.car);
+  const field = (k, v) => h("div", { class: "pp-field" }, h("span", { class: "pp-k", text: k }), h("span", { class: "pp-v", text: v }));
+  const mrz = `P<VRM<${name.replace(/[^A-Z0-9]/g, "<")}<<<<<<<<<<<<<<<<<<<<<<<<`.slice(0, 30);
+  return page("pp-id",
+    h("div", { class: "pp-head", text: "PASSPORT · PASSEPORT · PASAPORTE" }),
+    h("div", { class: "pp-id-top" }, h("div", { class: "pp-photo" }, h("span", { class: "pp-wheel dark" })),
+      h("div", {}, field("NAME", name), field("CAR", car.name.toUpperCase()), field("CLASS", car.cls))),
+    field("BEST RUN", save.best ? `${Math.round(save.best).toLocaleString("en-US")} M` : "—"),
+    field("RACES", String(save.races || 0)),
+    field("STAMPS", `${got} OF ${DESTINATIONS.length}`),
+    field("VROOMILLIONS", String(save.vrooms || 0)),
+    h("div", { class: "pp-mrz", text: mrz }),
+    h("div", { class: "pp-mrz", text: `${String(save.races || 0).padStart(6, "0")}<${String(got)}VRM<<<<<<<<<<<<<<<<<<<<`.slice(0, 30) }));
+}
+
+// a visited place is a sticker you can tap; one you haven't reached is an empty slot
+function ppSticker(d, idx, got) {
+  const best = save.passport[d.id];
+  const cv = h("canvas", { class: "pp-art", width: 192, height: 108, "aria-hidden": "true" });
+  try { const sc = new ChaseScene(cv); sc.resize(192, 108, 100); sc.preview(d.id); } catch { /* preview is decoration only */ }
+  if (!best) {
+    return h("div", { class: "pp-slot" + (d.exclusive ? " exclusive" : "") }, cv,
+      h("div", { class: "pp-slot-name", text: d.exclusive ? "??? EXCLUSIVE ???" : d.name }),
+      h("div", { class: "pp-slot-need", text: d.min ? `REACH ${d.min.toLocaleString("en-US")} M · CLASS ${d.cls}+ CAR` : "FINISH ANY RACE" }));
+  }
+  const el = h("button", { class: "pp-sticker" + (d.exclusive ? " gold" : ""), type: "button", "aria-label": `${d.name}. Best ${best.toLocaleString("en-US")} metres. Open the picture` },
+    cv, h("div", { class: "pp-sticker-name", text: d.name }),
+    h("div", { class: "pp-best", text: `BEST ${best.toLocaleString("en-US")} M` }),
+    h("div", { class: "pp-ink", text: "VISITED" }));
+  el.style.setProperty("--tilt", [-4, 3, -2, 5, -3, 2, -5, 4, -1][idx % 9] + "deg");
+  el.addEventListener("click", (e) => {
+    e.stopPropagation();
+    audio.sfx.click();
+    el.classList.add("lift");
+    setTimeout(() => { el.classList.remove("lift"); openStamp(d, best, got); }, 320);
+  });
+  return el;
+}
+
+// the picture for a place, shown big on the page, with SHARE and SAVE
+async function openStamp(d, best, got) {
+  closeStamp();
+  const shot = h("div", { class: "pp-shot", text: "DEVELOPING…" });
+  const close = h("button", { class: "btn", type: "button", text: "CLOSE", onclick: () => { audio.sfx.click(); closeStamp(); } });
+  const box = h("div", { class: "pp-viewer-box" }, shot, h("div", { class: "pp-viewer-name", text: d.name }), h("p", { class: "note", text: d.blurb }), shareButtons(d, best), close);
+  const v = h("div", { class: "pp-viewer", id: "pp-viewer", role: "dialog", "aria-modal": "true", "aria-label": d.name }, box);
+  v.addEventListener("click", (e) => { if (e.target === v) closeStamp(); });
+  document.body.append(v);
+  close.focus({ preventScroll: true });
+  try {
+    const cv = await drawShareCard(d, best, [got, DESTINATIONS.length]);
+    cv.className = "pp-card";
+    cv.setAttribute("role", "img");
+    cv.setAttribute("aria-label", `${d.name} passport stamp`);
+    shot.textContent = "";
+    shot.append(cv);
+  } catch { shot.textContent = "COULDN'T DRAW THE PICTURE"; }
+}
+function closeStamp() { $("pp-viewer")?.remove(); }
+document.addEventListener("keydown", (e) => {
+  if (current !== "passport") return;
+  if (e.key === "Escape" && $("pp-viewer")) { closeStamp(); return; }
+  if ($("pp-viewer") || !ppTurn) return;
+  if (e.key === "ArrowRight") ppTurn(1);
+  else if (e.key === "ArrowLeft") ppTurn(-1);
+});
 
 function finish(token) {
   if (token !== raceToken) return;

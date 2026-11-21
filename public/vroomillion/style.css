@@ -401,7 +401,6 @@ h3 { font-weight: normal; }
 .feedback.bad { color: var(--red); }
 .feedback.good { color: var(--green); }
 .feedback.checking { color: var(--t1); animation: blink 0.6s steps(2) infinite; }
-@keyframes blink { 50% { opacity: 0.45; } }
 .feedback.pop { animation: slam 0.25s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
 #answer.shake { animation: shake 0.35s steps(6) both; border-color: var(--red); }
 .btn.nitro { margin-top: 4px; width: 100%; background: #10325c; border-color: var(--cyan); color: var(--cyan); font-size: 10px; }
@@ -916,3 +915,103 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 #updates-list { display: grid; gap: 12px; max-width: 560px; margin: 0 auto 16px; }
 .log-entry { padding: 12px 14px; background: var(--panel); border: var(--px) solid #3a4a6b; display: grid; gap: 8px; }
 @media (max-width: 600px) { .whats-new { margin-top: 10px; padding: 10px; } .log-items { font-size: 7px; } }
+
+/* ---------- passport book ---------- */
+.pp-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin: 14px 0 18px; }
+.pp-book {
+  --pw: min(340px, calc((100vw - 56px) / 2));
+  position: relative; width: calc(var(--pw) * 2); height: calc(var(--pw) * 1.42);
+  perspective: 2400px; transition: transform 0.7s cubic-bezier(0.3, 0.1, 0.2, 1); touch-action: pan-y; user-select: none;
+}
+.pp-book.closed { transform: translateX(calc(var(--pw) * -0.5)); }
+.pp-book.ended { transform: translateX(calc(var(--pw) * 0.5)); }
+.pp-leaf {
+  position: absolute; left: 50%; top: 0; width: var(--pw); height: 100%;
+  transform-origin: left center; transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.3, 0.1, 0.2, 1);
+}
+.pp-leaf.flipped { transform: rotateY(-180deg); }
+.pp-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+.pp-face.back { transform: rotateY(180deg); }
+/* one page at a time on phones: a turned page swings away to the left */
+.pp-book.single { --pw: min(360px, calc(100vw - 40px)); width: var(--pw); }
+.pp-book.single.closed, .pp-book.single.ended { transform: none; }
+.pp-book.single .pp-leaf { left: 0; transition: transform 0.75s cubic-bezier(0.3, 0.1, 0.2, 1), visibility 0s 0.75s; }
+.pp-book.single .pp-leaf:not(.flipped) { transition-delay: 0s; }
+.pp-book.single .pp-leaf.flipped:not(.turning) { visibility: hidden; }
+
+.pp-page {
+  position: absolute; inset: 0; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px;
+  color: #2a2340; font-size: 8px; line-height: 1.5; text-align: left;
+  background: repeating-radial-gradient(circle at 50% 120%, rgba(120, 90, 160, 0.07) 0 2px, transparent 2px 9px), linear-gradient(#f4ead0, #ece0bf);
+}
+.pp-face.front .pp-page { box-shadow: inset 16px 0 18px -14px rgba(40, 20, 0, 0.45); }
+.pp-face.back .pp-page { box-shadow: inset -16px 0 18px -14px rgba(40, 20, 0, 0.45); }
+.pp-head { font-size: 7px; letter-spacing: 1px; color: #7a2a52; border-bottom: 2px solid rgba(122, 42, 82, 0.35); padding-bottom: 6px; }
+
+.pp-cover {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  text-align: center; color: #e8c45a; cursor: pointer;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 3px, transparent 3px 7px), #1c2058;
+  box-shadow: inset 0 0 0 8px #1c2058, inset 0 0 0 10px #e8c45a, inset 14px 0 0 0 #141746;
+}
+.pp-cover-title { font-size: clamp(13px, 3.6vw, 20px); text-shadow: 2px 2px 0 #0b0d2e; }
+.pp-cover-sub { font-size: 11px; letter-spacing: 6px; }
+.pp-cover-count { font-size: 8px; color: #c9b98a; }
+.pp-cover-tap { font-size: 7px; color: #fff; animation: blink 1s steps(2) infinite; margin-top: 8px; }
+.pp-crest { width: 70px; height: 70px; border: 4px solid #e8c45a; border-radius: 50%; display: grid; place-items: center; }
+.pp-wheel { width: 38px; height: 38px; border-radius: 50%; border: 6px solid #e8c45a; box-shadow: inset 0 0 0 5px #1c2058, inset 0 0 0 9px #e8c45a; }
+.pp-wheel.dark { border-color: #4a3f6b; box-shadow: inset 0 0 0 5px #d9cba6, inset 0 0 0 9px #4a3f6b; }
+
+.pp-id-top { display: flex; gap: 12px; align-items: center; }
+.pp-photo { width: 74px; height: 90px; flex: none; display: grid; place-items: center; background: #d9cba6; border: 2px solid #b7a67b; }
+.pp-field { display: flex; flex-direction: column; margin-bottom: 4px; }
+.pp-k { font-size: 6px; color: #8b7a55; }
+.pp-v { font-size: 9px; color: #1c1838; word-break: break-word; }
+.pp-mrz { margin-top: auto; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 1px; color: #3d3557; white-space: nowrap; overflow: hidden; }
+.pp-mrz + .pp-mrz { margin-top: 0; }
+
+.pp-stamps { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
+.pp-art { width: 100%; height: auto; display: block; image-rendering: pixelated; }
+.pp-sticker {
+  position: relative; display: block; width: 100%; padding: 6px 6px 7px; cursor: pointer; font: inherit; color: #2a2340;
+  background: #fffdf6; border: 4px dotted #ece0bf; outline: 2px solid #fffdf6; outline-offset: -2px;
+  transform: rotate(var(--tilt, 0deg)); box-shadow: 3px 4px 0 rgba(40, 20, 0, 0.22); transition: transform 0.18s, box-shadow 0.18s;
+  animation: pp-stick 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.pp-sticker:hover, .pp-sticker:focus-visible { transform: rotate(0deg) scale(1.04); box-shadow: 6px 9px 0 rgba(40, 20, 0, 0.25); }
+.pp-sticker.gold { background: #fff4c9; outline-color: #ffd23f; box-shadow: 3px 4px 0 rgba(40, 20, 0, 0.22), 0 0 16px rgba(255, 210, 63, 0.7); }
+.pp-sticker.lift { animation: pp-lift 0.32s ease-out forwards; }
+.pp-sticker-name { font-size: 8px; margin-top: 6px; text-align: center; }
+.pp-best { font-size: 6px; color: #7a6a48; text-align: center; margin-top: 3px; }
+.pp-ink {
+  position: absolute; right: -4px; top: -6px; transform: rotate(14deg); padding: 3px 6px; font-size: 9px;
+  color: #c0213f; border: 3px double #c0213f; border-radius: 4px; opacity: 0.85; pointer-events: none;
+  animation: pp-thunk 0.35s 0.25s cubic-bezier(0.2, 1.8, 0.4, 1) both;
+}
+.pp-slot { padding: 6px; border: 3px dashed #b9a97f; color: #8b7d5a; text-align: center; }
+.pp-slot .pp-art { opacity: 0.25; filter: grayscale(1); }
+.pp-slot.exclusive .pp-art { filter: grayscale(1) blur(3px); }
+.pp-slot-name { font-size: 8px; margin-top: 6px; }
+.pp-slot-need { font-size: 6px; margin-top: 3px; }
+.pp-end { align-items: center; justify-content: center; text-align: center; }
+.pp-seal { width: 96px; height: 96px; border-radius: 50%; border: 4px double rgba(122, 42, 82, 0.5); color: rgba(122, 42, 82, 0.6); display: grid; place-items: center; font-size: 12px; transform: rotate(-10deg); }
+.pp-note { font-size: 7px; color: #8b7a55; margin-top: 14px; }
+.pp-nav { display: flex; align-items: center; gap: 14px; }
+.pp-label { font-size: 8px; color: var(--dim); min-width: 120px; text-align: center; }
+
+.pp-viewer { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 3, 15, 0.9); animation: fade-in 0.2s both; }
+.pp-viewer-box { width: min(92vw, 460px); max-height: 100%; overflow: auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; animation: pp-pop 0.35s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+.pp-shot { width: 100%; min-height: 200px; display: grid; place-items: center; font-size: 9px; color: var(--dim); }
+.pp-card { display: block; width: auto; max-width: 100%; max-height: 66vh; height: auto; box-shadow: 0 0 0 4px #000, 0 0 40px rgba(255, 79, 216, 0.35); }
+.pp-viewer-name { font-size: 11px; color: #fff; }
+
+@keyframes pp-stick { from { transform: rotate(var(--tilt, 0deg)) scale(1.25); opacity: 0; } to { transform: rotate(var(--tilt, 0deg)) scale(1); opacity: 1; } }
+@keyframes pp-thunk { from { transform: rotate(14deg) scale(2.2); opacity: 0; } to { transform: rotate(14deg) scale(1); opacity: 0.85; } }
+@keyframes pp-lift { to { transform: rotate(0deg) scale(1.18) translateY(-10px); box-shadow: 10px 16px 0 rgba(40, 20, 0, 0.28); } }
+@keyframes pp-pop { from { transform: scale(0.6) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .pp-book, .pp-leaf, .pp-book.single .pp-leaf { transition-duration: 0.01s; }
+  .pp-sticker, .pp-ink, .pp-viewer-box, .pp-sticker.lift { animation-duration: 0.01s; }
+}

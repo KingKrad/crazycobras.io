@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21h",
+    date: "Nov 21, 2026",
+    title: "A real passport",
+    items: [
+      "Your PASSPORT is now a little book: open the cover, flip the pages (buttons, swipe or arrow keys) and see your driver ID page.",
+      "Every place you've been is a sticker. Tap one to see its picture big, right on the page, with SHARE and SAVE.",
+    ],
+  },
+  {
     id: "2026-11-21g",
     date: "Nov 21, 2026",
     title: "Clearer rarity",
