@@ -1928,7 +1928,7 @@ async function lookupOnline(index, value, k) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: index.prompt, answer: value }),
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(10000), // Wikidata, then the AI judge for catalog prompts
     });
     if (res.ok) {
       settled = true;
@@ -1943,6 +1943,7 @@ async function lookupOnline(index, value, k) {
 }
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
 function onlineTier(hit) {
+  if (Number.isInteger(hit.tier) && hit.tier >= 1 && hit.tier <= 4) return hit.tier; // the AI judge's verdict
   const [t2, t3] = Array.isArray(hit.tiers) ? hit.tiers : [70, 25];
   return hit.n >= t2 ? 2 : hit.n >= t3 ? 3 : 4;
 }

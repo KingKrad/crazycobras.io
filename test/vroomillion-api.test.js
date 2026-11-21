@@ -644,3 +644,36 @@ test("online 1v1, new prompt system: no prompts at create, the friend's history 
   assert.deepEqual(st.prompts, prompts);
   assert.equal(st.status, "racing");
 });
+
+// ---------- the AI judge (catalog prompts; the Claude API is faked here) ----------
+const judgeReply = (verdict, stop = "end_turn") => async (url, init) => {
+  judgeReply.last = JSON.parse(init.body);
+  return new Response(JSON.stringify({
+    id: "msg_test", type: "message", role: "assistant", model: "claude-opus-5-5", stop_reason: stop, stop_sequence: null,
+    content: stop === "refusal" ? [] : [{ type: "text", text: JSON.stringify(verdict) }],
+    usage: { input_tokens: 10, output_tokens: 10 },
+  }), { status: 200, headers: { "content-type": "application/json" } });
+};
+const askJudge = (body, env) => handleCheck(new Request("https://x/api/vroomillion/check", { method: "POST", body: JSON.stringify(body) }), env, async () => { throw new Error("no wikidata here"); });
+
+test("AI judge: a hand-written catalog prompt accepts a fitting answer that isn't on the list, tier from how common it is", async () => {
+  const env = { ANTHROPIC_API_KEY: "test", JUDGE_FETCH: judgeReply({ valid: true, canonical: "a lime popsicle", commonness: "uncommon" }) };
+  const j = await (await askJudge({ prompt: "Name something green", answer: "Lime popsicle" }, env)).json();
+  assert.deepEqual([j.found, j.label, j.tier], [true, "a lime popsicle", 3]);
+  assert.equal(judgeReply.last.model, "claude-opus-5-5");
+  assert.match(judgeReply.last.messages[0].content, /Name something green/);
+  assert.equal(judgeReply.last.output_config.format.type, "json_schema");
+});
+
+test("AI judge: says no to answers it rejects, to refusals, and is off without a key or for prompts outside the catalog", async () => {
+  let env = { ANTHROPIC_API_KEY: "test", JUDGE_FETCH: judgeReply({ valid: false, canonical: "stuff", commonness: "rare" }) };
+  assert.equal((await (await askJudge({ prompt: "Name something green", answer: "stuff" }, env)).json()).found, false);
+  env = { ANTHROPIC_API_KEY: "test", JUDGE_FETCH: judgeReply(null, "refusal") };
+  assert.equal((await (await askJudge({ prompt: "Name something green", answer: "grass" }, env)).json()).found, false);
+  let called = false;
+  env = { JUDGE_FETCH: async () => { called = true; throw new Error("no"); } };
+  assert.equal((await (await askJudge({ prompt: "Name something green", answer: "grass" }, env)).json()).found, false);
+  env.ANTHROPIC_API_KEY = "test";
+  assert.equal((await (await askJudge({ prompt: "Name a made-up thing", answer: "grass" }, env)).json()).found, false);
+  assert.equal(called, false, "no API call without a key or for unknown prompts");
+});
