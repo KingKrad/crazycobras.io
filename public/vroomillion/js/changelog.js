@@ -3,6 +3,18 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-21e",
+    date: "Nov 21, 2026",
+    title: "All-new prompts",
+    items: [
+      "Thousands of brand-new prompts, and you'll never see one twice: not in any mode, daily or unlimited, solo, 2P or online.",
+      "Much more variety in every race: rhymes, letters, \"something with a zipper\", famous Jimmys, '80s hits and lots more.",
+      "One free daily race a day, the same for everyone, with its own set of prompts.",
+      "Answers not on our list are now judged by an AI referee, so more real answers count.",
+      "Everyone starts fresh: your prompt history has been reset for the new set.",
+    ],
+  },
+  {
     id: "2026-11-21d",
     date: "Nov 21, 2026",
     title: "Rematch + button fixes",

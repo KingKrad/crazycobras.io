@@ -5,7 +5,7 @@ import { carById } from "../public/vroomillion/js/cars.js";
 import {
   DESTINATIONS, destinationFor,
   TIERS, ROUNDS, classRank, blockedBy, carReach, tunedCar, upgradeLevel, upgradeCost, normalize, buildIndex, judge, metresFor, applyFenderBender,
-  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, dailyQuestions, pickFresh, promptsLeft, makeVariants,
+  pickQuestions, payout, deckQuestions, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, dailyQuestions, pickFresh, promptsLeft, makeVariants, DAILY_RACES,
 } from "../public/vroomillion/js/logic.js";
 
 const fruit = buildIndex(QUESTIONS.find((q) => q.q === "Name a fruit"));
@@ -92,21 +92,21 @@ test("matching answers cause a fender bender", () => {
   assert.equal(n.bump, undefined);
 });
 
-test("two daily races for everyone, Unlimited for everything else, everything during free play", () => {
+test("one daily race for everyone, Unlimited for everything else, everything during free play", () => {
   const today = dayKey(new Date(2026, 10, 17, 9, 30));
   assert.equal(today, "2026-11-17");
   assert.equal(dayKey(new Date(2026, 0, 5)), "2026-01-05");
   const solo = { mode: "solo", deck: "classic" };
-  assert.ok(canRace({}, today, { daily: 1 }, false) && canRace({}, today, { daily: 2 }, false), "both daily races are free");
+  assert.equal(DAILY_RACES, 1);
+  assert.ok(canRace({}, today, { daily: 1 }, false), "the daily race is free");
+  assert.ok(!canRace({}, today, { daily: 2 }, false), "only one");
   assert.ok(!canRace({}, today, solo, false), "a regular race needs Unlimited");
   const one = { daily: markDaily({}, today, 1, 4321) };
   assert.deepEqual(one.daily, { day: today, done: { 1: 4321 } });
-  assert.ok(!canRace(one, today, { daily: 1 }, false), "each daily race once");
-  assert.ok(canRace(one, today, { daily: 2 }, false));
-  assert.equal(dailyLeft(one, today), 1);
-  assert.equal(nextDaily(one, today), 2);
-  assert.ok(canRace(one, "2026-11-18", { daily: 1 }, false), "new day, new daily races");
-  assert.ok(!canRace({}, today, { daily: 3 }, false), "only two");
+  assert.ok(!canRace(one, today, { daily: 1 }, false), "once a day");
+  assert.equal(dailyLeft(one, today), 0);
+  assert.equal(nextDaily(one, today), 0);
+  assert.ok(canRace(one, "2026-11-18", { daily: 1 }, false), "new day, new daily race");
   assert.ok(!canRace({}, today, { mode: "versus", deck: "classic" }, false), "VERSUS needs Unlimited");
   assert.ok(!canRace({}, today, { mode: "solo", deck: "hard" }, false), "HARD MODE needs Unlimited");
   assert.ok(canRace({ unlimited: true }, today, { mode: "versus", deck: "hard" }, false), "unlimited");

@@ -68,12 +68,12 @@
         <ol class="how">
           <li>Every race is 7 questions. Each one has lots of right answers.</li>
           <li>Type one. The <b>more niche</b> your answer, the further your car blasts down the road.</li>
-          <li><b>Almost anything real counts.</b> If your answer isn't on our list, we check it against Wikipedia's database while the clock runs — so Mayochup counts as a condiment. Answers found that way are rare, so they score high.</li>
+          <li><b>Almost anything real counts.</b> If your answer isn't on our list, we check it while the clock runs — against Wikipedia's database or with our AI referee — so Mayochup counts as a condiment. Answers found that way are rare, so they score high.</li>
           <li>Made a small typo? We show the fix in the box — press <b>GO</b> again to use it, or type something else. Not on the list? <b>Try again</b> — keep guessing until the timer runs out.</li>
           <li>Your distance is your score, and your car multiplies it: a beater ×1, the best hypercars ×5. Every destination also needs a car class (the Moon needs Class S), so upgrade to go further. Higher classes earn more cash per metre too.</li>
           <li><b>Online 1v1:</b> race a friend on your own phones or computers. With Unlimited, tap ONLINE 1V1, pick a mode and send your friend the code or link; they join free, no account needed. You both get the same seven prompts at the same time.</li>
-          <li><b>Daily races:</b> two free races a day, the same prompts for everyone. Unlimited adds numbered races (RACE #1, #2...) in every mode.</li>
-          <li><b>No repeats:</b> once you've seen a prompt it never comes back, unless you hit <b>REDO THIS RACE</b> on the results screen to replay the same prompts. CLASSIC has over 400 broad prompts; letter twists like <b>starting with "M"</b> are in HARD MODE.</li>
+          <li><b>Daily race:</b> one free race a day, the same seven prompts for everyone, from a pool of its own. Unlimited adds numbered races (RACE #1, #2...) in every mode.</li>
+          <li><b>No repeats:</b> once you've seen a prompt it never comes back — in any mode, daily or unlimited, solo, 2P or online — until you've played them all. Close cousins count as the same prompt. Want a rematch? Hit <b>REDO THIS RACE</b> on the results screen to replay the same prompts.</li>
           <li><b>Typos:</b> a close misspelling is fixed for you (press Enter again to use it) and scores the same as the real answer, One in a Vroomillion included.</li>
           <li><b>Destinations:</b> your total distance at the end of a race decides where you end up — from the scrapyard to the Moon. Each new place gets a passport stamp. There's an exclusive area at the very top, and getting there unlocks a car you can't buy.</li>
           <li><b>Cartoon shows:</b> real people who appeared count too — Donald Trump is a South Park character. The more famous the cameo, the less it scores.</li>
@@ -82,7 +82,7 @@
           <li><b>HARD MODE:</b> the niche stuff: one band's songs, one show's characters, typefaces, knots, chess openings and more.</li>
           <li><b>2P:</b> same answer as your friend? <b>FENDER BENDER</b> — you both drop a tier.</li>
           <li>Hit <b>NITRO</b> before you answer for 1.5× distance. Charges depend on your car.</li>
-          <li><b>Free:</b> the 2 daily races. <b>Unlimited</b> ($5, once) unlocks as many races as you like, plus 2P, GEARHEAD and HARD MODE.</li>
+          <li><b>Free:</b> the daily race. <b>Unlimited</b> ($5, once) unlocks as many races as you like, plus 2P, GEARHEAD and HARD MODE.</li>
         </ol>
         <div class="tiers" id="tier-legend"></div>
         <button class="btn" data-go="title" type="button">BACK</button>
@@ -91,7 +91,7 @@
       <section class="screen" id="s-leagues">
         <h2>1P RACE</h2>
         <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
-        <h3 class="sub-title">TODAY'S DAILY RACES</h3>
+        <h3 class="sub-title">TODAY'S DAILY RACE</h3>
         <div class="daily-races" id="daily-solo"></div>
         <p class="note" id="daily-note"></p>
         <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
@@ -107,13 +107,13 @@
 
       <section class="screen" id="s-paywall">
         <h2 class="pay-title">GO UNLIMITED</h2>
-        <p class="pay-lead" id="pay-lead">You've used today's free races.</p>
+        <p class="pay-lead" id="pay-lead">You've used today's free race.</p>
         <div class="pay-card">
           <div class="pay-price">$5 <span>ONE-TIME</span></div>
           <ul class="pay-perks">
             <li>Unlimited races, every day</li>
             <li>1P, 2P versus, CLASSIC, GEARHEAD and HARD MODE</li>
-            <li>Numbered races on top of the two daily ones</li>
+            <li>Numbered races on top of the daily one</li>
           </ul>
           <div class="pay-step" id="pay-step"></div>
           <p class="pay-msg" id="pay-msg" role="status" aria-live="polite"></p>
@@ -159,7 +159,7 @@
 
       <section class="screen" id="s-board">
         <h2>TODAY'S LEADERBOARD</h2>
-        <p class="note">Everyone races the same two daily races. Scores reset at midnight UTC.</p>
+        <p class="note">Everyone races the same daily race. Scores reset at midnight UTC.</p>
         <div class="board-lists" id="board-lists"></div>
         <div id="board-nick"></div>
         <button class="btn" data-go="leagues" type="button">BACK</button>

@@ -293,7 +293,7 @@ function renderDaily() {
     box.append(h("div", { class: "daily-line good", text: `${n} DAILY RACE${n === 1 ? "" : "S"} LEFT TODAY · SAME PROMPTS FOR EVERYONE` }));
   } else {
     box.append(
-      h("div", { class: "daily-line", text: `TODAY'S ${DAILY_RACES} DAILY RACES ARE DONE · NEW ONES IN ${timeLeft()}` }),
+      h("div", { class: "daily-line", text: DAILY_RACES === 1 ? `TODAY'S DAILY RACE IS DONE · A NEW ONE IN ${timeLeft()}` : `TODAY'S ${DAILY_RACES} DAILY RACES ARE DONE · NEW ONES IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
   }
 }
@@ -496,7 +496,7 @@ function renderPaywall() {
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
     : dailyLeft(save, dday()) > 0
       ? "Unlimited races on top of the daily two, in every mode."
-      : `You've played today's ${DAILY_RACES} daily races. New ones in ${timeLeft()}.`;
+      : (DAILY_RACES === 1 ? `You've played today's daily race. A new one in ${timeLeft()}.` : `You've played today's ${DAILY_RACES} daily races. New ones in ${timeLeft()}.`);
   $("pay-msg").textContent = "";
   const step = $("pay-step");
   step.textContent = "";
@@ -526,7 +526,7 @@ function renderAccount() {
   }
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
-    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : `FREE PLAYER — ${DAILY_RACES} DAILY RACES A DAY` }),
+    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : (DAILY_RACES === 1 ? "FREE PLAYER — 1 DAILY RACE A DAY" : `FREE PLAYER — ${DAILY_RACES} DAILY RACES A DAY`) }),
     nicknameForm(),
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
     account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
@@ -1346,7 +1346,7 @@ function streakNow() {
 // One leaderboard (top 10 for a daily race), drawn into el.
 async function drawBoard(el, n) {
   el.textContent = "";
-  el.append(h("div", { class: "board-title", text: `DAILY RACE ${n} · TOP 10` }));
+  el.append(h("div", { class: "board-title", text: DAILY_RACES === 1 ? "DAILY RACE · TOP 10" : `DAILY RACE ${n} · TOP 10` }));
   let body;
   try { ({ body } = await api("daily-board?race=" + n)); } catch { el.append(h("p", { class: "note", text: "Leaderboards work on the VROOMILLION website." })); return; }
   if (!body.top?.length) { el.append(h("p", { class: "note", text: "Nobody on it yet today. Be the first!" })); return; }
@@ -1417,14 +1417,14 @@ function renderLeagues() {
     const played = n in done;
     daily.append(h("button", {
       class: "btn daily-race" + (played ? " done" : ""), type: "button", disabled: played,
-      text: played ? (done[n] ? `DAILY ${n} ✓ ${done[n].toLocaleString("en-US")} M` : `DAILY ${n} ✓ PLAYED`) : `DAILY RACE ${n}`,
+      text: played ? (DAILY_RACES === 1 ? "DAILY" : `DAILY ${n}`) + (done[n] ? ` ✓ ${done[n].toLocaleString("en-US")} M` : " ✓ PLAYED") : DAILY_RACES === 1 ? "DAILY RACE" : `DAILY RACE ${n}`,
       onclick: () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); },
     }));
   }
   const st = streakNow();
   $("daily-note").textContent = (dailyLeft(save, dday())
-    ? "Same 7 prompts for everyone today. Free, once each."
-    : `Both done. New daily races in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
+    ? (DAILY_RACES === 1 ? "Same 7 prompts for everyone today. Free, once a day." : "Same 7 prompts for everyone today. Free, once each.")
+    : DAILY_RACES === 1 ? `Done. A new daily race in ${timeLeft()}.` : `Both done. New daily races in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
   modeSwitch($("mode-solo"), renderLeagues);
   carPicker($("picker-solo"), () => save.car, (id) => { save.car = id; persist(); });
   $("best-solo").textContent = save.best ? Math.round(save.best).toLocaleString("en-US") + " M" : "—";
@@ -1598,7 +1598,7 @@ function startRace(setup) {
     label = "ONLINE 1V1";
   } else if (daily) {
     save.daily = markDaily(save, today, daily);
-    label = `DAILY ${daily} OF ${DAILY_RACES}`;
+    label = DAILY_RACES === 1 ? "DAILY RACE" : `DAILY ${daily} OF ${DAILY_RACES}`;
   } else {
     const n = racesRun() + 1;
     save.unlRaces = Math.max(save.unlRaces || 0, n);
@@ -1678,7 +1678,8 @@ async function runRace(token) {
     // the long tail, fetched when the race started; read on each guess, so it counts as soon as it arrives
     Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
-    $("q-kicker").textContent = `${topicOf(q)} · ${round + 1}/${rounds}`;
+    // the new prompt system shows no topic label (it would give the answer space away)
+    $("q-kicker").textContent = V2 ? `PROMPT ${round + 1}/${rounds}` : `${topicOf(q)} · ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
     if (V2) markSeen(q.fam || famKeyOf(q.q)); // the new system: the whole family, in every race type
     else if (!race.online) markSeen(q.q);
@@ -2266,7 +2267,7 @@ function finish(token) {
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
     FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
-      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE${dailyLeft(save, dday()) === 1 ? "" : "S"} LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
+      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE${dailyLeft(save, dday()) === 1 ? "" : "S"} LEFT TODAY` : (DAILY_RACES === 1 ? `NEW DAILY RACE IN ${timeLeft()}` : `NEW DAILY RACES IN ${timeLeft()}`) }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },

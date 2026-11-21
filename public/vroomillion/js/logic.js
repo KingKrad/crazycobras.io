@@ -80,7 +80,7 @@ export const FREE_PLAY = false;
 // THE NEW PROMPT SYSTEM (js/catalog, js/racepick.js): prompt families that never repeat, seven topics
 // a race, and one daily race from its own pool. It goes live for everyone when V2_LIVE is true; until
 // then it can be tried on one browser with localStorage "vroomillion.v2" = "1".
-const V2_LIVE = false;
+const V2_LIVE = true;
 export const V2 = V2_LIVE || (() => { try { return typeof localStorage !== "undefined" && localStorage.getItem("vroomillion.v2") === "1"; } catch { return false; } })();
 export const DAILY_RACES = V2 ? 1 : 2;
 export const dailyDone = (save, today) => (save.daily?.day === today && save.daily.done && typeof save.daily.done === "object" ? save.daily.done : {});
