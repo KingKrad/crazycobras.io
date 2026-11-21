@@ -330,6 +330,7 @@ async function refreshAccount() {
   if (current === "title") renderDaily();
   if (current === "paywall") renderPaywall();
   if (current === "account") renderAccount();
+  if (current === "online" && !online) renderOnline();
 }
 
 // Shows a recovery code once, with a copy button. onDone runs after "I'VE SAVED IT".
@@ -538,6 +539,182 @@ async function adminCall(body) {
   const { res, body: out } = await api("admin", { method: "POST", body: JSON.stringify(body) });
   if (!res.ok) throw new Error(out.error || "Something went wrong.");
   return out;
+}
+
+// ---------- ONLINE 1V1: race a friend, each on your own device ----------
+// The host (logged in, Unlimited) makes a room and shares its code or link; the friend joins with a name.
+// Both games load the same seven prompts, count down together from the server's start time, and after
+// each round swap results through /api/vroomillion/online (polling, about once a second while waiting).
+let online = null; // { code, token, seat, host: bool, deck, poll }
+const onlineCall = async (body) => {
+  const { res, body: out } = await api("online", { method: "POST", body: JSON.stringify(body) });
+  if (!res.ok) { const e = new Error(out.error || "Something went wrong."); e.status = res.status; throw e; }
+  return out;
+};
+const inviteLink = (code) => `${location.origin}/vroomillion/?race=${code}`;
+const stopPoll = () => { if (online?.poll) { clearTimeout(online.poll); online.poll = 0; } };
+// a race link (vroomillion.com/vroomillion/?race=CODE) opens straight onto the join screen
+const linkCode = (new URLSearchParams(location.search).get("race") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+
+function renderOnline() {
+  const box = $("online-box");
+  box.textContent = "";
+  if (online?.code) return onlineLobby(box);
+  stopPoll();
+  const nameIn = (v) => h("input", { type: "text", maxlength: "16", value: v, placeholder: "your name", "aria-label": "Your name", autocomplete: "nickname" });
+  const myName = account?.nickname && !/^RACER /.test(account.nickname) ? account.nickname : (save.onlineName || "");
+  // join
+  const code = h("input", { type: "text", maxlength: "6", value: linkCode, placeholder: "CODE", "aria-label": "Race code", autocomplete: "off", autocapitalize: "characters", class: "code-in" });
+  const jName = nameIn(myName);
+  const jMsg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const join = h("form", { class: "online-card" }, h("div", { class: "step-label", text: "JOIN A FRIEND'S RACE" }),
+    h("p", { class: "note", text: "Got a code or link from a friend? Free, no account needed." }), code, jName,
+    h("button", { class: "btn big", type: "submit", text: "JOIN RACE" }), jMsg);
+  join.addEventListener("submit", async (e) => {
+    e.preventDefault(); audio.sfx.click(); jMsg.textContent = "Joining…";
+    save.onlineName = jName.value.trim().slice(0, 16); persist();
+    const car = tuned(carById(save.car));
+    try {
+      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro });
+      online = { code: code.value.trim().toUpperCase(), token: out.token, seat: 1, host: false };
+      renderOnline();
+    } catch (err) { jMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
+  });
+  // create
+  const cMsg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const create = h("div", { class: "online-card" }, h("div", { class: "step-label", text: "CREATE A RACE" }));
+  if (!account) {
+    create.append(h("p", { class: "note", text: "Log in with Unlimited to create a race. Your friend joins free." }),
+      h("button", { class: "btn", type: "button", text: "LOG IN", onclick: () => { audio.sfx.click(); show("account"); } }));
+  } else if (!unlimitedNow()) {
+    create.append(h("p", { class: "note", text: "Creating online races is part of Unlimited. Your friends join free." }),
+      h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("mode"); } }));
+  } else {
+    const cName = nameIn(myName || "YOU");
+    const modes = h("div", { class: "modes" });
+    let deck = ["classic", "car", "hard"].includes(save.onlineDeck) ? save.onlineDeck : "classic";
+    const drawModes = () => { modes.textContent = ""; for (const [id, label] of [["classic", "CLASSIC"], ["car", "GEARHEAD"], ["hard", "HARD MODE"]]) modes.append(h("button", { class: `mode mode-${id}`, type: "button", "aria-pressed": String(deck === id), onclick: () => { deck = id; drawModes(); } }, h("span", { class: "mode-name", text: label }))); };
+    drawModes();
+    const go = h("button", { class: "btn big", type: "button", text: "CREATE RACE", onclick: async () => {
+      audio.sfx.click(); cMsg.textContent = "Making your race…";
+      save.onlineName = cName.value.trim().slice(0, 16); save.onlineDeck = deck; persist();
+      await questionsLoaded;
+      const prompts = pickFresh(deckQuestions(QUESTIONS, deck), [], ROUNDS, Math.random, { flat: deck === "car" }).map((q) => q.q);
+      const car = tuned(carById(save.car));
+      try {
+        const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts });
+        online = { code: out.code, token: out.token, seat: 0, host: true };
+          renderOnline();
+      } catch (err) { cMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
+    } });
+    create.append(h("p", { class: "note", text: "Pick the prompts, then send your friend the code or link." }), cName, modes, go, cMsg);
+  }
+  box.append(...(linkCode ? [join, create] : [create, join]),
+    h("p", { class: "note", text: `You race in your ${carById(save.car).name}. Same seven prompts for both of you; rarer answers drive further.` }));
+  if (linkCode) jName.focus();
+}
+
+function onlineLobby(box) {
+  const me = online;
+  const status = h("p", { class: "note", role: "status", "aria-live": "polite", text: "Connecting…" });
+  const players = h("div", { class: "online-players" });
+  const actions = h("div", { class: "admin-actions row" });
+  const leave = h("button", { class: "link", type: "button", text: "Leave this race", onclick: () => { stopPoll(); online = null; renderOnline(); } });
+  if (me.host) {
+    const link = inviteLink(me.code);
+    const msg = h("span", { class: "note" });
+    box.append(h("div", { class: "online-card" },
+      h("div", { class: "step-label", text: "SEND THIS TO YOUR FRIEND" }),
+      h("div", { class: "race-code", text: me.code }),
+      h("div", { class: "note invite-link", text: link }),
+      h("div", { class: "admin-actions row" },
+        h("button", { class: "btn small", type: "button", text: "COPY LINK", onclick: async () => { try { await navigator.clipboard.writeText(link); msg.textContent = "Copied!"; } catch { msg.textContent = "Select the link above to copy it."; } } }),
+        navigator.share ? h("button", { class: "btn small", type: "button", text: "SHARE", onclick: () => navigator.share({ text: `Race me in VROOMILLION! Code ${me.code}`, url: link }).catch(() => {}) }) : null,
+        msg)));
+  } else {
+    box.append(h("div", { class: "online-card" }, h("div", { class: "step-label", text: `RACE ${me.code}` })));
+  }
+  box.append(players, status, actions, leave);
+  let started = false;
+  const tick = async () => {
+    if (current !== "online" || online !== me || started) return;
+    let st;
+    try { st = await onlineCall({ action: "state", code: me.code, token: me.token }); } catch (err) {
+      status.textContent = err.message;
+      if (err.status === 404 || err.status === 403) { online = null; }
+      return;
+    }
+    me.deck = st.deck;
+    players.textContent = "";
+    st.players.forEach((p, i) => players.append(h("div", { class: "online-player p" + (i + 1) },
+      h("span", { class: "hud-name", text: (p.joined ? p.name : "WAITING…") + (i === me.seat ? " (YOU)" : "") }),
+      h("span", { class: "note", text: p.joined ? carById(p.car).name : "" }))));
+    actions.textContent = "";
+    if (st.status === "racing" && st.startAt) { started = true; return onlineBegin(st); }
+    if (!st.players[1].joined) status.textContent = `Waiting for your friend to join · ${modeName(st.deck)}`;
+    else if (me.host) {
+      status.textContent = `${st.players[1].name} is here! Start when you're both ready.`;
+      actions.append(h("button", { class: "btn big", type: "button", text: "START RACE", onclick: async (e) => {
+        e.target.disabled = true; audio.sfx.click();
+        try { const s2 = await onlineCall({ action: "start", code: me.code, token: me.token }); started = true; onlineBegin(s2); } catch (err) { status.textContent = err.message; e.target.disabled = false; }
+      } }));
+    } else status.textContent = `Waiting for ${st.players[0].name} to start · ${modeName(st.deck)}`;
+    me.poll = setTimeout(tick, 1500);
+  };
+  tick();
+}
+
+// Both games count down to the server's start time, then race the same prompts.
+async function onlineBegin(st) {
+  stopPoll();
+  const o = online;
+  online = null; // the race has the room now; the online screen starts fresh next time
+  await questionsLoaded;
+  const byText = new Map(QUESTIONS.map((q) => [q.q, q]));
+  // a prompt this copy of the game doesn't have (an older version): race it on the live check alone
+  const questions = st.prompts.map((t) => byText.get(t) || { q: t, a: [[], [], [], [], []], cat: "everyday" });
+  const offset = st.now - Date.now(); // server clock minus ours
+  const wait = st.startAt - offset - Date.now() - 2100; // the 3-2-1 takes about 2.1 s
+  const go = () => startRace({
+    mode: "versus", online: { code: o.code, token: o.token, seat: o.seat, deck: st.deck, players: st.players },
+    questions, names: st.players.map((p, i) => (i === o.seat ? "YOU" : (p.name || "FRIEND").toUpperCase())), cars: st.players.map((p) => p.car || "rustbucket"),
+  });
+  overlay(wait > 600 ? "GET READY!" : "", "small");
+  setTimeout(go, Math.max(0, wait));
+}
+
+// my result for a round (sent once; retried a couple of times if the network blips)
+function onlineSend(round, res, nitro, tries = 0) {
+  const o = race.online;
+  onlineCall({ action: "answer", code: o.code, token: o.token, round, tier: res.tier, answer: res.display || "", nitro: !!nitro })
+    .catch(() => { if (tries < 3) setTimeout(() => onlineSend(round, res, nitro, tries + 1), 1000); });
+}
+
+// wait for my friend's result for this round; a friend who's gone quiet for long counts as stalled
+function onlineOpponent(round, token) {
+  const o = race.online;
+  const opp = 1 - o.seat;
+  const r = race.racers[opp];
+  const give = ANSWER_SECONDS * 1000 + 20000;
+  const t0 = Date.now();
+  return new Promise((resolve) => {
+    const done = (res) => { overlay(""); resolve(res); };
+    const tick = async () => {
+      if (token !== raceToken) return done({ tier: 0, display: "", key: "" });
+      try {
+        const st = await onlineCall({ action: "state", code: o.code, token: o.token });
+        const hit = st.results.find((x) => x.seat === opp && x.round === round);
+        if (hit) {
+          if (hit.nitro && r.nitro > 0) { r.useNitro = true; r.nitro -= 1; } else r.useNitro = false;
+          return done({ tier: hit.tier, display: hit.answer || "", key: normalize(hit.answer || "") });
+        }
+      } catch { /* keep trying */ }
+      if (Date.now() - t0 > give) { r.useNitro = false; return done({ tier: 0, display: "", key: "" }); }
+      overlay(`WAITING FOR ${r.name}…`, "small");
+      setTimeout(tick, 1200);
+    };
+    tick();
+  });
 }
 
 // ---------- anonymous round stats, answer reports, announcement ----------
@@ -861,6 +1038,7 @@ function show(name) {
   if (name === "garage") renderGarage();
   if (name === "passport") renderPassport();
   if (name === "board") renderBoardScreen();
+  if (name === "online") renderOnline();
   window.scrollTo({ top: 0 });
 }
 
@@ -1245,12 +1423,14 @@ function startRace(setup) {
   const today = dday();
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
   const kind = daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };
-  if (!canRace(me(), today, kind)) {
+  if (!setup.online && !canRace(me(), today, kind)) {
     if (daily) { show("leagues"); return; } // already played today: the screen says so
     openPaywall(setup.mode === "solo" && save.deck === "classic" ? "used" : "mode");
     return;
   }
-  const questions = daily
+  const questions = setup.online
+    ? setup.questions
+    : daily
     ? dailyQuestions(deckQuestions(QUESTIONS, "classic"), today)[daily - 1]
     : setup.redo && setup.questions?.length
       ? setup.questions
@@ -1264,7 +1444,9 @@ function startRace(setup) {
   lastSetup = { ...setup, redo: false, questions };
   // a daily race counts as played once it starts; an Unlimited race gets the next number
   let label;
-  if (daily) {
+  if (setup.online) {
+    label = "ONLINE 1V1";
+  } else if (daily) {
     save.daily = markDaily(save, today, daily);
     label = `DAILY ${daily} OF ${DAILY_RACES}`;
   } else {
@@ -1282,7 +1464,13 @@ function startRace(setup) {
   const racers = solo
     ? [mk("YOU", tuned(carById(save.car)))]
     : [mk(setup.names[0], tuned(carById(setup.cars[0]))), mk(setup.names[1], tuned(carById(setup.cars[1])))];
-  race = { token, solo, setup, racers, round: 0, questions, daily, label };
+  if (setup.online) racers.forEach((r, i) => {
+    if (i === setup.online.seat) return;
+    const p = setup.online.players[i];
+    if (p.power) r.power = p.power;
+    if (Number.isInteger(p.nitro)) r.nitro = p.nitro;
+  });
+  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null };
 
   scene = chaseScene; // races use the behind-the-car view
   scene.setRacers(solo
@@ -1302,7 +1490,7 @@ function startRace(setup) {
   $("q-twist").classList.add("hidden");
   $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
-  $("mode-label").textContent = daily ? label : `${label} · ${modeName(save.deck)}`;
+  $("mode-label").textContent = daily ? label : `${label} · ${modeName(setup.online ? setup.online.deck : save.deck)}`;
   $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : save.deck);
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
@@ -1342,7 +1530,7 @@ async function runRace(token) {
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     $("q-kicker").textContent = `${topicOf(q)} · ${round + 1}/${rounds}`;
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
-    markSeen(q.q);
+    if (!race.online) markSeen(q.q);
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);
@@ -1357,9 +1545,19 @@ async function runRace(token) {
 
     // collect answers
     const results = [];
-    for (let i = 0; i < race.racers.length; i++) {
-      results[i] = await askAnswer(race.racers[i], i, token, index);
+    if (race.online) {
+      // online: I answer here, my friend answers on their device; the server swaps the results
+      const mine = race.online.seat;
+      results[mine] = await askAnswer(race.racers[mine], mine, token, index);
       if (!alive()) return;
+      onlineSend(round, results[mine], race.racers[mine].useNitro);
+      results[1 - mine] = await onlineOpponent(round, token);
+      if (!alive()) return;
+    } else {
+      for (let i = 0; i < race.racers.length; i++) {
+        results[i] = await askAnswer(race.racers[i], i, token, index);
+        if (!alive()) return;
+      }
     }
     const final = race.solo ? results : applyFenderBender(results[0], results[1]);
     const bumped = final.some((f) => f.bump);
@@ -1514,7 +1712,8 @@ async function runRace(token) {
 // After the last round the road turns into wherever this race's distance has taken you.
 async function arrive(token) {
   const alive = () => token === raceToken;
-  const lead = race.racers.reduce((a, b) => (b.dist > a.dist ? b : a));
+  // online: your own distance takes you somewhere (your friend's stamp is theirs); same screen: the leader's
+  const lead = race.online ? race.racers[race.online.seat] : race.racers.reduce((a, b) => (b.dist > a.dist ? b : a));
   const top = lead.dist;
   const dest = destinationFor(top, lead.car);
   const blocked = blockedBy(top, lead.car); // went far enough, but the car can't go there
@@ -1605,7 +1804,7 @@ function askAnswer(r, i, token, index) {
     const input = $("answer");
     const fill = $("timer-fill");
     const nitroBtn = $("btn-nitro");
-    const hidden = !race.solo;
+    const hidden = !race.solo && !race.online; // same-screen 2P hides answers; online doesn't need to
     const ring = $("ring-fg");
     const secs = $("secs");
     $("q-hint").classList.remove("hidden");
@@ -1617,7 +1816,7 @@ function askAnswer(r, i, token, index) {
     feedback.className = "feedback";
     input.type = hidden ? "password" : "text";
     input.autocomplete = hidden ? "new-password" : "off";
-    $("turn").textContent = race.solo ? "" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
+    $("turn").textContent = race.solo || race.online ? "" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
     r.useNitro = false;
     const drawNitro = () => {
       const narrow = window.innerWidth < 520;
@@ -1868,8 +2067,8 @@ function finish(token) {
     save.deep += a.tiers.filter((t) => t === 4).length;
   } else {
     const w = winner === -1 ? a : race.racers[winner];
-    pay = payout(1500, winner !== -1, w.tiers);
-    title = winner === -1 ? "DEAD HEAT" : `${w.name} WINS!`;
+    pay = race.online ? payout(1500, winner === race.online.seat, race.racers[race.online.seat].tiers) : payout(1500, winner !== -1, w.tiers);
+    title = winner === -1 ? "DEAD HEAT" : race.online && winner === race.online.seat ? "YOU WIN!" : `${w.name} WINS!`;
     for (const r of race.racers) {
       save.vrooms += r.tiers.filter((t) => t === 5).length;
       save.deep += r.tiers.filter((t) => t === 4).length;
@@ -1908,14 +2107,14 @@ function finish(token) {
     race.arrival ? destResult(race.arrival) : null,
     race.daily ? dailyBoardSlot(race.daily, a) : null,
     h("div", { class: "payout" },
-      h("div", { text: race.solo ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
+      h("div", { text: race.solo || race.online ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
       h("div", { class: "payout-total", text: "+" + money(pay.total + streakBonus) }),
       streakBonus ? h("div", { class: "note good", text: `${save.streak.count}-DAY STREAK BONUS +${money(streakBonus)}` }) : null,
       h("div", { class: "note", text: race.solo
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
     FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
-      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
+      h("div", { text: dailyLeft(save, dday()) > 0 ? `${dailyLeft(save, dday())} DAILY RACE${dailyLeft(save, dday()) === 1 ? "" : "S"} LEFT TODAY` : `NEW DAILY RACES IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
       ...a.log.map((row, i) => h("div", { class: "log-row" },
@@ -1931,6 +2130,9 @@ function finish(token) {
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : left ? `RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "NO NEW PROMPTS";
   $("btn-again").disabled = paid && !left;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
+  // online: "again" goes back to the online screen for a new race with your friend; no redo
+  if (race.online) { $("btn-again").textContent = "NEW ONLINE RACE"; $("btn-again").disabled = false; }
+  $("btn-redo").classList.toggle("hidden", !!race.online);
   show("results");
 }
 
@@ -1947,30 +2149,7 @@ document.addEventListener("click", (e) => {
 $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
-// Online 1v1 (race a friend, each on your own device) isn't built yet: the button says so.
-{
-  const btn = $("btn-online");
-  const label = btn.innerHTML;
-  let timer = 0;
-  btn.addEventListener("click", () => {
-    audio.sfx.deny();
-    btn.textContent = "RACE A FRIEND ONLINE — SOON!";
-    clearTimeout(timer);
-    timer = setTimeout(() => { btn.innerHTML = label; }, 1800);
-  });
-}
-$("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
-$("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
-$("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
-$("btn-how").addEventListener("click", () => { audio.sfx.click(); show("how"); });
-$("btn-quit").addEventListener("click", () => { audio.sfx.deny(); overlay(""); show("title"); });
-$("btn-again").addEventListener("click", () => {
-  audio.sfx.click();
-  if (!lastSetup) return;
-  const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dday()) : 0;
-  startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false });
-});
-$("btn-redo").addEventListener("click", () => { audio.sfx.click(); if (lastSetup) startRace({ ...lastSetup, redo: true }); });
+$("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
 $("btn-start-1p").addEventListener("click", () => { audio.sfx.click(); startRace({ mode: "solo" }); });
 $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("btn-start-2p").addEventListener("click", () => {
@@ -1994,7 +2173,7 @@ audio.setMuted(save.muted);
 renderSound();
 renderCash(false);
 renderLegend();
-show("title");
+show(linkCode ? "online" : "title"); // a race link opens the join screen
 refreshAccount();
 // progress brought back from the server copy: redraw with it
 restoring.then((ok) => { if (ok && current !== "race") { renderCash(); show(current); } });

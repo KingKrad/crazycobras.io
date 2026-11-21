@@ -879,7 +879,20 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .announcement { background: #3a1d00; border: 2px solid var(--orange); color: #ffe0b8; padding: 8px 10px; font-size: 9px; text-align: center; max-width: 520px; line-height: 1.6; }
 
 /* online 1v1: coming soon */
-.btn.big.online-soon { background: #2a2440; border-color: #6a6190; color: #b9b2d8; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.btn.big.online-soon:hover:not(:disabled) { background: #332c4f; }
+.btn.big.online-btn { background: #1d7a46; border-color: #c8ffd9; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.btn.big.online-btn:hover:not(:disabled) { background: #24944f; }
 .soon-tag { font-size: 8px; padding: 4px 6px; background: var(--yellow); color: #000; letter-spacing: 0.1em; }
-#s-title .menu .online-soon { grid-column: 1 / -1; }
+#s-title .menu .online-btn { grid-column: 1 / -1; }
+
+/* online 1v1 */
+.online-box { display: grid; gap: 12px; }
+.online-card { background: var(--panel); border: var(--px) solid var(--line); padding: 14px; display: grid; gap: 10px; }
+.online-card input { font: inherit; font-size: 12px; padding: 10px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
+.online-card .code-in { font-size: 20px; letter-spacing: 0.3em; text-transform: uppercase; text-align: center; }
+.online-card .modes { margin: 0; }
+.race-code { font-size: 34px; letter-spacing: 0.25em; color: var(--yellow); text-align: center; text-shadow: 3px 3px 0 #000; }
+.invite-link { text-align: center; overflow-wrap: anywhere; user-select: all; }
+.online-players { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.online-player { background: #120a2a; border: 2px solid #2d2156; padding: 10px; display: grid; gap: 4px; text-align: center; }
+.online-player.p1 { border-color: #4fd1ff; }
+.online-player.p2 { border-color: #ff4fd8; }

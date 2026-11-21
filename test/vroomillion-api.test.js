@@ -582,3 +582,38 @@ test("admin overview, player list, daily moderation, announcement and deleting a
   // and none of it for a normal player
   assert.equal((await worker.fetch(post("admin", { action: "overview" }, { cookie: (await signup("x@example.com")).cookie }), adminEnv())).status, 404);
 });
+
+// ---------- online 1v1 ----------
+
+test("online 1v1: an Unlimited host makes a room, a friend joins without an account, they swap results", async () => {
+  const prompts = ["Name a fruit", "Name a dog breed", "Name a country", "Name a colour", "Name a sport", "Name a car brand", "Name a bird"];
+  const on = (body, h = {}) => worker.fetch(post("online", body, h), env());
+  const host = await signup("host@example.com");
+  // needs Unlimited to create
+  let r = await on({ action: "create", deck: "classic", name: "Hosty", prompts }, { cookie: host.cookie });
+  assert.equal(r.status, 402);
+  db.sql.prepare("UPDATE users SET unlimited = 1 WHERE email = 'host@example.com'").run();
+  assert.equal((await on({ action: "create", prompts })).status, 401, "no account, no room");
+  r = await on({ action: "create", deck: "car", name: "Hosty", car: "chiron", power: 4.1, nitro: 4, prompts }, { cookie: host.cookie });
+  const room = await r.json();
+  assert.match(room.code, /^[A-HJ-NP-Z2-9]{6}$/);
+  // the friend: no cookie at all
+  const g = await (await on({ action: "join", code: room.code.toLowerCase(), name: "Pal", car: "rustbucket", power: 1, nitro: 0 })).json();
+  assert.equal(g.seat, 1);
+  assert.equal((await on({ action: "join", code: room.code, name: "Third" })).status, 409, "two players only");
+  let st = await (await on({ action: "state", code: room.code, token: g.token })).json();
+  assert.deepEqual(st.prompts, prompts);
+  assert.equal(st.deck, "car");
+  assert.deepEqual(st.players.map((p) => p.name), ["Hosty", "Pal"]);
+  assert.equal((await on({ action: "start", code: room.code, token: g.token })).status, 403, "only the host starts");
+  st = await (await on({ action: "start", code: room.code, token: room.token })).json();
+  assert.equal(st.status, "racing");
+  assert.ok(st.startAt > st.now);
+  await on({ action: "answer", code: room.code, token: room.token, round: 0, tier: 4, answer: "durian", nitro: true });
+  await on({ action: "answer", code: room.code, token: g.token, round: 0, tier: 1, answer: "apple" });
+  await on({ action: "answer", code: room.code, token: g.token, round: 0, tier: 5, answer: "changed my mind" });
+  st = await (await on({ action: "state", code: room.code, token: g.token })).json();
+  assert.deepEqual(st.results.map((x) => [x.seat, x.tier, x.answer, x.nitro]), [[0, 4, "durian", true], [1, 1, "apple", false]], "first answer per round counts");
+  assert.equal((await on({ action: "state", code: room.code, token: "0".repeat(32) })).status, 403);
+  assert.equal((await on({ action: "state", code: "ZZZZZZ", token: g.token })).status, 404);
+});
