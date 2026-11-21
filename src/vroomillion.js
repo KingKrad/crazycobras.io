@@ -22,8 +22,8 @@ async function stripe(env, path, init = {}) {
 const isPaid = (s) => s.payment_status === "paid" && s.metadata?.product === PRODUCT && s.amount_total === PRICE_CENTS;
 
 async function markPaid(env, userId, sessionId) {
-  await env.DB.prepare("UPDATE users SET unlimited = 1, paid_session = ?, pending_session = NULL WHERE id = ?")
-    .bind(sessionId, userId).run();
+  await env.DB.prepare("UPDATE users SET unlimited = 1, paid_session = ?, pending_session = NULL, paid_at = COALESCE(paid_at, ?) WHERE id = ?")
+    .bind(sessionId, Date.now(), userId).run();
 }
 
 // GET /api/vroomillion/me -> { email, unlimited } for the logged-in player, or 401.
@@ -45,6 +45,8 @@ export async function handleMe(request, env) {
       await env.DB.prepare("UPDATE users SET pending_session = NULL WHERE id = ?").bind(user.id).run();
     }
   }
+  // last seen, for the admin screen's active-player counts (at most once an hour)
+  if (!(user.last_seen > now - 3600000)) await env.DB.prepare("UPDATE users SET last_seen = ? WHERE id = ?").bind(now, user.id).run();
   return json(publicUser(user, env));
 }
 

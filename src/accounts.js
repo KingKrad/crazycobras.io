@@ -97,7 +97,7 @@ export async function ensureSchema(db) {
     )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   schemaReady = true;
@@ -254,9 +254,13 @@ export async function passesBotCheck(request, env, token, fetchImpl = fetch) {
 }
 
 // GET /api/vroomillion/config -> settings the page needs before it can show the sign-up form.
-export function handleConfig(request, env) {
+export async function handleConfig(request, env) {
   if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
-  return json({ turnstileSiteKey: turnstileSecret(env) && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null });
+  const { announcement } = await import("./stats.js");
+  return json({
+    turnstileSiteKey: turnstileSecret(env) && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null,
+    announcement: await announcement(env), // the title-screen message set on the admin screen
+  });
 }
 
 export async function handleSignup(request, env) {
@@ -342,6 +346,8 @@ export async function handleDeleteAccount(request, env) {
   const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
   const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
   if (!sameString(hash, user.pw_hash)) return json({ error: "Wrong password." }, 401);
+  // their leaderboard scores go too (the table exists once a daily score has been sent)
+  try { await env.DB.prepare("DELETE FROM daily_scores WHERE user_id = ?").bind(user.id).run(); } catch { /* no scores table yet */ }
   await env.DB.batch([
     env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
     env.DB.prepare("DELETE FROM users WHERE id = ?").bind(user.id),

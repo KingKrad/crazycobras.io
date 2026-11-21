@@ -416,7 +416,7 @@ test("admins grant and remove Unlimited, give free races back, and see stats", a
   assert.equal(stats.races[0]["solo-classic"], 2);
   assert.equal(stats.races[0].versus, 1);
   assert.equal(stats.races[0].total, 3);
-  assert.equal(stats.races.length, 7);
+  assert.equal(stats.races.length, 14);
 });
 
 // ---------- seen prompts ----------
@@ -517,4 +517,68 @@ test("device saves refuse junk, huge saves and other sites", async () => {
   assert.equal((await worker.fetch(post("device-save", { save: [1, 2] }), env())).status, 400);
   assert.equal((await worker.fetch(post("device-save", { save: { owned: ["x"], pad: "x".repeat(130000) } }), env())).status, 400, "too big is dropped");
   assert.equal((await worker.fetch(post("device-save", { save: { owned: ["x"] } }, { origin: "https://evil.test" }), env())).status, 403);
+});
+
+// ---------- the bigger admin screen ----------
+
+test("round stats count plays, stalls, tiers and accepted answers, never free text", async () => {
+  const send = (rounds) => worker.fetch(post("round-stats", { rounds }), env());
+  assert.equal((await send([{ prompt: "Name a fruit", answer: "Apple", tier: 1 }, { prompt: "Name a fruit", answer: "my phone number 555", tier: 0 }, { prompt: "Name a fruit", answer: "Durian", tier: 3 }])).status, 200);
+  const s = db.sql.prepare("SELECT * FROM prompt_stats WHERE prompt = 'Name a fruit'").get();
+  assert.deepEqual([s.plays, s.stalls, s.t1, s.t3], [3, 1, 1, 1]);
+  const answers = db.sql.prepare("SELECT answer FROM answer_stats ORDER BY answer").all().map((r) => r.answer);
+  assert.deepEqual(answers, ["apple", "durian"], "a stalled (unaccepted) answer is never stored");
+  assert.equal((await send([])).status, 400);
+  assert.equal((await worker.fetch(post("round-stats", { rounds: [{ prompt: "x", tier: 1 }] }, { origin: "https://evil.test" }), env())).status, 403);
+});
+
+test("players can report an answer, and admins work through the reports", async () => {
+  assert.equal((await worker.fetch(post("report", { prompt: "Name a fruit", answer: "durian", tier: 4, reason: "too-rare", note: "everyone knows durian" }), env())).status, 200);
+  assert.equal((await worker.fetch(post("report", { prompt: "Name a fruit", answer: "x", tier: 1, reason: "made-up" }), env())).status, 400);
+  const boss = await signup("boss@example.com");
+  const call = async (body) => (await worker.fetch(post("admin", body, { cookie: boss.cookie }), adminEnv())).json();
+  const open = await call({ action: "reports" });
+  assert.equal(open.reports.length, 1);
+  assert.equal(open.reports[0].note, "everyone knows durian");
+  await call({ action: "resolve-report", id: open.reports[0].id, status: "fixed" });
+  assert.equal((await call({ action: "reports" })).reports.length, 0);
+  assert.equal((await call({ action: "reports", status: "fixed" })).reports.length, 1);
+});
+
+test("admin overview, player list, daily moderation, announcement and deleting a player", async () => {
+  const boss = await signup("boss@example.com");
+  const racer = await signup("racer@example.com");
+  const call = async (body) => (await worker.fetch(post("admin", body, { cookie: boss.cookie }), adminEnv())).json();
+  db.sql.prepare("UPDATE users SET paid_session = 'cs_x', paid_at = ?, unlimited = 1 WHERE email = 'racer@example.com'").run(Date.now());
+  const o = await call({ action: "overview" });
+  assert.equal(o.money.allTime, 5);
+  assert.equal(o.money.today, 5);
+  assert.equal(o.signups.length, 14);
+  assert.equal(o.signups.at(-1).n, 2, "two sign-ups today");
+  const list = await call({ action: "players" });
+  assert.equal(list.total, 2);
+  assert.equal((await call({ action: "players", q: "racer" })).players[0].email, "racer@example.com");
+  // leaderboard moderation
+  await worker.fetch(post("daily", { race: 1, metres: 5000, tiers: [3, 3, 3, 3, 3, 3, 3] }, { cookie: racer.cookie }), env());
+  await worker.fetch(post("nickname", { nickname: "Sneaky Pete" }, { cookie: racer.cookie }), env());
+  let daily = await call({ action: "daily" });
+  assert.equal(daily.races[0].players, 1);
+  assert.equal(daily.races[0].scores[0].nickname, "Sneaky Pete");
+  await call({ action: "reset-nickname", email: "racer@example.com" });
+  await call({ action: "remove-score", email: "racer@example.com", race: 1, day: daily.day });
+  daily = await call({ action: "daily" });
+  assert.equal(daily.races[0].players, 0);
+  assert.equal(db.sql.prepare("SELECT nickname FROM users WHERE email = 'racer@example.com'").get().nickname, null);
+  // announcement shows in /config for everyone
+  await call({ action: "set-announcement", text: "New prompts this weekend!" });
+  assert.equal((await (await worker.fetch(get("config"), env())).json()).announcement, "New prompts this weekend!");
+  await call({ action: "set-announcement", text: "" });
+  assert.equal((await (await worker.fetch(get("config"), env())).json()).announcement, null);
+  // deleting needs the email typed again, and never an admin
+  assert.ok((await call({ action: "delete-player", email: "racer@example.com", confirm: "nope@example.com" })).error);
+  assert.ok((await call({ action: "delete-player", email: "boss@example.com", confirm: "boss@example.com" })).error);
+  assert.equal((await call({ action: "delete-player", email: "racer@example.com", confirm: "racer@example.com" })).deleted, "racer@example.com");
+  assert.equal(db.sql.prepare("SELECT COUNT(*) AS n FROM users WHERE email = 'racer@example.com'").get().n, 0);
+  // and none of it for a normal player
+  assert.equal((await worker.fetch(post("admin", { action: "overview" }, { cookie: (await signup("x@example.com")).cookie }), adminEnv())).status, 404);
 });

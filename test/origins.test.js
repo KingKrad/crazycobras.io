@@ -40,8 +40,8 @@ test("bot check is off without keys, and asks Turnstile when on", async () => {
 
 test("config only hands out the site key when the check is fully set up", async () => {
   const get = new Request("https://x/api/vroomillion/config");
-  assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site" }).json()).turnstileSiteKey, null);
-  assert.equal((await handleConfig(get, { TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "s" }).json()).turnstileSiteKey, "site");
+  assert.equal((await (await handleConfig(get, { TURNSTILE_SITE_KEY: "site" })).json()).turnstileSiteKey, null);
+  assert.equal((await (await handleConfig(get, { TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "s" })).json()).turnstileSiteKey, "site");
 });
 
 import { clientIp } from "../src/accounts.js";

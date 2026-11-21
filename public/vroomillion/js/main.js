@@ -279,6 +279,7 @@ function renderDaily() {
   box.textContent = "";
   // admins get a shortcut to the admin screen right on the title screen (phones included)
   $("btn-admin-title")?.classList.toggle("hidden", !account?.admin);
+  if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
   const today = dday();
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
@@ -539,43 +540,248 @@ async function adminCall(body) {
   return out;
 }
 
+// ---------- anonymous round stats, answer reports, announcement ----------
+// After each race: which prompts were played, how often people stall, which accepted answers were given.
+// No player ID goes with it, and a stalled (unaccepted) answer's text is never sent.
+function sendRoundStats() {
+  const rounds = race.racers.flatMap((r) => r.log.map((l) => ({ prompt: l.q, tier: l.tier, ...(l.tier > 0 ? { answer: l.answer.toLowerCase().slice(0, 40) } : {}) })));
+  if (rounds.length) api("round-stats", { method: "POST", body: JSON.stringify({ rounds: rounds.slice(0, 7) }) }).catch(() => {});
+  if (rounds.length > 7) api("round-stats", { method: "POST", body: JSON.stringify({ rounds: rounds.slice(7, 14) }) }).catch(() => {});
+}
+
+// "REPORT" beside each answer on the results screen: tell us a tier or answer is wrong.
+function reportLink(prompt, entry) {
+  const btn = h("button", { class: "link report-link", type: "button", text: "REPORT", "aria-label": `Report the answer ${entry.answer} for ${prompt}` });
+  btn.addEventListener("click", () => {
+    audio.sfx.click();
+    const row = btn.closest(".log-row");
+    if (row.querySelector(".report-form")) return;
+    const reasons = [["too-common", "SHOULD BE RARER"], ["too-rare", "SHOULD BE MORE COMMON"], ...(entry.tier === 0 ? [["should-count", "SHOULD HAVE COUNTED"]] : [["should-not-count", "SHOULDN'T COUNT"]]), ["other", "SOMETHING ELSE"]]
+      .filter(([r]) => entry.tier > 0 || !["too-common", "too-rare"].includes(r));
+    const pick = h("select", { "aria-label": "What's wrong" }, ...reasons.map(([v, t]) => h("option", { value: v, text: t })));
+    const note = h("input", { type: "text", maxlength: "200", placeholder: "optional: tell us more", "aria-label": "More detail" });
+    const msg = h("span", { class: "note" });
+    const form = h("form", { class: "report-form" }, h("span", { class: "note", text: `"${entry.answer}" →` }), pick, note, h("button", { class: "btn small", type: "submit", text: "SEND" }), msg);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.textContent = "Sending…";
+      try {
+        const { res, body } = await api("report", { method: "POST", body: JSON.stringify({ prompt, answer: entry.answer, tier: entry.tier, reason: pick.value, note: note.value }) });
+        if (!res.ok) throw new Error(body.error || "Couldn't send that.");
+        form.replaceWith(h("p", { class: "note good", text: "Thanks — we'll take a look." }));
+      } catch (err) { msg.textContent = err.message === "offline" ? "Reports work on the VROOMILLION website." : err.message; }
+    });
+    row.append(form);
+    pick.focus();
+  });
+  return btn;
+}
+
+// The announcement set on the admin screen, shown at the top of the title screen.
+let announcementText = null;
+api("config").then(({ body }) => { announcementText = body.announcement || null; if (current === "title") renderDaily(); }).catch(() => {});
+
+// ---------- the admin screen: Overview, Players, Daily, Prompts, Reports, Settings ----------
+const ADMIN_TABS = [["overview", "OVERVIEW"], ["players", "PLAYERS"], ["daily", "DAILY"], ["prompts", "PROMPTS"], ["reports", "REPORTS"], ["settings", "SETTINGS"]];
+let adminTab = "overview";
+const fmtDay = (d) => d.slice(5).replace("-", "/");
+const fmtDate = (t) => (t ? new Date(t).toISOString().slice(0, 10) : "—");
+const fmtM = (m) => Math.round(m).toLocaleString("en-US") + " M";
+const tile = (label, value, sub) => h("div", { class: "admin-tile" }, h("div", { class: "admin-n", text: String(value) }), h("div", { class: "note", text: label }), sub ? h("div", { class: "admin-sub", text: sub }) : null);
+
+// A one-series bar chart of daily values (oldest left). Hover or tap a bar for its exact value.
+function barChart(title, rows, fmt = (n) => String(n)) {
+  const max = Math.max(1, ...rows.map((r) => r.n));
+  const total = rows.reduce((t, r) => t + r.n, 0);
+  const bars = h("div", { class: "chart-bars", role: "img", "aria-label": `${title}: ${rows.map((r) => `${r.day} ${fmt(r.n)}`).join(", ")}` },
+    ...rows.map((r) => {
+      const bar = h("div", { class: "chart-bar", title: `${r.day}: ${fmt(r.n)}`, tabindex: "0" });
+      bar.style.height = Math.max(r.n ? 4 : 1, Math.round((r.n / max) * 100)) + "%";
+      return h("div", { class: "chart-col" }, bar);
+    }));
+  const readout = h("div", { class: "chart-readout", text: `TOTAL ${fmt(total)} · PEAK ${fmt(max === 1 && !rows.some((r) => r.n) ? 0 : max)}` });
+  bars.addEventListener("pointerover", (e) => { if (e.target.classList.contains("chart-bar")) readout.textContent = e.target.title.toUpperCase(); });
+  bars.addEventListener("focusin", (e) => { if (e.target.classList.contains("chart-bar")) readout.textContent = e.target.title.toUpperCase(); });
+  bars.addEventListener("pointerleave", () => { readout.textContent = `TOTAL ${fmt(total)} · PEAK ${fmt(max)}`; });
+  return h("div", { class: "chart" },
+    h("div", { class: "step-label", text: title }), bars,
+    h("div", { class: "chart-axis" }, h("span", { text: fmtDay(rows[0].day) }), h("span", { text: fmtDay(rows.at(-1).day) })),
+    readout);
+}
+
 function renderAdmin() {
   const box = $("admin-box");
   box.textContent = "";
   if (!account?.admin) { box.append(h("p", { class: "note", text: "Log in with an admin account." })); return; }
-  const stats = h("div", { class: "admin-stats", text: "Loading stats…" });
-  const email = h("input", { type: "email", maxlength: "254", placeholder: "player@email.com", "aria-label": "Player email", autocomplete: "off" });
-  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
-  const player = h("div", { class: "admin-player" });
-  const showPlayer = (p) => {
-    player.textContent = "";
-    player.append(
-      h("div", { class: "signed-in", text: p.email.toUpperCase() }),
-      h("div", { class: "note", text: [p.admin ? "ADMIN" : null, p.unlimited ? "UNLIMITED" : "FREE PLAYER", p.paid ? "PAID" : null, "JOINED " + new Date(p.createdAt).toISOString().slice(0, 10)].filter(Boolean).join(" · ") }),
-      h("div", { class: "admin-actions" },
-        h("button", { class: "btn", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.") }),
-        h("button", { class: "btn", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") })));
-  };
-  const act = async (body, done) => {
-    msg.textContent = "Working…";
-    try { const p = await adminCall(body); showPlayer(p); msg.textContent = done || ""; } catch (e) { msg.textContent = e.message; player.textContent = ""; }
-  };
-  const form = h("form", { class: "auth-form", novalidate: true },
-    h("div", { class: "step-label", text: "FIND A PLAYER" }), email,
-    h("button", { class: "btn big", type: "submit", text: "LOOK UP" }), msg, player);
-  form.addEventListener("submit", (e) => { e.preventDefault(); audio.sfx.click(); act({ action: "lookup", email: email.value }); });
-  box.append(stats, form);
+  const body = h("div", { class: "admin-body" });
+  const tabs = h("div", { class: "admin-tabs", role: "tablist" }, ...ADMIN_TABS.map(([id, label]) =>
+    h("button", { class: "admin-tab" + (adminTab === id ? " on" : ""), type: "button", role: "tab", "aria-selected": String(adminTab === id), text: label,
+      onclick: () => { audio.sfx.click(); adminTab = id; renderAdmin(); } })));
+  box.append(tabs, body);
+  const fail = (e) => { body.textContent = ""; body.append(h("p", { class: "pay-msg bad", text: e.message === "offline" ? "The admin screen needs the live site." : e.message })); };
+  body.append(h("p", { class: "note", text: "Loading…" }));
+  ({ overview: adminOverview, players: adminPlayers, daily: adminDaily, prompts: adminPrompts, reports: adminReports, settings: adminSettings })[adminTab](body).catch(fail);
+}
 
-  adminCall({ action: "stats" }).then((st) => {
-    stats.textContent = "";
-    const tile = (label, n) => h("div", { class: "admin-tile" }, h("div", { class: "admin-n", text: String(n) }), h("div", { class: "note", text: label }));
-    stats.append(
-      h("div", { class: "admin-tiles" }, tile("ACCOUNTS", st.users), tile("UNLIMITED", st.unlimited), tile("PAID", st.paid), tile("NEW (24H)", st.newToday)),
-      h("div", { class: "step-label", text: "RACES STARTED (UTC DAYS)" }),
-      h("table", { class: "admin-races" },
-        h("tr", {}, ...["DAY", "1P", "GEAR", "HARD", "2P", "ALL"].map((t) => h("th", { text: t }))),
-        ...st.races.map((r) => h("tr", {}, ...[r.day.slice(5), r["solo-classic"], r["solo-car"], r["solo-hard"], r.versus, r.total].map((v) => h("td", { text: String(v) }))))));
-  }).catch((e) => { stats.textContent = e.message === "offline" ? "The admin screen needs the live site." : e.message; });
+async function adminOverview(body) {
+  const o = await adminCall({ action: "overview" });
+  body.textContent = "";
+  const money = (n) => "$" + n.toLocaleString("en-US");
+  body.append(
+    h("div", { class: "step-label", text: "MONEY" }),
+    h("div", { class: "admin-tiles" }, tile("TODAY", money(o.money.today)), tile("LAST 7 DAYS", money(o.money.week)), tile("ALL TIME", money(o.money.allTime), `${o.money.sales} SALE${o.money.sales === 1 ? "" : "S"} × $${o.money.price}`), tile("UNLIMITED", o.unlimited, "INCL. GIFTED")),
+    barChart("REVENUE PER DAY (14 DAYS)", o.money.perDay, money),
+    h("div", { class: "step-label", text: "PLAYERS" }),
+    h("div", { class: "admin-tiles" }, tile("ACCOUNTS", o.users), tile("NEW (24H)", o.newToday), tile("ACTIVE TODAY", o.activity.devicesToday, `${o.activity.accountsToday} WITH ACCOUNTS`), tile("ACTIVE 7 DAYS", o.activity.devicesWeek, `${o.activity.accountsWeek} WITH ACCOUNTS`)),
+    h("p", { class: "note", text: `Active = devices that played (with or without an account). ${o.activity.devicesAll.toLocaleString("en-US")} devices have played in all.` }),
+    barChart("NEW ACCOUNTS PER DAY (14 DAYS)", o.signups),
+    barChart("RACES STARTED PER DAY (14 DAYS)", [...o.races].reverse().map((r) => ({ day: r.day, n: r.total }))),
+    h("table", { class: "admin-races" },
+      h("tr", {}, ...["DAY", "1P", "GEAR", "HARD", "2P", "ALL"].map((t) => h("th", { text: t }))),
+      ...o.races.slice(0, 7).map((r) => h("tr", {}, ...[fmtDay(r.day), r["solo-classic"], r["solo-car"], r["solo-hard"], r.versus, r.total].map((v) => h("td", { text: String(v) }))))));
+}
+
+async function adminPlayers(body, q = "", offset = 0) {
+  const list = await adminCall({ action: "players", q, offset });
+  body.textContent = "";
+  const search = h("input", { type: "search", value: q, placeholder: "search email or nickname", "aria-label": "Search players", autocomplete: "off" });
+  const form = h("form", { class: "admin-search" }, search, h("button", { class: "btn small", type: "submit", text: "SEARCH" }));
+  form.addEventListener("submit", (e) => { e.preventDefault(); adminPlayers(body, search.value.trim(), 0).catch((err) => body.append(h("p", { class: "pay-msg bad", text: err.message }))); });
+  const detail = h("div", { class: "admin-player" });
+  const rows = list.players.map((p) => h("button", { class: "admin-row", type: "button", onclick: () => showPlayer(p) },
+    h("span", { class: "admin-row-main", text: p.email }),
+    h("span", { class: "admin-row-tags", text: [p.admin ? "ADMIN" : null, p.paid ? "PAID" : p.unlimited ? "UNLIMITED" : null, p.streak ? `STREAK ${p.streak}` : null].filter(Boolean).join(" · ") || "FREE" }),
+    h("span", { class: "admin-row-sub", text: `joined ${fmtDate(p.createdAt)} · seen ${fmtDate(p.lastSeen)}` })));
+  const more = h("div", { class: "admin-pager" },
+    offset > 0 ? h("button", { class: "btn small", type: "button", text: "◀ NEWER", onclick: () => adminPlayers(body, q, Math.max(0, offset - 25)) }) : null,
+    h("span", { class: "note", text: `${list.total ? offset + 1 : 0}–${offset + list.players.length} OF ${list.total}` }),
+    offset + 25 < list.total ? h("button", { class: "btn small", type: "button", text: "OLDER ▶", onclick: () => adminPlayers(body, q, offset + 25) }) : null);
+  body.append(form, detail, h("div", { class: "admin-list" }, ...(rows.length ? rows : [h("p", { class: "note", text: "No players found." })])), more);
+
+  function showPlayer(p) {
+    detail.textContent = "";
+    const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+    const act = async (req, done, after) => {
+      msg.textContent = "Working…";
+      try { const out = await adminCall(req); msg.textContent = done; if (after) after(out); } catch (e) { msg.textContent = e.message; }
+    };
+    const confirmBox = h("input", { type: "email", placeholder: "type their email to confirm", "aria-label": "Type the email to confirm deleting", autocomplete: "off" });
+    detail.append(
+      h("div", { class: "signed-in", text: p.email.toUpperCase() }),
+      h("div", { class: "note", text: [p.admin ? "ADMIN" : null, p.unlimited ? "UNLIMITED" : "FREE PLAYER", p.paid ? `PAID ${fmtDate(p.paidAt)}` : null].filter(Boolean).join(" · ") }),
+      h("div", { class: "note", text: `NAME ${p.nickname || "(default)"} · STREAK ${p.streak} · RACES ${p.races} · JOINED ${fmtDate(p.createdAt)} · LAST SEEN ${fmtDate(p.lastSeen)}` }),
+      h("div", { class: "admin-actions" },
+        h("button", { class: "btn small", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.", (np) => showPlayer({ ...p, ...np })) }),
+        h("button", { class: "btn small", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") }),
+        p.nickname ? h("button", { class: "btn small", type: "button", text: "RESET NICKNAME", onclick: () => act({ action: "reset-nickname", email: p.email }, "Nickname reset to the default.", (np) => showPlayer({ ...p, ...np })) }) : null),
+      p.admin ? null : h("details", { class: "danger-zone" }, h("summary", { text: "Delete this account…" }),
+        h("p", { class: "note", text: "Deletes the account, its sessions and its leaderboard scores. This can't be undone." }),
+        confirmBox,
+        h("button", { class: "btn small danger", type: "button", text: "DELETE ACCOUNT", onclick: () => act({ action: "delete-player", email: p.email, confirm: confirmBox.value }, "Account deleted.", () => adminPlayers(body, q, offset)) })),
+      msg);
+    detail.scrollIntoView({ block: "nearest" });
+  }
+}
+
+async function adminDaily(body, d) {
+  const out = await adminCall({ action: "daily", ...(d ? { day: d } : {}) });
+  body.textContent = "";
+  const prev = new Date(Date.parse(out.day + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
+  const next = new Date(Date.parse(out.day + "T00:00:00Z") + 86400000).toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  body.append(h("div", { class: "admin-pager" },
+    h("button", { class: "btn small", type: "button", text: "◀ DAY", onclick: () => adminDaily(body, prev) }),
+    h("span", { class: "step-label", text: `DAILY RACES · ${out.day} (UTC)` }),
+    out.day < today ? h("button", { class: "btn small", type: "button", text: "DAY ▶", onclick: () => adminDaily(body, next) }) : null));
+  for (const r of out.races) {
+    const msg = h("p", { class: "pay-msg", role: "status" });
+    body.append(h("div", { class: "board-box" },
+      h("div", { class: "board-title", text: `DAILY RACE ${r.race}` }),
+      h("div", { class: "admin-tiles" }, tile("PLAYERS", r.players), tile("AVERAGE", fmtM(r.avg)), tile("TOP", fmtM(r.top))),
+      r.scores.length ? h("ol", { class: "board" }, ...r.scores.map((s, i) => h("li", {},
+        h("span", { class: "board-rank", text: String(i + 1) }),
+        h("span", { class: "board-name", text: `${s.nickname} · ${s.email}` }),
+        h("span", { class: "board-m", text: fmtM(s.metres) }),
+        h("button", { class: "link", type: "button", text: "remove", "aria-label": `Remove ${s.nickname}'s score`,
+          onclick: async () => { msg.textContent = "Removing…"; try { await adminCall({ action: "remove-score", email: s.email, race: r.race, day: out.day }); adminDaily(body, out.day); } catch (e) { msg.textContent = e.message; } } })))) : h("p", { class: "note", text: "No scores." }),
+      msg));
+  }
+  const days = [...new Set(out.history.map((x) => x.day))].sort();
+  if (days.length) {
+    const rows = [];
+    for (let i = 13; i >= 0; i--) { const dd = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10); rows.push({ day: dd, n: out.history.filter((x) => x.day === dd).reduce((t, x) => t + x.n, 0) }); }
+    body.append(barChart("DAILY RACE SCORES SENT PER DAY (14 DAYS)", rows));
+  }
+  body.append(h("div", { class: "step-label", text: "LIVE STREAKS (ACCOUNTS)" }),
+    out.streaks.length ? h("table", { class: "admin-races" }, h("tr", {}, h("th", { text: "DAYS IN A ROW" }), h("th", { text: "PLAYERS" })),
+      ...out.streaks.map((s) => h("tr", {}, h("td", { text: String(s.streak) }), h("td", { text: String(s.n) })))) : h("p", { class: "note", text: "No live streaks yet." }));
+}
+
+async function adminPrompts(body) {
+  const out = await adminCall({ action: "prompts" });
+  body.textContent = "";
+  const t = out.totals;
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) + "%" : "—");
+  const detail = h("div", { class: "admin-player" });
+  const open = async (prompt) => {
+    detail.textContent = "Loading…";
+    const p = await adminCall({ action: "prompt", prompt });
+    detail.textContent = "";
+    const s = p.stats || { plays: 0, stalls: 0, t1: 0, t2: 0, t3: 0, t4: 0, t5: 0 };
+    detail.append(h("div", { class: "signed-in", text: prompt.toUpperCase() }),
+      h("div", { class: "note", text: `PLAYED ${s.plays} · STALLED ${pct(s.stalls, s.plays)} · TRAFFIC ${s.t1} · CRUISING ${s.t2} · FAST LANE ${s.t3} · DEEP CUT ${s.t4} · VROOMILLION ${s.t5}` }),
+      p.answers.length ? h("table", { class: "admin-races" }, h("tr", {}, h("th", { text: "ANSWER" }), h("th", { text: "TIER" }), h("th", { text: "TIMES" })),
+        ...p.answers.map((a) => h("tr", {}, h("td", { text: a.answer }), h("td", { text: TIERS[a.tier].short }), h("td", { text: String(a.n) })))) : h("p", { class: "note", text: "No answers counted yet." }));
+    detail.scrollIntoView({ block: "nearest" });
+  };
+  const table = (rows, extra) => rows.length ? h("div", { class: "admin-list" }, ...rows.map((r) => h("button", { class: "admin-row", type: "button", onclick: () => open(r.prompt).catch((e) => { detail.textContent = e.message; }) },
+    h("span", { class: "admin-row-main", text: r.prompt }), h("span", { class: "admin-row-tags", text: extra(r) })))) : h("p", { class: "note", text: "Nothing yet — stats start with the next races played." });
+  body.append(
+    h("div", { class: "admin-tiles" }, tile("PROMPTS PLAYED", t.prompts), tile("ROUNDS", t.plays), tile("STALLED", pct(t.stalls, t.plays)), tile("VROOMILLIONS", t.vrooms)),
+    detail,
+    h("div", { class: "step-label", text: "MOST PLAYED" }), table(out.played, (r) => `${r.plays} PLAYS · ${pct(r.stalls, r.plays)} STALL`),
+    h("div", { class: "step-label", text: "HARDEST (MOST STALLS, 5+ PLAYS)" }), table(out.stalled, (r) => `${pct(r.stalls, r.plays)} STALL · ${r.plays} PLAYS`),
+    h("p", { class: "note", text: "Tap a prompt for its most common answers. Counted anonymously; only accepted answers are stored." }));
+}
+
+const REASON_TEXT = { "too-common": "should be rarer", "too-rare": "should be more common", "should-count": "should count", "should-not-count": "shouldn't count", other: "other" };
+async function adminReports(body, status = "open") {
+  const out = await adminCall({ action: "reports", status });
+  body.textContent = "";
+  body.append(h("div", { class: "admin-tabs small" }, ...["open", "fixed", "dismissed"].map((st) =>
+    h("button", { class: "admin-tab" + (st === status ? " on" : ""), type: "button", text: `${st.toUpperCase()} (${out.counts[st] || 0})`, onclick: () => adminReports(body, st) }))));
+  if (!out.reports.length) { body.append(h("p", { class: "note", text: status === "open" ? "No open reports. Players send these from the results screen." : "None." })); return; }
+  for (const r of out.reports) {
+    const msg = h("span", { class: "note" });
+    const set = (st) => async () => { msg.textContent = "…"; try { await adminCall({ action: "resolve-report", id: r.id, status: st }); adminReports(body, status); } catch (e) { msg.textContent = e.message; } };
+    body.append(h("div", { class: "board-box report" },
+      h("div", { class: "board-title", text: r.prompt.toUpperCase() }),
+      h("div", { text: `"${r.answer || "—"}" scored ${TIERS[r.tier]?.name || "?"} — player says it ${REASON_TEXT[r.reason] || r.reason}` }),
+      r.note ? h("div", { class: "note", text: `"${r.note}"` }) : null,
+      h("div", { class: "note", text: fmtDate(r.at) }),
+      h("div", { class: "admin-actions row" },
+        status !== "fixed" ? h("button", { class: "btn small", type: "button", text: "MARK FIXED", onclick: set("fixed") }) : null,
+        status !== "dismissed" ? h("button", { class: "btn small", type: "button", text: "DISMISS", onclick: set("dismissed") }) : null,
+        status !== "open" ? h("button", { class: "btn small", type: "button", text: "REOPEN", onclick: set("open") }) : null, msg)));
+  }
+}
+
+async function adminSettings(body) {
+  const out = await adminCall({ action: "get-settings" });
+  body.textContent = "";
+  const input = h("input", { type: "text", maxlength: "140", value: out.announcement, placeholder: "e.g. New prompts this weekend!", "aria-label": "Announcement" });
+  const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  const save = async (text) => {
+    msg.textContent = "Saving…";
+    try { const r = await adminCall({ action: "set-announcement", text }); input.value = r.announcement; msg.textContent = r.announcement ? "Live on everyone's title screen." : "Announcement removed."; announcementText = r.announcement || null; } catch (e) { msg.textContent = e.message; }
+  };
+  body.append(h("div", { class: "step-label", text: "TITLE-SCREEN ANNOUNCEMENT" }),
+    h("p", { class: "note", text: "Shows at the top of everyone's title screen. Up to 140 characters. Leave empty to remove it." }),
+    input,
+    h("div", { class: "admin-actions row" },
+      h("button", { class: "btn small", type: "button", text: "SAVE", onclick: () => save(input.value) }),
+      h("button", { class: "btn small", type: "button", text: "REMOVE", onclick: () => save("") })),
+    msg);
 }
 
 // Delete the account after re-entering the password.
@@ -1679,6 +1885,7 @@ function finish(token) {
       streakBonus = STREAK_BONUS * Math.min(STREAK_CAP, save.streak.count);
     }
   }
+  sendRoundStats();
   save.races++;
   save.cash += pay.total + streakBonus;
   persist();
@@ -1715,7 +1922,8 @@ function finish(token) {
         h("div", { class: "log-q", text: `${i + 1}. ${row.q.toUpperCase()}` }),
         ...race.racers.map((r, pi) => h("div", { class: `log-a p${pi + 1}` },
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
-          h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short })))))),
+          h("span", { class: "badge t" + r.log[i].tier, text: TIERS[r.log[i].tier].short }),
+          reportLink(row.q, r.log[i])))))),
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const left = leftInMode();
