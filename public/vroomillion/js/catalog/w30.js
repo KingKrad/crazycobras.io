@@ -103,7 +103,6 @@ placed3/crowded | 1 | daily | | Name a place that's always crowded | | times squ
 placed3/24hours | 1 | daily | | Name a place that's open 24 hours | | hospital, 7-eleven, gas stations, walmart, a diner, gyms, las vegas casinos, ihop, denny's, waffle house, airports, a laundromat
 placed3/vending | 1 | daily | | Name a place you'd find a vending machine | | school, hospital, office, gym, airport, train station, hotel, mall, a rest stop, a laundromat, a bowling alley, a dorm
 placed3/tourists | 1 | daily | | Name a place where you'd see lots of tourists | | times square, paris, disney world, the grand canyon, rome, las vegas, london, new york, hawaii, venice, niagara falls, the beach
-placed3/nationalpark | 2 | daily | | Name a national park | | yellowstone, yosemite, the grand canyon, zion, glacier, the everglades, the great smoky mountains, arches, rocky mountain, acadia, joshua tree, denali
 placed3/uniforms | 1 | daily | | Name a place where people wear uniforms | | school, the military, a hospital, a restaurant, a fire station, a police station, a sports team, an airline, a prison, a factory, a fast food place, a marching band
 placed3/birds | 1 | daily | | Name a place you'd see lots of birds | | the beach, a park, a lake, a farm, a zoo, the sky, a bird feeder, trees, a pond, a parking lot, a city square, an aviary
 # sports
