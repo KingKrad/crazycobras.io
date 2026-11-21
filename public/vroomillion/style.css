@@ -877,3 +877,9 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .report-form .btn.small { width: auto; }
 /* title-screen announcement */
 .announcement { background: #3a1d00; border: 2px solid var(--orange); color: #ffe0b8; padding: 8px 10px; font-size: 9px; text-align: center; max-width: 520px; line-height: 1.6; }
+
+/* online 1v1: coming soon */
+.btn.big.online-soon { background: #2a2440; border-color: #6a6190; color: #b9b2d8; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.btn.big.online-soon:hover:not(:disabled) { background: #332c4f; }
+.soon-tag { font-size: 8px; padding: 4px 6px; background: var(--yellow); color: #000; letter-spacing: 0.1em; }
+#s-title .menu .online-soon { grid-column: 1 / -1; }

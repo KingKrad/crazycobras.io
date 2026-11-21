@@ -1947,6 +1947,18 @@ document.addEventListener("click", (e) => {
 $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
+// Online 1v1 (race a friend, each on your own device) isn't built yet: the button says so.
+{
+  const btn = $("btn-online");
+  const label = btn.innerHTML;
+  let timer = 0;
+  btn.addEventListener("click", () => {
+    audio.sfx.deny();
+    btn.textContent = "RACE A FRIEND ONLINE — SOON!";
+    clearTimeout(timer);
+    timer = setTimeout(() => { btn.innerHTML = label; }, 1800);
+  });
+}
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
