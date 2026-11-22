@@ -61,6 +61,31 @@ function noise(dur, { vol = 0.2, at = 0, hp = 800 } = {}) {
   src.start(t);
 }
 
+// filtered noise: type "bandpass" / "highpass" / "lowpass", optional sweep (filter glides to that frequency)
+// and attack (seconds to swell in)
+function noiseF(dur, { vol = 0.2, at = 0, type = "bandpass", freq = 1000, q = 1, sweep = 0, attack = 0 } = {}) {
+  if (!ctx) return;
+  const t = ctx.currentTime + at;
+  const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * dur), ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const f = ctx.createBiquadFilter();
+  f.type = type;
+  f.Q.value = q;
+  f.frequency.setValueAtTime(freq, t);
+  if (sweep) f.frequency.exponentialRampToValueAtTime(sweep, t + dur);
+  const g = ctx.createGain();
+  if (attack) { g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); }
+  else g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(f).connect(g).connect(master);
+  src.start(t);
+}
+// a bass drum hit
+const kick = (at = 0, vol = 0.4) => tone(150, 0.25, { type: "sine", vol, at, slide: 0.25 });
+
 const N = { C4: 261.6, D4: 293.7, E4: 329.6, F4: 349.2, G4: 392, A4: 440, B4: 493.9, C5: 523.3, D5: 587.3, E5: 659.3, G5: 784, A5: 880, C6: 1046.5, E6: 1318.5 };
 
 export const sfx = {
@@ -115,12 +140,64 @@ export const sfx = {
   },
   // A STALLED answer: the engine coughs out black smoke.
   sputter: () => [0, 0.16, 0.34].forEach((at, i) => { noise(0.08, { vol: 0.12 - i * 0.03, hp: 250, at }); tone(80 - i * 12, 0.08, { type: "square", vol: 0.1 - i * 0.02, at }); }),
-  // Reveal jingle gets grander with each rarity tier.
+  // Each tier has its own sound when it's revealed, grander as it gets rarer.
   tier: (t) => {
     if (t === 0) { tone(110, 0.3, { type: "sawtooth", vol: 0.18, slide: 0.5 }); noise(0.25, { vol: 0.1, hp: 200 }); return; }
-    const scale = [N.C5, N.E5, N.G5, N.C6, N.E6, 1568];
-    for (let i = 0; i <= t; i++) tone(scale[i], 0.09 + (i === t ? 0.2 : 0), { vol: 0.15, at: i * 0.07 });
-    if (t === 5) { noise(0.6, { vol: 0.12, hp: 4000, at: 0.4 }); [1568, 2093, 1568, 2093, 2637].forEach((f, i) => tone(f, 0.08, { vol: 0.12, at: 0.45 + i * 0.07 })); }
+    if (t === 1) { // TRAFFIC JAM: a plain two-note blip
+      tone(N.C5, 0.07, { vol: 0.13 }); tone(N.E5, 0.12, { vol: 0.13, at: 0.07 });
+      return;
+    }
+    if (t === 2) { // CRUISING: a bell chime with a sparkle
+      [N.E5, N.A5, N.E6].forEach((f, i) => { tone(f, 0.5, { type: "triangle", vol: 0.16, at: i * 0.08 }); tone(f * 2, 0.25, { type: "sine", vol: 0.05, at: i * 0.08 }); });
+      [0.3, 0.36, 0.42].forEach((at, i) => tone(2600 + i * 400, 0.05, { type: "sine", vol: 0.04, at }));
+      return;
+    }
+    if (t === 3) { // FAST LANE: a crunchy power chord with a cymbal crash
+      [N.G4 / 2, N.D4, N.G4].forEach((f) => { tone(f, 0.12, { type: "sawtooth", vol: 0.1 }); tone(f, 0.6, { type: "sawtooth", vol: 0.1, at: 0.14 }); });
+      tone(N.G4 * 2, 0.6, { type: "square", vol: 0.05, at: 0.14 });
+      noiseF(0.9, { vol: 0.12, at: 0.14, type: "highpass", freq: 5000 });
+      kick(0.14, 0.3);
+      return;
+    }
+    if (t === 4) { // TURBO: a synth riser, then a bass drop and a big chord stab
+      tone(300, 0.35, { type: "sawtooth", vol: 0.07, slide: 4 });
+      noiseF(0.35, { vol: 0.06, type: "bandpass", freq: 1500, sweep: 8000 });
+      kick(0.36, 0.45);
+      tone(110, 0.9, { type: "sine", vol: 0.35, at: 0.36, slide: 0.35 });
+      [N.A4, N.C5, N.E5, N.A5].forEach((f) => tone(f, 0.55, { type: "sawtooth", vol: 0.06, at: 0.36 }));
+      noiseF(1.1, { vol: 0.12, at: 0.36, type: "highpass", freq: 4500 });
+      [0.6, 0.72, 0.84].forEach((at, i) => tone(N.A5 * (i + 2) / 2, 0.08, { vol: 0.06, at }));
+      return;
+    }
+    // ONE IN A VROOMILLION: a fanfare, a held chord and a cheering crowd
+    const brass = (f, dur, at) => { tone(f, dur, { type: "square", vol: 0.1, at }); tone(f * 1.005, dur, { type: "sawtooth", vol: 0.05, at }); };
+    kick(0, 0.5);
+    noiseF(1.4, { vol: 0.14, type: "highpass", freq: 4000 });
+    [[N.G4, 0.12, 0], [N.G4, 0.12, 0.14], [N.G4, 0.12, 0.28], [N.C5, 0.5, 0.42], [N.G4, 0.14, 0.95], [N.C5, 0.14, 1.1], [N.E5, 1.3, 1.25]].forEach(([f, d, at]) => brass(f, d, at));
+    [N.C4, N.G4, N.C5, N.E5].forEach((f) => tone(f, 1.4, { type: "triangle", vol: 0.08, at: 1.25 }));
+    kick(1.25, 0.45);
+    [1.3, 1.4, 1.5, 1.6, 1.7, 1.8].forEach((at, i) => tone([2093, 2637, 3136][i % 3], 0.06, { type: "sine", vol: 0.05, at }));
+    sfx.crowd(0.4);
+  },
+  // A drumroll that speeds up and gets louder before a rare answer is revealed (dur in seconds),
+  // with a tone rising underneath; bigger for rarer tiers.
+  drumroll: (dur, t = 3) => {
+    let at = 0, gap = 0.1;
+    while (at < dur) {
+      const k = at / dur;
+      noiseF(0.06, { vol: 0.05 + k * (0.08 + (t - 3) * 0.03), at, type: "bandpass", freq: 1800 + k * 1200 });
+      tone(180, 0.04, { type: "triangle", vol: 0.03 + k * 0.05, at });
+      at += gap;
+      gap = Math.max(0.028, gap * 0.9);
+    }
+    tone(110, dur, { type: "sawtooth", vol: 0.04 + (t - 3) * 0.015, slide: t >= 5 ? 6 : 4 });
+    if (t >= 4) tone(55, dur, { type: "sine", vol: 0.12, slide: 3 });
+  },
+  // A stadium cheer: filtered noise swelling up, with whoops on top.
+  crowd: (at = 0) => {
+    noiseF(2.6, { vol: 0.16, at, type: "bandpass", freq: 900, q: 0.6, attack: 0.5 });
+    noiseF(2.2, { vol: 0.07, at: at + 0.1, type: "bandpass", freq: 2400, q: 1, attack: 0.4 });
+    for (let i = 0; i < 6; i++) tone(500 + Math.random() * 500, 0.35, { type: "sine", vol: 0.03, at: at + 0.3 + Math.random() * 1.4, slide: 1.6 + Math.random() });
   },
 };
 

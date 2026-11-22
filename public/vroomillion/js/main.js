@@ -1637,10 +1637,19 @@ function rareMoment(tier, crazy = false) {
   scene.rare(tier);
   const word = crazy ? ["", "", "", "OK!", "NICE!", "CRAZY!"][tier] : ["", "", "", "RARE!", "TURBO!", "LEGENDARY!"][tier];
   const sub = crazy ? "CRAZY MODE" : TIERS[tier].rarity;
+  // TURBO and up: the letters land one at a time
+  const wordEl = h("div", { class: "rare-word" });
+  if (tier >= 4) {
+    [...word].forEach((ch, i) => {
+      const l = h("span", { class: "ltr", text: ch });
+      l.style.setProperty("--d", (i * (tier === 5 ? 0.07 : 0.06)).toFixed(2) + "s");
+      wordEl.append(l);
+    });
+  } else wordEl.textContent = word;
   const slam = h("div", { class: "rare-slam rs" + tier, "aria-hidden": "true" },
-    h("div", { class: "rare-ring" }), h("div", { class: "rare-word", text: word }), h("div", { class: "rare-sub", text: sub }));
+    h("div", { class: "rare-ring" }), wordEl, h("div", { class: "rare-sub", text: sub }));
   document.querySelector(".stage")?.append(slam);
-  setTimeout(() => slam.remove(), tier === 5 ? 2600 : 1900);
+  setTimeout(() => slam.remove(), [0, 0, 0, 1900, 2900, 3800][tier]);
   if (tier === 5) { scene.confetti(); audio.sfx.win(); }
 }
 
@@ -1827,6 +1836,7 @@ async function runRace(token) {
         tierName: TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "") + (res.bump ? (res.half ? " · LOST TOSS, HALF" : " · WON THE TOSS") : ""),
         gain: res.tier ? `+${m.toLocaleString("en-US")} M${r.useNitro ? " NITRO" : ""}` : "0 M",
         tier: res.tier,
+        fx: effectTier(res.tier, race.crazy), // how big the show is (the payout, in CRAZY MODE)
         color: i ? "#ff4fd8" : "#4fd1ff",
       };
     });
@@ -1838,9 +1848,11 @@ async function runRace(token) {
     race.racers.forEach((r, i) => {
       r.tiers.push(final[i].tier);
       r.log.push({ q: q.q, answer: final[i].display || "—", tier: final[i].tier, gain: gain[i], nitro: r.useNitro, bump: !!final[i].bump });
-      r.elTier.className = "badge t" + final[i].tier;
-      r.elTier.textContent = TIERS[final[i].tier].short;
+      // the tier badge waits for the card's reveal (rare ones build up first)
+      r.elTier.className = "badge";
+      r.elTier.textContent = "…";
     });
+    const showBadge = (i) => { race.racers[i].elTier.className = "badge t" + final[i].tier; race.racers[i].elTier.textContent = TIERS[final[i].tier].short; };
     const stage = document.querySelector(".stage");
     const BOOST_MS = [2300, 2400, 2600, 2900, 3400, 4200]; // rarer answers get a longer run
     const runs = race.racers.map(() => null);
@@ -1865,7 +1877,9 @@ async function runRace(token) {
       if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
     };
     scene.onEvent = (type, card) => {
-      if (type === "slam") audio.sfx.tier(card.tier);
+      // a rare one: drumroll while the card builds up, then its own sound on the reveal
+      if (type === "slam") { if (card.build) audio.sfx.drumroll(card.build, card.fx); else { audio.sfx.tier(card.fx); showBadge(card.i); } }
+      else if (type === "reveal") { audio.sfx.tier(card.fx); showBadge(card.i); }
       else if (type === "impact") { audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); startRun(card.i); }
       // STALLED: bounce off the card, then cough black smoke
       else if (type === "bonk") { audio.sfx.bonk(); setTimeout(() => startRun(card.i), 450); }
@@ -1917,6 +1931,7 @@ async function runRace(token) {
       requestAnimationFrame(step);
     });
     await scene.smash(smashCards);
+    final.forEach((_, i) => showBadge(i));
     document.body.classList.remove("smashing");
     if (!alive()) return;
     smashed = true;

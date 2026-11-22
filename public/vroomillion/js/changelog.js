@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22f",
+    date: "Nov 22, 2026",
+    title: "Rare answers hit harder",
+    items: [
+      "FAST LANE and up: a drumroll while your card shakes and glows up through the rarity colours, then the big reveal.",
+      "Every tier has its own sound, from a bell chime for CRUISING to a fanfare and a cheering crowd for ONE IN A VROOMILLION.",
+      "Sparks in your tier's colour burst out when you smash through the card.",
+      "TURBO and LEGENDARY titles slam in letter by letter and stay up longer.",
+    ],
+  },
+  {
     id: "2026-11-22e",
     date: "Nov 22, 2026",
     title: "Progress on your account",

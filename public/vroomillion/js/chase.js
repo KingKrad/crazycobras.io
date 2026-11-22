@@ -583,6 +583,11 @@ function buildCard(card, maxW) {
 const FIRE = [null, null, ["#1f9a4a", "#5dff8f", "#e6ffe9"], ["#1f4fd6", "#4f9dff", "#dceaff"], ["#7a2fd6", "#c070ff", "#f3e3ff"], ["#ff9a1f", "#ffd23f", "#ffffff"]];
 const FIRE_LEN = [0, 0, 0.22, 0.4, 0.6, 0.85];
 
+// rare answers build up before they're revealed: the card hides its tier, shakes and glows up the
+// rarity colours (seconds, by effect tier)
+const BUILD = [0, 0, 0, 0.75, 1.1, 1.6];
+// sparks in the tier colour when the car smashes through
+const BURST = [0, 0, 26, 44, 70, 110];
 const SMASH = [
   null,
   { tile: 9, speed: 55, grow: 0, accel: 30 },
@@ -813,7 +818,11 @@ export class ChaseScene {
         const cx = n > 1 ? this.W * (i ? 0.74 : 0.26) : this.W / 2;
         // sit above the car (and its name tag) so it's clear the car has to drive into it
         const cy = Math.round(Math.min(top + img.height / 2, this.coverTop() - 10 - img.height / 2));
-        return { ...c, i, img, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0 };
+        const fx = c.fx ?? c.tier;
+        const build = BUILD[fx] || 0;
+        // the hidden face: the answer, but no tier yet
+        const hidden = build ? buildCard({ ...c, tier: 1, tierName: ". . .", gain: "? ? ?" }, maxW) : null;
+        return { ...c, fx, build, i, img, hidden, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0, revealed: !build, pop: 0 };
       });
       this.smashDone = resolve;
     });
@@ -830,7 +839,21 @@ export class ChaseScene {
         s.phase = "hold";
         if (!this.calm) this.shake = Math.max(this.shake, 0.25 + s.tier * 0.05);
         this.onEvent?.("slam", s);
-      } else if (s.phase === "hold" && s.t >= 1.15 + s.i * 0.15) {
+      } else if (s.phase === "hold" && !s.revealed && s.t >= 0.28 + s.build) {
+        // the reveal: the tier lands with a pop, a flash and a ring of sparks in its colour
+        s.revealed = true;
+        s.pop = 0.35;
+        const u = this.u;
+        const col = TIER_COL[s.fx];
+        const n = 18 + s.fx * 8;
+        for (let q = 0; q < n; q++) {
+          const a = (q / n) * Math.PI * 2;
+          const sp = (90 + Math.random() * 90) * u * (s.fx - 1);
+          this.particles.push({ x: s.cx, y: s.cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.6 + Math.random() * 0.3, size: Math.max(1, u), color: s.fx === 5 ? ["#ff4fd8", "#ffd23a", "#5dff8f", "#4fd1ff"][q % 4] : q % 3 ? col : "#ffffff", g: 60 * u, hot: true });
+        }
+        if (!this.calm) { this.shake = Math.max(this.shake, 0.3 + s.fx * 0.08); this.flash = Math.max(this.flash, 0.25 + (s.fx - 3) * 0.12); this.flashColor = col; }
+        this.onEvent?.("reveal", s);
+      } else if (s.phase === "hold" && s.revealed && s.t >= 1.15 + s.build + s.i * 0.15) {
         s.phase = "charge";
         if (r) { r.chargeV = 0; r.charging = true; }
       } else if (s.phase === "charge") {
@@ -914,7 +937,14 @@ export class ChaseScene {
     if (r) r.chargeV *= 0.7;
     if (!this.calm) this.shake = Math.max(this.shake, 0.3 + s.tier * 0.18);
     this.kick = Math.max(this.kick, 0.2 + s.tier * 0.18);
-    if (s.tier >= 3) for (let q = 0; q < s.tier * 14; q++) this.particles.push({ x: hx, y: hy, vx: (Math.random() - 0.5) * 320 * u, vy: -Math.random() * 220 * u, life: 0.5 + Math.random() * 0.5, size: Math.max(1, u * 0.75), color: Math.random() < 0.5 ? "#ffd23a" : "#ffffff", g: 300 * u, hot: true });
+    // sparks in the tier colour, from CRUISING up: more, faster and bigger the rarer it is
+    const fx = s.fx ?? s.tier;
+    const rainbow = ["#ff4fd8", "#ffd23a", "#5dff8f", "#4fd1ff", "#b388ff"];
+    for (let q = 0; q < (BURST[fx] || 0); q++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4;
+      const sp = (120 + Math.random() * (140 + fx * 60)) * u;
+      this.particles.push({ x: hx, y: hy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.5 + Math.random() * (0.3 + fx * 0.12), size: Math.max(1, u * (fx >= 4 ? 1.5 : 1)), color: fx === 5 ? rainbow[q % 5] : q % 4 ? TIER_COL[fx] : "#ffffff", g: 300 * u, hot: true });
+    }
     if (s.tier >= 4) { this.flash = Math.max(this.flash, s.tier === 5 ? 0.6 : 0.3); this.flashColor = s.tier === 5 ? "rainbow" : "#ffb02e"; this.glow = Math.max(this.glow, 2); }
     if (s.tier === 5) { this.slowmo = 0.7; this.warp = Math.max(this.warp, 1.6); this.tunnel = Math.max(this.tunnel, 2.4); }
     this.onEvent?.("impact", s);
@@ -926,9 +956,16 @@ export class ChaseScene {
       if (s.phase === "broken" || s.alpha <= 0) continue;
       let sc = 1;
       if (s.phase === "slam") { const t = Math.min(1, s.t / 0.28); sc = 1 + 1.6 * (1 - t) * (1 - t); }
+      if (s.pop > 0) { s.pop = Math.max(0, s.pop - 1 / 60); sc *= 1 + s.pop * 0.6; }
       let jx = 0;
       let jy = 0;
-      if (s.phase === "hold" && s.tier >= 4 && !this.calm) { jx = Math.round((Math.random() - 0.5) * (s.tier - 3) * 2 * u); jy = Math.round((Math.random() - 0.5) * (s.tier - 3) * 2 * u); }
+      // the build-up: shaking harder and harder until the reveal
+      const building = s.phase === "hold" && !s.revealed;
+      const k = building ? Math.min(1, (s.t - 0.28) / s.build) : 0;
+      if (building) {
+        sc *= 1 + 0.03 * Math.sin(s.t * (14 + k * 30)) * k;
+        if (!this.calm) { const a = (0.5 + k * k * (s.fx - 1.5)) * u; jx = Math.round((Math.random() - 0.5) * 2 * a); jy = Math.round((Math.random() - 0.5) * 2 * a); }
+      } else if (s.phase === "hold" && s.fx >= 4 && !this.calm) { jx = Math.round((Math.random() - 0.5) * (s.fx - 3) * 2 * u); jy = Math.round((Math.random() - 0.5) * (s.fx - 3) * 2 * u); }
       if (s.phase === "charge" && !this.calm) jx = Math.round(Math.sin(s.t * 60) * u);
       const w = Math.round(s.img.width * sc);
       const h = Math.round(s.img.height * sc);
@@ -937,7 +974,19 @@ export class ChaseScene {
       g.globalAlpha = s.phase === "slam" ? Math.min(1, s.t / 0.12) : s.alpha;
       g.fillStyle = "rgba(0,0,0,0.45)";
       g.fillRect(x + 3, y + 4, w, h);
-      g.drawImage(s.img, x, y, w, h);
+      if (building) {
+        // a glow climbing the rarity colours: TRAFFIC JAM, CRUISING, FAST LANE... up to this card's tier
+        const lvl = Math.min(s.fx, 1 + Math.floor(k * s.fx));
+        const pulse = 0.5 + 0.5 * Math.sin(s.t * (10 + k * 25));
+        g.fillStyle = lvl === 5 ? `hsl(${Math.floor(this.time * 600) % 360},100%,60%)` : TIER_COL[lvl];
+        for (let ring = 1; ring <= 3; ring++) {
+          g.globalAlpha = (0.25 + 0.5 * k) * (0.4 + 0.6 * pulse) / ring;
+          const p = Math.round(ring * (2 + k * 4) * u);
+          g.fillRect(x - p, y - p, w + p * 2, h + p * 2);
+        }
+        g.globalAlpha = 1;
+      }
+      g.drawImage(s.revealed ? s.img : s.hidden, x, y, w, h);
       if (s.tier === 5 && s.phase !== "slam") {
         g.strokeStyle = `hsl(${Math.floor(this.time * 600) % 360},100%,65%)`;
         g.lineWidth = 2;
