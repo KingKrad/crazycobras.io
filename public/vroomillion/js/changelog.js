@@ -3,6 +3,14 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22d",
+    date: "Nov 22, 2026",
+    title: "Fewer word games",
+    items: [
+      "From tomorrow, every race has at most one word game (rhymes, \"starts with\", \"means\"...). The rest are real trivia.",
+    ],
+  },
+  {
     id: "2026-11-22c",
     date: "Nov 22, 2026",
     title: "Launch prep",

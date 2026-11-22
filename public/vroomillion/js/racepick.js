@@ -3,6 +3,7 @@
 //      then the ones you had longest ago come back first
 //   2. seven different topics, and never two families from the same group
 //   3. at most one "one artist / one show" style prompt
+//   4. at most one word game (rhymes, "starts with", "means"...)
 // The history is a list of family ids ("F:<id>"), oldest first.
 import { FAMILIES, TOPICS } from "./catalog/index.js";
 import { DAILY_START, DAILY_ORDER } from "./catalog/daily-order.js";
@@ -17,6 +18,13 @@ export const familyOf = (prompt) => byPrompt.get(prompt) || null;
 // which families a mode draws from, and how the topics are counted there
 const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily" };
 const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : f.topic);
+// word games: rhymes, letters, prefixes, synonyms. One a race is fun; three is a spelling test.
+const WORD_GAME = /\b(rhymes? with|starts? with|begins? with|ends? (in|with)|contains?|spelled|sounds like a letter|letters?|a word that means|word that)\b/i;
+const wordCache = new Map();
+export const isWordGame = (f) => {
+  if (!wordCache.has(f.id)) wordCache.set(f.id, f.prompts.some((p) => WORD_GAME.test(p)));
+  return wordCache.get(f.id);
+};
 export const poolFamilies = (mode, fams = FAMILIES) => fams.filter((f) => f.pools.includes(POOL[mode] || "main"));
 
 // seen: the history list; returns families in play order, each with the prompt text to ask
@@ -35,6 +43,7 @@ export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
     const t = topicOf(f, pool);
     if (picked.some((p) => p.group === f.group || famKey(p) === famKey(f))) return false;
     if (f.single && picked.some((p) => p.single)) return false;
+    if (isWordGame(f) && picked.some(isWordGame)) return false;
     if (strict && picked.some((p) => topicOf(p, pool) === t)) return false;
     return true;
   };
@@ -103,11 +112,14 @@ export function dailyLayout(fams = FAMILIES, n = 7) {
         if (race.length >= n) break;
         const f = o.f;
         if (race.includes(f)) continue;
-        const twin = race.some((p) => famKey(p) === famKey(f)); // never both twins in one race
+        // never both twins in one race, never two word games
+        const twin = race.some((p) => famKey(p) === famKey(f)) || (isWordGame(f) && race.some(isWordGame));
         const clash = twin || (extra !== null && (race.some((p) => p.group === f.group || (f.single && p.single)) || race.filter((p) => p.topic === f.topic).length >= share(f.topic) + extra));
         if (!clash) race.push(f);
       }
     }
+    // what's left can't make a good race (mostly word games): it waits until more prompts are added
+    if (race.length < n || new Set(race.map((f) => f.group)).size < n) break;
     for (const f of race) { left.splice(left.indexOf(f), 1); groupLeft[f.group]--; topicLeft[f.topic]--; if (f.single) singlesLeft--; }
     races.push(race);
   }
@@ -126,7 +138,7 @@ export function dailyRace(day, fams = FAMILIES) {
       const rng = seeded("vroomillion-daily-fill-" + idx);
       for (const f of shuffle(poolFamilies("daily"), rng)) {
         if (race.length >= 7) break;
-        if (!race.some((p) => p === f || p.group === f.group || famKey(p) === famKey(f) || (p.single && f.single))) race.push(f);
+        if (!race.some((p) => p === f || p.group === f.group || famKey(p) === famKey(f) || (p.single && f.single) || (isWordGame(p) && isWordGame(f)))) race.push(f);
       }
     }
     const rng = seeded("vroomillion-daily-words-" + idx);

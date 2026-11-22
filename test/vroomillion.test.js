@@ -292,7 +292,7 @@ test("hand-picked top answers fix Wikidata-built prompts", () => {
 });
 
 // ---------- prompt families, groups, topics ----------
-import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies } from "../public/vroomillion/js/racepick.js";
+import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies, isWordGame } from "../public/vroomillion/js/racepick.js";
 import { FAMILIES, TOPICS } from "../public/vroomillion/js/catalog/index.js";
 import { QUESTIONS as ALL_Q } from "../public/vroomillion/js/data.js";
 
@@ -374,10 +374,12 @@ test("daily order: fixed, every daily family at most once, seven groups a race, 
     for (const id of ids) { assert.ok(!seen.has(id), "twice: " + id); seen.add(id); }
     const fams = ids.map((id) => byId.get(id)).filter(Boolean);
     assert.equal(new Set(fams.map((f) => f.group)).size, fams.length, line);
+    if (DAILY_ORDER.indexOf(line) >= 2) assert.ok(fams.filter(isWordGame).length <= 1, "two word games: " + line);
   }
   // nearly every listed family still exists, and nearly every daily family is listed (run tools/daily-order.mjs)
   assert.ok([...seen].filter((id) => !byId.has(id)).length < 20);
-  assert.ok(poolFamilies("daily").filter((f) => !seen.has(f.id)).length < 7, "run node tools/daily-order.mjs");
+  // (word games beyond one a race wait for more prompts)
+  assert.ok(poolFamilies("daily").filter((f) => !seen.has(f.id) && !isWordGame(f)).length < 50, "run node tools/daily-order.mjs");
   // the start day gets the first line
   assert.deepEqual(dailyRace(DAILY_START).map((x) => x.family.id), DAILY_ORDER[0].split(","));
 });
