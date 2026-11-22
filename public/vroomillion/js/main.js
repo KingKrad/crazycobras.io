@@ -1321,7 +1321,7 @@ function spriteCanvas(car, scale = 4) {
   const src = carSprite(car);
   const cv = h("canvas", { class: "sprite", width: src.width, height: src.height, "aria-hidden": "true" });
   cv.getContext("2d").drawImage(src, 0, 0);
-  cv.style.width = src.width * scale + "px";
+  cv.style.width = (src.width * scale) / (src.res || 1) + "px";
   return cv;
 }
 

@@ -81,7 +81,7 @@ export const CARS = [
   // a 2026 electric fastback in dark stealth grey: no grille, all-glass roof, white seats showing through,
   // black window trim, dark aero wheels.
   // Ties the Mazzy for the best in the game.
-  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true },
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true, hiRes: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -279,6 +279,7 @@ const cache = new Map();
 export function carSprite(car, frame = 0) {
   const ck = car.id + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
+  if (car.hiRes) { const cv = evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
   const wheelTop = tpl.rows.length - 2;
@@ -473,6 +474,7 @@ const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
   const key = car.id + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
+  if (car.hiRes) { const cv = evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);
   const cv = document.createElement("canvas");
   cv.width = rows[0].length;
@@ -495,4 +497,94 @@ export function rearSprite(car, frame = 0) {
   }));
   rearCache.set(key, cv);
   return cv;
+}
+
+
+// ---- a detailed car (twice the pixels; canvas.res = 2 tells the game to draw it at half size) ----
+// AMELIA'S TESSY: a dark grey electric fastback, drawn with shapes and then snapped to hard pixel edges.
+function crisp(cv) {
+  const g = cv.getContext("2d");
+  const im = g.getImageData(0, 0, cv.width, cv.height);
+  for (let i = 3; i < im.data.length; i += 4) im.data[i] = im.data[i] > 110 ? 255 : 0;
+  g.putImageData(im, 0, 0);
+  cv.res = 2;
+  return cv;
+}
+const poly = (g, pts, fill) => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath(); g.fillStyle = fill; g.fill(); };
+
+function evSide(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 72; cv.height = 25;
+  const g = cv.getContext("2d");
+  const dark = shade(car.color, 0.7), deep = shade(car.color, 0.45), light = lighten(car.color, 0.28);
+  // the body: trunk lip, a long glass arch, short sloping hood, rounded nose
+  const body = [[3, 11], [7, 9], [12, 8.2], [22, 2.4], [30, 0.8], [38, 0.8], [46, 4.5], [51, 8.2], [60, 9.8], [67, 11.2], [70.5, 13], [70.5, 16], [69, 18.5], [3, 18.5], [2, 15]];
+  const grad = g.createLinearGradient(0, 0, 0, 19);
+  grad.addColorStop(0, light); grad.addColorStop(0.45, car.color); grad.addColorStop(1, dark);
+  poly(g, body, grad);
+  // the glasshouse with black trim, and the light seats showing through
+  poly(g, [[11, 8.6], [22.5, 3.2], [30, 1.8], [38, 1.8], [45, 5], [49.5, 8.6]], car.accent);
+  poly(g, [[13, 8.2], [23, 3.8], [30, 2.6], [37.5, 2.6], [44, 5.4], [47.5, 8.2]], car.glass);
+  g.fillStyle = car.seats;
+  for (const hx of [25.5, 37.5]) { g.beginPath(); g.ellipse(hx, 5.6, 1.5, 1.4, 0, 0, Math.PI * 2); g.fill(); g.fillRect(hx - 2.5, 7.1, 4, 1); }
+  g.fillStyle = car.accent; g.fillRect(31.5, 2, 1.6, 7); // B-pillar
+  g.fillStyle = "rgba(255,255,255,0.22)"; poly(g, [[25, 3.4], [33, 2.6], [30, 5]], "rgba(255,255,255,0.18)"); // a sky reflection on the roof glass
+  // shoulder highlight, door lines, flush handles, mirror
+  g.fillStyle = light; g.fillRect(8, 10.2, 58, 0.9);
+  g.fillStyle = deep; g.fillRect(31.8, 9.2, 0.7, 8); g.fillRect(46, 9.2, 0.7, 7.5);
+  g.fillStyle = lighten(car.color, 0.45); g.fillRect(26, 11.6, 3, 0.8); g.fillRect(40, 11.6, 3, 0.8);
+  poly(g, [[47, 8], [50.5, 7.6], [50.5, 9.4], [47.5, 9.4]], car.accent);
+  // slim headlight, a sliver of tail light, black rocker and lower bumper
+  poly(g, [[63, 11.4], [69.5, 12.4], [69.5, 13.1], [63.5, 12.3]], "#f4f6ff");
+  poly(g, [[2.2, 11.5], [7, 10], [7, 11], [2.4, 12.4]], "#ff3b3b");
+  g.fillStyle = car.accent; g.fillRect(6, 17, 60, 1.6); g.fillRect(66, 16.6, 4, 1.2);
+  // wheel arches and the dark aero wheels; the spokes move between the two frames
+  for (const wx of [15.5, 57]) {
+    g.fillStyle = "#08080a"; g.beginPath(); g.arc(wx, 18.3, 6.4, Math.PI, 0); g.fill();
+    g.fillStyle = "#15151c"; g.beginPath(); g.arc(wx, 18.5, 5.6, 0, Math.PI * 2); g.fill();
+    g.fillStyle = car.rim; g.beginPath(); g.arc(wx, 18.5, 3.9, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = lighten(car.rim, 0.25); g.lineWidth = 0.9;
+    for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * Math.PI * 2 + frame * 0.6;
+      g.beginPath(); g.moveTo(wx + Math.cos(a) * 0.8, 18.5 + Math.sin(a) * 0.8); g.lineTo(wx + Math.cos(a + 0.5) * 3.6, 18.5 + Math.sin(a + 0.5) * 3.6); g.stroke();
+    }
+    g.fillStyle = "#0d0d10"; g.beginPath(); g.arc(wx, 18.5, 1, 0, Math.PI * 2); g.fill();
+  }
+  return crisp(cv);
+}
+
+function evRear(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 80; cv.height = 52;
+  const g = cv.getContext("2d");
+  const dark = shade(car.color, 0.7), light = lighten(car.color, 0.25);
+  // tyres first, under the body; the tread alternates so they look like they roll
+  for (const tx of [7, 59]) {
+    g.fillStyle = "#15151c"; g.fillRect(tx, 40, 14, 12);
+    g.fillStyle = "#2c2c38"; for (let y = 41 + frame; y < 52; y += 2) g.fillRect(tx + 1, y, 12, 1);
+  }
+  // the body: wide hips, rounded shoulders
+  const grad = g.createLinearGradient(0, 18, 0, 46);
+  grad.addColorStop(0, light); grad.addColorStop(0.4, car.color); grad.addColorStop(1, dark);
+  poly(g, [[6, 25], [12, 21], [68, 21], [74, 25], [76, 30], [76, 43], [72, 46], [8, 46], [4, 43], [4, 30]], grad);
+  // the sloping rear glass, the thin roof line, mirrors, and the white headrests
+  poly(g, [[23, 3], [57, 3], [66, 21], [14, 21]], car.color);
+  poly(g, [[25, 5], [55, 5], [63, 21], [17, 21]], car.glass);
+  // headrests: small and rounded
+  g.fillStyle = car.seats;
+  for (const hx of [29, 51]) { g.beginPath(); g.ellipse(hx, 15.5, 3, 2.4, 0, 0, Math.PI * 2); g.fill(); g.fillRect(hx - 0.6, 17.5, 1.2, 2); }
+  poly(g, [[28, 6], [36, 6], [26, 17], [21, 17]], "rgba(255,255,255,0.16)");
+  // mirrors on stalks at the bottom corners of the glass
+  poly(g, [[7, 17], [13, 17.5], [15, 20], [7, 20]], car.accent); poly(g, [[73, 17], [67, 17.5], [65, 20], [73, 20]], car.accent);
+  // black lip spoiler, slim wrap-around tail lights
+  g.fillStyle = car.accent; g.fillRect(14, 21, 52, 1.6);
+  g.fillStyle = "#ff3b3b"; poly(g, [[5, 26], [22, 25], [22, 27.2], [5, 28.6]], "#ff3b3b"); poly(g, [[75, 26], [58, 25], [58, 27.2], [75, 28.6]], "#ff3b3b");
+  g.fillStyle = "#b0202c"; g.fillRect(5, 28.6, 3, 3); g.fillRect(72, 28.6, 3, 3);
+  // trunk line, number plate, black diffuser
+  g.fillStyle = dark; g.fillRect(14, 30, 52, 0.8);
+  g.fillStyle = "#e9e6d8"; g.fillRect(31, 33, 18, 6);
+  g.fillStyle = "#7d8296"; for (const x of [33, 36, 40, 43, 46]) g.fillRect(x, 35, 2, 2);
+  g.fillStyle = car.accent; g.fillRect(6, 42, 68, 4);
+  g.fillStyle = shade(car.accent, 1.6); for (let x = 12; x < 70; x += 7) g.fillRect(x, 42, 1, 4);
+  return crisp(cv);
 }

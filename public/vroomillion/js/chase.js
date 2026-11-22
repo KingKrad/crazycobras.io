@@ -2056,8 +2056,8 @@ export class ChaseScene {
     if (!p || p.hidden) { r.box = null; return; }
     const frame = r.frames[Math.abs(Math.floor(r.wheel || 0)) % 2];
     const s = Math.max(0.25, this.carPx * rel);
-    const w = frame.width * s;
-    const h = frame.height * s;
+    const w = (frame.width * s) / (frame.res || 1); // a detailed car has twice the pixels, drawn at half size
+    const h = (frame.height * s) / (frame.res || 1);
     const bounce = Math.sin(this.time * 24 + r.lane * 5) > 0.6 && this.speed > 0.1 ? Math.round(u) : 0;
     const lift = this.calm ? 0 : Math.sin((1 - r.lift) * Math.PI) * r.lift * h * 0.25;
     const jitter = this.revT > 0 && !this.calm ? Math.round((Math.random() - 0.5) * 2 * u) : 0;

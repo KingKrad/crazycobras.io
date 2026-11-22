@@ -313,8 +313,8 @@ export class Scene {
 
     // cars, far lane first
     for (const r of this.racers) {
-      const sw = r.sprite.width * SCALE;
-      const sh = r.sprite.height * SCALE;
+      const sw = (r.sprite.width * SCALE) / (r.sprite.res || 1);
+      const sh = (r.sprite.height * SCALE) / (r.sprite.res || 1);
       const bob = Math.sin(this.time * (18 + r.lane * 3) + r.lane) > 0.3 && this.speed > 0.1 ? 1 : 0;
       const x = Math.round(r.x);
       const y = LANES[r.lane] - sh + bob;
