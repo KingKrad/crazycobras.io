@@ -413,7 +413,24 @@ function recoveryPanel(code, onDone, intro) {
     h("button", { class: "btn big", type: "button", text: "I'VE SAVED IT ▶", onclick: () => { audio.sfx.click(); onDone(); } }));
 }
 
-const authLabel = (text, input) => h("label", {}, h("span", { text }), input);
+const authLabel = (text, input) => h("label", {}, h("span", { text }), input.type === "password" ? withShow(input) : input);
+// a SHOW / HIDE button beside a password box
+function withShow(input) {
+  const btn = h("button", { class: "pw-show", type: "button", text: "SHOW", "aria-label": "Show password", "aria-pressed": "false" });
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "HIDE" : "SHOW";
+    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    btn.setAttribute("aria-pressed", String(show));
+    input.focus({ preventScroll: true });
+  });
+  // never leave it showing once the form is sent
+  // (the form is built around the box afterwards, so hook it up on the next tick)
+  setTimeout(() => input.form?.addEventListener("submit", () => { input.type = "password"; btn.textContent = "SHOW"; btn.setAttribute("aria-pressed", "false"); }));
+  return h("div", { class: "pw-wrap" }, input, btn);
+}
 const emailInput = () => h("input", { type: "email", name: "email", autocomplete: "email", required: true, maxlength: "254", placeholder: "you@example.com", "aria-label": "Email" });
 const passwordInput = (kind, placeholder) => h("input", { type: "password", name: "password", required: true, minlength: "8", maxlength: "128", autocomplete: kind, placeholder, "aria-label": "Password" });
 
