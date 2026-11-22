@@ -78,6 +78,8 @@ export const CARS = [
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
   // can't be bought or won: only an admin can gift it (ADMIN → PLAYERS). The best car in the game by a mile.
   { ...C("mazzy", "DEAN'S MAZZY", "X", 0, 9.0, 8, "pickup", "#b9a98a", "#26262b"), giftOnly: true, rim: "#f4f4f0" },
+  // a 2026 electric fastback: pearl white, all-glass roof, aero wheels. Ties the Mazzy for the best in the game.
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#eef0f2", "#1b1d22"), giftOnly: true, rim: "#3a3d45", glass: "#2a3850" },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -219,6 +221,18 @@ const BODIES = {
       "HDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDH",
     ],
   },
+  ev: {
+    wheels: [4, 22],
+    rows: [
+      "...........WWWWWWWW...........",
+      ".........WWWWWWWWWWWW.........",
+      ".......BBWWWWWBWWWWWWBB.......",
+      "..RBBBBBBBBBBBBBBBBBBBBBBBB...",
+      ".RBBBBBBBBBBBBBBBBBBBBBBBBBBL.",
+      ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB.",
+      "..DDDDDDDDDDDDDDDDDDDDDDDDDD..",
+    ],
+  },
   formula: {
     wheels: [3, 22],
     rows: [
@@ -268,7 +282,7 @@ export function carSprite(car, frame = 0) {
     B: car.color,
     D: shade(car.color, 0.55),
     S: car.accent,
-    W: "#9fe3ff",
+    W: car.glass || "#9fe3ff",
     R: "#ff3b3b",
     L: "#fff6a0",
     K: "#15151c",
@@ -306,6 +320,7 @@ const REAR = {
   super:    { w: 42, roof: 16, glass: 3, body: 7, tyre: 8, tyreH: 6, wing: 2, lightbar: true, diffuser: true, pipes: "centre" },
   hyper:    { w: 44, roof: 14, glass: 3, body: 7, tyre: 9, tyreH: 6, wing: 3, lightbar: true, diffuser: true, pipes: "quad" },
   pickup:   { w: 40, roof: 22, glass: 4, body: 10, tyre: 7, tyreH: 6, slope: 0, chrome: true, tall: true },
+  ev:       { w: 40, roof: 18, glass: 6, body: 8, tyre: 7, tyreH: 5, lip: true, pipes: "none" },
 };
 
 function grid(w) {
@@ -394,7 +409,7 @@ function rearRows(type, frame) {
   if (pipes === "centre") put(r, mid - 3, "GKKKKG");
   else if (pipes === "quad") { put(r, s + 3, "GKG GKG"); put(r, s + bw - 10, "GKG GKG"); }
   else if (pipes === "twin") { put(r, s + 3, "GKG"); put(r, s + bw - 6, "GKG"); }
-  else put(r, s + 3, "GKG");
+  else if (pipes !== "none") put(r, s + 3, "GKG");
   if (t.diffuser) {
     r = row(); span(r, bw - 2, "X");
     for (let x = s + 3; x < s + bw - 3; x += 4) r[x] = "E";
