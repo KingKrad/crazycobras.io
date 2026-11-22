@@ -599,8 +599,8 @@ const CORE_QUESTIONS = [
   },
 ];
 
-// Krillion-style everyday and pop-culture prompts live in data-pop.js.
-// pop: true puts them first in the queue, so races feel like Krillion before the trivia-heavy ones.
+// Everyday and pop-culture prompts live in data-pop.js.
+// pop: true puts them first in the queue, so races start with prompts everyone can answer before the trivia-heavy ones.
 // Extra answers pulled from Wikidata (tools/build-answers.mjs) fill out CRUISING, FAST LANE and
 // DEEP CUT so far more real answers count. The hand-written tiers come first and always win.
 // data-more.js has extra hand-written answers for prompts Wikidata can't fill well.

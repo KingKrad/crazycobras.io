@@ -1,4 +1,4 @@
-// Krillion-style prompts: everyday things and pop culture that everyone can have a go at.
+// Everyday prompts: everyday things and pop culture that everyone can have a go at.
 // Same format as data.js: five tiers from most obvious to most niche, "a|b" = alias.
 
 export const POP_QUESTIONS = [
