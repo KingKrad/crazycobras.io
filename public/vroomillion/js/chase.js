@@ -103,6 +103,13 @@ function mixTod(a, b, t) {
   };
 }
 const skyOf = (d) => ({ sky: d.sky.map(rgb), tint: rgb(d.tint[0]), tintA: d.tint[1], stars: d.stars, sun: d.sun, lamps: d.lamps, noMoon: !!d.noMoon });
+// A rare answer changes the light for a few seconds: electric blue dusk (rare), a neon night (ultra rare),
+// a gold-and-green aurora (legendary).
+const RARE_SKY = {
+  3: skyOf({ sky: ["#04103a", "#0b2f8a", "#2f7bff", "#9fd0ff"], tint: ["#2f6bff", 0.22], stars: 0.6, sun: -0.3, lamps: 1 }),
+  4: skyOf({ sky: ["#12002a", "#3d0a6e", "#9b2fe0", "#ff6ad8"], tint: ["#a040ff", 0.26], stars: 0.9, sun: -0.3, lamps: 1 }),
+  5: skyOf({ sky: ["#05140f", "#0f5a3a", "#3fe08a", "#ffd23f"], tint: ["#ffc21a", 0.2], stars: 1, sun: -0.3, lamps: 1 }),
+};
 
 const FOG = { clear: "#c8b8d8", fog: "#cfd5e2", rain: "#606a86", snow: "#e6ecf7", sand: "#e3a965", ash: "#5a3a30" };
 
@@ -608,6 +615,8 @@ export class ChaseScene {
     this.smashes = [];
     this.shards = [];
     this.slowmo = 0;
+    this.rareFx = null; // { tier, t, dur }: tint, light, zoom and rays for a rare answer
+    this.zoom = 0;
     this.onEvent = null;
     this.calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.resetWorld();
@@ -663,6 +672,8 @@ export class ChaseScene {
     this.smashes = [];
     this.shards = [];
     this.slowmo = 0;
+    this.rareFx = null;
+    this.zoom = 0;
     if (this.smashDone) { this.smashDone(); this.smashDone = null; }
     this.resetWorld();
   }
@@ -714,6 +725,20 @@ export class ChaseScene {
   }
 
   // A backfire on a gear shift: the flame flares and spits sparks.
+  // The big moment for a rare answer (tier 3 FAST LANE, 4 TURBO, 5 ONE IN A VROOMILLION): the world tints
+  // and relights in the rarity colour, time slows and the camera pushes in. Reduced motion keeps the colour.
+  rare(tier) {
+    if (tier < 3) return;
+    const dur = [0, 0, 0, 2.6, 3.4, 4.6][tier];
+    this.rareFx = { tier, t: 0, dur, amt: 0 };
+    if (this.calm) return;
+    this.slowmo = Math.max(this.slowmo, [0, 0, 0, 0.35, 0.55, 0.9][tier]);
+    this.zoom = Math.max(this.zoom, [0, 0, 0, 0.5, 0.75, 1][tier]);
+    this.shake = Math.max(this.shake, [0, 0, 0, 0.35, 0.55, 0.8][tier]);
+    this.flash = Math.max(this.flash, tier === 5 ? 0.8 : 0.35);
+    this.flashColor = TIER_COL[tier];
+  }
+
   backfire(i) {
     const r = this.racers[i];
     if (!r?.box || r.fireT <= 0) return;
@@ -1017,6 +1042,15 @@ export class ChaseScene {
         if (Math.random() < dt * 30) this.particles.push({ x: Math.random() * this.W, y: Math.random() * this.horizon, vx: 0, vy: 8 * u, life: 0.8, size: Math.max(1, u), color: Math.random() < 0.5 ? "#fff3a0" : "#ffd23a", g: 0 });
       }
     }
+    if (this.rareFx) {
+      const fx = this.rareFx;
+      fx.t += dt;
+      // fade in fast, hold, fade out over the last second
+      fx.amt = Math.min(1, fx.t / 0.25) * Math.min(1, Math.max(0, (fx.dur - fx.t) / 1));
+      if (fx.t >= fx.dur) this.rareFx = null;
+      else goal = mixTod(goal, RARE_SKY[fx.tier], fx.amt * 0.85);
+    }
+    this.zoom = Math.max(0, this.zoom - dt * 0.9);
     this.tod = goal;
     // lightning in a night storm
     if (!this.calm && this.wx.rain > 0.7 && this.tod.lamps > 0.6 && Math.random() < dt * 0.12) {
@@ -1144,6 +1178,13 @@ export class ChaseScene {
       g.translate(Math.round((Math.random() - 0.5) * 8 * u * this.shake), Math.round((Math.random() - 0.5) * 8 * u * this.shake));
     }
 
+    // a rare answer: the camera pushes in on the cars for a moment
+    if (this.zoom > 0 && !this.calm) {
+      const z = 1 + 0.16 * smooth(Math.min(1, this.zoom));
+      g.translate(W / 2, this.carBottom);
+      g.scale(z, z);
+      g.translate(-W / 2, -this.carBottom);
+    }
     // launches widen the field of view so the road stretches away
     const depth = BASE_DEPTH * (this.calm ? 1 : 1 - Math.min(0.22, this.kick * 0.16));
     const k = W / 2;
@@ -1368,6 +1409,14 @@ export class ChaseScene {
       wg.fillStyle = `hsla(${Math.floor(this.time * 300) % 360},100%,60%,${Math.min(0.3, this.tunnel * 0.15).toFixed(3)})`;
       wg.fillRect(0, 0, W, H);
     }
+    if (this.rareFx) {
+      // the whole world washes over in the rarity colour
+      wg.globalCompositeOperation = "color";
+      wg.globalAlpha = 0.55 * this.rareFx.amt;
+      wg.fillStyle = TIER_COL[this.rareFx.tier];
+      wg.fillRect(0, 0, W, H);
+      wg.globalAlpha = 1;
+    }
     wg.globalCompositeOperation = "lighter";
     const night = tod.lamps;
     if (night > 0.05) {
@@ -1411,11 +1460,34 @@ export class ChaseScene {
     }
     g.globalAlpha = 1;
 
+    if (this.rareFx && this.rareFx.tier === 5 && !this.calm) this.drawRays(g, this.rareFx.amt);
     if (this.flash > 0 && !this.calm) {
       g.globalAlpha = Math.min(1, this.flash);
       g.fillStyle = this.flashColor === "rainbow" ? `hsl(${Math.floor(this.time * 720) % 360},100%,65%)` : this.flashColor;
       g.fillRect(-W, -H, W * 3, H * 3);
       g.globalAlpha = 1;
+    }
+    g.restore();
+  }
+
+  // ONE IN A VROOMILLION: gold rays turning round the horizon
+  drawRays(g, amt) {
+    const { W, H } = this;
+    const cx = W / 2, cy = this.horizon;
+    const R = Math.hypot(W, H);
+    g.save();
+    g.globalCompositeOperation = "lighter";
+    g.globalAlpha = 0.35 * amt;
+    g.fillStyle = "#ffd23f";
+    const n = 14;
+    for (let i = 0; i < n; i++) {
+      const a0 = this.time * 0.6 + (i / n) * Math.PI * 2;
+      g.beginPath();
+      g.moveTo(cx, cy);
+      g.lineTo(cx + Math.cos(a0) * R, cy + Math.sin(a0) * R);
+      g.lineTo(cx + Math.cos(a0 + 0.12) * R, cy + Math.sin(a0 + 0.12) * R);
+      g.closePath();
+      g.fill();
     }
     g.restore();
   }

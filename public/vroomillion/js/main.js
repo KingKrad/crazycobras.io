@@ -1551,6 +1551,19 @@ function hudCard(r, i) {
     h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
 }
 
+// A rare answer takes over the screen: the world relights in the rarity colour (chase.js rare()), and a
+// big word slams into the middle with a shockwave. ONE IN A VROOMILLION adds confetti and a fanfare.
+function rareMoment(tier, crazy = false) {
+  scene.rare(tier);
+  const word = crazy ? ["", "", "", "OK!", "NICE!", "CRAZY!"][tier] : ["", "", "", "RARE!", "TURBO!", "LEGENDARY!"][tier];
+  const sub = crazy ? "CRAZY MODE" : TIERS[tier].rarity;
+  const slam = h("div", { class: "rare-slam rs" + tier, "aria-hidden": "true" },
+    h("div", { class: "rare-ring" }), h("div", { class: "rare-word", text: word }), h("div", { class: "rare-sub", text: sub }));
+  document.querySelector(".stage")?.append(slam);
+  setTimeout(() => slam.remove(), tier === 5 ? 2600 : 1900);
+  if (tier === 5) { scene.confetti(); audio.sfx.win(); }
+}
+
 // "+720 M" bursting up from a car, sized by how rare the answer was.
 function popGain(i, metres, tier, nitro, crazy = false) {
   const at = scene.anchor(i);
@@ -1751,6 +1764,9 @@ async function runRace(token) {
     const stage = document.querySelector(".stage");
     const BOOST_MS = [2300, 2400, 2600, 2900, 3400, 4200]; // rarer answers get a longer run
     const runs = race.racers.map(() => null);
+    // the round's biggest moment (the rarest answer, or the biggest payout in CRAZY MODE) gets the show once
+    const topFx = Math.max(...final.map((f) => effectTier(f.tier, race.crazy)));
+    let fxShown = false;
     const startRun = (i) => {
       if (runs[i] || !alive()) return;
       const r = race.racers[i];
@@ -1761,6 +1777,7 @@ async function runRace(token) {
       scene.racers[i].nitro = nitro;
       scene.launch(i, tier, nitro, dur / 1000);
       popGain(i, gain[i], tier, nitro, race.crazy);
+      if (topFx >= 3 && !fxShown) { fxShown = true; rareMoment(topFx, race.crazy); }
       audio.sfx.launch(tier);
       if (tier >= 2) audio.sfx.whoosh(tier);
       if (tier === 0) audio.sfx.sputter();

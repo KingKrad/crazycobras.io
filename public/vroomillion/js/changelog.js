@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22b",
+    date: "Nov 22, 2026",
+    title: "Rare answers hit harder",
+    items: [
+      "Rare answers now take over the screen: the whole world turns the rarity color and the sky changes (blue for RARE, neon purple for TURBO, a gold aurora for LEGENDARY).",
+      "A big RARE!, TURBO! or LEGENDARY! slams in with a shockwave, and time slows down as the camera pushes in on your car.",
+      "ONE IN A VROOMILLION goes all out: gold rays, confetti and a fanfare.",
+      "Phones set to reduce motion still get the colors and the title, without the shaking and flashing.",
+    ],
+  },
+  {
     id: "2026-11-22a",
     date: "Nov 22, 2026",
     title: "Race links",
