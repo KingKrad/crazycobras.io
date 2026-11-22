@@ -209,58 +209,105 @@ export const sfx = {
   },
 };
 
-// An electric car's sounds (AMELIA'S TESSY): lasers and plasma instead of fire and exhaust.
+// An electric car's sounds (AMELIA'S TESSY), like a classic sci-fi spaceship: a deep throbbing hum,
+// thruster rumble, arcade "pew" lasers and a hyperdrive whoosh. Nothing slides up and down like a siren.
 export const ev = {
-  // off the line: the motor whines up, then laser shots (more for rarer answers)
+  // off the line: the hyperdrive kicks in (a rushing roar and a deep drop), lasers for the rare ones
   launch: (t) => {
     if (t === 0) { ev.sputter(); return; }
-    tone(220, 0.7, { type: "sine", vol: 0.12, slide: 3 + t });
-    tone(110, 0.3, { type: "square", vol: 0.12, slide: 0.4 });
-    for (let i = 0; i < Math.max(1, t - 1); i++) ev.zap(0.05 + i * 0.11, 1 + i * 0.12);
-    if (t >= 4) { noiseF(0.9, { vol: 0.08, type: "bandpass", freq: 600, sweep: 9000, at: 0.1 }); tone(55, 0.8, { type: "sine", vol: 0.25, at: 0.05, slide: 0.5 }); }
+    noiseF(0.5 + t * 0.15, { vol: 0.12 + t * 0.02, type: "lowpass", freq: 300, sweep: 1500 + t * 500, attack: 0.05 });
+    tone(70, 0.6 + t * 0.1, { type: "sawtooth", vol: 0.1, slide: 0.6 });
+    tone(42, 0.7, { type: "sine", vol: 0.25, slide: 0.7 });
+    for (let i = 0; i < Math.max(0, t - 2); i++) ev.zap(0.2 + i * 0.16);
   },
-  // one laser shot: a sharp falling "pew"
-  zap: (at = 0, pitch = 1) => {
-    tone(2400 * pitch, 0.16, { type: "square", vol: 0.09, at, slide: 0.12 });
-    tone(1200 * pitch, 0.2, { type: "sine", vol: 0.08, at, slide: 0.2 });
+  // one classic laser shot: a quick falling "pew" with a faint echo
+  zap: (at = 0) => {
+    tone(1500, 0.14, { type: "square", vol: 0.07, at, slide: 0.22 });
+    tone(1500, 0.14, { type: "square", vol: 0.025, at: at + 0.09, slide: 0.22 });
   },
-  // the plasma trail lighting up: a crackling, rising hum
+  // thrusters lighting up: a low rushing roar that swells and fades
   whoosh: (t) => {
-    noiseF(0.4 + t * 0.12, { vol: 0.07 + t * 0.015, type: "bandpass", freq: 400, sweep: 6000, q: 2 });
-    tone(90, 0.4 + t * 0.12, { type: "sawtooth", vol: 0.05, slide: 2 });
-    for (let i = 0; i < t * 2; i++) noiseF(0.03, { vol: 0.06, type: "highpass", freq: 5000, at: 0.05 + Math.random() * (0.3 + t * 0.1) });
+    noiseF(0.6 + t * 0.15, { vol: 0.08 + t * 0.02, type: "lowpass", freq: 900, q: 0.7, attack: 0.12 });
+    noiseF(0.3, { vol: 0.04, type: "bandpass", freq: 2500, q: 1, at: 0.08, attack: 0.08 });
   },
-  // a gear change: a laser blast instead of a backfire
-  backfire: () => { ev.zap(0, 1.2); noiseF(0.05, { vol: 0.1, type: "highpass", freq: 3000 }); },
-  // nitro: a charging whine and a plasma surge
-  nitro: () => { tone(400, 0.5, { type: "sine", vol: 0.1, slide: 8 }); noiseF(0.5, { vol: 0.12, type: "bandpass", freq: 800, sweep: 10000, q: 3 }); ev.zap(0.45, 0.8); },
-  // STALLED: the battery fizzles out
-  sputter: () => [0, 0.14, 0.3].forEach((at, i) => { noiseF(0.06, { vol: 0.1 - i * 0.02, type: "highpass", freq: 4000, at }); tone(300 - i * 70, 0.08, { type: "square", vol: 0.06, at, slide: 0.5 }); }),
+  // a gear change: a single laser shot instead of a backfire
+  backfire: () => ev.zap(0),
+  // nitro: a hyperspace jump, a deep "vwoom" and a rush of noise
+  nitro: () => {
+    tone(90, 0.7, { type: "sawtooth", vol: 0.12, slide: 0.45 });
+    tone(45, 0.8, { type: "sine", vol: 0.3, slide: 0.6 });
+    noiseF(0.8, { vol: 0.14, type: "lowpass", freq: 400, sweep: 5000, attack: 0.15 });
+  },
+  // STALLED: the ship powers down, a falling hum and a few crackles
+  sputter: () => {
+    tone(110, 0.8, { type: "sawtooth", vol: 0.08, slide: 0.35 });
+    [0.1, 0.3, 0.45].forEach((at) => noiseF(0.04, { vol: 0.06, type: "highpass", freq: 3000, at }));
+  },
 };
 
 // Engine drone that follows car speed (0..1).
-// electric: an electric car's motor, a high whine instead of a growl
+// electric: a spaceship's engine instead (AMELIA'S TESSY): two low detuned tones and thruster rumble,
+// throbbing slowly, that only get a little deeper and louder with speed
 export function engineStart(electric = false) {
   if (!ctx || engine) return;
+  if (electric) {
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    const f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 400;
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator();
+    o.type = o2.type = "sawtooth";
+    o.frequency.value = 55;
+    o2.frequency.value = 55.8;
+    // thruster rumble: looping noise through a low band
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const n = ctx.createBufferSource();
+    n.buffer = buf;
+    n.loop = true;
+    const nf = ctx.createBiquadFilter();
+    nf.type = "lowpass";
+    nf.frequency.value = 500;
+    const ng = ctx.createGain();
+    ng.gain.value = 0.25;
+    // a slow throb on the whole hum
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 5;
+    lg.gain.value = 0.3;
+    const throb = ctx.createGain();
+    throb.gain.value = 0.7;
+    lfo.connect(lg).connect(throb.gain);
+    o.connect(f); o2.connect(f); n.connect(nf).connect(ng).connect(f);
+    f.connect(throb).connect(g).connect(master);
+    for (const x of [o, o2, n, lfo]) x.start();
+    engine = { o, o2, n, lfo, g, f, ng, electric: true };
+    return;
+  }
   const o = ctx.createOscillator();
   const g = ctx.createGain();
   const f = ctx.createBiquadFilter();
-  o.type = electric ? "triangle" : "sawtooth";
+  o.type = "sawtooth";
   o.frequency.value = 50;
   f.type = "lowpass";
   f.frequency.value = 500;
   g.gain.value = 0;
   o.connect(f).connect(g).connect(master);
   o.start();
-  engine = { o, g, f, electric };
+  engine = { o, g, f };
 }
 export function engineSet(speed) {
   if (!engine) return;
   const t = ctx.currentTime;
   if (engine.electric) {
-    engine.o.frequency.setTargetAtTime(160 + speed * 1100, t, 0.08);
-    engine.f.frequency.setTargetAtTime(1800 + speed * 3000, t, 0.08);
-    engine.g.gain.setTargetAtTime(0.015 + speed * 0.05, t, 0.08);
+    // barely any pitch change (no siren): the hum opens up, the thrusters roar and the throb quickens
+    engine.o.frequency.setTargetAtTime(52 + speed * 14, t, 0.3);
+    engine.o2.frequency.setTargetAtTime(52.8 + speed * 14, t, 0.3);
+    engine.f.frequency.setTargetAtTime(300 + speed * 900, t, 0.25);
+    engine.ng.gain.setTargetAtTime(0.2 + speed * 0.6, t, 0.25);
+    engine.lfo.frequency.setTargetAtTime(4 + speed * 5, t, 0.3);
+    engine.g.gain.setTargetAtTime(0.06 + speed * 0.1, t, 0.25);
     return;
   }
   engine.o.frequency.setTargetAtTime(48 + speed * 150, t, 0.08);
@@ -272,5 +319,5 @@ export function engineStop() {
   const e = engine;
   engine = null;
   e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
-  e.o.stop(ctx.currentTime + 0.5);
+  for (const x of [e.o, e.o2, e.n, e.lfo]) x?.stop(ctx.currentTime + 0.5);
 }
