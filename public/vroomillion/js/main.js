@@ -2358,13 +2358,18 @@ function renderPassport() {
   root.className = "pp-wrap";
   const got = Object.keys(save.passport).length;
   $("passport-count").textContent = `${got} OF ${DESTINATIONS.length} STAMPS`;
+  // Always the open two-page spread. On a phone it's drawn at a fixed size and scaled down to fit;
+  // tapping a page zooms in on it.
   const narrow = window.innerWidth < 720;
   const page = (cls, ...kids) => h("div", { class: "pp-page " + cls }, ...kids);
-  const pages = [ppIdPage(got, page)];
+  // each page can be made again (fresh, with working stickers) for the zoomed view
+  const makers = [() => ppIdPage(got, page)];
   for (let k = 0; k < DESTINATIONS.length; k += 2) {
-    pages.push(page("pp-visas", h("div", { class: "pp-head", text: `VISAS · ${pages.length}` }),
-      h("div", { class: "pp-stamps" }, ...DESTINATIONS.slice(k, k + 2).map((d, n) => ppSticker(d, k + n, got)))));
+    const n = makers.length;
+    makers.push(() => page("pp-visas", h("div", { class: "pp-head", text: `VISAS · ${n}` }),
+      h("div", { class: "pp-stamps" }, ...DESTINATIONS.slice(k, k + 2).map((d, j) => ppSticker(d, k + j, got)))));
   }
+  const pages = makers.map((make, i) => { const el = make(); el.dataset.page = String(i); return el; });
   const cover = h("div", { class: "pp-cover" },
     h("div", { class: "pp-crest" }, h("span", { class: "pp-wheel" })),
     h("div", { class: "pp-cover-title", text: "VROOMILLION" }),
@@ -2374,10 +2379,22 @@ function renderPassport() {
   const endpaper = () => page("pp-end", h("div", { class: "pp-seal", text: "VROOM" }), h("div", { class: "pp-note", text: "MORE PLACES THE FURTHER YOU DRIVE" }));
   const faces = [cover, ...pages];
   const leaves = [];
-  if (narrow) for (const f of faces) leaves.push([f, page("pp-blank")]);
-  else for (let i = 0; i < faces.length; i += 2) leaves.push([faces[i], faces[i + 1] || endpaper()]);
+  for (let i = 0; i < faces.length; i += 2) leaves.push([faces[i], faces[i + 1] || endpaper()]);
   const els = leaves.map(([front, back]) => h("div", { class: "pp-leaf" }, h("div", { class: "pp-face front" }, front), h("div", { class: "pp-face back" }, back)));
-  const book = h("div", { class: "pp-book" + (narrow ? " single" : "") }, ...els);
+  const book = h("div", { class: "pp-book" + (narrow ? " scaled" : "") }, ...els);
+  const scaler = h("div", { class: "pp-scaler" }, book);
+  const fit = h("div", { class: "pp-fit" }, scaler);
+  ppFit = () => {
+    if (!narrow) { fit.classList.remove("on"); return; }
+    const pw = 320; // the page size it's drawn at
+    const w = pw * 2, hgt = Math.round(pw * 1.42);
+    const k = Math.max(0.4, Math.min(1, (window.innerWidth - 24) / w, (window.innerHeight - 260) / hgt));
+    fit.classList.add("on");
+    fit.style.setProperty("--ppk", String(k));
+    fit.style.setProperty("--ppw", Math.round(w * k) + "px");
+    fit.style.setProperty("--pph", Math.round(hgt * k) + "px");
+  };
+  ppFit();
   const prev = h("button", { class: "btn small", type: "button", text: "PREV" });
   const next = h("button", { class: "btn small", type: "button", text: "NEXT" });
   const label = h("span", { class: "pp-label" });
@@ -2388,7 +2405,7 @@ function renderPassport() {
     book.classList.toggle("ended", flipped === leaves.length);
     prev.disabled = flipped === 0;
     next.disabled = flipped === leaves.length;
-    label.textContent = flipped === 0 ? "CLOSED" : flipped === leaves.length ? "THE END" : narrow ? `PAGE ${flipped} OF ${leaves.length - 1}` : `PAGES ${flipped * 2 - 1}–${flipped * 2}`;
+    label.textContent = flipped === 0 ? "CLOSED" : flipped === leaves.length ? "THE END" : `PAGES ${flipped * 2 - 1}–${flipped * 2}`;
   };
   const turn = (dir) => {
     const n = Math.max(0, Math.min(leaves.length, flipped + dir));
@@ -2413,12 +2430,30 @@ function renderPassport() {
     downX = null;
     if (e.target.closest(".pp-sticker")) return;
     if (Math.abs(dx) > 40) return turn(dx < 0 ? 1 : -1);
-    const box = book.getBoundingClientRect();
     if (flipped === 0) return turn(1);
-    turn(e.clientX - box.left > box.width * (narrow ? 0.3 : 0.5) ? 1 : -1);
+    // on a phone the pages are small: a tap zooms in on the page instead of turning it
+    const pg = narrow && e.target.closest(".pp-page[data-page]");
+    if (pg) return openPage(makers[Number(pg.dataset.page)]);
+    const box = book.getBoundingClientRect();
+    turn(e.clientX - box.left > box.width * 0.5 ? 1 : -1);
   });
-  root.append(book, h("div", { class: "pp-nav" }, prev, label, next));
+  root.append(fit, h("div", { class: "pp-nav" }, prev, label, next));
+  if (narrow) root.append(h("p", { class: "note pp-tip", text: "TAP A PAGE TO ZOOM IN · SWIPE TO TURN" }));
   draw();
+}
+
+let ppFit = () => {};
+addEventListener("resize", () => { if (current === "passport") { if ((window.innerWidth < 720) !== !!document.querySelector(".pp-book.scaled")) renderPassport(); else ppFit(); } });
+// one page, big enough to read, over the book
+function openPage(make) {
+  closeStamp();
+  audio.sfx.click();
+  const close = h("button", { class: "btn", type: "button", text: "CLOSE", onclick: () => { audio.sfx.click(); closeStamp(); } });
+  const v = h("div", { class: "pp-viewer", id: "pp-viewer", role: "dialog", "aria-modal": "true", "aria-label": "Passport page" },
+    h("div", { class: "pp-viewer-box" }, h("div", { class: "pp-zoom" }, make()), close));
+  v.addEventListener("click", (e) => { if (e.target === v) closeStamp(); });
+  document.body.append(v);
+  close.focus({ preventScroll: true });
 }
 
 // the inside cover: who you are and how far you've gone

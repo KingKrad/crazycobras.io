@@ -940,6 +940,15 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .pp-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
 .pp-face.back { transform: rotateY(180deg); }
 /* one page at a time on phones: a turned page swings away to the left */
+/* phones: the full spread is drawn at a fixed size and scaled down to fit (main.js sets --ppk etc.) */
+.pp-book.scaled { --pw: 320px; }
+.pp-fit.on { position: relative; width: var(--ppw); height: var(--pph); }
+.pp-fit.on .pp-scaler { position: absolute; left: 0; top: 0; transform: scale(var(--ppk)); transform-origin: 0 0; }
+.pp-tip { margin: -4px 0 0; font-size: 7px; }
+/* a page zoomed in to read */
+.pp-zoom { --pw: max(220px, min(340px, calc(100vw - 48px), calc((100svh - 140px) / 1.42))); position: relative; width: var(--pw); height: calc(var(--pw) * 1.42); }
+.pp-zoom .pp-page { text-align: left; }
+.pp-zoom .pp-art { width: auto; max-width: 100%; max-height: calc(var(--pw) * 0.36); margin: 0 auto; }
 /* sized to fit the screen's height too, so the page buttons stay in view */
 .pp-book.single { --pw: max(190px, min(360px, calc(100vw - 40px), calc((100vh - 280px) / 1.42))); width: var(--pw); }
 @supports (height: 100svh) { .pp-book.single { --pw: max(190px, min(360px, calc(100vw - 40px), calc((100svh - 280px) / 1.42))); } }
@@ -1076,6 +1085,10 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 
 /* small phones (iPhone SE): a tighter passport page so everything fits */
 @media (max-width: 360px), (max-height: 620px) {
+  .pp-zoom .pp-page { padding: 10px 10px 8px; gap: 5px; }
+  .pp-zoom .pp-photo { width: 48px; height: 60px; }
+  .pp-zoom .pp-v { font-size: 7px; }
+  .pp-zoom .pp-art { max-height: calc(var(--pw) * 0.3); }
   .pp-book.single .pp-page { padding: 10px 10px 8px; gap: 5px; }
   .pp-book.single .pp-photo { width: 48px; height: 60px; }
   .pp-book.single .pp-photo .pp-wheel { transform: scale(0.75); }
