@@ -940,7 +940,9 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .pp-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
 .pp-face.back { transform: rotateY(180deg); }
 /* one page at a time on phones: a turned page swings away to the left */
-.pp-book.single { --pw: min(360px, calc(100vw - 40px)); width: var(--pw); }
+/* sized to fit the screen's height too, so the page buttons stay in view */
+.pp-book.single { --pw: max(190px, min(360px, calc(100vw - 40px), calc((100vh - 280px) / 1.42))); width: var(--pw); }
+@supports (height: 100svh) { .pp-book.single { --pw: max(190px, min(360px, calc(100vw - 40px), calc((100svh - 280px) / 1.42))); } }
 .pp-book.single.closed, .pp-book.single.ended { transform: none; }
 .pp-book.single .pp-leaf { left: 0; transition: transform 0.75s cubic-bezier(0.3, 0.1, 0.2, 1), visibility 0s 0.75s; }
 .pp-book.single .pp-leaf:not(.flipped) { transition-delay: 0s; }
@@ -977,7 +979,8 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .pp-mrz { margin-top: auto; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 1px; color: #3d3557; white-space: nowrap; overflow: hidden; }
 .pp-mrz + .pp-mrz { margin-top: 0; }
 
-.pp-stamps { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
+.pp-stamps { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
+.pp-book.single .pp-art { width: auto; max-width: 100%; max-height: calc(var(--pw) * 0.36); margin: 0 auto; }
 .pp-art { width: 100%; height: auto; display: block; image-rendering: pixelated; }
 .pp-sticker {
   position: relative; display: block; width: 100%; padding: 6px 6px 7px; cursor: pointer; font: inherit; color: #2a2340;
@@ -1070,3 +1073,21 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
   .rare-ring { display: none; }
 }
 @keyframes rare-fade { 0%, 100% { opacity: 0; } 15%, 80% { opacity: 1; } }
+
+/* small phones (iPhone SE): a tighter passport page so everything fits */
+@media (max-width: 360px), (max-height: 620px) {
+  .pp-book.single .pp-page { padding: 10px 10px 8px; gap: 5px; }
+  .pp-book.single .pp-photo { width: 48px; height: 60px; }
+  .pp-book.single .pp-photo .pp-wheel { transform: scale(0.75); }
+  .pp-book.single .pp-id-top { gap: 8px; }
+  .pp-book.single .pp-field { margin-bottom: 1px; }
+  .pp-book.single .pp-v { font-size: 7px; word-break: normal; overflow-wrap: anywhere; }
+  .pp-book.single .pp-mrz { font-size: 8px; }
+  .pp-book.single .pp-stamps { gap: 6px; }
+  .pp-book.single .pp-sticker-name { font-size: 7px; margin-top: 4px; }
+  .pp-book.single .pp-art { max-height: calc(var(--pw) * 0.3); }
+  .pp-book.single .pp-slot { padding: 4px; }
+  .pp-book.single .pp-slot-name { font-size: 7px; margin-top: 4px; }
+  .pp-book.single .pp-slot-need { font-size: 5px; }
+  .pp-wrap { gap: 8px; margin: 8px 0 10px; }
+}

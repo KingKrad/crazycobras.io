@@ -12,7 +12,14 @@ function ensure() {
   ctx = new AC();
   master = ctx.createGain();
   master.gain.value = muted ? 0 : 0.5;
-  master.connect(ctx.destination);
+  // a limiter, so the loudest moments (the legendary fanfare) get louder without crackling
+  const limit = ctx.createDynamicsCompressor();
+  limit.threshold.value = -6;
+  limit.knee.value = 4;
+  limit.ratio.value = 12;
+  limit.attack.value = 0.003;
+  limit.release.value = 0.15;
+  master.connect(limit).connect(ctx.destination);
   return true;
 }
 
@@ -170,12 +177,13 @@ export const sfx = {
       return;
     }
     // ONE IN A VROOMILLION: a fanfare, a held chord and a cheering crowd
-    const brass = (f, dur, at) => { tone(f, dur, { type: "square", vol: 0.1, at }); tone(f * 1.005, dur, { type: "sawtooth", vol: 0.05, at }); };
-    kick(0, 0.5);
-    noiseF(1.4, { vol: 0.14, type: "highpass", freq: 4000 });
+    // louder than everything else in the game: this is the moment
+    const brass = (f, dur, at) => { tone(f, dur, { type: "square", vol: 0.24, at }); tone(f * 1.005, dur, { type: "sawtooth", vol: 0.13, at }); tone(f / 2, dur, { type: "square", vol: 0.08, at }); };
+    kick(0, 0.7);
+    noiseF(1.4, { vol: 0.16, type: "highpass", freq: 4000 });
     [[N.G4, 0.12, 0], [N.G4, 0.12, 0.14], [N.G4, 0.12, 0.28], [N.C5, 0.5, 0.42], [N.G4, 0.14, 0.95], [N.C5, 0.14, 1.1], [N.E5, 1.3, 1.25]].forEach(([f, d, at]) => brass(f, d, at));
-    [N.C4, N.G4, N.C5, N.E5].forEach((f) => tone(f, 1.4, { type: "triangle", vol: 0.08, at: 1.25 }));
-    kick(1.25, 0.45);
+    [N.C4, N.G4, N.C5, N.E5].forEach((f) => tone(f, 1.6, { type: "triangle", vol: 0.16, at: 1.25 }));
+    kick(1.25, 0.7);
     [1.3, 1.4, 1.5, 1.6, 1.7, 1.8].forEach((at, i) => tone([2093, 2637, 3136][i % 3], 0.06, { type: "sine", vol: 0.05, at }));
     sfx.crowd(0.4);
   },
