@@ -1,3 +1,4 @@
+import { oauthProviders } from "./oauth.js";
 // VROOMILLION accounts: email + password, stored in the D1 database bound as DB.
 // Passwords are hashed with PBKDF2-SHA256 and a random salt per user; sessions are
 // random tokens kept in an HttpOnly cookie, and only their SHA-256 hash is stored.
@@ -97,9 +98,10 @@ export async function ensureSchema(db) {
     )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
+  for (const col of ["google_sub", "apple_sub"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
   schemaReady = true;
 }
 export const resetSchemaFlagForTests = () => { schemaReady = false; };
@@ -116,7 +118,7 @@ function readCookie(request) {
 const cookie = (value, maxAge) =>
   `${COOKIE}=${value}; Path=/api/vroomillion; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 
-async function startSession(env, userId) {
+export async function startSession(env, userId) {
   const token = b64(crypto.getRandomValues(new Uint8Array(32))).replace(/[+/=]/g, (c) => ({ "+": "-", "/": "_", "=": "" }[c]));
   const expires = Date.now() + SESSION_DAYS * 86400000;
   await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)")
@@ -146,6 +148,7 @@ export const publicUser = (u, env) => ({
   email: u.email,
   unlimited: u.unlimited === 1 || isAdmin(u, env),
   ...(isAdmin(u, env) ? { admin: true } : {}),
+  hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
   freeResetAt: u.free_reset_at || 0,
   // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
   nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),
@@ -259,6 +262,7 @@ export async function handleConfig(request, env) {
   const { announcement } = await import("./stats.js");
   return json({
     turnstileSiteKey: turnstileSecret(env) && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null,
+    signIn: oauthProviders(env), // which "Continue with..." buttons to show
     announcement: await announcement(env), // the title-screen message set on the admin screen
   });
 }
@@ -313,6 +317,7 @@ export async function handleLogin(request, env) {
     await hashPassword(password, new Uint8Array(16), iterationsFor(env));
     return wrong;
   }
+  if (!user.pw_hash) return json({ error: "This account signs in with Google or Apple. Use that button above." }, 401);
   const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
   if (!sameString(hash, user.pw_hash)) return wrong;
 
@@ -344,8 +349,10 @@ export async function handleDeleteAccount(request, env) {
   if (!user) return json({ error: "Log in first." }, 401);
   const body = await readForm(request);
   const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
-  const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
-  if (!sameString(hash, user.pw_hash)) return json({ error: "Wrong password." }, 401);
+  if (!user.pw_hash) {
+    // a Google or Apple account has no password: typing DELETE confirms instead
+    if (String(body.confirm || "").trim().toUpperCase() !== "DELETE") return json({ error: "Type DELETE to confirm." }, 401);
+  } else if (!sameString(await hashPassword(password, unb64(user.pw_salt), user.pw_iter), user.pw_hash)) return json({ error: "Wrong password." }, 401);
   // their leaderboard scores go too (the table exists once a daily score has been sent)
   try { await env.DB.prepare("DELETE FROM daily_scores WHERE user_id = ?").bind(user.id).run(); } catch { /* no scores table yet */ }
   await env.DB.batch([
@@ -392,6 +399,7 @@ export async function handleNewRecoveryCode(request, env) {
   if (!user) return json({ error: "Log in first." }, 401);
   const body = await readForm(request);
   const password = typeof body.password === "string" ? body.password.slice(0, 128) : "";
+  if (!user.pw_hash) return json({ error: "This account signs in with Google or Apple, so it doesn't need a code." }, 400);
   const hash = await hashPassword(password, unb64(user.pw_salt), user.pw_iter);
   if (!sameString(hash, user.pw_hash)) return json({ error: "Wrong password." }, 401);
   const recoveryCode = newRecoveryCode();

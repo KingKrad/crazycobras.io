@@ -706,3 +706,92 @@ test("AI judge: a daily cap keeps it inside the free allowance", async () => {
   assert.equal(j.found, false);
   assert.equal(AI.calls, JUDGE_DAILY_CAP);
 });
+
+// ---------- Continue with Google / Apple ----------
+const b64u = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+const idToken = (claims) => `${b64u({ alg: "RS256" })}.${b64u(claims)}.sig`;
+const GOOGLE = { GOOGLE_CLIENT_ID: "gid.apps", GOOGLE_CLIENT_SECRET: "gsecret", SITE_URL: "https://game.test" };
+async function startSignIn(p, e) {
+  const res = await worker.fetch(get("oauth-" + p), e);
+  assert.equal(res.status, 302);
+  const loc = new URL(res.headers.get("location"));
+  const [, state, nonce] = res.headers.get("set-cookie").match(/vroom_oauth=([a-f0-9]+)\.([a-f0-9]+)/);
+  assert.equal(loc.searchParams.get("state"), state);
+  assert.equal(loc.searchParams.get("nonce"), nonce);
+  return { loc, state, nonce, cookie: `vroom_oauth=${state}.${nonce}` };
+}
+
+test("sign in with Google: makes a password-less account, logs in, and links an existing email", async () => {
+  assert.deepEqual((await (await worker.fetch(get("config"), env())).json()).signIn, { google: false, apple: false });
+  assert.equal((await (await worker.fetch(get("config"), env(GOOGLE))).json()).signIn.google, true);
+  const s = await startSignIn("google", env(GOOGLE));
+  assert.equal(s.loc.origin, "https://accounts.google.com");
+  assert.equal(s.loc.searchParams.get("redirect_uri"), "https://game.test/api/vroomillion/oauth-google-cb");
+  const claims = { iss: "https://accounts.google.com", aud: "gid.apps", sub: "g-123", email: "New@Example.com", email_verified: true, nonce: s.nonce, exp: Date.now() / 1000 + 600 };
+  stripeReply = (url, init) => {
+    assert.equal(url, "https://oauth2.googleapis.com/token");
+    assert.match(String(init.body), /client_secret=gsecret/);
+    return { body: { id_token: idToken(claims) } };
+  };
+  const cb = await worker.fetch(get(`oauth-google-cb?code=abc&state=${s.state}`, { cookie: s.cookie }), env(GOOGLE));
+  assert.equal(cb.status, 303);
+  assert.equal(cb.headers.get("location"), "https://game.test/vroomillion/#signed-in");
+  const session = cb.headers.getSetCookie().find((c) => c.startsWith("vr_session="))?.split(";")[0];
+  assert.ok(session, "logged in");
+  const me = await (await worker.fetch(get("me", { cookie: session }), env(GOOGLE))).json();
+  assert.equal(me.email, "new@example.com");
+  assert.equal(me.hasPassword, false);
+  // no password to log in with, no recovery code; delete needs DELETE typed
+  assert.equal((await worker.fetch(post("login", { email: "new@example.com", password: "whateverwhatever" }), env(GOOGLE))).status, 401);
+  assert.equal((await worker.fetch(post("delete-account", { confirm: "nope" }, { cookie: session }), env(GOOGLE))).status, 401);
+
+  // an existing password account with the same verified email is the same player
+  await signup("racer@example.com");
+  const s2 = await startSignIn("google", env(GOOGLE));
+  stripeReply = { body: { id_token: idToken({ ...claims, sub: "g-456", email: "racer@example.com", nonce: s2.nonce }) } };
+  const cb2 = await worker.fetch(get(`oauth-google-cb?code=abc&state=${s2.state}`, { cookie: s2.cookie }), env(GOOGLE));
+  assert.equal(cb2.headers.get("location"), "https://game.test/vroomillion/#signed-in");
+  assert.equal(db.sql.prepare("SELECT google_sub FROM users WHERE email = 'racer@example.com'").get().google_sub, "g-456");
+  assert.equal(db.sql.prepare("SELECT COUNT(*) n FROM users").get().n, 2);
+  assert.equal((await worker.fetch(post("delete-account", { confirm: "delete" }, { cookie: session }), env(GOOGLE))).status, 200);
+});
+
+test("Google sign-in refuses a wrong state, a token for another app, an unverified email or a replayed nonce", async () => {
+  const s = await startSignIn("google", env(GOOGLE));
+  const good = { iss: "https://accounts.google.com", aud: "gid.apps", sub: "g-1", email: "a@example.com", email_verified: true, nonce: s.nonce, exp: Date.now() / 1000 + 600 };
+  const tryWith = async (claims, state = s.state, cookie = s.cookie) => {
+    stripeReply = { body: { id_token: idToken(claims) } };
+    const r = await worker.fetch(get(`oauth-google-cb?code=abc&state=${state}`, { cookie }), env(GOOGLE));
+    return r.headers.get("location");
+  };
+  assert.match(await tryWith(good, "0000"), /signin-error/);
+  assert.match(await tryWith(good, s.state, ""), /signin-error/);
+  assert.match(await tryWith({ ...good, aud: "someone-else" }), /signin-error/);
+  assert.match(await tryWith({ ...good, nonce: "abcd" }), /signin-error/);
+  assert.match(await tryWith({ ...good, email_verified: false }), /verified/);
+  assert.match(await tryWith({ ...good, exp: 1 }), /signin-error/);
+  assert.equal(db.sql.prepare("SELECT name FROM sqlite_master WHERE name = 'users'").get() && db.sql.prepare("SELECT COUNT(*) n FROM users").get().n || 0, 0);
+  // switched off without its settings
+  assert.match((await worker.fetch(get("oauth-google"), env())).headers.get("location"), /signin-error/);
+});
+
+test("sign in with Apple: signed client secret, form_post callback", async () => {
+  const { privateKey } = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
+  const pem = `-----BEGIN PRIVATE KEY-----\n${Buffer.from(await crypto.subtle.exportKey("pkcs8", privateKey)).toString("base64")}\n-----END PRIVATE KEY-----`;
+  const APPLE = { APPLE_CLIENT_ID: "com.vroom.web", APPLE_TEAM_ID: "TEAM123", APPLE_KEY_ID: "KEY123", APPLE_PRIVATE_KEY: pem, SITE_URL: "https://game.test" };
+  const s = await startSignIn("apple", env(APPLE));
+  assert.equal(s.loc.searchParams.get("response_mode"), "form_post");
+  let secret;
+  stripeReply = (url, init) => {
+    secret = new URLSearchParams(String(init.body)).get("client_secret");
+    return { body: { id_token: idToken({ iss: "https://appleid.apple.com", aud: "com.vroom.web", sub: "a-1", email: "x@privaterelay.appleid.com", email_verified: "true", nonce: s.nonce, exp: Date.now() / 1000 + 600 }) } };
+  };
+  const cb = await worker.fetch(new Request(BASE + "oauth-apple-cb", {
+    method: "POST", body: `code=abc&state=${s.state}`,
+    headers: { origin: "https://appleid.apple.com", "content-type": "application/x-www-form-urlencoded", cookie: s.cookie },
+  }), env(APPLE));
+  assert.equal(cb.headers.get("location"), "https://game.test/vroomillion/#signed-in");
+  const [head, body] = secret.split(".").slice(0, 2).map((p) => JSON.parse(Buffer.from(p, "base64url").toString()));
+  assert.deepEqual([head.alg, head.kid, body.iss, body.sub, body.aud], ["ES256", "KEY123", "TEAM123", "com.vroom.web", "https://appleid.apple.com"]);
+  assert.equal(db.sql.prepare("SELECT apple_sub FROM users").get().apple_sub, "a-1");
+});

@@ -5,7 +5,7 @@
 export const config = { runtime: "edge" };
 
 const PASS_UP = ["accept", "content-type", "cookie", "origin"];
-const PASS_DOWN = ["cache-control", "content-type", "x-content-type-options"];
+const PASS_DOWN = ["cache-control", "content-type", "x-content-type-options", "location"];
 
 export default async function handler(req) {
   const url = new URL(req.url);

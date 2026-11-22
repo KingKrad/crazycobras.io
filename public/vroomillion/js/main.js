@@ -478,6 +478,17 @@ function botCheck() {
 }
 
 // Create-account / log-in / forgot-password form. mode is "signup", "login" or "reset".
+// "Continue with Google / Apple": a plain link to the server, which sends the player to Google or Apple
+// and back to the game logged in. after: the screen to come back to.
+function signInButtons(signup) {
+  const list = [["google", "CONTINUE WITH GOOGLE"], ["apple", "CONTINUE WITH APPLE"]].filter(([p]) => signInWith[p]);
+  if (!list.length) return null;
+  return h("div", { class: "sso" },
+    ...list.map(([p, label]) => h("a", { class: `btn sso-${p}`, href: `/api/vroomillion/oauth-${p}`, text: label,
+      onclick: () => { audio.sfx.click(); try { sessionStorage.setItem("vroom.after", current); } catch {} } })),
+    signup ? h("p", { class: "note", text: "Accounts are for players 13 and over. By continuing you agree to the Terms." }) : null,
+    h("div", { class: "sso-or", text: "OR WITH EMAIL" }));
+}
 function authForm(mode, onDone) {
   let form;
   const swap = (next) => form.replaceWith(authForm(next, onDone));
@@ -507,6 +518,7 @@ function authForm(mode, onDone) {
   const submit = h("button", { class: "btn big", type: "submit", text: signup ? "CREATE ACCOUNT" : "LOG IN" });
   const bots = signup ? botCheck() : null;
   form = h("form", { class: "auth-form", novalidate: true },
+    signInButtons(signup),
     authLabel("EMAIL", email), authLabel("PASSWORD", password),
     bots && bots.el, submit, msg,
     signup ? h("p", { class: "note" }, "Accounts are for players 13 and over. Your email is used only for your account. ",
@@ -577,13 +589,16 @@ function renderPaywall() {
   }
 }
 
+let signInError = null; // why a Google or Apple sign-in didn't work, shown once on the log-in screen
 function renderAccount() {
   const box = $("account-box");
   box.textContent = "";
   if (!account) {
+    if (signInError) box.append(h("p", { class: "pay-msg bad", role: "alert", text: signInError }));
     box.append(h("p", { class: "note", text: "Bought Unlimited? Log in to use it on this device." }), authForm("login", () => show("title")));
     return;
   }
+  signInError = null;
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
     h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : "FREE PLAYER — 1 DAILY RACE A DAY" }),
@@ -591,7 +606,7 @@ function renderAccount() {
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
     account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
-    newCodeForm(),
+    account.hasPassword === false ? h("p", { class: "note", text: "You sign in with Google or Apple." }) : newCodeForm(),
     deleteAccountForm(),
   ].filter(Boolean));
 }
@@ -882,7 +897,13 @@ function reportLink(prompt, entry) {
 
 // The announcement set on the admin screen, shown at the top of the title screen.
 let announcementText = null;
-api("config").then(({ body }) => { announcementText = body.announcement || null; if (current === "title") renderDaily(); }).catch(() => {});
+let signInWith = {}; // { google: bool, apple: bool }: which "Continue with..." buttons the server has set up
+api("config").then(({ body }) => {
+  announcementText = body.announcement || null;
+  if (current === "title") renderDaily();
+  signInWith = body.signIn || {};
+  if (!account && (signInWith.google || signInWith.apple)) { if (current === "account") renderAccount(); if (current === "paywall") renderPaywall(); }
+}).catch(() => {});
 
 // ---------- the admin screen: Overview, Players, Daily, Prompts, Reports, Settings ----------
 const ADMIN_TABS = [["overview", "OVERVIEW"], ["players", "PLAYERS"], ["daily", "DAILY"], ["prompts", "PROMPTS"], ["reports", "REPORTS"], ["settings", "SETTINGS"]];
@@ -1089,19 +1110,22 @@ async function adminSettings(body) {
 
 // Delete the account after re-entering the password.
 function deleteAccountForm() {
-  const password = h("input", { type: "password", autocomplete: "current-password", maxlength: "128", placeholder: "your password", "aria-label": "Password to confirm deleting your account" });
+  const noPw = account?.hasPassword === false; // a Google or Apple account confirms by typing DELETE
+  const password = noPw
+    ? h("input", { type: "text", autocomplete: "off", maxlength: "10", placeholder: "DELETE", "aria-label": "Type DELETE to confirm deleting your account" })
+    : h("input", { type: "password", autocomplete: "current-password", maxlength: "128", placeholder: "your password", "aria-label": "Password to confirm deleting your account" });
   const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
   const go = h("button", { class: "btn danger", type: "submit", text: "DELETE MY ACCOUNT" });
   const form = h("form", { class: "auth-form hidden", novalidate: true },
     h("p", { class: "note", text: account?.unlimited ? "This removes your email and password and you lose Unlimited. It can't be undone." : "This removes your email and password. It can't be undone." }),
-    h("label", {}, h("span", { text: "PASSWORD" }), password), go, msg);
+    h("label", {}, h("span", { text: noPw ? "TYPE DELETE" : "PASSWORD" }), password), go, msg);
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     go.disabled = true;
     msg.className = "pay-msg";
     msg.textContent = "Deleting…";
     try {
-      const { res, body } = await api("delete-account", { method: "POST", body: JSON.stringify({ password: password.value }) });
+      const { res, body } = await api("delete-account", { method: "POST", body: JSON.stringify(noPw ? { confirm: password.value } : { password: password.value }) });
       if (res.ok) { account = null; audio.sfx.deny(); show("title"); return; }
       msg.textContent = body.error || "Couldn't delete the account. Try again.";
     } catch {
@@ -2590,7 +2614,15 @@ audio.setMuted(save.muted);
 renderSound();
 renderCash(false);
 renderLegend();
-show(linkCode ? "online" : "title"); // a race link opens the join screen
+// back from Google or Apple sign-in: to the screen the player left from, or the log-in screen with the problem
+const signInReturn = location.hash.match(/^#(signed-in|signin-error=(.*))$/);
+if (signInReturn) history.replaceState(null, "", location.pathname + location.search);
+let after = null;
+try { after = sessionStorage.getItem("vroom.after"); sessionStorage.removeItem("vroom.after"); } catch {}
+if (signInReturn?.[2] !== undefined) {
+  try { signInError = decodeURIComponent(signInReturn[2]).slice(0, 120); } catch { signInError = "Sign-in didn't work. Try again."; }
+  show("account");
+} else show(signInReturn && ["paywall", "account", "online"].includes(after) ? after : linkCode ? "online" : "title"); // a race link opens the join screen
 refreshAccount();
 // progress brought back from the server copy: redraw with it
 restoring.then((ok) => { if (ok && current !== "race") { renderCash(); show(current); } });
