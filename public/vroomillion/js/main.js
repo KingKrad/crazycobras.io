@@ -2068,7 +2068,46 @@ function revealCard(r, res, i) {
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
     race.crazy && isJackpot(res) ? h("span", { class: "badge t5", text: "JACKPOT!" }) : tierBadge(res.tier),
-    h("div", { class: "reveal-gain", text: `+${roundMetres(res, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? (res.half ? " · LOST THE TOSS, HALF" : " · WON THE TOSS") : "") }));
+    h("div", { class: "reveal-gain", text: `+${roundMetres(res, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? (res.half ? " · LOST THE TOSS, HALF" : " · WON THE TOSS") : "") }),
+    rarityRoad(r, res));
+}
+
+// Under each answer after a round: a little road with a marker for every tier. Your car drives up it
+// and stops as far as your answer's rarity takes it (in CRAZY MODE, as far as its payout does),
+// lighting each marker it passes.
+function rarityRoad(r, res) {
+  const crazy = race.crazy;
+  const marks = crazy
+    ? [[5, "", 4], [4, "TURBO", 3], [3, "FAST", 2], [2, "CRUISE", 1], [1, "COMMON", 0], [1, "JACKPOT", -1]].map(([t, label, k]) => ({ m: k < 0 ? 1000 : CRAZY_METRES[t], label, col: effectTier(t, true, k < 0) }))
+    : [1, 2, 3, 4, 5].map((t) => ({ m: TIERS[t].metres, label: TIERS[t].short, col: t }));
+  const at = res.tier ? metresFor(res.tier, 1, false, crazy, res.top) / 1000 : 0;
+  const fx = effectTier(res.tier, crazy, res.top);
+  const fill = h("div", { class: "rr-fill" });
+  const car = spriteCanvas(r.car, 2);
+  car.classList.add("rr-car");
+  const ticks = marks.map((mk, k) => {
+    const el = h("div", { class: "rr-tick c" + mk.col + (k === marks.length - 1 ? " end" : "") }, h("span", { class: "rr-label", text: mk.label }));
+    el.style.setProperty("--x", (mk.m / 10).toFixed(1) + "%");
+    return el;
+  });
+  const road = h("div", { class: `rr fx${fx}` + (res.tier ? "" : " stalled"), "aria-hidden": "true" },
+    h("div", { class: "rr-track" }, fill, ...ticks, car));
+  road.style.setProperty("--pos", "0%");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dur = calm ? 0 : 500 + at * 1300;
+  road.style.setProperty("--dur", dur + "ms");
+  // start the drive once the card is on screen
+  setTimeout(() => {
+    road.style.setProperty("--pos", (at * 100).toFixed(1) + "%");
+    marks.forEach((mk, k) => {
+      if (mk.m / 1000 > at + 1e-6) return;
+      // the car eases out, so work out roughly when it passes each marker
+      const when = dur * (1 - Math.sqrt(Math.max(0, 1 - mk.m / 1000 / at)));
+      setTimeout(() => { ticks[k].classList.add("hit"); if (!calm) audio.sfx.tick(); }, when);
+    });
+    setTimeout(() => road.classList.add("arrived"), dur);
+  }, 380);
+  return road;
 }
 
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated

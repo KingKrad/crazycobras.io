@@ -1104,3 +1104,32 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
   .pp-book.single .pp-slot-need { font-size: 5px; }
   .pp-wrap { gap: 8px; margin: 8px 0 10px; }
 }
+
+/* the rarity road under each answer after a round (main.js rarityRoad) */
+.rr { grid-column: 1 / -1; padding: 4px 4px 14px; }
+.rr-track { position: relative; height: 14px; margin: 0 24px 0 22px; background: #24203a; border-top: 2px solid #3a3456; border-bottom: 2px solid #3a3456;
+  background-image: repeating-linear-gradient(90deg, #6b6488 0 6px, transparent 6px 14px); background-size: 100% 2px; background-position: 0 50%; background-repeat: no-repeat; }
+.rr-fill { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos)) 0 0); transition: clip-path var(--dur) cubic-bezier(0, 0, 0.3, 1);
+  background: linear-gradient(90deg, var(--t1) 12%, var(--t2) 28%, var(--t3) 48%, var(--t4) 72%, var(--t5)); opacity: 0.55; }
+.rr-car { position: absolute; bottom: 1px; left: var(--pos); transform: translateX(-50%); transition: left var(--dur) cubic-bezier(0, 0, 0.3, 1); image-rendering: pixelated; z-index: 2; }
+.rr-tick { position: absolute; left: var(--x); top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: #4a4466; }
+.rr-label { position: absolute; top: calc(100% + 3px); left: 50%; transform: translateX(-50%); font-size: 5px; color: #6f6a88; white-space: nowrap; }
+.rr-tick.end .rr-label { left: auto; right: -2px; transform: none; }
+.rr-tick.hit { animation: rr-ping 0.35s ease-out; }
+.rr-tick.hit.c1 { background: var(--t1); } .rr-tick.hit.c1 .rr-label { color: var(--t1); }
+.rr-tick.hit.c2 { background: var(--t2); } .rr-tick.hit.c2 .rr-label { color: var(--t2); }
+.rr-tick.hit.c3 { background: var(--t3); } .rr-tick.hit.c3 .rr-label { color: var(--t3); }
+.rr-tick.hit.c4 { background: var(--t4); } .rr-tick.hit.c4 .rr-label { color: var(--t4); }
+.rr-tick.hit.c5 { background: var(--t5); } .rr-tick.hit.c5 .rr-label { color: var(--t5); }
+@keyframes rr-ping { 0% { transform: scaleY(2.2); box-shadow: 0 0 10px #fff; } 100% { transform: none; } }
+/* where it stopped: a bounce, and for the big ones a glow */
+.rr.arrived .rr-car { animation: rr-stop 0.3s ease-out; }
+.rr.fx4.arrived .rr-car { filter: drop-shadow(0 0 4px var(--t4)); }
+.rr.fx5.arrived .rr-car { filter: drop-shadow(0 0 6px var(--t5)); }
+.rr.fx5.arrived .rr-fill { opacity: 0.9; animation: rr-shine 0.6s steps(3) 2; }
+@keyframes rr-stop { 0% { transform: translateX(-50%) translateY(0); } 40% { transform: translateX(-35%) translateY(-3px); } 100% { transform: translateX(-50%); } }
+@keyframes rr-shine { 50% { filter: brightness(1.8); } }
+/* STALLED: the car never leaves the line */
+.rr.stalled.arrived .rr-car { animation: rr-cough 0.5s steps(4) 2; }
+@keyframes rr-cough { 25% { transform: translateX(-46%); } 75% { transform: translateX(-54%); } }
+@media (prefers-reduced-motion: reduce) { .rr .rr-car, .rr .rr-fill, .rr-tick { animation: none !important; transition: none; } }
