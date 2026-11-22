@@ -79,7 +79,7 @@ export const CARS = [
   // can't be bought or won: only an admin can gift it (ADMIN → PLAYERS). The best car in the game by a mile.
   { ...C("mazzy", "DEAN'S MAZZY", "X", 0, 9.0, 8, "pickup", "#b9a98a", "#26262b"), giftOnly: true, rim: "#f4f4f0" },
   // a 2026 electric fastback: pearl white, all-glass roof, aero wheels. Ties the Mazzy for the best in the game.
-  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#eef0f2", "#1b1d22"), giftOnly: true, rim: "#3a3d45", glass: "#2a3850" },
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#eef0f2", "#1b1d22"), giftOnly: true, rim: "#3a3d45", glass: "#2a3850", electric: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 

@@ -209,24 +209,60 @@ export const sfx = {
   },
 };
 
+// An electric car's sounds (AMELIA'S TESSY): lasers and plasma instead of fire and exhaust.
+export const ev = {
+  // off the line: the motor whines up, then laser shots (more for rarer answers)
+  launch: (t) => {
+    if (t === 0) { ev.sputter(); return; }
+    tone(220, 0.7, { type: "sine", vol: 0.12, slide: 3 + t });
+    tone(110, 0.3, { type: "square", vol: 0.12, slide: 0.4 });
+    for (let i = 0; i < Math.max(1, t - 1); i++) ev.zap(0.05 + i * 0.11, 1 + i * 0.12);
+    if (t >= 4) { noiseF(0.9, { vol: 0.08, type: "bandpass", freq: 600, sweep: 9000, at: 0.1 }); tone(55, 0.8, { type: "sine", vol: 0.25, at: 0.05, slide: 0.5 }); }
+  },
+  // one laser shot: a sharp falling "pew"
+  zap: (at = 0, pitch = 1) => {
+    tone(2400 * pitch, 0.16, { type: "square", vol: 0.09, at, slide: 0.12 });
+    tone(1200 * pitch, 0.2, { type: "sine", vol: 0.08, at, slide: 0.2 });
+  },
+  // the plasma trail lighting up: a crackling, rising hum
+  whoosh: (t) => {
+    noiseF(0.4 + t * 0.12, { vol: 0.07 + t * 0.015, type: "bandpass", freq: 400, sweep: 6000, q: 2 });
+    tone(90, 0.4 + t * 0.12, { type: "sawtooth", vol: 0.05, slide: 2 });
+    for (let i = 0; i < t * 2; i++) noiseF(0.03, { vol: 0.06, type: "highpass", freq: 5000, at: 0.05 + Math.random() * (0.3 + t * 0.1) });
+  },
+  // a gear change: a laser blast instead of a backfire
+  backfire: () => { ev.zap(0, 1.2); noiseF(0.05, { vol: 0.1, type: "highpass", freq: 3000 }); },
+  // nitro: a charging whine and a plasma surge
+  nitro: () => { tone(400, 0.5, { type: "sine", vol: 0.1, slide: 8 }); noiseF(0.5, { vol: 0.12, type: "bandpass", freq: 800, sweep: 10000, q: 3 }); ev.zap(0.45, 0.8); },
+  // STALLED: the battery fizzles out
+  sputter: () => [0, 0.14, 0.3].forEach((at, i) => { noiseF(0.06, { vol: 0.1 - i * 0.02, type: "highpass", freq: 4000, at }); tone(300 - i * 70, 0.08, { type: "square", vol: 0.06, at, slide: 0.5 }); }),
+};
+
 // Engine drone that follows car speed (0..1).
-export function engineStart() {
+// electric: an electric car's motor, a high whine instead of a growl
+export function engineStart(electric = false) {
   if (!ctx || engine) return;
   const o = ctx.createOscillator();
   const g = ctx.createGain();
   const f = ctx.createBiquadFilter();
-  o.type = "sawtooth";
+  o.type = electric ? "triangle" : "sawtooth";
   o.frequency.value = 50;
   f.type = "lowpass";
   f.frequency.value = 500;
   g.gain.value = 0;
   o.connect(f).connect(g).connect(master);
   o.start();
-  engine = { o, g, f };
+  engine = { o, g, f, electric };
 }
 export function engineSet(speed) {
   if (!engine) return;
   const t = ctx.currentTime;
+  if (engine.electric) {
+    engine.o.frequency.setTargetAtTime(160 + speed * 1100, t, 0.08);
+    engine.f.frequency.setTargetAtTime(1800 + speed * 3000, t, 0.08);
+    engine.g.gain.setTargetAtTime(0.015 + speed * 0.05, t, 0.08);
+    return;
+  }
   engine.o.frequency.setTargetAtTime(48 + speed * 150, t, 0.08);
   engine.f.frequency.setTargetAtTime(350 + speed * 1400, t, 0.08);
   engine.g.gain.setTargetAtTime(0.03 + speed * 0.09, t, 0.08);

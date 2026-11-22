@@ -1820,7 +1820,8 @@ function startRace(setup) {
   $("btn-next").classList.add("hidden");
   $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible
   show("race");
-  audio.engineStart();
+  // an electric car on this screen (yours, in 1P) whines instead of growling
+  audio.engineStart(racers[setup.online?.seat ?? 0]?.car?.electric === true);
   audio.engineSet(0.1);
   runRace(token);
 }
@@ -1942,10 +1943,11 @@ async function runRace(token) {
       scene.launch(i, tier, nitro, dur / 1000);
       popGain(i, gain[i], tier, nitro, race.crazy);
       if (topFx >= 3 && !fxShown) { fxShown = true; rareMoment(topFx, race.crazy); }
-      audio.sfx.launch(tier);
-      if (tier >= 2) audio.sfx.whoosh(tier);
-      if (tier === 0) audio.sfx.sputter();
-      if (nitro) audio.sfx.nitro();
+      const sfx = r.car.electric ? audio.ev : audio.sfx; // an electric car fires lasers and plasma instead
+      sfx.launch(tier);
+      if (tier >= 2) sfx.whoosh(tier);
+      if (tier === 0) sfx.sputter();
+      if (nitro) sfx.nitro();
       if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
     };
     scene.onEvent = (type, card) => {
@@ -1986,7 +1988,7 @@ async function runRace(token) {
           if (g > R.gear && b > 0.3) {
             R.gear = g;
             audio.sfx.shift();
-            if (R.tier >= 3) { scene.backfire(i); audio.sfx.backfire(); }
+            if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
           }
           if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));
         });

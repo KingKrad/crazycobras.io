@@ -582,6 +582,10 @@ function buildCard(card, maxW) {
 // exhaust fire by tier: [outer, middle, core] colours and length as a share of the car's height
 const FIRE = [null, null, ["#1f9a4a", "#5dff8f", "#e6ffe9"], ["#1f4fd6", "#4f9dff", "#dceaff"], ["#7a2fd6", "#c070ff", "#f3e3ff"], ["#ff9a1f", "#ffd23f", "#ffffff"]];
 const FIRE_LEN = [0, 0, 0.22, 0.4, 0.6, 0.85];
+// an electric car (AMELIA'S TESSY) shoots plasma and lasers instead: [outer, middle, core] by tier
+const PLASMA = [null, null, ["#0d6b8a", "#2fd8ff", "#e6fdff"], ["#2a3bd6", "#5d8bff", "#e8eeff"], ["#8a1fd6", "#ff4fd8", "#ffe6fb"], ["#00b3ff", "#ff4fd8", "#ffffff"]];
+const SPARK = ["#2fd8ff", "#ff4fd8", "#ffffff", "#9d7bff"];
+const elec = (r) => r?.car?.electric === true;
 
 // rare answers build up before they're revealed: the card hides its tier, shakes and glows up the
 // rarity colours (seconds, by effect tier)
@@ -749,10 +753,11 @@ export class ChaseScene {
     if (!r?.box || r.fireT <= 0) return;
     const u = this.u;
     r.popT = 0.14;
+    if (elec(r)) r.zapT = 0.18; // a laser blast instead of a backfire
     const { x, y, w, h } = r.box;
     for (const ex of [x + w * 0.2, x + w * 0.8]) {
       for (let k = 0; k < 6 + r.fireTier * 2; k++) {
-        this.particles.push({ x: ex, y: y - h * 0.15, vx: (Math.random() - 0.5) * 90 * u, vy: (40 + Math.random() * 110) * u, life: 0.25 + Math.random() * 0.25, size: Math.max(1, u), color: FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: 160 * u, hot: true });
+        this.particles.push({ x: ex, y: y - h * 0.15, vx: (Math.random() - 0.5) * 90 * u, vy: (40 + Math.random() * 110) * u, life: 0.25 + Math.random() * 0.25, size: Math.max(1, u), color: elec(r) ? SPARK[k % 4] : FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: elec(r) ? 0 : 160 * u, hot: true });
       }
     }
   }
@@ -1122,6 +1127,7 @@ export class ChaseScene {
         r.launchT = Math.max(0, r.launchT - dt);
         r.fireT = Math.max(0, r.fireT - dt);
         r.popT = Math.max(0, r.popT - dt);
+        r.zapT = Math.max(0, (r.zapT || 0) - dt);
         r.drift += (clamp(-bend * 0.012, -0.04, 0.04) - r.drift) * Math.min(1, dt * 2);
         if (r.box && r.boost > 0.6 && !this.calm) r.trail.unshift({ ...r.box });
         else if (r.trail.length) r.trail.pop();
@@ -1130,12 +1136,16 @@ export class ChaseScene {
           // exhaust: rev puffs and boost smoke
           const ex = [r.box.x + r.box.w * 0.18, r.box.x + r.box.w * 0.82];
           const ey = r.box.y - r.box.h * 0.25;
-          if (this.revT > 0 && Math.random() < 0.6) {
+          if (this.revT > 0 && Math.random() < 0.6 && !elec(r)) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 20 * u, vy: (10 + Math.random() * 15) * u, life: 0.5, size: 2 * u, grow: 5 * u, color: "#8f8aa8", g: 0, soft: true });
           }
           // STALLED: black smoke coughs out of the exhausts
-          if (r.sputterT > 0) {
+          if (r.sputterT > 0 && elec(r)) {
+            // an electric car fizzles: a few dying sparks instead of smoke
+            r.sputterT -= dt;
+            if (Math.random() < 0.4) this.particles.push({ x: ex[Math.random() < 0.5 ? 0 : 1], y: ey, vx: (Math.random() - 0.5) * 60 * u, vy: (Math.random() - 0.3) * 50 * u, life: 0.25, size: Math.max(1, u), color: SPARK[Math.floor(Math.random() * 3)], g: 120 * u, hot: true });
+          } else if (r.sputterT > 0) {
             r.sputterT -= dt;
             if (Math.random() < 0.55) {
               const sx = ex[Math.random() < 0.5 ? 0 : 1];
@@ -1145,9 +1155,9 @@ export class ChaseScene {
           // embers off the end of the exhaust fire, Fast Lane and up
           if (r.fireT > 0 && r.fireTier >= 3 && Math.random() < 0.25 + r.fireTier * 0.1) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
-            this.particles.push({ x: sx + (Math.random() - 0.5) * 4 * u, y: ey + r.box.h * FIRE_LEN[r.fireTier] * 0.8, vx: (Math.random() - 0.5) * 50 * u, vy: (60 + Math.random() * 90) * u, life: 0.3 + Math.random() * 0.3, size: Math.max(1, u * 0.75), color: FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: 60 * u, hot: true });
+            this.particles.push({ x: sx + (Math.random() - 0.5) * 4 * u, y: ey + r.box.h * FIRE_LEN[r.fireTier] * 0.8, vx: (Math.random() - 0.5) * 50 * u, vy: (60 + Math.random() * 90) * u, life: 0.3 + Math.random() * 0.3, size: Math.max(1, u * 0.75), color: elec(r) ? SPARK[Math.floor(Math.random() * 4)] : FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: elec(r) ? -20 * u : 60 * u, hot: true });
           }
-          if (r.boost > 0.05 && r.fireT <= 0 && Math.random() < r.boost * 0.8) {
+          if (r.boost > 0.05 && r.fireT <= 0 && Math.random() < r.boost * 0.8 && !elec(r)) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: "#cfd3e6", g: 0, soft: true });
           }
@@ -1965,6 +1975,52 @@ export class ChaseScene {
     g.drawImage(txt, Math.round(p.sx - bw / 2), Math.round(top), Math.round(bw), Math.round(bh));
   }
 
+  // An electric car's lasers: thin bright beams from the back of the car down past the camera,
+  // more of them (and wider apart) for rarer answers, flaring on every gear change.
+  drawLasers(g, r, pipes, y, h, fade) {
+    const n = Math.max(1, r.fireTier - 1);
+    const step = Math.max(1, Math.round(this.u));
+    const flare = r.zapT > 0 ? 2.2 : 1;
+    const cols = PLASMA[r.fireTier];
+    g.save();
+    g.globalCompositeOperation = "lighter";
+    for (const [k, px] of pipes.entries()) {
+      for (let b = 0; b < n; b++) {
+        const spread = (b - (n - 1) / 2) * 0.35 + (k ? 0.12 : -0.12);
+        const len = this.H - y + 20;
+        const x2 = px + spread * len;
+        const flick = 0.55 + Math.random() * 0.45;
+        for (const [wd, col, a] of [[5, cols[0], 0.35], [3, cols[1], 0.7], [1, cols[2], 1]]) {
+          g.globalAlpha = a * flick * Math.min(1, fade);
+          g.strokeStyle = col;
+          g.lineWidth = Math.max(1, wd * step * flare * (0.6 + r.fireTier * 0.12));
+          g.beginPath(); g.moveTo(px, y); g.lineTo(x2, y + len); g.stroke();
+        }
+      }
+    }
+    g.restore();
+  }
+
+  // Crackling plasma arcs: jagged lightning from each emitter, and across between them for TURBO and up.
+  drawArcs(g, pipes, y, len, tier) {
+    const step = Math.max(1, Math.round(this.u));
+    const bolt = (x1, y1, x2, y2, segs) => {
+      g.beginPath(); g.moveTo(x1, y1);
+      for (let i = 1; i < segs; i++) {
+        const t = i / segs;
+        g.lineTo(x1 + (x2 - x1) * t + (Math.random() - 0.5) * 8 * step, y1 + (y2 - y1) * t + (Math.random() - 0.5) * 6 * step);
+      }
+      g.lineTo(x2, y2); g.stroke();
+    };
+    g.save();
+    g.globalCompositeOperation = "lighter";
+    g.lineWidth = step;
+    g.strokeStyle = Math.random() < 0.5 ? "#e6fdff" : "#ff9df0";
+    for (const px of pipes) if (Math.random() < 0.6) bolt(px, y, px + (Math.random() - 0.5) * len * 0.6, y + len * (0.4 + Math.random() * 0.5), 5);
+    if (tier >= 4 && Math.random() < 0.7) bolt(pipes[0], y + 2 * step, pipes[1], y + 2 * step, 8);
+    g.restore();
+  }
+
   // A flickering pixel flame from (x, y) towards the camera: outer, middle and core layers that taper.
   drawFlame(g, x, y, width, len, colours, glow = false) {
     if (len < 1) return;
@@ -2031,7 +2087,14 @@ export class ChaseScene {
     g.restore();
 
     // exhaust fire out of both pipes, towards the camera: longer and hotter for rarer answers
-    if (r.fireT > 0 && !this.calm) {
+    if (r.fireT > 0 && !this.calm && elec(r)) {
+      const fade = Math.min(1, r.fireT / 0.6) * (r.popT > 0 ? 1.5 : 1);
+      const len = h * FIRE_LEN[r.fireTier] * fade;
+      const pipes = [left + w * 0.22, left + w * 0.78];
+      this.drawLasers(g, r, pipes, bottom - h * 0.2, h, fade);
+      for (const fx of pipes) this.drawFlame(g, fx, bottom - h * 0.2, Math.max(3, s * (2.6 + r.fireTier * 0.5)), len * 0.8, PLASMA[r.fireTier], true);
+      this.drawArcs(g, pipes, bottom - h * 0.2, len, r.fireTier);
+    } else if (r.fireT > 0 && !this.calm) {
       const fade = Math.min(1, r.fireT / 0.6) * (r.popT > 0 ? 1.7 : 1);
       const len = h * FIRE_LEN[r.fireTier] * fade;
       const rgb = (hue, l) => `rgb(${hsl(mod(hue, 360), 1, l).map(Math.round).join(",")})`;
@@ -2041,7 +2104,7 @@ export class ChaseScene {
     // nitro: long blue jets on top of the fire
     if (r.nitro && r.boost > 0.05 && !this.calm) {
       const len = h * (0.35 + Math.min(1.5, r.boost) * 0.2);
-      for (const fx of [left + w * 0.2, left + w * 0.8]) this.drawFlame(g, fx, bottom - h * 0.18, Math.max(2, s * 1.8), len, ["#2f6bff", "#4fd1ff", "#ffffff"]);
+      for (const fx of [left + w * 0.2, left + w * 0.8]) this.drawFlame(g, fx, bottom - h * 0.18, Math.max(2, s * 1.8), len, elec(r) ? ["#8a1fd6", "#ff4fd8", "#ffffff"] : ["#2f6bff", "#4fd1ff", "#ffffff"]);
     }
 
     // lean into bends
