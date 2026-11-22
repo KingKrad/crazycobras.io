@@ -1,4 +1,4 @@
-import { CARS, CLASSES, carById, carSprite } from "./cars.js";
+import { CARS, CLASSES, GIFT_CARS, carById, carSprite } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
@@ -144,6 +144,7 @@ async function syncProgress() {
     progressFor = email;
     persist();
     if (backupTimer) sendBackup(); // send the merged copy now, not in four seconds
+    applyGifts(); // the merged save only keeps gifted cars this account really has
     if (JSON.stringify(save) !== before && current !== "race") { audio.setMuted(save.muted); renderCash(); show(current); }
   } catch { /* offline: tried again next visit */ }
 }
@@ -379,6 +380,14 @@ async function refreshAccount() {
     const { res, body } = await api("me");
     account = res.ok ? body : null;
     syncSeen();
+    applyGifts();
+    // logged out: gift-only cars wait on the account (they come back on logging in)
+    if (res.status === 401 && save.owned.some((id) => GIFT_CARS.includes(id))) {
+      save.owned = save.owned.filter((id) => !GIFT_CARS.includes(id));
+      if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
+      persist();
+      if (current === "garage") renderGarage();
+    }
     // an admin gave this player today's free races back
     if (account?.freeResetAt > (save.freeResetAt || 0)) {
       if (new Date(account.freeResetAt).toISOString().slice(0, 10) === dday()) save.daily = { day: dday(), done: {} };
@@ -1016,6 +1025,11 @@ async function adminPlayers(body, q = "", offset = 0) {
       h("div", { class: "note", text: `NAME ${p.nickname || "(default)"} · STREAK ${p.streak} · RACES ${p.races} · JOINED ${fmtDate(p.createdAt)} · LAST SEEN ${fmtDate(p.lastSeen)}` }),
       h("div", { class: "admin-actions" },
         h("button", { class: "btn small", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.", (np) => showPlayer({ ...p, ...np })) }),
+        ...GIFT_CARS.map((id) => {
+          const has = (p.gifts || []).includes(id);
+          return h("button", { class: "btn small", type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${carById(id).name}`,
+            onclick: () => act({ action: "gift-car", email: p.email, car: id, give: !has }, has ? "Taken back." : "Gifted! It appears in their garage next time they open the game logged in.", (np) => showPlayer({ ...p, ...np })) });
+        }),
         h("button", { class: "btn small", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") }),
         p.nickname ? h("button", { class: "btn small", type: "button", text: "RESET NICKNAME", onclick: () => act({ action: "reset-nickname", email: p.email }, "Nickname reset to the default.", (np) => showPlayer({ ...p, ...np })) }) : null),
       p.admin ? null : h("details", { class: "danger-zone" }, h("summary", { text: "Delete this account…" }),
@@ -1271,6 +1285,37 @@ function overlay(text, cls = "") {
   o.append(h("div", { class: "overlay-text " + cls, text }));
 }
 
+// Cars an admin gifted to this account go into the garage; one taken back leaves it.
+function applyGifts() {
+  // logged out (or offline) the save is left as it is; otherwise the account decides
+  if (!account || !Array.isArray(account.gifts)) return;
+  const gifts = account.gifts.filter((id) => GIFT_CARS.includes(id));
+  const fresh = gifts.filter((id) => !save.owned.includes(id));
+  const gone = save.owned.filter((id) => GIFT_CARS.includes(id) && !gifts.includes(id));
+  if (!fresh.length && !gone.length) return;
+  save.owned = [...save.owned.filter((id) => !gone.includes(id)), ...fresh];
+  if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
+  save.gifts = gifts;
+  persist();
+  renderCash();
+  if (fresh.length && current !== "race") {
+    const car = carById(fresh[0]);
+    const close = () => pop.remove();
+    const pop = h("div", { class: "gift-pop", role: "dialog", "aria-modal": "true", "aria-label": "A gift for you" },
+      h("div", { class: "gift-box" },
+        h("div", { class: "gift-kicker", text: "★ A GIFT FOR YOU ★" }),
+        spriteCanvas(car, 6),
+        h("div", { class: "gift-name", text: car.name }),
+        h("p", { class: "note", text: "It's in your garage. The best car in the game." }),
+        h("button", { class: "btn big", type: "button", text: "DRIVE IT", onclick: () => { save.car = car.id; persist(); audio.sfx.lock(); close(); show("garage"); } }),
+        h("button", { class: "link", type: "button", text: "Later", onclick: () => { audio.sfx.click(); close(); } })));
+    pop.addEventListener("click", (e) => { if (e.target === pop) close(); });
+    document.body.append(pop);
+    audio.sfx.win();
+  }
+  if (current === "garage") renderGarage();
+}
+
 // ---------- car widgets ----------
 function spriteCanvas(car, scale = 4) {
   const src = carSprite(car);
@@ -1284,8 +1329,9 @@ const tuned = (car) => tunedCar(car, save.upgrades);
 function statLine(car0) {
   const car = tuned(car0);
   const pct = Math.round(((car.power - 1) / 5) * 100);
-  const bar = h("span", { class: "bar" }, h("span", { class: "bar-fill" }));
-  bar.firstChild.style.width = Math.max(4, pct) + "%";
+  // a car beyond the scale (an admin gift) maxes the bar out and makes it glow
+  const bar = h("span", { class: "bar" + (pct > 100 ? " over" : "") }, h("span", { class: "bar-fill" }));
+  bar.firstChild.style.width = Math.min(100, Math.max(4, pct)) + "%";
   return h("div", { class: "statline" },
     h("span", { text: "PWR" }), bar, h("span", { class: "num", text: "×" + car.power.toFixed(2) }),
     h("span", { class: "n2o", text: "N2O " + car.nitro }),
@@ -1559,6 +1605,7 @@ function renderGarage() {
     const grid = h("div", { class: "car-grid" });
     for (const car of CARS.filter((c) => c.cls === cls)) {
       const owned = save.owned.includes(car.id);
+      if (car.giftOnly && !owned) continue; // only shows once an admin has gifted it
       const equipped = save.car === car.id;
       const afford = save.cash >= car.price;
       const action = car.exclusive && !owned
@@ -1572,7 +1619,8 @@ function renderGarage() {
             "aria-label": `Buy ${car.name} for ${money(car.price)}`,
             onclick: () => buy(car),
           });
-      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") },
+      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") + (car.giftOnly ? " gift" : "") },
+        car.giftOnly ? h("div", { class: "tag gift-tag", text: "★ ADMIN GIFT · ONE OF A KIND" }) : null,
         spriteCanvas(car, 4), h("div", { class: "car-name", text: car.name }), statLine(car), action,
         owned ? upgradeRow(car) : null));
     }

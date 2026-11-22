@@ -98,7 +98,7 @@ export async function ensureSchema(db) {
     )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   for (const col of ["google_sub", "apple_sub"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
@@ -144,11 +144,17 @@ export async function currentUser(request, env) {
 export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email);
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
+// cars only an admin can give (public/vroomillion/js/cars.js GIFT_CARS), kept on the account as a JSON list
+export const GIFT_CARS = ["mazzy"];
+export function parseGifts(text) {
+  try { const l = JSON.parse(text || "[]"); return Array.isArray(l) ? l.filter((c) => GIFT_CARS.includes(c)) : []; } catch { return []; }
+}
 export const publicUser = (u, env) => ({
   email: u.email,
   unlimited: u.unlimited === 1 || isAdmin(u, env),
   ...(isAdmin(u, env) ? { admin: true } : {}),
   hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
+  gifts: parseGifts(u.gifts), // cars an admin gave this account
   freeResetAt: u.free_reset_at || 0,
   // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
   nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),

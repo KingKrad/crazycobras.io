@@ -1,6 +1,6 @@
 // The admin screen's API. Only accounts listed in the ADMIN_EMAILS secret can use it.
 // Also POST /race-start, which counts races for the stats.
-import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail } from "./accounts.js";
+import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts } from "./accounts.js";
 import { ensureDailySchema, utcDay, cleanNickname } from "./daily.js";
 import { ensureStatsSchema } from "./stats.js";
 
@@ -47,6 +47,7 @@ const playerView = (u, env) => ({
   streak: Number(u.streak) || 0,
   races: Number(u.unl_races) || 0,
   freeResetAt: u.free_reset_at || 0,
+  gifts: parseGifts(u.gifts),
 });
 
 // counts per UTC day from a list of timestamps
@@ -60,7 +61,7 @@ const perDay = (stamps, days) => {
 //   stats | overview                  money, players, activity, races (last 14 days)
 //   players { q?, offset? }           newest players first, or search by email / nickname
 //   lookup { email }                  one player
-//   set-unlimited { email, unlimited } | reset-free { email } | delete-player { email, confirm: email }
+//   set-unlimited { email, unlimited } | gift-car { email, car, give } | reset-free { email } | delete-player { email, confirm: email }
 //   daily { day? }                    both daily races: players, average and top distance, every score
 //   remove-score { day, race, email } | reset-nickname { email }
 //   prompts                           most played, most stalled, best answers per prompt
@@ -193,6 +194,14 @@ export async function handleAdmin(request, env) {
   if (action === "set-unlimited") {
     if (typeof body.unlimited !== "boolean") return json({ error: "Bad request." }, 400);
     await db.prepare("UPDATE users SET unlimited = ? WHERE id = ?").bind(body.unlimited ? 1 : 0, player.id).run();
+    return json(playerView(await find(), env));
+  }
+  if (action === "gift-car") {
+    // give or take back a gift-only car; it appears in their garage next time they open the game logged in
+    if (!GIFT_CARS.includes(body.car) || typeof body.give !== "boolean") return json({ error: "Bad request." }, 400);
+    const now = new Set(parseGifts(player.gifts));
+    if (body.give) now.add(body.car); else now.delete(body.car);
+    await db.prepare("UPDATE users SET gifts = ? WHERE id = ?").bind(JSON.stringify([...now]), player.id).run();
     return json(playerView(await find(), env));
   }
   if (action === "reset-free") {

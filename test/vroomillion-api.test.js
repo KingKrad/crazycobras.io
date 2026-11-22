@@ -795,3 +795,16 @@ test("sign in with Apple: signed client secret, form_post callback", async () =>
   assert.deepEqual([head.alg, head.kid, body.iss, body.sub, body.aud], ["ES256", "KEY123", "TEAM123", "com.vroom.web", "https://appleid.apple.com"]);
   assert.equal(db.sql.prepare("SELECT apple_sub FROM users").get().apple_sub, "a-1");
 });
+
+test("admins can gift DEAN'S MAZZY, and take it back; nobody else can", async () => {
+  const boss = await signup("boss@example.com");
+  const { cookie } = await signup("dean@example.com");
+  const call = async (body, c = boss.cookie, e = adminEnv()) => worker.fetch(post("admin", body, { cookie: c }), e);
+  assert.equal((await call({ action: "gift-car", email: "dean@example.com", car: "mazzy", give: true }, cookie)).status, 404, "not for players");
+  assert.equal((await call({ action: "gift-car", email: "dean@example.com", car: "golden", give: true })).status, 400, "only gift-only cars");
+  const out = await (await call({ action: "gift-car", email: "dean@example.com", car: "mazzy", give: true })).json();
+  assert.deepEqual(out.gifts, ["mazzy"]);
+  assert.deepEqual((await (await worker.fetch(get("me", { cookie }), adminEnv())).json()).gifts, ["mazzy"]);
+  await call({ action: "gift-car", email: "dean@example.com", car: "mazzy", give: false });
+  assert.deepEqual((await (await worker.fetch(get("me", { cookie }), adminEnv())).json()).gifts, []);
+});

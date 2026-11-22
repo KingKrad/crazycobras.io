@@ -431,3 +431,15 @@ test("account progress merges with a device's save without losing anything earne
   assert.equal(both.best, 4000);
   assert.equal(both.upgrades.van.power, 3);
 });
+
+test("DEAN'S MAZZY: gift-only, and the best car in the game by a big margin", async () => {
+  const { CARS, GIFT_CARS, carById } = await import("../public/vroomillion/js/cars.js");
+  const mazzy = carById("mazzy");
+  assert.equal(mazzy.name, "DEAN'S MAZZY");
+  assert.deepEqual(GIFT_CARS, ["mazzy"]);
+  assert.equal(mazzy.price, 0);
+  assert.equal(mazzy.cls, "X");
+  const next = Math.max(...CARS.filter((c) => c.id !== "mazzy").map((c) => c.power));
+  assert.ok(mazzy.power >= next * 1.4, `${mazzy.power} vs ${next}`);
+  assert.ok(mazzy.nitro > Math.max(...CARS.filter((c) => c.id !== "mazzy").map((c) => c.nitro)));
+});

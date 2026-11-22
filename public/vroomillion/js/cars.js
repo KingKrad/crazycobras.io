@@ -76,12 +76,15 @@ export const CARS = [
   C("golden", "The Golden Vroomillion", "X", 5000000, 1.55, 5, "hyper", "#ffd23a", "#ff4fd8"),
   // can't be bought: reaching VROOMILLION CITY unlocks it
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
+  // can't be bought or won: only an admin can gift it (ADMIN → PLAYERS). The best car in the game by a mile.
+  { ...C("mazzy", "DEAN'S MAZZY", "X", 0, 9.0, 8, "pickup", "#b9a98a", "#26262b"), giftOnly: true, rim: "#f4f4f0" },
 ];
+export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
 // Power by class: the car really decides how far you get. Within a class, pricier cars sit higher.
 export const POWER_RANGE = { D: [1.0, 1.3], C: [1.45, 1.95], B: [2.1, 2.7], A: [2.9, 3.5], S: [3.7, 4.4], X: [4.7, 5.4] };
 for (const cls of Object.keys(POWER_RANGE)) {
-  const list = CARS.filter((c) => c.cls === cls && !c.exclusive);
+  const list = CARS.filter((c) => c.cls === cls && !c.exclusive && !c.giftOnly);
   const [lo, hi] = POWER_RANGE[cls];
   list.forEach((c, i) => { c.power = Math.round((lo + (list.length > 1 ? (hi - lo) * i / (list.length - 1) : 0)) * 100) / 100; });
 }
@@ -93,6 +96,7 @@ for (const c of CARS) if (PRICE_SCALE[c.cls] && c.price) c.price = Math.round(c.
 export const carById = (id) => CARS.find((c) => c.id === id) || CARS[0];
 
 // Side-view body templates, nose pointing right.
+// (pickup: a '97 extended-cab truck: little rear jump-seat window, long bed under a black cover)
 // B body · D shadow · S accent · W glass · R tail light · L headlight
 const BODIES = {
   micro: {
@@ -202,6 +206,19 @@ const BODIES = {
       "..DDDDDDDDDDDDDDDDDDDDDDDDDD..",
     ],
   },
+  pickup: {
+    wheels: [4, 25],
+    rows: [
+      "...................BBBBBBBB.......",
+      "..................BWWWBWWWWWB.....",
+      "..................BWWWBWWWWWWB....",
+      ".SSSSSSSSSSSSSSSS.BBBBBBBBBBBBBBB.",
+      "RBBBBBBBBBBBBBBBBDBBBBBBBBBBBBBBBL",
+      "RBBBBBBBBBBBBBBBBDBBBBBBBBBBBBBBBL",
+      ".BBBBBBBBBBBBBBBBDBBBBBBBBBBBBBBB.",
+      "HDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDH",
+    ],
+  },
   formula: {
     wheels: [3, 22],
     rows: [
@@ -255,7 +272,7 @@ export function carSprite(car, frame = 0) {
     R: "#ff3b3b",
     L: "#fff6a0",
     K: "#15151c",
-    H: "#c9ced6",
+    H: car.rim || "#c9ced6",
   };
   const put = (ch, x, y) => {
     if (!pal[ch]) return;
@@ -288,6 +305,7 @@ const REAR = {
   suv:      { w: 40, roof: 34, glass: 6, body: 10, tyre: 7, tyreH: 6, slope: 0, spare: true, tall: true },
   super:    { w: 42, roof: 16, glass: 3, body: 7, tyre: 8, tyreH: 6, wing: 2, lightbar: true, diffuser: true, pipes: "centre" },
   hyper:    { w: 44, roof: 14, glass: 3, body: 7, tyre: 9, tyreH: 6, wing: 3, lightbar: true, diffuser: true, pipes: "quad" },
+  pickup:   { w: 40, roof: 22, glass: 4, body: 10, tyre: 7, tyreH: 6, slope: 0, chrome: true, tall: true },
 };
 
 function grid(w) {
