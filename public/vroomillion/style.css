@@ -1149,3 +1149,86 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .gift-kicker { font-size: 9px; color: var(--t5); }
 .gift-name { font-size: clamp(14px, 4.4vw, 20px); color: #fff; text-shadow: 3px 3px 0 #000; }
 .gift-box .btn { width: 100%; }
+
+/* ---------- garage revamp: collection, rarity, deals, levels, paint, new-car reveal ---------- */
+.rar { display: inline-block; padding: 3px 6px; font-size: 6px; letter-spacing: 1px; border: 2px solid currentColor; background: #000; margin-bottom: 6px; }
+.rar.r1 { color: var(--t1); } .rar.r3 { color: var(--t3); } .rar.r4 { color: var(--t4); } .rar.r5 { color: var(--t5); }
+.car-card.rar-3 { border-color: rgba(79, 157, 255, 0.45); }
+.car-card.rar-4 { border-color: rgba(192, 112, 255, 0.55); }
+.car-card.rar-5 { border-color: rgba(255, 210, 63, 0.6); }
+.car-card.owned.rar-4 { box-shadow: 0 0 14px rgba(192, 112, 255, 0.35); }
+.car-card.owned.rar-5 { box-shadow: 0 0 18px rgba(255, 210, 63, 0.4); }
+.car-card.premium:not(.owned) .sprite { opacity: 0.35; filter: grayscale(0.6); }
+
+.collect { background: #000; border: var(--px) solid var(--line); padding: 12px; margin: 10px 0 4px; }
+.collect-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.collect-n { font-size: 10px; color: var(--ink); }
+.collect-pct { font-size: 18px; color: var(--yellow); text-shadow: 2px 2px 0 #000; }
+.collect-bar { height: 14px; background: #1a1430; border: 2px solid var(--line); margin-bottom: 8px; }
+.collect-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--t1), var(--t2), var(--t3), var(--t4), var(--t5)); }
+
+.deals-title { border-left-color: var(--t5); }
+.deal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.deal { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px; background: var(--panel); border: var(--px) solid var(--t2); text-align: center; }
+.deal.premium { border-color: var(--t5); box-shadow: 0 0 22px rgba(255, 210, 63, 0.4); grid-column: 1 / -1; }
+.deal .sprite { opacity: 1; }
+.deal-tag { font-size: 7px; color: var(--t2); }
+.deal.premium .deal-tag { color: var(--t5); animation: blink 1.2s steps(2) infinite; }
+.deal-meta { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 7px; color: var(--dim); }
+.deal-meta .rar { margin: 0; }
+.deal-price { font-size: 11px; color: var(--yellow); }
+.deal-price s { font-size: 8px; color: var(--dim); }
+.deal-buy { display: grid; gap: 8px; width: 100%; max-width: 320px; }
+.deal-agree { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 7px; color: var(--dim); }
+.deal .btn { width: 100%; }
+
+.lv { width: 100%; margin-top: 8px; display: grid; gap: 4px; text-align: left; }
+.lv-top { display: flex; justify-content: space-between; font-size: 7px; }
+.lv-n { color: var(--cyan); }
+.lv-xp { color: var(--dim); }
+.lv-bar { height: 6px; background: #1a1430; border: 1px solid var(--line); }
+.lv-fill { display: block; height: 100%; background: var(--cyan); }
+.lv-next { font-size: 6px; color: #9aa0c8; }
+.swatches { display: flex; gap: 6px; margin-top: 2px; }
+.swatch { width: 22px; height: 22px; padding: 0; border: 2px solid #000; outline: 2px solid var(--line); background: var(--sw); cursor: pointer; display: grid; place-items: center; font: inherit; font-size: 6px; color: #fff; text-shadow: 1px 1px 0 #000; }
+.swatch.on { outline-color: var(--yellow); }
+.swatch.locked { filter: brightness(0.35); cursor: not-allowed; }
+
+.levelup { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px; border: var(--px) solid var(--cyan); background: rgba(79, 209, 255, 0.08); margin: 10px 0; animation: pp-pop 0.4s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+.levelup-t { font-size: 9px; color: var(--cyan); margin-bottom: 4px; }
+
+.car-reveal { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: rgba(5, 3, 15, 0.92); animation: fade-in 0.2s both; --rc: var(--t1); }
+.car-reveal.r3 { --rc: var(--t3); } .car-reveal.r4 { --rc: var(--t4); } .car-reveal.r5 { --rc: var(--t5); }
+.cr-box { width: min(94vw, 420px); display: grid; justify-items: center; gap: 12px; padding: 20px 14px; background: var(--panel); border: var(--px) solid var(--rc); text-align: center; }
+.car-reveal.open .cr-box { box-shadow: 0 0 50px var(--rc); }
+.cr-kicker { font-size: 10px; color: var(--rc); }
+.cr-stage { position: relative; width: 100%; height: 130px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(#0b0618, #1d1238); border: 2px solid #000; }
+.cr-stage .sprite { position: relative; z-index: 1; opacity: 1; max-width: 92%; height: auto; transform: translateX(-140%); }
+.car-reveal.open .cr-stage .sprite { animation: cr-drive 0.7s cubic-bezier(0.2, 1.2, 0.4, 1) forwards; }
+.cr-light { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 100%, var(--rc), transparent 65%); opacity: 0; }
+.car-reveal.open .cr-light { opacity: 0.55; transition: opacity 0.4s; }
+/* the garage door: shakes during the drumroll, then rolls up */
+.cr-door { position: absolute; inset: 0; z-index: 2; background: repeating-linear-gradient(#5a5470 0 8px, #3c3752 8px 10px); animation: cr-shake 0.12s steps(2) infinite; }
+.car-reveal.open .cr-door { animation: cr-up 0.45s ease-in forwards; }
+@keyframes cr-up { to { transform: translateY(-100%); } }
+@keyframes cr-shake { 50% { transform: translateX(2px); } }
+@keyframes cr-drive { to { transform: none; } }
+.cr-name { font-size: clamp(14px, 4.6vw, 20px); color: #fff; text-shadow: 3px 3px 0 #000; }
+.cr-milestone { font-size: 8px; color: var(--yellow); padding: 8px; border: 2px dashed var(--yellow); }
+.cr-box .btn { width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .cr-door, .car-reveal.open .cr-door { animation: none; display: none; }
+  .cr-stage .sprite, .car-reveal.open .cr-stage .sprite { animation: none; transform: none; }
+}
+
+/* the next car to chase: title screen and results */
+.next-car { display: flex; gap: 12px; align-items: center; padding: 10px; margin: 10px 0; background: #000; border: var(--px) solid var(--line); text-align: left; cursor: pointer; width: 100%; font: inherit; color: inherit; }
+.next-car:hover, .next-car:focus-visible { border-color: var(--cyan); outline: none; }
+.next-car .sprite { opacity: 1; flex: none; }
+.next-car-body { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.next-car-k { font-size: 7px; color: var(--dim); }
+.next-car-n { font-size: 9px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.next-car-bar { height: 8px; background: #1a1430; border: 1px solid var(--line); }
+.next-car-fill { display: block; height: 100%; background: var(--green); }
+.next-car.ready { border-color: var(--green); animation: throb 0.8s steps(2) infinite; }
+.next-car.ready .next-car-k { color: var(--green); }

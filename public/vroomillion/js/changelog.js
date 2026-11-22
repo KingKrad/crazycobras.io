@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-23a",
+    date: "Nov 23, 2026",
+    title: "The big garage update",
+    items: [
+      "30+ new cars (vans, wagons, hot rods, a rocket sled...), each with a rarity from COMMON to LEGENDARY. Collect them all: GARAGE % pays cash and titles at 10, 25, 50, 75 and 100%.",
+      "Cars level up as you race them: more power, extra nitro, and new paint colours. Your old engine and nitro upgrades became levels.",
+      "TODAY'S DEALS: three cars up to 40% off every day, plus one premium car with special effects.",
+      "Your next car is always on the title screen and after every race, and every new car gets a big garage reveal.",
+    ],
+  },
+  {
     id: "2026-11-22k",
     date: "Nov 22, 2026",
     title: "Show password",

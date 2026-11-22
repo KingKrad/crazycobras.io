@@ -1,10 +1,10 @@
-import { CARS, CLASSES, GIFT_CARS, carById, carSprite } from "./cars.js";
+import { CARS, CLASSES, GIFT_CARS, carById, carSprite, painted, paintsFor, rarityOf, RARITIES, COLLECTION, PREMIUM, premiumFor } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
   dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, DAILY_RACES, FREE_PLAY, normalize,
   isJackpot, CRAZY_TOP,
-  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar, mergeProgress,
+  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, tunedCar, levelFor, xpForLevel, MAX_LEVEL, PAINT_LEVELS, migrateUpgrades, mergeProgress,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -68,6 +68,9 @@ const readSave = (key) => {
   } catch { return null; }
 };
 const tidy = (s) => {
+  if (s.upgrades) { Object.assign(s, migrateUpgrades(s)); delete s.upgrades; } // ENGINE / NITRO upgrades became car levels
+  if (!s.carXp || typeof s.carXp !== "object") s.carXp = {};
+  if (!s.paint || typeof s.paint !== "object") s.paint = {};
   if (!s.passport || typeof s.passport !== "object") s.passport = {};
   if (!s.owned.includes(s.car)) s.car = s.owned[0] || "rustbucket";
   // Unlimited comes from the logged-in account on the server, never from this save.
@@ -285,7 +288,7 @@ $("answer").addEventListener("focus", () => { unscroll(); fitScene(); requestAni
 $("answer").addEventListener("blur", () => setTimeout(fitScene, 350));
 
 function attract() {
-  scene.setRacers([{ car: carById(save.car), label: "P1", color: "#4fd1ff", lane: 1 }]);
+  scene.setRacers([{ car: tuned(carById(save.car)), label: "P1", color: "#4fd1ff", lane: 1 }]);
   scene.speed = 0.3;
 }
 
@@ -335,6 +338,8 @@ function renderDaily() {
   // admins get a shortcut to the admin screen right on the title screen (phones included)
   $("btn-admin-title")?.classList.toggle("hidden", !account?.admin);
   if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
+  const nextCar = nextCarCard();
+  if (nextCar) box.append(nextCar);
   const today = dday();
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
@@ -382,8 +387,8 @@ async function refreshAccount() {
     syncSeen();
     applyGifts();
     // logged out: gift-only cars wait on the account (they come back on logging in)
-    if (res.status === 401 && save.owned.some((id) => GIFT_CARS.includes(id))) {
-      save.owned = save.owned.filter((id) => !GIFT_CARS.includes(id));
+    if (res.status === 401 && save.owned.some((id) => ACCOUNT_CARS.includes(id))) {
+      save.owned = save.owned.filter((id) => !ACCOUNT_CARS.includes(id));
       if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
       persist();
       if (current === "garage") renderGarage();
@@ -1285,21 +1290,26 @@ function overlay(text, cls = "") {
   o.append(h("div", { class: "overlay-text " + cls, text }));
 }
 
-// Cars an admin gifted to this account go into the garage; one taken back leaves it.
+// Cars kept on the account (admin gifts, bought premium cars) go into the garage; one taken back leaves it.
+const ACCOUNT_CARS = [...GIFT_CARS, ...PREMIUM.map((c) => c.id)];
 function applyGifts() {
   // logged out (or offline) the save is left as it is; otherwise the account decides
   if (!account || !Array.isArray(account.gifts)) return;
-  const gifts = account.gifts.filter((id) => GIFT_CARS.includes(id));
+  const gifts = [...account.gifts.filter((id) => GIFT_CARS.includes(id)), ...(account.cars || []).filter((id) => ACCOUNT_CARS.includes(id))];
   const fresh = gifts.filter((id) => !save.owned.includes(id));
-  const gone = save.owned.filter((id) => GIFT_CARS.includes(id) && !gifts.includes(id));
+  const gone = save.owned.filter((id) => ACCOUNT_CARS.includes(id) && !gifts.includes(id));
   if (!fresh.length && !gone.length) return;
   save.owned = [...save.owned.filter((id) => !gone.includes(id)), ...fresh];
   if (!save.owned.includes(save.car)) save.car = save.owned[0] || "rustbucket";
   save.gifts = gifts;
   persist();
   renderCash();
-  if (fresh.length && current !== "race") {
-    const car = carById(fresh[0]);
+  // a premium car just bought: the new-car reveal
+  const bought = fresh.find((id) => !GIFT_CARS.includes(id));
+  if (bought && current !== "race") revealCar(carById(bought), [], "★ PREMIUM CAR ★");
+  const giftId = fresh.find((id) => GIFT_CARS.includes(id));
+  if (giftId && current !== "race") {
+    const car = carById(giftId);
     const close = () => pop.remove();
     const pop = h("div", { class: "gift-pop", role: "dialog", "aria-modal": "true", "aria-label": "A gift for you" },
       h("div", { class: "gift-box" },
@@ -1317,7 +1327,8 @@ function applyGifts() {
 }
 
 // ---------- car widgets ----------
-function spriteCanvas(car, scale = 4) {
+function spriteCanvas(car0, scale = 4) {
+  const car = save.owned.includes(car0.id) ? painted(car0, save.paint?.[car0.id] || 0) : car0; // your cars in your paint
   const src = carSprite(car);
   const cv = h("canvas", { class: "sprite", width: src.width, height: src.height, "aria-hidden": "true" });
   cv.getContext("2d").drawImage(src, 0, 0);
@@ -1325,7 +1336,9 @@ function spriteCanvas(car, scale = 4) {
   return cv;
 }
 
-const tuned = (car) => tunedCar(car, save.upgrades);
+// a car as you race it: with its level's power and nitro, in the paint you picked
+const tuned = (car) => painted(tunedCar(car, save.carXp), save.paint?.[car.id] || 0);
+const carLevel = (id) => levelFor(save.carXp?.[id]);
 function statLine(car0) {
   const car = tuned(car0);
   const pct = Math.round(((car.power - 1) / 5) * 100);
@@ -1597,78 +1610,240 @@ function renderVersus() {
   carPicker($("picker-p2"), () => versus.p2, (id) => { versus.p2 = id; });
 }
 
+// ---------- the garage: collection, daily deals, levels and paint ----------
+// GARAGE %: how much of the collection (every car you can earn by playing) you own. Milestones pay cash
+// and give a title shown on the title screen.
+const MILESTONES = [
+  { pct: 10, cash: 2000, title: "CAR NUT" },
+  { pct: 25, cash: 15000, title: "COLLECTOR" },
+  { pct: 50, cash: 120000, title: "CURATOR" },
+  { pct: 75, cash: 800000, title: "MOGUL" },
+  { pct: 100, cash: 3000000, title: "THE COMPLETIST" },
+];
+const collected = () => COLLECTION.filter((c) => save.owned.includes(c.id)).length;
+const collectPct = () => Math.floor((collected() / COLLECTION.length) * 100);
+const collectorTitle = () => [...MILESTONES].reverse().find((m) => (save.collect || []).includes(m.pct))?.title || null;
+// pays out any milestone just reached; returns the ones it paid
+function checkCollection() {
+  const pct = (collected() / COLLECTION.length) * 100;
+  const got = MILESTONES.filter((m) => pct >= m.pct && !(save.collect || []).includes(m.pct));
+  if (!got.length) return [];
+  save.collect = [...(save.collect || []), ...got.map((m) => m.pct)];
+  save.cash += got.reduce((a, m) => a + m.cash, 0);
+  persist();
+  renderCash(true);
+  return got;
+}
+
+// RARITY badge, in the answer-tier colours
+const rarityBadge = (car) => h("span", { class: "rar r" + RARITIES[rarityOf(car)], text: rarityOf(car) });
+
+// TODAY'S DEALS: three cars you don't own yet, near what you can afford, 20-40% off. Picked once a day
+// (so they don't shuffle as your cash changes) and kept in the save.
+const DEAL_OFF = [20, 30, 40];
+function todaysDeals() {
+  const day = dday();
+  if (save.deals?.day === day) return save.deals;
+  const pool = COLLECTION.filter((c) => c.price > 0 && !c.exclusive && !save.owned.includes(c.id)).sort((a, b) => a.price - b.price);
+  let from = pool.findIndex((c) => c.price >= save.cash * 0.6);
+  if (from < 0) from = Math.max(0, pool.length - 9);
+  const window = pool.slice(from, from + 9);
+  let seed = 0;
+  for (const ch of day) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+  const picks = [];
+  while (picks.length < 3 && window.length) picks.push(window.splice((seed = (seed * 1103515245 + 12345) >>> 0) % window.length, 1)[0]);
+  save.deals = { day, list: picks.map((c, i) => ({ id: c.id, off: DEAL_OFF[i] })) };
+  persist();
+  return save.deals;
+}
+const dealPrice = (car) => {
+  const d = save.deals?.day === dday() ? save.deals.list.find((x) => x.id === car.id) : null;
+  return d ? Math.round((car.price * (100 - d.off)) / 100 / 10) * 10 : car.price;
+};
+const dollars = (cents) => "$" + (cents / 100).toFixed(2);
+
 function renderGarage() {
   const root = $("garage-list");
   root.textContent = "";
+  // the collection meter
+  const pct = collectPct();
+  const next = MILESTONES.find((m) => !(save.collect || []).includes(m.pct));
+  const meter = h("div", { class: "collect" },
+    h("div", { class: "collect-top" },
+      h("span", { class: "collect-n", text: `GARAGE ${collected()} / ${COLLECTION.length}` }),
+      h("span", { class: "collect-pct", text: pct + "%" })),
+    h("div", { class: "collect-bar" }, h("span", { class: "collect-fill" })),
+    h("div", { class: "note", text: (collectorTitle() ? `★ ${collectorTitle()} · ` : "") + (next ? `NEXT: ${next.pct}% → ${money(next.cash)} + "${next.title}"` : "EVERY CAR COLLECTED. LEGEND.") }));
+  meter.querySelector(".collect-fill").style.width = pct + "%";
+  root.append(meter);
+
+  // today's deals: the premium car of the day, then three cash deals
+  const deals = todaysDeals();
+  const prem = premiumFor(dday());
+  const dealCard = (car, tag, priceEl, action) => h("div", { class: "deal" + (car.premium ? " premium" : "") },
+    h("div", { class: "deal-tag", text: tag }), spriteCanvas(car, 3), h("div", { class: "car-name", text: car.name }),
+    h("div", { class: "deal-meta" }, rarityBadge(car), h("span", { class: "cls", text: "CLASS " + car.cls })), priceEl, action);
+  const premOwned = save.owned.includes(prem.id);
+  const agree = h("input", { type: "checkbox", "aria-label": "I understand this car is mine right away and non-refundable" });
+  const premAction = premOwned ? h("div", { class: "tag equipped", text: "OWNED" }) : h("div", { class: "deal-buy" },
+    h("label", { class: "deal-agree" }, agree, h("span", { text: "Mine right away, non-refundable" })),
+    h("button", { class: "btn small buy", type: "button", text: "BUY · " + dollars(prem.premium), onclick: (e) => buyPremium(prem, agree.checked, e.currentTarget) }));
+  root.append(h("h3", { class: "class-title deals-title", text: `TODAY'S DEALS · NEW IN ${timeLeft()}` }),
+    h("div", { class: "deal-grid" },
+      dealCard(prem, "★ PREMIUM · TODAY ONLY", h("div", { class: "deal-price", text: dollars(prem.premium) }), premAction),
+      ...deals.list.map((d) => {
+        const car = carById(d.id);
+        const owned = save.owned.includes(car.id);
+        const price = dealPrice(car);
+        return dealCard(car, `${d.off}% OFF`, h("div", { class: "deal-price" }, h("s", { text: money(car.price) }), " " + money(price)),
+          owned ? h("div", { class: "tag equipped", text: "SOLD · YOURS" })
+            : h("button", { class: "btn small buy" + (save.cash >= price ? "" : " poor"), type: "button", text: money(price), "aria-label": `Buy ${car.name} for ${money(price)}`, onclick: () => buy(car, price) }));
+      })),
+    h("p", { class: "note", text: "Premium cars look and sound unique but are no faster than other cars in their class, and they don't count towards GARAGE %." }));
+
   for (const [cls, title] of Object.entries(CLASSES)) {
     root.append(h("h3", { class: "class-title cls-" + cls, text: title }));
     const grid = h("div", { class: "car-grid" });
-    for (const car of CARS.filter((c) => c.cls === cls)) {
+    for (const car of CARS.filter((c) => c.cls === cls).sort((a, b) => (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.price || 9e9) - (b.price || 9e9))) {
       const owned = save.owned.includes(car.id);
       if (car.giftOnly && !owned) continue; // only shows once an admin has gifted it
       const equipped = save.car === car.id;
-      const afford = save.cash >= car.price;
-      const action = car.exclusive && !owned
-        ? h("div", { class: "tag locked", text: "LOCKED · REACH VROOMILLION CITY" })
-        : equipped
+      const price = dealPrice(car);
+      const afford = save.cash >= price;
+      const action = equipped
         ? h("div", { class: "tag equipped", text: "EQUIPPED" })
         : owned
           ? h("button", { class: "btn small", type: "button", text: "DRIVE", onclick: () => { save.car = car.id; persist(); audio.sfx.lock(); renderGarage(); } })
-          : h("button", {
-            class: "btn small buy" + (afford ? "" : " poor"), type: "button", text: money(car.price),
-            "aria-label": `Buy ${car.name} for ${money(car.price)}`,
-            onclick: () => buy(car),
-          });
-      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") + (car.giftOnly ? " gift" : "") },
-        car.giftOnly ? h("div", { class: "tag gift-tag", text: "★ ADMIN GIFT · ONE OF A KIND" }) : null,
+          : car.premium
+            ? h("div", { class: "tag locked", text: "PREMIUM · SOMETIMES IN TODAY'S DEALS" })
+            : car.exclusive
+              ? h("div", { class: "tag locked", text: "LOCKED · REACH VROOMILLION CITY" })
+              : h("button", {
+                class: "btn small buy" + (afford ? "" : " poor"), type: "button", text: money(price) + (price < car.price ? " DEAL" : ""),
+                "aria-label": `Buy ${car.name} for ${money(price)}`,
+                onclick: () => buy(car, price),
+              });
+      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") + (car.giftOnly ? " gift" : "") + (car.premium ? " premium" : "") + " rar-" + RARITIES[rarityOf(car)] },
+        car.giftOnly ? h("div", { class: "tag gift-tag", text: "★ ADMIN GIFT · ONE OF A KIND" }) : rarityBadge(car),
         spriteCanvas(car, 4), h("div", { class: "car-name", text: car.name }), statLine(car), action,
-        owned ? upgradeRow(car) : null));
+        owned ? levelRow(car) : null));
     }
     root.append(grid);
   }
 }
 
-// ENGINE / NITRO upgrade buttons on an owned car
-function upgradeRow(car) {
-  return h("div", { class: "upgrades" }, ...Object.entries(UPGRADES).map(([kind, u]) => {
-    const level = upgradeLevel(save.upgrades, car.id, kind);
-    if (level >= u.levels) return h("div", { class: "tag up-max", text: `${u.name} MAX` });
-    const cost = upgradeCost(car, kind, level);
-    return h("button", {
-      class: "btn small up" + (save.cash >= cost ? "" : " poor"), type: "button",
-      text: `${u.name} ${level + 1}/${u.levels} · ${money(cost)}`,
-      "aria-label": `Upgrade ${u.name.toLowerCase()} on ${car.name} for ${money(cost)}`,
+// an owned car's level, XP bar and paint swatches
+function levelRow(car) {
+  const xp = save.carXp?.[car.id] || 0;
+  const level = levelFor(xp);
+  const lo = xpForLevel(level), hi = xpForLevel(level + 1);
+  const bar = h("div", { class: "lv-bar" }, h("span", { class: "lv-fill" }));
+  bar.firstChild.style.width = (level >= MAX_LEVEL ? 100 : Math.round(((xp - lo) / (hi - lo)) * 100)) + "%";
+  const nextPerk = level >= MAX_LEVEL ? "MAX LEVEL" : `NEXT: +2.5% PWR${level + 1 === 5 || level + 1 === 10 ? " · +1 N2O" : ""}${PAINT_LEVELS.includes(level + 1) ? " · NEW PAINT" : ""}`;
+  const paints = paintsFor(car);
+  const sw = paints.map((col, i) => {
+    const unlocked = level >= PAINT_LEVELS[i];
+    const b = h("button", { class: "swatch" + ((save.paint?.[car.id] || 0) === i ? " on" : "") + (unlocked ? "" : " locked"), type: "button",
+      "aria-label": unlocked ? `Paint ${i ? i + 1 : "factory"}` : `Paint unlocks at level ${PAINT_LEVELS[i]}`, title: unlocked ? "" : `LV ${PAINT_LEVELS[i]}`,
       onclick: () => {
-        if (save.cash < cost) { audio.sfx.deny(); overlay(`NEED ${money(cost - save.cash)} MORE`, "small"); setTimeout(() => current === "garage" && overlay(""), 1200); return; }
-        save.cash -= cost;
-        save.upgrades = { ...(save.upgrades || {}), [car.id]: { ...(save.upgrades?.[car.id] || {}), [kind]: level + 1 } };
-        persist();
-        audio.sfx.buy();
-        renderCash(true);
+        if (!unlocked) { audio.sfx.deny(); return; }
+        save.paint = { ...(save.paint || {}), [car.id]: i };
+        persist(); audio.sfx.lock();
+        if (save.car === car.id) scene.setRacers([{ car: tuned(car), label: "P1", color: "#4fd1ff", lane: 1 }]);
         renderGarage();
-      },
-    });
-  }));
+      } }, unlocked ? null : h("span", { text: String(PAINT_LEVELS[i]) }));
+    b.style.setProperty("--sw", col);
+    return b;
+  });
+  return h("div", { class: "lv" },
+    h("div", { class: "lv-top" }, h("span", { class: "lv-n", text: "LV " + level }), h("span", { class: "lv-xp", text: level >= MAX_LEVEL ? "MAX" : `${(xp - lo).toLocaleString("en-US")} / ${(hi - lo).toLocaleString("en-US")} XP` })),
+    bar, h("div", { class: "lv-next", text: nextPerk }), h("div", { class: "swatches" }, ...sw));
 }
 
-function buy(car) {
-  if (save.cash < car.price) {
+// THE NEXT CAR: the cheapest car you don't own yet (at today's deal price), with how close you are.
+// On the title screen and after every race, so there's always one to chase.
+function nextCarCard() {
+  const want = COLLECTION.filter((c) => c.price > 0 && !c.exclusive && !save.owned.includes(c.id)).sort((a, b) => dealPrice(a) - dealPrice(b))[0];
+  if (!want) return null;
+  const price = dealPrice(want);
+  const ready = save.cash >= price;
+  const first = save.owned.length <= 1;
+  const bar = h("div", { class: "next-car-bar" }, h("span", { class: "next-car-fill" }));
+  bar.firstChild.style.width = Math.min(100, Math.round((save.cash / price) * 100)) + "%";
+  return h("button", { class: "next-car" + (ready ? " ready" : ""), type: "button", onclick: () => { audio.sfx.click(); show("garage"); } },
+    spriteCanvas(want, 2),
+    h("div", { class: "next-car-body" },
+      h("div", { class: "next-car-k", text: ready ? "YOU CAN BUY IT NOW! TAP FOR THE GARAGE" : (first ? "YOUR FIRST REAL CAR" : "NEXT CAR") + ` · ${money(save.cash)} / ${money(price)}` + (price < want.price ? " DEAL" : "") }),
+      h("div", { class: "next-car-n", text: want.name }),
+      bar,
+      h("div", { class: "next-car-k", text: `GARAGE ${collectPct()}%` + (collectorTitle() ? ` · ★ ${collectorTitle()}` : "") })));
+}
+
+// "LEVEL UP!" on the results screen
+function levelUpCard({ id, to }) {
+  const car = carById(id);
+  const perks = ["+" + ((to - 1) * 2.5).toFixed(1) + "% PWR"];
+  if (to >= 5) perks.push(`+${to >= 10 ? 2 : 1} N2O`);
+  const paint = PAINT_LEVELS.filter((l) => l > 1 && l <= to).length;
+  if (paint) perks.push(`${paint} NEW PAINT${paint > 1 ? "S" : ""}`);
+  return h("div", { class: "levelup" }, spriteCanvas(car, 3),
+    h("div", {}, h("div", { class: "levelup-t", text: `LEVEL UP! ${car.name} → LV ${to}` }), h("div", { class: "note", text: perks.join(" · ") })));
+}
+
+function buy(car, price = car.price) {
+  if (save.cash < price) {
     audio.sfx.deny();
-    overlay(`NEED ${money(car.price - save.cash)} MORE`, "small");
+    overlay(`NEED ${money(price - save.cash)} MORE`, "small");
     setTimeout(() => current === "garage" && overlay(""), 1200);
     return;
   }
-  save.cash -= car.price;
+  save.cash -= price;
   save.owned.push(car.id);
   save.car = car.id;
   persist();
-  audio.sfx.buy();
   renderCash(true);
-  scene.setRacers([{ car, label: "P1", color: "#4fd1ff" }]);
-  scene.confetti();
-  overlay("NEW RIDE!", "win");
-  setTimeout(() => current === "garage" && overlay(""), 1400);
+  scene.setRacers([{ car: tuned(car), label: "P1", color: "#4fd1ff" }]);
   renderGarage();
+  revealCar(car, checkCollection());
+}
+
+// A NEW CAR: the garage door rolls up on it, a drumroll, then a sound by its rarity.
+function revealCar(car, milestones = [], kicker = "NEW CAR!") {
+  const rar = rarityOf(car);
+  const tier = RARITIES[rar];
+  const close = () => { pop.remove(); if (current === "garage") renderGarage(); };
+  const pop = h("div", { class: `car-reveal r${tier}`, role: "dialog", "aria-modal": "true", "aria-label": `New car: ${car.name}` },
+    h("div", { class: "cr-box" },
+      h("div", { class: "cr-kicker", text: kicker }),
+      h("div", { class: "cr-stage" }, h("div", { class: "cr-light" }), spriteCanvas(car, 7), h("div", { class: "cr-door" })),
+      h("div", { class: "cr-name", text: car.name }),
+      h("div", { class: "deal-meta" }, rarityBadge(car), h("span", { class: "cls", text: "CLASS " + car.cls })),
+      statLine(car),
+      ...milestones.map((m) => h("div", { class: "cr-milestone", text: `GARAGE ${m.pct}%! +${money(m.cash)} · YOU'RE NOW A "${m.title}"` })),
+      h("button", { class: "btn big", type: "button", text: "LET'S DRIVE", onclick: () => { audio.sfx.click(); close(); } })));
+  document.body.append(pop);
+  audio.sfx.drumroll(0.9, Math.max(3, tier));
+  setTimeout(() => {
+    audio.sfx.tier(tier);
+    pop.classList.add("open");
+    if (tier >= 4 || milestones.length) scene.confetti();
+  }, 950);
+}
+
+// PREMIUM: today's car for real money (Stripe, like Unlimited). Needs an account so the car is kept.
+async function buyPremium(car, agreed, btn) {
+  if (!account) { audio.sfx.deny(); overlay("LOG IN TO BUY", "small"); setTimeout(() => overlay(""), 1400); show("account"); return; }
+  if (!agreed) { audio.sfx.deny(); overlay("TICK THE BOX FIRST", "small"); setTimeout(() => current === "garage" && overlay(""), 1400); return; }
+  btn.disabled = true;
+  btn.textContent = "OPENING CHECKOUT…";
+  try {
+    const { res, body } = await api("car-checkout", { method: "POST", body: JSON.stringify({ car: car.id, acceptNoRefunds: true }) });
+    if (res.ok && typeof body.url === "string" && body.url.startsWith("https://checkout.stripe.com/")) { location.href = body.url; return; }
+    overlay((body.error || "Couldn't open checkout.").toUpperCase(), "small");
+  } catch (e) { overlay(e.message.toUpperCase(), "small"); }
+  setTimeout(() => overlay(""), 2400);
+  btn.disabled = false;
+  btn.textContent = "BUY · " + dollars(car.premium);
 }
 
 function renderLegend() {
@@ -2067,7 +2242,7 @@ async function arrive(token) {
   const newStamp = !race.crazy && !(dest.id in save.passport);
   if (!race.crazy) save.passport[dest.id] = Math.max(save.passport[dest.id] || 0, Math.round(top));
   const carUnlocked = !race.crazy && !!dest.exclusive && !save.owned.includes(EXCLUSIVE_CAR);
-  if (carUnlocked) save.owned.push(EXCLUSIVE_CAR);
+  if (carUnlocked) { save.owned.push(EXCLUSIVE_CAR); checkCollection(); }
   persist();
   race.arrival = { dest, newStamp, carUnlocked, top, car: lead.car, blocked };
 
@@ -2678,6 +2853,17 @@ function finish(token) {
     }
   }
   sendRoundStats();
+  // car XP: every car driven from this garage earns its distance (online, only yours)
+  const levelUps = [];
+  race.racers.forEach((r, i) => {
+    if (race.online && i !== race.online.seat) return;
+    const id = r.car.id;
+    if (!save.owned.includes(id)) return;
+    const before = carLevel(id);
+    save.carXp[id] = (save.carXp[id] || 0) + Math.round(r.dist);
+    const after = carLevel(id);
+    if (after > before && !levelUps.some((l) => l.id === id)) levelUps.push({ id, from: before, to: after });
+  });
   save.races++;
   save.cash += pay.total + streakBonus;
   persist();
@@ -2698,7 +2884,9 @@ function finish(token) {
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
         race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
     race.arrival ? destResult(race.arrival) : null,
+    ...levelUps.map(levelUpCard),
     race.daily ? dailyBoardSlot(race.daily, a) : null,
+    nextCarCard(),
     h("div", { class: "payout" },
       h("div", { text: race.solo || race.online ? "PRIZE MONEY" : "PRIZE (SHARED GARAGE)" }),
       h("div", { class: "payout-total", text: "+" + money(pay.total + streakBonus) }),
@@ -2797,6 +2985,14 @@ if (signInReturn?.[2] !== undefined) {
   try { signInError = decodeURIComponent(signInReturn[2]).slice(0, 120); } catch { signInError = "Sign-in didn't work. Try again."; }
   show("account");
 } else show(signInReturn && ["paywall", "account", "online"].includes(after) ? after : linkCode ? "online" : "title"); // a race link opens the join screen
-refreshAccount();
+// back from buying a premium car: confirm it with the server, then the account brings it to the garage
+const carSession = new URLSearchParams(location.search).get("car_session");
+if (carSession) {
+  history.replaceState(null, "", location.pathname);
+  api("car-verify?session_id=" + encodeURIComponent(carSession)).then(({ body }) => {
+    if (!body.paid) { overlay((body.error || "Payment not confirmed yet. It'll appear once it goes through.").toUpperCase(), "small"); setTimeout(() => overlay(""), 3000); }
+    refreshAccount();
+  }).catch(() => refreshAccount());
+} else refreshAccount();
 // progress brought back from the server copy: redraw with it
 restoring.then((ok) => { if (ok && current !== "race") { renderCash(); show(current); } });

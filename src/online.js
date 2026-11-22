@@ -113,7 +113,7 @@ export async function handleOnline(request, env) {
     const token = newToken();
     await db.prepare(`INSERT INTO online_rooms (code, created, deck, prompts, status, host_hash, host_name, host_car, host_power, host_nitro)
       VALUES (?, ?, ?, ?, 'waiting', ?, ?, ?, ?, ?)`)
-      .bind(code, now, deck, JSON.stringify(prompts), await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0))).run();
+      .bind(code, now, deck, JSON.stringify(prompts), await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 12, 1), Math.round(num(body.nitro, 0, 12, 0))).run();
     // the host's race rules: CRAZY MODE (obvious answers score most) and "cars don't matter" (both x1, 2 nitro)
     if (body.crazy || body.equalCars) await db.prepare("UPDATE online_rooms SET crazy = ?, equal_cars = ? WHERE code = ?").bind(body.crazy ? 1 : 0, body.equalCars ? 1 : 0, code).run();
     if (from) await db.prepare("UPDATE online_rooms SET next_code = ? WHERE code = ? AND next_code IS NULL").bind(code, from.code).run();
@@ -133,7 +133,7 @@ export async function handleOnline(request, env) {
     }
     const token = newToken();
     await db.prepare("UPDATE online_rooms SET guest_hash = ?, guest_name = ?, guest_car = ?, guest_power = ?, guest_nitro = ?, guest_seen = ? WHERE code = ? AND guest_hash IS NULL")
-      .bind(await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 8, 1), Math.round(num(body.nitro, 0, 9, 0)), JSON.stringify(seenIn(body.seen)), code).run();
+      .bind(await sha(token), name(body.name), clean(body.car, 40), num(body.power, 1, 12, 1), Math.round(num(body.nitro, 0, 12, 0)), JSON.stringify(seenIn(body.seen)), code).run();
     const now2 = await db.prepare("SELECT guest_hash FROM online_rooms WHERE code = ?").bind(code).first();
     if (now2.guest_hash !== (await sha(token))) return json({ error: "Someone already joined that race." }, 409);
     return json({ token, seat: 1 });

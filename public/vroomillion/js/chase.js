@@ -1161,9 +1161,14 @@ export class ChaseScene {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: "#cfd3e6", g: 0, soft: true });
           }
-          // the exclusive gold car leaves a sparkle trail
-          if (r.car?.exclusive && Math.random() < 0.5 + r.boost) {
-            this.particles.push({ x: r.box.x + Math.random() * r.box.w, y: r.box.y - Math.random() * r.box.h, vx: (Math.random() - 0.5) * 30 * u, vy: (20 + Math.random() * 40) * u, life: 0.6, size: Math.max(1, u), color: Math.random() < 0.6 ? "#fff3a0" : "#ffffff", g: 0 });
+          // the exclusive gold car (and sparkle premium cars) leave a sparkle trail in their own colours
+          if ((r.car?.exclusive || r.car?.fx === "sparkle") && Math.random() < 0.5 + r.boost) {
+            this.particles.push({ x: r.box.x + Math.random() * r.box.w, y: r.box.y - Math.random() * r.box.h, vx: (Math.random() - 0.5) * 30 * u, vy: (20 + Math.random() * 40) * u, life: 0.6, size: Math.max(1, u), color: Math.random() < 0.6 ? (r.car.exclusive ? "#fff3a0" : r.car.accent) : "#ffffff", g: 0 });
+          }
+          // rainbow premium cars paint a rainbow trail behind them
+          if (r.car?.fx === "rainbow" && Math.random() < 0.6 + r.boost) {
+            const hue = Math.floor((this.time * 400 + Math.random() * 60) % 360);
+            this.particles.push({ x: r.box.x + r.box.w * (0.2 + Math.random() * 0.6), y: r.box.y - r.box.h * 0.15, vx: (Math.random() - 0.5) * 20 * u, vy: (40 + Math.random() * 50 + r.boost * 60) * u, life: 0.7, size: Math.max(1, u * 1.5), color: `hsl(${hue},100%,60%)`, g: 0 });
           }
           // spray off the tyres on a wet road, powder on snow, dust in the desert
           const kick = this.wx.rain > 0.3 ? "#b9c4e6" : this.wx.snow > 0.3 ? "#f4f8ff" : this.wx.sand > 0.3 ? "#e8b878" : null;
@@ -2086,6 +2091,19 @@ export class ChaseScene {
     g.fillRect(cx - w * 0.6, bottom - w * 0.6, w * 1.2, w * 1.2);
     g.restore();
 
+    // neon premium cars: a pulsing underglow on the road
+    if (r.car?.fx === "neon" && !this.calm) {
+      const glow = g.createRadialGradient(cx, bottom, 0, cx, bottom, w * 0.75);
+      glow.addColorStop(0, r.car.accent);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      g.save();
+      g.globalCompositeOperation = "lighter";
+      g.globalAlpha = 0.45 + 0.25 * Math.sin(this.time * 6) + Math.min(0.3, r.boost * 0.2);
+      g.translate(cx, bottom); g.scale(1, 0.22); g.translate(-cx, -bottom);
+      g.fillStyle = glow;
+      g.fillRect(cx - w, bottom - w, w * 2, w * 2);
+      g.restore();
+    }
     // exhaust fire out of both pipes, towards the camera: longer and hotter for rarer answers
     if (r.fireT > 0 && !this.calm && elec(r)) {
       const fade = Math.min(1, r.fireT / 0.6) * (r.popT > 0 ? 1.5 : 1);

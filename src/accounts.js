@@ -1,4 +1,5 @@
 import { oauthProviders } from "./oauth.js";
+import { parseCars } from "./premium.js";
 // VROOMILLION accounts: email + password, stored in the D1 database bound as DB.
 // Passwords are hashed with PBKDF2-SHA256 and a random salt per user; sessions are
 // random tokens kept in an HttpOnly cookie, and only their SHA-256 hash is stored.
@@ -98,7 +99,7 @@ export async function ensureSchema(db) {
     )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT", "cars TEXT", "pending_car_session TEXT", "car_checked_at INTEGER"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   for (const col of ["google_sub", "apple_sub"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
@@ -155,6 +156,7 @@ export const publicUser = (u, env) => ({
   ...(isAdmin(u, env) ? { admin: true } : {}),
   hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
   gifts: parseGifts(u.gifts), // cars an admin gave this account
+  cars: parseCars(u.cars), // premium cars bought on this account
   freeResetAt: u.free_reset_at || 0,
   // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
   nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),

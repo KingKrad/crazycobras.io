@@ -5,6 +5,7 @@ import { handleSeen } from "./seen.js";
 import { handleDailyScore, handleDailyBoard, handleNickname } from "./daily.js";
 import { handleDeviceSave } from "./device.js";
 import { handleProgress } from "./progress.js";
+import { handleCarCheckout, handleCarVerify } from "./premium.js";
 import { handleOAuthStart, handleOAuthCallback } from "./oauth.js";
 import { handleRoundStats, handleReport } from "./stats.js";
 import { handleOnline } from "./online.js";
@@ -25,6 +26,8 @@ const ROUTES = {
   "/api/vroomillion/nickname": handleNickname,
   "/api/vroomillion/device-save": handleDeviceSave,
   "/api/vroomillion/progress": handleProgress,
+  "/api/vroomillion/car-checkout": handleCarCheckout,
+  "/api/vroomillion/car-verify": handleCarVerify,
   "/api/vroomillion/oauth-google": (r, e) => handleOAuthStart(r, e, "google"),
   "/api/vroomillion/oauth-google-cb": (r, e) => handleOAuthCallback(r, e, "google"),
   "/api/vroomillion/oauth-apple": (r, e) => handleOAuthStart(r, e, "apple"),

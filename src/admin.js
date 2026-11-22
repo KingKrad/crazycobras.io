@@ -2,6 +2,7 @@
 // Also POST /race-start, which counts races for the stats.
 import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts } from "./accounts.js";
 import { ensureDailySchema, utcDay, cleanNickname } from "./daily.js";
+import { parseCars } from "./premium.js";
 import { ensureStatsSchema } from "./stats.js";
 
 const KINDS = new Set(["solo-classic", "solo-car", "solo-hard", "versus"]);
@@ -48,6 +49,7 @@ const playerView = (u, env) => ({
   races: Number(u.unl_races) || 0,
   freeResetAt: u.free_reset_at || 0,
   gifts: parseGifts(u.gifts),
+  cars: parseCars(u.cars),
 });
 
 // counts per UTC day from a list of timestamps

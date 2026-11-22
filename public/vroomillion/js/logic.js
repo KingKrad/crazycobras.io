@@ -36,21 +36,34 @@ export const blockedBy = (metres, car) => DESTINATIONS.find((d) => metres >= d.m
 export const carReach = (car) => [...DESTINATIONS].reverse().find((d) => canReach(d, car));
 export const EXCLUSIVE_CAR = "vroomillionaire";
 
-// ---- car upgrades ----
-// Tune a car you own: ENGINE (+6% power a level, 3 levels) and NITRO (+1 charge a level, 2 levels).
-// Upgrades never change a car's class, so a better class is still needed to reach new places.
-export const UPGRADES = {
-  engine: { name: "ENGINE", levels: 3, cost: [0.3, 0.6, 1.0] },
-  nitro: { name: "NITRO", levels: 2, cost: [0.25, 0.5] },
-};
-const carValue = (car) => Math.max(car.price || 0, 4000);
-export const upgradeLevel = (ups, carId, kind) => Math.max(0, Math.min(UPGRADES[kind].levels, Number(ups?.[carId]?.[kind]) || 0));
-export const upgradeCost = (car, kind, level) => Math.round(carValue(car) * UPGRADES[kind].cost[level] / 100) * 100;
-// the car as it races: power and nitro with its upgrades
-export function tunedCar(car, ups) {
-  const engine = upgradeLevel(ups, car.id, "engine");
-  const nitro = upgradeLevel(ups, car.id, "nitro");
-  return { ...car, power: Math.round(car.power * (1 + 0.06 * engine) * 100) / 100, nitro: car.nitro + nitro, engine, nitroUp: nitro };
+// ---- car levels ----
+// The car you drive earns XP from the distance you race in it. Levels 1 to 10: each level adds 2.5%
+// power, levels 5 and 10 add a nitro charge, and levels 3, 6 and 9 unlock a new paint colour.
+// Levels never change a car's class, so a better class is still needed to reach new places.
+export const MAX_LEVEL = 10;
+export const PAINT_LEVELS = [1, 3, 6, 9]; // paint 0 is the factory colour
+// total XP needed to reach a level: 1,500 for level 2, about 50,000 for level 10
+export const xpForLevel = (level) => (level <= 1 ? 0 : Math.round(1500 * Math.pow(level - 1, 1.6) / 100) * 100);
+export function levelFor(xp) {
+  let level = 1;
+  while (level < MAX_LEVEL && (Number(xp) || 0) >= xpForLevel(level + 1)) level++;
+  return level;
+}
+// the car as it races: power and nitro with its level
+export function tunedCar(car, carXp) {
+  const level = levelFor(carXp?.[car.id]);
+  return { ...car, level, power: Math.round(car.power * (1 + 0.025 * (level - 1)) * 100) / 100, nitro: car.nitro + (level >= 5 ? 1 : 0) + (level >= 10 ? 1 : 0) };
+}
+// the old ENGINE / NITRO upgrades become levels (each upgrade bought is worth two levels)
+export function migrateUpgrades(save) {
+  if (!save.upgrades || typeof save.upgrades !== "object") return save;
+  const carXp = { ...(save.carXp || {}) };
+  for (const [id, ups] of Object.entries(save.upgrades)) {
+    const level = Math.min(MAX_LEVEL, 1 + 2 * (Number(ups?.engine) || 0) + 2 * (Number(ups?.nitro) || 0));
+    carXp[id] = Math.max(carXp[id] || 0, xpForLevel(level));
+  }
+  const { upgrades, ...rest } = save;
+  return { ...rest, carXp };
 }
 
 export const ROUNDS = 7;
@@ -407,11 +420,9 @@ export function mergeProgress(local, remote) {
   out.passport = { ...(other.passport || {}) };
   for (const [k, v] of Object.entries(base.passport || {})) out.passport[k] = Math.max(out.passport[k] || 0, v || 0);
   for (const k of ["best", "vrooms", "deep", "wins", "races", "unlRaces"]) out[k] = Math.max(base[k] || 0, other[k] || 0);
-  out.upgrades = { ...(other.upgrades || {}) };
-  for (const [car, ups] of Object.entries(base.upgrades || {})) {
-    out.upgrades[car] = { ...(out.upgrades[car] || {}) };
-    for (const [kind, lvl] of Object.entries(ups || {})) out.upgrades[car][kind] = Math.max(out.upgrades[car][kind] || 0, lvl || 0);
-  }
+  out.carXp = { ...(other.carXp || {}) };
+  for (const [car, xp] of Object.entries(base.carXp || {})) out.carXp[car] = Math.max(out.carXp[car] || 0, Number(xp) || 0);
+  out.collect = [...new Set([...(base.collect || []), ...(other.collect || [])])];
   // today's daily race: done on either device counts
   if (base.daily && other.daily && base.daily.day === other.daily.day) out.daily = { ...base.daily, done: { ...(other.daily.done || {}), ...(base.daily.done || {}) } };
   return out;

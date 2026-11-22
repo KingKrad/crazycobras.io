@@ -808,3 +808,37 @@ test("admins can gift DEAN'S MAZZY, and take it back; nobody else can", async ()
   await call({ action: "gift-car", email: "dean@example.com", car: "mazzy", give: false });
   assert.deepEqual((await (await worker.fetch(get("me", { cookie }), adminEnv())).json()).gifts, []);
 });
+
+// ---------- premium cars ----------
+test("premium cars: only today's car, right price, kept on the account once Stripe says it's paid", async () => {
+  const { premiumOn, PREMIUM_CARS } = await import("../src/premium.js");
+  const today = premiumOn();
+  const other = PREMIUM_CARS.find((c) => c.id !== today.id && c.id !== premiumOn(Date.now() - 86400000).id);
+  assert.equal((await worker.fetch(post("car-checkout", { car: today.id, acceptNoRefunds: true }), env())).status, 401, "needs an account");
+  const { cookie } = await signup("buyer@example.com");
+  assert.equal((await worker.fetch(post("car-checkout", { car: other.id, acceptNoRefunds: true }, { cookie }), env())).status, 400, "not in the dealership today");
+  assert.equal((await worker.fetch(post("car-checkout", { car: today.id }, { cookie }), env())).status, 400, "must accept no refunds");
+  stripeReply = { body: { id: "cs_test_car1234567890", url: "https://checkout.stripe.com/c/pay/x" } };
+  const r = await worker.fetch(post("car-checkout", { car: today.id, acceptNoRefunds: true }, { cookie }), env());
+  assert.equal(r.status, 200);
+  const sent = new URLSearchParams(String(stripeCalls.at(-1).init.body));
+  assert.equal(sent.get("line_items[0][price_data][unit_amount]"), String(today.cents));
+  assert.ok(today.cents <= 500, "never more than $5");
+  assert.equal(sent.get("metadata[car_id]"), today.id);
+  const uid = userId("buyer@example.com");
+  // a forged or underpaid session gives nothing
+  stripeReply = { body: { payment_status: "paid", amount_total: 1, metadata: { product: "vroomillion_car", car_id: today.id, user_id: uid } } };
+  assert.equal((await (await worker.fetch(get("car-verify?session_id=cs_test_car1234567890"), env())).json()).paid, false);
+  stripeReply = { body: { payment_status: "paid", amount_total: today.cents, metadata: { product: "vroomillion_car", car_id: today.id, user_id: uid } } };
+  const v = await (await worker.fetch(get("car-verify?session_id=cs_test_car1234567890"), env())).json();
+  assert.deepEqual(v, { paid: true, car: today.id });
+  assert.deepEqual((await (await worker.fetch(get("me", { cookie }), env())).json()).cars, [today.id]);
+  assert.equal((await worker.fetch(post("car-checkout", { car: today.id, acceptNoRefunds: true }, { cookie }), env())).status, 409, "already owned");
+});
+
+test("premium cars: the server's list, prices and daily rotation match the game's", async () => {
+  const { PREMIUM_CARS, premiumOn } = await import("../src/premium.js");
+  const { PREMIUM, premiumFor } = await import("../public/vroomillion/js/cars.js");
+  assert.deepEqual(PREMIUM_CARS.map((c) => [c.id, c.name, c.cents]), PREMIUM.map((c) => [c.id, c.name, c.premium]));
+  for (const day of ["2026-11-22", "2026-11-23", "2027-03-01"]) assert.equal(premiumOn(Date.parse(day + "T12:00:00Z")).id, premiumFor(day).id, day);
+});

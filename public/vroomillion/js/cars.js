@@ -23,6 +23,13 @@ export const CARS = [
   C("ae86", "Tofu Delivery Coupe", "D", 4500, 1.05, 1, "coupe", "#f4f4f4", "#222222"),
   C("miata", "Little Roadster", "D", 6000, 1.06, 1, "roadster", "#d42d2d", "#111111"),
   C("gti", "Hot Hatch GT", "D", 8000, 1.07, 1, "hatch", "#eeeeee", "#d42d2d"),
+  C("trike", "Three-Wheel Wonder", "D", 500, 1, 0, "micro", "#7fc4e8", "#ffffff"),
+  C("woodie", "Grandpa's Wagon", "D", 1100, 1, 0, "wagon", "#7a5a3a", "#d9c08a"),
+  C("mailvan", "Mail Van", "D", 1900, 1, 0, "van", "#f4f4f4", "#2a5bd6"),
+  C("taxi", "Yellow Cab", "D", 2700, 1, 0, "sedan", "#f2c230", "#111111"),
+  C("pizza", "Pizza Delivery Hatch", "D", 3800, 1, 0, "hatch", "#d42d2d", "#f2c230"),
+  C("icecream", "Ice Cream Van", "D", 5200, 1, 1, "van", "#ffd6e8", "#6ad1e8"),
+  C("hippie", "Peace & Love Bus", "D", 7000, 1, 1, "van", "#e8a33a", "#f4f4f4"),
 
   C("wrangler", "Trail Boss 4x4", "C", 11000, 1.08, 1, "suv", "#5d7a3a", "#2e3d1c"),
   C("wrx", "Gravel Rocket", "C", 14000, 1.09, 1, "sedan", "#1f4fc4", "#e2b53a"),
@@ -36,6 +43,14 @@ export const CARS = [
   C("r34", "Twin-Turbo Street Legend", "C", 46000, 1.16, 2, "coupe", "#2a52be", "#bfc6d6"),
   C("supra", "Turbo Six Coupe", "C", 50000, 1.17, 2, "coupe", "#ee7a1c", "#111111"),
   C("nsx", "Midship Sports '90", "C", 58000, 1.18, 1, "super", "#d42d2d", "#111111"),
+  C("lowrider", "Lowrider Deluxe", "C", 12500, 1, 1, "muscle", "#2bb3a3", "#e8e2c8"),
+  C("drift", "Drift Missile", "C", 15000, 1, 1, "coupe", "#e8e8e8", "#3bd0ff"),
+  C("police", "Highway Interceptor", "C", 20000, 1, 1, "sedan", "#1b1b1f", "#f4f4f4"),
+  C("rallywagon", "Rally Wagon", "C", 27000, 1, 2, "wagon", "#1f4fc4", "#f2d21f"),
+  C("hotrod", "Hot Rod '32", "C", 32000, 1, 1, "roadster", "#c8323c", "#f2a33a"),
+  C("monster", "Monster Pickup", "C", 38000, 1, 2, "pickup", "#7ed321", "#111111"),
+  C("caferacer", "Café Racer Coupe", "C", 43000, 1, 1, "coupe", "#3a3f4a", "#d9b25a"),
+  C("ecohatch", "Electric Hatch", "C", 53000, 1, 1, "hatch", "#9ad7ff", "#1b1d22"),
 
   C("exige", "Featherweight Track Car", "B", 70000, 1.19, 1, "super", "#1f8a4c", "#f2d21f"),
   C("corvette", "American V8 Sports Car", "B", 80000, 1.2, 1, "super", "#f04a2a", "#111111"),
@@ -50,6 +65,11 @@ export const CARS = [
   C("huracan", "Wedge V10", "B", 190000, 1.27, 2, "super", "#7ed321", "#111111"),
   C("488", "Italian Midship V8", "B", 210000, 1.28, 2, "super", "#e0201b", "#f2d21f"),
   C("720s", "Dihedral Supercar", "B", 240000, 1.29, 2, "super", "#ff7a00", "#111111"),
+  C("safari", "Safari Rally 4x4", "B", 75000, 1, 2, "suv", "#e8d6a8", "#2f5d50"),
+  C("brake", "Shooting Brake", "B", 100000, 1, 2, "wagon", "#2f5d50", "#d9b25a"),
+  C("limo", "Stretch Limo", "B", 120000, 1, 2, "sedan", "#111114", "#d8dde6"),
+  C("gullwing", "Gullwing Classic '55", "B", 175000, 1, 1, "coupe", "#c9ced6", "#c8323c"),
+  C("trackday", "Track Day Special", "B", 225000, 1, 2, "super", "#f2d21f", "#1b1b1f"),
 
   C("countach", "Poster Wedge '88", "A", 300000, 1.3, 2, "super", "#f4f4f4", "#c8323c"),
   C("aventador", "Scissor-Door V12", "A", 340000, 1.31, 2, "super", "#f2d21f", "#111111"),
@@ -61,6 +81,10 @@ export const CARS = [
   C("mclarenf1", "Three-Seat Legend '93", "A", 650000, 1.37, 2, "super", "#8b8f98", "#ff7a00"),
   C("huayra", "Gullwing Artisan", "A", 720000, 1.38, 3, "hyper", "#5a6b8c", "#d9b25a"),
   C("valkyrie", "Road-Going Racer", "A", 800000, 1.39, 3, "hyper", "#0f5c4a", "#d6ff3a"),
+  C("barchetta", "V12 Barchetta", "A", 330000, 1, 2, "roadster", "#c8121a", "#f4f4f4"),
+  C("lemans", "Le Mans Prototype", "A", 450000, 1, 3, "super", "#1f8a4c", "#f4f4f4"),
+  C("speedster", "Carbon Speedster", "A", 600000, 1, 2, "roadster", "#22232a", "#ff7a00"),
+  C("stealth", "Stealth Fighter", "A", 760000, 1, 3, "hyper", "#2a2d33", "#3bd0ff"),
 
   C("nevera", "Electric Megawatt", "S", 900000, 1.4, 3, "hyper", "#3b6cff", "#111111"),
   C("venom", "Texas Twister", "S", 1000000, 1.41, 3, "hyper", "#f2d21f", "#111111"),
@@ -71,8 +95,12 @@ export const CARS = [
   C("jesko", "Nordic Hypercar Absolute", "S", 1800000, 1.46, 4, "hyper", "#f4f4f4", "#e0201b"),
   C("one1", "Megawatt One", "S", 2000000, 1.47, 4, "hyper", "#2a2a30", "#3bd0ff"),
   C("bolide", "W16 Track Weapon", "S", 2300000, 1.48, 4, "hyper", "#0d3fb8", "#111111"),
+  C("hydrogen", "Hydrogen Hyper", "S", 950000, 1, 3, "hyper", "#e9f4ff", "#3b6cff"),
+  C("streamliner", "Land Speed Streamliner", "S", 1500000, 1, 4, "hyper", "#c8323c", "#f4f4f4"),
+  C("ion", "Ion Thruster GT", "S", 2100000, 1, 4, "hyper", "#5a2fb5", "#3bd0ff"),
 
   C("v10", "Screaming V10 Formula Car", "X", 3000000, 1.5, 4, "formula", "#e0201b", "#f4f4f4"),
+  C("rocketsled", "Rocket Sled", "X", 4000000, 1, 5, "formula", "#f2f2f2", "#ff7a00"),
   C("golden", "The Golden Vroomillion", "X", 5000000, 1.55, 5, "hyper", "#ffd23a", "#ff4fd8"),
   // can't be bought: reaching VROOMILLION CITY unlocks it
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
@@ -85,14 +113,59 @@ export const CARS = [
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
+// PREMIUM cars: one is in the dealership each day for real money (src/premium.js has the same list and
+// prices; a test keeps them in step). They have unique looks and effects but only the power of a middle
+// car of their class, so nobody can buy a win. fx: rainbow (trail), neon (underglow), sparkle, electric.
+export const PREMIUM = [
+  { ...C("disco", "DISCO DEVILLE", "C", 0, 1, 2, "sedan", "#ff4fd8", "#ffd23a"), premium: 199, rarity: "EPIC", fx: "rainbow" },
+  { ...C("neon", "NEON NIGHTRIDER", "C", 0, 1, 2, "coupe", "#141418", "#ff2fd0"), premium: 299, rarity: "EPIC", fx: "neon" },
+  { ...C("ghost", "PHANTOM GHOST", "B", 0, 1, 2, "sedan", "#e8f0ff", "#9fd8ff"), premium: 299, rarity: "EPIC", fx: "sparkle" },
+  { ...C("goldgoose", "GOLDEN GOOSE", "B", 0, 1, 2, "muscle", "#ffcc33", "#fff6c2"), premium: 399, rarity: "LEGENDARY", fx: "sparkle" },
+  { ...C("lava", "LAVA RUNNER", "A", 0, 1, 3, "super", "#2b1a18", "#ff5a1f"), premium: 399, rarity: "EPIC", fx: "neon" },
+  { ...C("laser", "LASER LIGHTNING", "A", 0, 1, 3, "super", "#1b1d22", "#3bd0ff"), premium: 399, rarity: "LEGENDARY", fx: "electric", electric: true },
+  { ...C("comet", "THE COMET", "S", 0, 1, 4, "hyper", "#22226a", "#ffffff"), premium: 499, rarity: "LEGENDARY", fx: "rainbow" },
+];
+CARS.push(...PREMIUM);
+// today's premium car (UTC day), the same on every device and on the server
+export const premiumFor = (day) => PREMIUM[((Math.round((Date.parse(day + "T00:00:00Z") - Date.parse("2026-01-01T00:00:00Z")) / 86400000) % PREMIUM.length) + PREMIUM.length) % PREMIUM.length];
+
+// Rarity, apart from the speed class: COMMON, RARE, EPIC, LEGENDARY (the answer-tier colours)
+export const RARITIES = { COMMON: 1, RARE: 3, EPIC: 4, LEGENDARY: 5, "ONE OF A KIND": 5 };
+export function rarityOf(car) {
+  if (car.giftOnly) return "ONE OF A KIND";
+  if (car.rarity) return car.rarity;
+  if (car.exclusive) return "LEGENDARY";
+  return { D: "COMMON", C: car.price < 30000 ? "COMMON" : "RARE", B: "RARE", A: "EPIC", S: car.price < 2500000 ? "EPIC" : "LEGENDARY", X: "LEGENDARY" }[car.cls];
+}
+// the cars that count towards the garage collection: everything you can earn by playing
+export const COLLECTION = CARS.filter((c) => !c.giftOnly && !c.premium);
+
+// PAINT: each car has its factory colour plus three more, unlocked by levelling it up
+const PAINTS = ["#d42d2d", "#1f4fc4", "#f2c230", "#1f8a4c", "#f4f4f4", "#1b1b1f", "#ff7a00", "#7a2fb5", "#3bd0ff", "#ff4fd8", "#c9ced6", "#2f5d50", "#8a5a2b", "#b6e61a"];
+export function paintsFor(car) {
+  let h = 7;
+  for (const ch of car.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const out = [car.color];
+  for (let k = 0; out.length < 4 && k < 40; k++) {
+    const c = PAINTS[(h + k * 5) % PAINTS.length];
+    if (!out.includes(c) && c.toLowerCase() !== car.color.toLowerCase()) out.push(c);
+  }
+  return out;
+}
+export const painted = (car, idx) => (idx > 0 && paintsFor(car)[idx] ? { ...car, color: paintsFor(car)[idx] } : car);
+
 // Power by class: the car really decides how far you get. Within a class, pricier cars sit higher.
 export const POWER_RANGE = { D: [1.0, 1.3], C: [1.45, 1.95], B: [2.1, 2.7], A: [2.9, 3.5], S: [3.7, 4.4], X: [4.7, 5.4] };
 for (const cls of Object.keys(POWER_RANGE)) {
-  const list = CARS.filter((c) => c.cls === cls && !c.exclusive && !c.giftOnly);
+  const list = CARS.filter((c) => c.cls === cls && !c.exclusive && !c.giftOnly && !c.premium).sort((a, b) => a.price - b.price);
   const [lo, hi] = POWER_RANGE[cls];
   list.forEach((c, i) => { c.power = Math.round((lo + (list.length > 1 ? (hi - lo) * i / (list.length - 1) : 0)) * 100) / 100; });
 }
 CARS.find((c) => c.exclusive).power = 6.0;
+for (const p of PREMIUM) {
+  const list = CARS.filter((c) => c.cls === p.cls && !c.exclusive && !c.giftOnly && !c.premium).sort((a, b) => a.power - b.power);
+  p.power = list[Math.floor(list.length / 2)].power;
+}
 // Prices tuned so an average player buys a class S car (the Moon) after about 40 races.
 const PRICE_SCALE = { A: 1.2, S: 1.45, X: 1.3 };
 for (const c of CARS) if (PRICE_SCALE[c.cls] && c.price) c.price = Math.round(c.price * PRICE_SCALE[c.cls] / 10000) * 10000;
@@ -210,6 +283,31 @@ const BODIES = {
       "..DDDDDDDDDDDDDDDDDDDDDDDDDD..",
     ],
   },
+  van: {
+    wheels: [3, 19],
+    rows: [
+      ".BBBBBBBBBBBBBBBBBBBB.....",
+      ".BWWWWBWWWWBWWWWBWWWWB....",
+      ".BWWWWBWWWWBWWWWBWWWWBB...",
+      "RBBBBBBBBBBBBBBBBBBBBBBB..",
+      "RBSSSSSSSSSSSSSSSSSSSBBBBL",
+      ".BBBBBBBBBBBBBBBBBBBBBBBBL",
+      ".BBBBBBBBBBBBBBBBBBBBBBBB.",
+      ".DDDDDDDDDDDDDDDDDDDDDDDD.",
+    ],
+  },
+  wagon: {
+    wheels: [3, 21],
+    rows: [
+      "....BBBBBBBBBBBBBBBBB.........",
+      "...BWWWWWBWWWWBWWWWWBB........",
+      "..BBWWWWWBWWWWBWWWWWWBB.......",
+      ".RBBBBBBBBBBBBBBBBBBBBBBBBBB..",
+      ".RBBBBBBBBBBBBBBBBBBBBBBBBBBL.",
+      ".BBSSSSSSSSSSSSSSSSSSSSSSBBBL.",
+      ".DDDDDDDDDDDDDDDDDDDDDDDDDDD..",
+    ],
+  },
   pickup: {
     wheels: [4, 25],
     rows: [
@@ -277,7 +375,7 @@ const cache = new Map();
 // Returns an offscreen canvas holding the car at 1 pixel per cell.
 // frame 0/1 draws the wheel spokes in two positions so they can spin.
 export function carSprite(car, frame = 0) {
-  const ck = car.id + ":" + frame;
+  const ck = car.id + ":" + car.color + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
   if (car.hiRes) { const cv = evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
@@ -331,6 +429,8 @@ const REAR = {
   super:    { w: 42, roof: 16, glass: 3, body: 7, tyre: 8, tyreH: 6, wing: 2, lightbar: true, diffuser: true, pipes: "centre" },
   hyper:    { w: 44, roof: 14, glass: 3, body: 7, tyre: 9, tyreH: 6, wing: 3, lightbar: true, diffuser: true, pipes: "quad" },
   pickup:   { w: 40, roof: 22, glass: 4, body: 10, tyre: 7, tyreH: 6, slope: 0, chrome: true, tall: true },
+  van:      { w: 38, roof: 34, glass: 7, body: 11, tyre: 6, tyreH: 5, slope: 0, tall: true },
+  wagon:    { w: 38, roof: 26, glass: 5, body: 8, tyre: 6, tyreH: 5, slope: 0, chrome: true },
   ev:       { w: 40, roof: 16, glass: 7, body: 8, tyre: 7, tyreH: 5, lip: true, pipes: "none", slimLights: true },
 };
 
@@ -472,7 +572,7 @@ function formulaRows(frame) {
 
 const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
-  const key = car.id + ":" + frame;
+  const key = car.id + ":" + car.color + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
   if (car.hiRes) { const cv = evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);

@@ -4,7 +4,7 @@ import { QUESTIONS } from "../public/vroomillion/js/data.js";
 import { carById } from "../public/vroomillion/js/cars.js";
 import {
   DESTINATIONS, destinationFor,
-  TIERS, ROUNDS, classRank, blockedBy, carReach, tunedCar, upgradeLevel, upgradeCost, normalize, buildIndex, judge, metresFor, applyFenderBender,
+  TIERS, ROUNDS, classRank, blockedBy, carReach, tunedCar, normalize, buildIndex, judge, metresFor, applyFenderBender,
   payout, soloPayout, dayKey, msUntilTomorrow, canRace, markDaily, dailyLeft, nextDaily, DAILY_RACES,
 } from "../public/vroomillion/js/logic.js";
 
@@ -265,17 +265,22 @@ test("long-tail (deep) answers count instantly, and long typos snap to them only
   assert.equal(judge(index, "mayochup").tier, 0, "starting-with twists still need the letter");
 });
 
-test("car upgrades add power and nitro but never change the class", () => {
+test("car levels add power and nitro but never change the class; old upgrades become levels", async () => {
+  const { levelFor, xpForLevel, migrateUpgrades, MAX_LEVEL } = await import("../public/vroomillion/js/logic.js");
   const car = carById("rustbucket");
-  const ups = { rustbucket: { engine: 3, nitro: 2 } };
-  const t = tunedCar(car, ups);
-  assert.equal(t.power, 1.18);
+  assert.equal(levelFor(0), 1);
+  assert.equal(levelFor(xpForLevel(5)), 5);
+  assert.equal(levelFor(1e9), MAX_LEVEL, "levels are capped");
+  const t = tunedCar(car, { rustbucket: xpForLevel(10) });
+  assert.equal(t.level, 10);
+  assert.equal(t.power, Math.round(car.power * 1.225 * 100) / 100);
   assert.equal(t.nitro, car.nitro + 2);
   assert.equal(t.cls, "D");
   assert.equal(destinationFor(30000, t).id, "beach", "still can't leave the beach");
-  assert.equal(tunedCar(car, { rustbucket: { engine: 99 } }).power, 1.18, "levels are capped");
-  assert.equal(upgradeLevel({}, "rustbucket", "engine"), 0);
-  assert.ok(upgradeCost(car, "engine", 0) > 0 && upgradeCost(car, "engine", 2) > upgradeCost(car, "engine", 0));
+  assert.equal(tunedCar(car, {}).power, car.power);
+  const m = migrateUpgrades({ cash: 5, upgrades: { rustbucket: { engine: 3, nitro: 2 } } });
+  assert.equal(m.upgrades, undefined);
+  assert.equal(levelFor(m.carXp.rustbucket), 10);
 });
 
 test("an answer with a word in front of a common answer is never much rarer than it", () => {
@@ -414,22 +419,22 @@ test("answer files: five tiers, the obvious answers in TRAFFIC, no 'not this' no
 test("account progress merges with a device's save without losing anything earned", async () => {
   const { mergeProgress } = await import("../public/vroomillion/js/logic.js");
   const fresh = { cash: 0, owned: ["rustbucket"], races: 0, passport: {}, seen: ["x"], muted: true };
-  const acct = { cash: 800, owned: ["rustbucket", "van"], races: 10, best: 3000, passport: { town: 2000 }, upgrades: { van: { power: 2 } }, savedAt: 1 };
+  const acct = { cash: 800, owned: ["rustbucket", "van"], races: 10, best: 3000, passport: { town: 2000 }, carXp: { van: 2000 }, savedAt: 1 };
   // a new device takes the account's progress, keeps its own history and settings
   const m = mergeProgress(fresh, acct);
   assert.equal(m.cash, 800); assert.deepEqual(m.owned, ["rustbucket", "van"]); assert.deepEqual(m.seen, ["x"]); assert.equal(m.muted, true);
   // no account copy yet, or an empty one: the device keeps its own
   assert.equal(mergeProgress(acct, null), acct);
   assert.equal(mergeProgress(acct, fresh).cash, 800);
-  // both played: the more-played save leads, cars, stamps, bests and upgrades combine
-  const dev = { cash: 50, owned: ["rustbucket", "truck"], races: 3, best: 4000, passport: { town: 500, beach: 700 }, upgrades: { van: { power: 3 } }, savedAt: 9 };
+  // both played: the more-played save leads, cars, stamps, bests and car XP combine
+  const dev = { cash: 50, owned: ["rustbucket", "truck"], races: 3, best: 4000, passport: { town: 500, beach: 700 }, carXp: { van: 9000 }, savedAt: 9 };
   const both = mergeProgress(dev, acct);
   assert.equal(both.cash, 800);
   assert.equal(both.races, 10);
   assert.deepEqual(both.owned.sort(), ["rustbucket", "truck", "van"]);
   assert.deepEqual(both.passport, { town: 2000, beach: 700 });
   assert.equal(both.best, 4000);
-  assert.equal(both.upgrades.van.power, 3);
+  assert.equal(both.carXp.van, 9000);
 });
 
 test("DEAN'S MAZZY: gift-only, and the best car in the game by a big margin", async () => {
@@ -444,4 +449,17 @@ test("DEAN'S MAZZY: gift-only, and the best car in the game by a big margin", as
   const next = Math.max(...CARS.filter((c) => !c.giftOnly).map((c) => c.power));
   assert.ok(mazzy.power >= next * 1.4, `${mazzy.power} vs ${next}`);
   assert.ok(mazzy.nitro > Math.max(...CARS.filter((c) => !c.giftOnly).map((c) => c.nitro)));
+});
+
+test("the car collection: about 80 to earn, rarities, premium cars no faster than their class", async () => {
+  const { CARS, COLLECTION, PREMIUM, rarityOf, paintsFor } = await import("../public/vroomillion/js/cars.js");
+  assert.ok(COLLECTION.length >= 75, String(COLLECTION.length));
+  assert.equal(new Set(CARS.map((c) => c.id)).size, CARS.length, "unique ids");
+  for (const c of CARS) assert.ok(["COMMON", "RARE", "EPIC", "LEGENDARY", "ONE OF A KIND"].includes(rarityOf(c)), c.id);
+  for (const p of PREMIUM) {
+    const top = Math.max(...CARS.filter((c) => c.cls === p.cls && !c.premium && !c.giftOnly && !c.exclusive).map((c) => c.power));
+    assert.ok(p.power < top, `${p.id} must not be the best of class ${p.cls}`);
+    assert.ok(p.premium <= 500);
+  }
+  for (const c of CARS) assert.equal(new Set(paintsFor(c)).size, 4, c.id + " has 4 different paints");
 });
