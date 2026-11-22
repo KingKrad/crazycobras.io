@@ -8,6 +8,7 @@ export const CHANGELOG = [
     title: "See how far it took you",
     items: [
       "After each round, your car drives up a little rarity road under your answer and stops as far as its rarity takes it, lighting up each tier it passes.",
+      "The answer list at the end of a race has one for every answer too.",
     ],
   },
   {

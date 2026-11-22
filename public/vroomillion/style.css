@@ -449,6 +449,7 @@ h3 { font-weight: normal; }
 .log-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; background: var(--panel); border: 2px solid var(--line); padding: 10px; }
 .log-q { grid-column: 1 / -1; font-size: 8px; color: var(--dim); }
 .log-a { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; min-width: 0; font-size: 8px; }
+.log-a .rr { align-self: stretch; padding-bottom: 12px; }
 .log-text { overflow-wrap: anywhere; }
 .log-a.p1 .log-text { color: var(--cyan); }
 .log-a.p2 .log-text { color: var(--pink); }

@@ -1850,7 +1850,7 @@ async function runRace(token) {
     const topTier = Math.max(...final.map((f) => f.tier));
     race.racers.forEach((r, i) => {
       r.tiers.push(final[i].tier);
-      r.log.push({ q: q.q, answer: final[i].display || "—", tier: final[i].tier, gain: gain[i], nitro: r.useNitro, bump: !!final[i].bump });
+      r.log.push({ q: q.q, answer: final[i].display || "—", tier: final[i].tier, top: !!final[i].top, gain: gain[i], nitro: r.useNitro, bump: !!final[i].bump });
       // the tier badge waits for the card's reveal (rare ones build up first)
       r.elTier.className = "badge";
       r.elTier.textContent = "…";
@@ -2075,7 +2075,8 @@ function revealCard(r, res, i) {
 // Under each answer after a round: a little road with a marker for every tier. Your car drives up it
 // and stops as far as your answer's rarity takes it (in CRAZY MODE, as far as its payout does),
 // lighting each marker it passes.
-function rarityRoad(r, res) {
+// opts.whenSeen: wait until it's scrolled into view (the results list), and drive quietly
+function rarityRoad(r, res, opts = {}) {
   const crazy = race.crazy;
   const marks = crazy
     ? [[5, "", 4], [4, "TURBO", 3], [3, "FAST", 2], [2, "CRUISE", 1], [1, "COMMON", 0], [1, "JACKPOT", -1]].map(([t, label, k]) => ({ m: k < 0 ? 1000 : CRAZY_METRES[t], label, col: effectTier(t, true, k < 0) }))
@@ -2096,17 +2097,24 @@ function rarityRoad(r, res) {
   const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const dur = calm ? 0 : 500 + at * 1300;
   road.style.setProperty("--dur", dur + "ms");
-  // start the drive once the card is on screen
-  setTimeout(() => {
+  const drive = () => {
     road.style.setProperty("--pos", (at * 100).toFixed(1) + "%");
     marks.forEach((mk, k) => {
       if (mk.m / 1000 > at + 1e-6) return;
       // the car eases out, so work out roughly when it passes each marker
       const when = dur * (1 - Math.sqrt(Math.max(0, 1 - mk.m / 1000 / at)));
-      setTimeout(() => { ticks[k].classList.add("hit"); if (!calm) audio.sfx.tick(); }, when);
+      setTimeout(() => { ticks[k].classList.add("hit"); if (!calm && !opts.whenSeen) audio.sfx.tick(); }, when);
     });
     setTimeout(() => road.classList.add("arrived"), dur);
-  }, 380);
+  };
+  if (opts.whenSeen && "IntersectionObserver" in window) {
+    const seen = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      seen.disconnect();
+      setTimeout(drive, 150);
+    }, { threshold: 0.6 });
+    seen.observe(road);
+  } else setTimeout(drive, 380); // once the card is on screen
   return road;
 }
 
@@ -2639,8 +2647,9 @@ function finish(token) {
         h("div", { class: "log-q", text: `${i + 1}. ${row.q.toUpperCase()}` }),
         ...race.racers.map((r, pi) => h("div", { class: `log-a p${pi + 1}` },
           h("span", { class: "log-text", text: r.log[i].answer.toUpperCase() }),
-          tierBadge(r.log[i].tier, "span", true),
-          reportLink(row.q, r.log[i])))))),
+          race.crazy && isJackpot(r.log[i]) ? h("span", { class: "badge t5", text: "JACKPOT" }) : tierBadge(r.log[i].tier, "span", true),
+          reportLink(row.q, r.log[i]),
+          rarityRoad(r, r.log[i], { whenSeen: true })))))),
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const dailyNext = race.daily && !paid ? nextDaily(save, dday()) : 0;
