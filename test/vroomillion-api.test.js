@@ -519,6 +519,18 @@ test("device saves refuse junk, huge saves and other sites", async () => {
   assert.equal((await worker.fetch(post("device-save", { save: { owned: ["x"] } }, { origin: "https://evil.test" }), env())).status, 403);
 });
 
+test("account progress: only for logged-in players, stored without the prompt history", async () => {
+  assert.equal((await worker.fetch(get("progress"), env())).status, 401);
+  const { cookie } = await signup("saver@example.com");
+  assert.equal((await (await worker.fetch(get("progress", { cookie }), env())).json()).save, null);
+  const save = { cash: 500, owned: ["rustbucket", "minivan"], races: 4, passport: { town: 900 }, seen: ["a"], acctSeen: { list: ["b"] } };
+  assert.equal((await worker.fetch(post("progress", { save }, { cookie }), env())).status, 200);
+  const back = (await (await worker.fetch(get("progress", { cookie }), env())).json()).save;
+  assert.deepEqual(back, { cash: 500, owned: ["rustbucket", "minivan"], races: 4, passport: { town: 900 } });
+  assert.equal((await worker.fetch(post("progress", { save: { cash: 1 } }, { cookie }), env())).status, 400);
+  assert.equal((await worker.fetch(post("progress", { save }, { cookie, origin: "https://evil.test" }), env())).status, 403);
+});
+
 // ---------- the bigger admin screen ----------
 
 test("round stats count plays, stalls, tiers and accepted answers, never free text", async () => {

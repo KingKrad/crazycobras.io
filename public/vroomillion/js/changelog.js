@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22e",
+    date: "Nov 22, 2026",
+    title: "Progress on your account",
+    items: [
+      "Logged in? Your cash, cars, upgrades, passport and stats now save to your account and follow you to any device.",
+      "Logging in on a device you've already played on keeps everything from both.",
+    ],
+  },
+  {
     id: "2026-11-22d",
     date: "Nov 22, 2026",
     title: "Fewer word games",

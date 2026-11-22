@@ -402,3 +402,24 @@ test("answer files: five tiers, the obvious answers in TRAFFIC, no 'not this' no
     for (const t of d.a) for (const e of t) assert.ok(!/ no$/.test(e) || /^(oh|uh) no$/.test(e), `${f}: ${e}`);
   }
 });
+
+test("account progress merges with a device's save without losing anything earned", async () => {
+  const { mergeProgress } = await import("../public/vroomillion/js/logic.js");
+  const fresh = { cash: 0, owned: ["rustbucket"], races: 0, passport: {}, seen: ["x"], muted: true };
+  const acct = { cash: 800, owned: ["rustbucket", "van"], races: 10, best: 3000, passport: { town: 2000 }, upgrades: { van: { power: 2 } }, savedAt: 1 };
+  // a new device takes the account's progress, keeps its own history and settings
+  const m = mergeProgress(fresh, acct);
+  assert.equal(m.cash, 800); assert.deepEqual(m.owned, ["rustbucket", "van"]); assert.deepEqual(m.seen, ["x"]); assert.equal(m.muted, true);
+  // no account copy yet, or an empty one: the device keeps its own
+  assert.equal(mergeProgress(acct, null), acct);
+  assert.equal(mergeProgress(acct, fresh).cash, 800);
+  // both played: the more-played save leads, cars, stamps, bests and upgrades combine
+  const dev = { cash: 50, owned: ["rustbucket", "truck"], races: 3, best: 4000, passport: { town: 500, beach: 700 }, upgrades: { van: { power: 3 } }, savedAt: 9 };
+  const both = mergeProgress(dev, acct);
+  assert.equal(both.cash, 800);
+  assert.equal(both.races, 10);
+  assert.deepEqual(both.owned.sort(), ["rustbucket", "truck", "van"]);
+  assert.deepEqual(both.passport, { town: 2000, beach: 700 });
+  assert.equal(both.best, 4000);
+  assert.equal(both.upgrades.van.power, 3);
+});

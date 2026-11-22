@@ -3,7 +3,7 @@ import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
   dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, DAILY_RACES, FREE_PLAY, normalize,
-  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar,
+  DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar, mergeProgress,
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
@@ -117,6 +117,34 @@ function sendBackup() {
   try {
     fetch("/api/vroomillion/device-save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ save }), keepalive: true }).catch(() => {});
   } catch { /* offline or no server */ }
+  // logged in: the account's copy too (only once this device has merged with it, so nothing is overwritten)
+  if (account?.email && progressFor === account.email) {
+    const { seen, acctSeen, seenMergedFor, progressOwner, ...progress } = save;
+    try {
+      fetch("/api/vroomillion/progress", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ save: progress }), keepalive: true }).catch(() => {});
+    } catch { /* offline: the next save sends it */ }
+  }
+}
+// Account progress: on log-in (and each visit while logged in) the account's copy and this device's save
+// are merged, so progress follows the player to every device and nothing earned on either is lost.
+let progressFor = null;
+async function syncProgress() {
+  const email = account?.email;
+  if (!email) { progressFor = null; return; }
+  try {
+    const { res, body } = await api("progress");
+    if (!res.ok || account?.email !== email) return;
+    const before = JSON.stringify(save);
+    // this device's progress belongs to another account: start from this account's own
+    const mine = !save.progressOwner || save.progressOwner === email
+      ? save : { ...fresh(), seen: save.seen, muted: save.muted, deck: save.deck };
+    save = tidy(mergeProgress(mine, body.save));
+    save.progressOwner = email;
+    progressFor = email;
+    persist();
+    if (backupTimer) sendBackup(); // send the merged copy now, not in four seconds
+    if (JSON.stringify(save) !== before && current !== "race") { audio.setMuted(save.muted); renderCash(); show(current); }
+  } catch { /* offline: tried again next visit */ }
 }
 // leaving the page: send a pending backup straight away
 addEventListener("pagehide", () => { if (backupTimer) sendBackup(); });
@@ -517,6 +545,7 @@ async function logOut() {
   try { await api("logout", { method: "POST" }); } catch { /* offline: nothing to end */ }
   account = null;
   accountSeen = null;
+  progressFor = null;
   show("title");
 }
 
@@ -1310,6 +1339,7 @@ function sendSeen(change) {
   return seenQueue;
 }
 async function syncSeen() {
+  syncProgress();
   if (!account?.email) { accountSeen = null; accountRaces = null; return; }
   const email = account.email;
   const cached = save.acctSeen?.email === email ? save.acctSeen.list : [];

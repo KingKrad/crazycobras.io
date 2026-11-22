@@ -381,3 +381,30 @@ export function exampleAnswer(question, tier = 4, rng = Math.random) {
   }
   return "";
 }
+
+// Account progress meets a device's save (logging in, or opening the game on another device).
+// The save with more races played is the base (it's the one that's been played on most recently);
+// nothing earned on either side is lost: cars, upgrades, stamps, bests and rare-answer counts combine.
+// Prompt history and settings stay the device's own.
+const isFreshSave = (s) => !s || (!(s.races > 0) && !(s.cash > 0) && (s.owned || []).length <= 1 && !Object.keys(s.passport || {}).length);
+export function mergeProgress(local, remote) {
+  if (!remote || !Array.isArray(remote.owned)) return local;
+  if (isFreshSave(remote)) return local;
+  const keepLocal = { seen: local.seen, acctSeen: local.acctSeen, seenMergedFor: local.seenMergedFor, muted: local.muted, deck: local.deck };
+  if (isFreshSave(local)) return { ...local, ...remote, ...keepLocal };
+  const remoteFirst = (remote.races || 0) > (local.races || 0) || ((remote.races || 0) === (local.races || 0) && (remote.savedAt || 0) > (local.savedAt || 0));
+  const [base, other] = remoteFirst ? [remote, local] : [local, remote];
+  const out = { ...other, ...base, ...keepLocal };
+  out.owned = [...new Set([...(base.owned || []), ...(other.owned || [])])];
+  out.passport = { ...(other.passport || {}) };
+  for (const [k, v] of Object.entries(base.passport || {})) out.passport[k] = Math.max(out.passport[k] || 0, v || 0);
+  for (const k of ["best", "vrooms", "deep", "wins", "races", "unlRaces"]) out[k] = Math.max(base[k] || 0, other[k] || 0);
+  out.upgrades = { ...(other.upgrades || {}) };
+  for (const [car, ups] of Object.entries(base.upgrades || {})) {
+    out.upgrades[car] = { ...(out.upgrades[car] || {}) };
+    for (const [kind, lvl] of Object.entries(ups || {})) out.upgrades[car][kind] = Math.max(out.upgrades[car][kind] || 0, lvl || 0);
+  }
+  // today's daily race: done on either device counts
+  if (base.daily && other.daily && base.daily.day === other.daily.day) out.daily = { ...base.daily, done: { ...(other.daily.done || {}), ...(base.daily.done || {}) } };
+  return out;
+}

@@ -4,6 +4,7 @@ import { handleAdmin, handleRaceStart } from "./admin.js";
 import { handleSeen } from "./seen.js";
 import { handleDailyScore, handleDailyBoard, handleNickname } from "./daily.js";
 import { handleDeviceSave } from "./device.js";
+import { handleProgress } from "./progress.js";
 import { handleRoundStats, handleReport } from "./stats.js";
 import { handleOnline } from "./online.js";
 import { handleSignup, handleLogin, handleLogout, handleDeleteAccount, handleResetPassword, handleNewRecoveryCode, handleConfig, json } from "./accounts.js";
@@ -22,6 +23,7 @@ const ROUTES = {
   "/api/vroomillion/daily-board": handleDailyBoard,
   "/api/vroomillion/nickname": handleNickname,
   "/api/vroomillion/device-save": handleDeviceSave,
+  "/api/vroomillion/progress": handleProgress,
   "/api/vroomillion/round-stats": handleRoundStats,
   "/api/vroomillion/report": handleReport,
   "/api/vroomillion/online": handleOnline,
