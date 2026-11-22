@@ -78,8 +78,9 @@ export const CARS = [
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
   // can't be bought or won: only an admin can gift it (ADMIN → PLAYERS). The best car in the game by a mile.
   { ...C("mazzy", "DEAN'S MAZZY", "X", 0, 9.0, 8, "pickup", "#b9a98a", "#26262b"), giftOnly: true, rim: "#f4f4f0" },
-  // a 2026 electric fastback: pearl white, all-glass roof, aero wheels. Ties the Mazzy for the best in the game.
-  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#eef0f2", "#1b1d22"), giftOnly: true, rim: "#3a3d45", glass: "#2a3850", electric: true },
+  // a 2026 electric fastback in metallic grey: no grille, all-glass roof, black window trim, aero wheels.
+  // Ties the Mazzy for the best in the game.
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#666a71", "#141519"), giftOnly: true, rim: "#9aa0a8", glass: "#1d2636", aero: true, electric: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -221,16 +222,18 @@ const BODIES = {
       "HDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDH",
     ],
   },
+  // the electric fastback: a smooth arch from the short nose over the glass roof down to the trunk lip
   ev: {
-    wheels: [4, 22],
+    wheels: [5, 25],
     rows: [
-      "...........WWWWWWWW...........",
-      ".........WWWWWWWWWWWW.........",
-      ".......BBWWWWWBWWWWWWBB.......",
-      "..RBBBBBBBBBBBBBBBBBBBBBBBB...",
-      ".RBBBBBBBBBBBBBBBBBBBBBBBBBBL.",
-      ".BBBBBBBBBBBBBBBBBBBBBBBBBBBB.",
-      "..DDDDDDDDDDDDDDDDDDDDDDDDDD..",
+      "............WWWWWWWWWW............",
+      "..........WWWWWWWWWWWWWW..........",
+      "........SWWWWWWWSWWWWWWWWS........",
+      "......SSBBBBBBBBBBBBBBBBBBBBB.....",
+      "...RBBBBBBBBDBBBBBBBDBBBBBBBBBBB..",
+      "..RBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBL",
+      "..BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB.",
+      "...SSSSSSSSSSSSSSSSSSSSSSSSSSSSS..",
     ],
   },
   formula: {
@@ -246,6 +249,11 @@ const BODIES = {
   },
 };
 
+// aero wheel covers: a flat disc with a few spokes, for the electric car
+const AERO = [
+  [".KKK.", "KHHHK", "KHKHK", "KHHHK", ".KKK."],
+  [".KKK.", "KHKHK", "KHHHK", "KHKHK", ".KKK."],
+];
 const WHEELS = [
   [".KKK.", "KKHKK", "KHHHK", "KKHKK", ".KKK."],
   [".KKK.", "KHKHK", "KKHKK", "KHKHK", ".KKK."],
@@ -299,7 +307,7 @@ export function carSprite(car, frame = 0) {
   tpl.rows.forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === "B" && (y === 0 || tpl.rows[y - 1][x] === "." )) g.fillRect(x, y, 1, 1);
   }));
-  for (const wx of tpl.wheels) WHEELS[frame].forEach((row, y) => [...row].forEach((ch, x) => put(ch, wx + x, wheelTop + y)));
+  for (const wx of tpl.wheels) (car.aero ? AERO : WHEELS)[frame].forEach((row, y) => [...row].forEach((ch, x) => put(ch, wx + x, wheelTop + y)));
   cache.set(ck, cv);
   return cv;
 }
@@ -320,7 +328,7 @@ const REAR = {
   super:    { w: 42, roof: 16, glass: 3, body: 7, tyre: 8, tyreH: 6, wing: 2, lightbar: true, diffuser: true, pipes: "centre" },
   hyper:    { w: 44, roof: 14, glass: 3, body: 7, tyre: 9, tyreH: 6, wing: 3, lightbar: true, diffuser: true, pipes: "quad" },
   pickup:   { w: 40, roof: 22, glass: 4, body: 10, tyre: 7, tyreH: 6, slope: 0, chrome: true, tall: true },
-  ev:       { w: 40, roof: 18, glass: 6, body: 8, tyre: 7, tyreH: 5, lip: true, pipes: "none" },
+  ev:       { w: 40, roof: 16, glass: 7, body: 8, tyre: 7, tyreH: 5, lip: true, pipes: "none", slimLights: true },
 };
 
 function grid(w) {
@@ -382,11 +390,13 @@ function rearRows(type, frame) {
   if (t.lightbar) {
     for (let x = s + 1; x < s + bw - 1; x++) r[x] = "R";
     put(r, mid - 2, "CCCC");
+  } else if (t.slimLights) {
+    put(r, s, "RRRRRR"); put(r, s + bw - 6, "RRRRRR");
   } else {
     put(r, s, "RRRRY"); put(r, s + bw - 5, "YRRRR"); put(r, mid - 1, "CC");
   }
   r = row(); span(r, bw, "B");
-  if (t.lightbar) { put(r, s, "rrr"); put(r, s + bw - 3, "rrr"); } else { put(r, s, "rrrr"); put(r, s + bw - 4, "rrrr"); }
+  if (t.lightbar) { put(r, s, "rrr"); put(r, s + bw - 3, "rrr"); } else if (t.slimLights) { put(r, s, "rr"); put(r, s + bw - 2, "rr"); } else { put(r, s, "rrrr"); put(r, s + bw - 4, "rrrr"); }
   // number plate, with a few dark "letters"
   r = row(); span(r, bw, "B"); r[s] = r[s + bw - 1] = "D";
   if (t.spare) {
