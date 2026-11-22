@@ -78,9 +78,10 @@ export const CARS = [
   { ...C("vroomillionaire", "THE VROOMILLIONAIRE", "X", 0, 1.62, 6, "hyper", "#ffcc33", "#fff6c2"), exclusive: true },
   // can't be bought or won: only an admin can gift it (ADMIN → PLAYERS). The best car in the game by a mile.
   { ...C("mazzy", "DEAN'S MAZZY", "X", 0, 9.0, 8, "pickup", "#b9a98a", "#26262b"), giftOnly: true, rim: "#f4f4f0" },
-  // a 2026 electric fastback in metallic grey: no grille, all-glass roof, black window trim, aero wheels.
+  // a 2026 electric fastback in dark stealth grey: no grille, all-glass roof, white seats showing through,
+  // black window trim, dark aero wheels.
   // Ties the Mazzy for the best in the game.
-  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#666a71", "#141519"), giftOnly: true, rim: "#9aa0a8", glass: "#1d2636", aero: true, electric: true },
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -228,7 +229,7 @@ const BODIES = {
     rows: [
       "............WWWWWWWWWW............",
       "..........WWWWWWWWWWWWWW..........",
-      "........SWWWWWWWSWWWWWWWWS........",
+      "........SWWWIIWWSWWWIIWWWS........",
       "......SSBBBBBBBBBBBBBBBBBBBBB.....",
       "...RBBBBBBBBDBBBBBBBDBBBBBBBBBBB..",
       "..RBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBL",
@@ -291,6 +292,7 @@ export function carSprite(car, frame = 0) {
     D: shade(car.color, 0.55),
     S: car.accent,
     W: car.glass || "#9fe3ff",
+    I: car.seats || car.glass || "#9fe3ff",
     R: "#ff3b3b",
     L: "#fff6a0",
     K: "#15151c",
@@ -479,7 +481,7 @@ export function rearSprite(car, frame = 0) {
   const pal = {
     B: car.color, L: lighten(car.color, 0.3), D: shade(car.color, 0.55), E: shade(car.color, 0.3), S: car.accent,
     W: "#2b3a55", w: "#9fc2ea", N: "#7d8296", R: "#ff3b3b", r: "#b0202c", Y: "#ffb02e", C: "#d8dde6",
-    K: "#15151c", T: "#2c2c38", P: "#e9e6d8", G: "#a7adb8", H: "#22222b", X: "#1c1c24",
+    K: "#15151c", T: "#2c2c38", P: "#e9e6d8", G: "#a7adb8", H: car.seats || "#22222b", X: "#1c1c24",
   };
   rows.forEach((row, y) => [...row].forEach((ch, x) => {
     if (!pal[ch]) return;
