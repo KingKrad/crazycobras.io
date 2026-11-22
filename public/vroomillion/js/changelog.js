@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22c",
+    date: "Nov 22, 2026",
+    title: "Launch prep",
+    items: [
+      "VROOMILLION now lives at vroomillion.com only: the old vercel.app address sends you there and brings your progress with you.",
+      "The AI referee checks more answers each day, and it's stricter on rhymes and spelling games.",
+      "Updated Terms and Privacy for the daily race, online 1v1 and the AI referee.",
+    ],
+  },
+  {
     id: "2026-11-22b",
     date: "Nov 22, 2026",
     title: "Rare answers hit harder",

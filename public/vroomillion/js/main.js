@@ -76,6 +76,32 @@ const tidy = (s) => {
 };
 const stored = readSave(SAVE_KEY) || readSave(BACKUP_KEY);
 let save = tidy({ ...fresh(), ...(stored || {}) });
+// One home: vroomillion.com. A copy of the game on another address (vroomillion.vercel.app...) sends the
+// player there and brings their progress along in the link, because saves live per address. The real
+// site only takes it into a browser with no progress of its own, so a link can never overwrite a save.
+const HOME = "vroomillion.com";
+(() => {
+  const host = location.hostname;
+  if (host.endsWith(".vercel.app") || host.endsWith(".workers.dev")) {
+    const { acctSeen, ...keep } = save; // the account's own history comes back when they log in
+    const bytes = new TextEncoder().encode(JSON.stringify(keep));
+    let bin = "";
+    for (const b of bytes) bin += String.fromCharCode(b);
+    location.replace(`https://${HOME}/vroomillion/${location.search}#move=${encodeURIComponent(btoa(bin))}`);
+    return;
+  }
+  if (!location.hash.startsWith("#move=")) return;
+  try {
+    const bin = atob(decodeURIComponent(location.hash.slice(6)));
+    const incoming = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
+    const freshHere = !stored || (!save.races && !save.cash && save.owned.length <= 1);
+    if (freshHere && incoming && Array.isArray(incoming.owned)) {
+      save = tidy({ ...fresh(), ...incoming });
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); localStorage.setItem(BACKUP_KEY, JSON.stringify(save)); } catch { /* private mode */ }
+    }
+  } catch { /* a broken link: just play */ }
+  history.replaceState(null, "", location.pathname + location.search);
+})();
 let backupTimer = 0;
 const persist = () => {
   save.savedAt = Date.now();
