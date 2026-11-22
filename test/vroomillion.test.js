@@ -39,10 +39,18 @@ test("judge ranks obvious answers low and niche answers high", () => {
 
 test("CRAZY MODE flips the ladder: obvious answers score most, a stall is still nothing", async () => {
   const { metresFor, effectTier, CRAZY_METRES } = await import("../public/vroomillion/js/logic.js");
-  assert.deepEqual([0, 1, 2, 3, 4, 5].map((t) => metresFor(t, 1, false, true)), [0, 1000, 720, 480, 280, 120]);
+  // CRAZY MODE: only the jackpot (a top-2 answer) scores 1000; other common answers 720, down to 60
+  assert.equal(metresFor(1, 1, false, true, true), 1000);
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map((t) => metresFor(t, 1, false, true)), [0, 720, 480, 280, 120, 60]);
   assert.deepEqual([0, 1, 2, 3, 4, 5].map((t) => metresFor(t, 1, false)), [0, 120, 280, 480, 720, 1000]);
-  assert.equal(metresFor(1, 2, true, true), Math.round(CRAZY_METRES[1] * 2 * 1.5));
-  assert.deepEqual([0, 1, 5].map((t) => effectTier(t, true)), [0, 5, 1]);
+  assert.equal(metresFor(5, 1, false, false, true), 1000, "top only matters in CRAZY MODE");
+  assert.equal(metresFor(1, 2, true, true, true), Math.round(CRAZY_METRES[0] * 2 * 1.5));
+  assert.deepEqual([0, 1, 2, 5].map((t) => effectTier(t, true)), [0, 4, 3, 1]);
+  assert.equal(effectTier(1, true, true), 5);
+  // the first two answers on a prompt's list are the jackpot ones, with all their spellings
+  const { buildIndex, judge, isJackpot } = await import("../public/vroomillion/js/logic.js");
+  const idx = buildIndex({ q: "Name a dog breed", a: [["labrador|lab", "poodle", "beagle"], ["pug"], [], [], []] });
+  assert.deepEqual(["lab", "poodle", "beagle", "pug", "labradr"].map((x) => isJackpot(judge(idx, x))), [true, true, false, false, true]);
 });
 
 test("typo forgiveness: none under 5 letters, one for 5-9, two for 10+", async () => {

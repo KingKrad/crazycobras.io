@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22h",
+    date: "Nov 22, 2026",
+    title: "CRAZY MODE jackpots",
+    items: [
+      "In CRAZY MODE only the 2 most obvious answers to each prompt hit the JACKPOT for the top score and the full legendary show.",
+      "Other common answers still go far, and after each round you'll see what the jackpot answers were.",
+    ],
+  },
+  {
     id: "2026-11-22g",
     date: "Nov 22, 2026",
     title: "Passport fits your phone",

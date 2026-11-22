@@ -111,13 +111,15 @@ export function buildIndex(question) {
   if (index.cats.has("dessert")) ["cake", "pie", "cookie", "biscuit"].forEach((w) => index.cats.add(w));
   if (index.cats.has("drink") || index.cats.has("cocktail")) ["drink", "cocktail"].forEach((w) => index.cats.add(w));
   question.a.forEach((list, i) => {
-    for (const entry of list) {
+    list.forEach((entry, pos) => {
       const forms = entry.split("|");
+      // the lists run most obvious first: the first two are CRAZY MODE's jackpot answers
+      const top = i === 0 && pos < CRAZY_TOP;
       for (const form of forms) {
         const key = normalize(form);
-        if (key && !index.has(key)) index.set(key, { tier: i + 1, display: forms[0] });
+        if (key && !index.has(key)) index.set(key, top ? { tier: 1, display: forms[0], top: true } : { tier: i + 1, display: forms[0] });
       }
-    }
+    });
   });
   return index;
 }
@@ -323,13 +325,19 @@ function partialMatch(index, key) {
   return bestOf(hits);
 }
 
-// CRAZY MODE turns the ladder upside down: the most obvious answer scores the most. STALLED is still 0.
-export const CRAZY_METRES = [0, 1000, 720, 480, 280, 120];
-export function metresFor(tier, power, nitro, crazy = false) {
-  return Math.round((crazy ? CRAZY_METRES[tier] : TIERS[tier].metres) * power * (nitro ? NITRO_BOOST : 1));
+// CRAZY MODE turns the ladder upside down: the more obvious, the further you go. Only a prompt's two
+// most obvious answers (the top of its list) hit the JACKPOT; the rest of the common answers come next.
+// Indexed by tier, with the jackpot first: [jackpot, COMMON, UNCOMMON, RARE, ULTRA RARE, LEGENDARY].
+export const CRAZY_TOP = 2;
+export const CRAZY_METRES = [1000, 720, 480, 280, 120, 60];
+export const isJackpot = (res) => !!res && res.tier === 1 && !!res.top;
+export function metresFor(tier, power, nitro, crazy = false, top = false) {
+  const base = !tier ? 0 : crazy ? CRAZY_METRES[tier === 1 && top ? 0 : tier] : TIERS[tier].metres;
+  return Math.round(base * power * (nitro ? NITRO_BOOST : 1));
 }
 // how big the effects are for a scored answer: the rarity normally, the payout in CRAZY MODE
-export const effectTier = (tier, crazy = false) => (crazy && tier ? 6 - tier : tier);
+// (only a jackpot gets the full show)
+export const effectTier = (tier, crazy = false, top = false) => (!crazy || !tier ? tier : tier === 1 && top ? 5 : Math.max(1, 5 - tier));
 // "cars don't matter" in a 1v1: everyone drives like a x1 car with 2 nitro charges
 export const EQUAL_CAR = { power: 1, nitro: 2 };
 
@@ -350,7 +358,7 @@ export function tossWinner(seedText = null) {
   return (h >>> 0) % 2;
 }
 // distance for a round, with the fender-bender halving for the loser of the toss
-export const roundMetres = (res, power, nitro, crazy = false) => Math.round(metresFor(res.tier, power, nitro, crazy) * (res.half ? 0.5 : 1));
+export const roundMetres = (res, power, nitro, crazy = false) => Math.round(metresFor(res.tier, power, nitro, crazy, res.top) * (res.half ? 0.5 : 1));
 
 // 2P: the winner's prize. tiers = the tier this racer hit each round.
 export function payout(prize, won, tiers) {

@@ -3,6 +3,7 @@ import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
   dayKey, canRace, dailyDone, dailyLeft, nextDaily, markDaily, DAILY_RACES, FREE_PLAY, normalize,
+  isJackpot, CRAZY_TOP,
   DESTINATIONS, destinationFor, blockedBy, carReach, classRank, EXCLUSIVE_CAR, UPGRADES, upgradeLevel, upgradeCost, tunedCar, mergeProgress,
 } from "./logic.js";
 import * as audio from "./audio.js";
@@ -832,7 +833,7 @@ function onlineSend(round, res, nitro, tries = 0) {
 }
 
 // wait for my friend's result for this round; a friend who's gone quiet for long counts as stalled
-function onlineOpponent(round, token) {
+function onlineOpponent(round, token, index = null) {
   const o = race.online;
   const opp = 1 - o.seat;
   const r = race.racers[opp];
@@ -847,7 +848,9 @@ function onlineOpponent(round, token) {
         const hit = st.results.find((x) => x.seat === opp && x.round === round);
         if (hit) {
           if (hit.nitro && r.nitro > 0) { r.useNitro = true; r.nitro -= 1; } else r.useNitro = false;
-          return done({ tier: hit.tier, display: hit.answer || "", key: normalize(hit.answer || "") });
+          // a jackpot answer (CRAZY MODE) is worked out here from the same list
+          const key = normalize(hit.answer || "");
+          return done({ tier: hit.tier, display: hit.answer || "", key, ...(hit.tier === 1 && index?.get(key)?.top ? { top: true } : {}) });
         }
       } catch { /* keep trying */ }
       if (Date.now() - t0 > give) { r.useNitro = false; return done({ tier: 0, display: "", key: "" }); }
@@ -1510,7 +1513,7 @@ function ruleToggles(versusRules) {
     const toggle = (key, label, on, off) => h("button", { class: "rule-btn" + (save[key] ? " on" : ""), type: "button", "aria-pressed": String(!!save[key]),
       onclick: () => { audio.sfx.click(); save[key] = !save[key]; persist(); draw(); } },
       h("span", { class: "rule-name", text: `${label}: ${save[key] ? "ON" : "OFF"}` }), h("span", { class: "rule-note", text: save[key] ? on : off }));
-    box.append(toggle("crazy", "CRAZY MODE", "Flipped! The most obvious answer scores most", "Rarer answers score more"));
+    box.append(toggle("crazy", "CRAZY MODE", `Flipped! Only the ${CRAZY_TOP} most obvious answers hit the jackpot`, "Rarer answers score more"));
     if (versusRules) box.append(toggle("equalCars", "EQUAL CARS", "Cars don't matter: both x1, 2 nitro", "Your car's power and nitro count"));
   };
   draw();
@@ -1635,8 +1638,8 @@ function hudCard(r, i) {
 // big word slams into the middle with a shockwave. ONE IN A VROOMILLION adds confetti and a fanfare.
 function rareMoment(tier, crazy = false) {
   scene.rare(tier);
-  const word = crazy ? ["", "", "", "OK!", "NICE!", "CRAZY!"][tier] : ["", "", "", "RARE!", "TURBO!", "LEGENDARY!"][tier];
-  const sub = crazy ? "CRAZY MODE" : TIERS[tier].rarity;
+  const word = crazy ? ["", "", "", "OK!", "NICE!", "JACKPOT!"][tier] : ["", "", "", "RARE!", "TURBO!", "LEGENDARY!"][tier];
+  const sub = crazy ? (tier === 5 ? `CRAZY MODE · A TOP ${CRAZY_TOP} ANSWER` : "CRAZY MODE") : TIERS[tier].rarity;
   // TURBO and up: the letters land one at a time
   const wordEl = h("div", { class: "rare-word" });
   if (tier >= 4) {
@@ -1658,7 +1661,7 @@ function popGain(i, metres, tier, nitro, crazy = false) {
   const at = scene.anchor(i);
   const el = h("div", { class: `gain-pop gp${tier}` },
     h("span", { class: "gain-m", text: tier ? `+${metres.toLocaleString("en-US")} M` : "STALLED" }),
-    tier >= 3 ? h("span", { class: "gain-tag", text: crazy ? (tier === 5 ? "CRAZY!" : tier === 4 ? "NICE!" : "OK!") : tier === 5 ? "VROOMILLION!" : tier === 4 ? "TURBO! ULTRA RARE" : "RARE!" }) : null,
+    tier >= 3 ? h("span", { class: "gain-tag", text: crazy ? (tier === 5 ? "JACKPOT!" : tier === 4 ? "NICE!" : "OK!") : tier === 5 ? "VROOMILLION!" : tier === 4 ? "TURBO! ULTRA RARE" : "RARE!" }) : null,
     nitro ? h("span", { class: "gain-tag nitro", text: "NITRO!" }) : null);
   el.style.left = (at.x * 100).toFixed(1) + "%";
   el.style.top = (at.y * 100).toFixed(1) + "%";
@@ -1808,7 +1811,7 @@ async function runRace(token) {
       results[mine] = await askAnswer(race.racers[mine], mine, token, index);
       if (!alive()) return;
       onlineSend(round, results[mine], race.racers[mine].useNitro);
-      results[1 - mine] = await onlineOpponent(round, token);
+      results[1 - mine] = await onlineOpponent(round, token, index);
       if (!alive()) return;
     } else {
       for (let i = 0; i < race.racers.length; i++) {
@@ -1833,10 +1836,10 @@ async function runRace(token) {
       return {
         who: race.solo ? "" : r.name.toUpperCase(),
         answer: (res.display || "NO ANSWER").toUpperCase(),
-        tierName: TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "") + (res.bump ? (res.half ? " · LOST TOSS, HALF" : " · WON THE TOSS") : ""),
+        tierName: (race.crazy && isJackpot(res) ? "JACKPOT! · TOP " + CRAZY_TOP + " ANSWER" : TIERS[res.tier].name + (res.tier ? " · " + TIERS[res.tier].rarity : "")) + (res.bump ? (res.half ? " · LOST TOSS, HALF" : " · WON THE TOSS") : ""),
         gain: res.tier ? `+${m.toLocaleString("en-US")} M${r.useNitro ? " NITRO" : ""}` : "0 M",
         tier: res.tier,
-        fx: effectTier(res.tier, race.crazy), // how big the show is (the payout, in CRAZY MODE)
+        fx: effectTier(res.tier, race.crazy, res.top), // how big the show is (the payout, in CRAZY MODE)
         color: i ? "#ff4fd8" : "#4fd1ff",
       };
     });
@@ -1852,17 +1855,21 @@ async function runRace(token) {
       r.elTier.className = "badge";
       r.elTier.textContent = "…";
     });
-    const showBadge = (i) => { race.racers[i].elTier.className = "badge t" + final[i].tier; race.racers[i].elTier.textContent = TIERS[final[i].tier].short; };
+    const showBadge = (i) => {
+      const jackpot = race.crazy && isJackpot(final[i]);
+      race.racers[i].elTier.className = "badge t" + (jackpot ? 5 : final[i].tier);
+      race.racers[i].elTier.textContent = jackpot ? "JACKPOT" : TIERS[final[i].tier].short;
+    };
     const stage = document.querySelector(".stage");
     const BOOST_MS = [2300, 2400, 2600, 2900, 3400, 4200]; // rarer answers get a longer run
     const runs = race.racers.map(() => null);
     // the round's biggest moment (the rarest answer, or the biggest payout in CRAZY MODE) gets the show once
-    const topFx = Math.max(...final.map((f) => effectTier(f.tier, race.crazy)));
+    const topFx = Math.max(...final.map((f) => effectTier(f.tier, race.crazy, f.top)));
     let fxShown = false;
     const startRun = (i) => {
       if (runs[i] || !alive()) return;
       const r = race.racers[i];
-      const tier = effectTier(final[i].tier, race.crazy); // the size of the effects: the payout, not the rarity, in CRAZY MODE
+      const tier = effectTier(final[i].tier, race.crazy, final[i].top); // the size of the effects: the payout, not the rarity, in CRAZY MODE
       const nitro = r.useNitro && tier > 0;
       const dur = BOOST_MS[tier] + (nitro ? 300 : 0);
       runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier };
@@ -1968,9 +1975,11 @@ async function runRace(token) {
 
     const best = Math.max(...final.map((f) => f.tier));
     const tossWon = final.findIndex((f) => f.toss === "won");
-    $("hint").textContent = (bumped ? `FENDER BENDER — ${race.racers[tossWon].name.toUpperCase()} WON THE TOSS, ${race.racers[1 - tossWon].name.toUpperCase()} GOT HALF. ` : "") + (best >= 5
-      ? "THAT'S AS NICHE AS IT GETS."
-      : `A RARE ONE HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
+    $("hint").textContent = (bumped ? `FENDER BENDER — ${race.racers[tossWon].name.toUpperCase()} WON THE TOSS, ${race.racers[1 - tossWon].name.toUpperCase()} GOT HALF. ` : "") + (race.crazy && q.a?.[0]?.length >= CRAZY_TOP
+      ? `JACKPOT ANSWERS: ${q.a[0].slice(0, CRAZY_TOP).map((x) => x.split("|")[0].toUpperCase()).join(" & ")}`
+      : best >= 5
+        ? "THAT'S AS NICHE AS IT GETS."
+        : `A RARE ONE HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
     await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token);
     if (!alive()) return;
@@ -2058,7 +2067,7 @@ function revealCard(r, res, i) {
   return h("div", { class: `reveal-card p${i + 1} tier${res.tier}` },
     h("div", { class: "reveal-who", text: r.name }),
     h("div", { class: "reveal-answer", text: (res.display || "(no answer)").toUpperCase() }),
-    tierBadge(res.tier),
+    race.crazy && isJackpot(res) ? h("span", { class: "badge t5", text: "JACKPOT!" }) : tierBadge(res.tier),
     h("div", { class: "reveal-gain", text: `+${roundMetres(res, r.power, r.useNitro, race.crazy).toLocaleString("en-US")} M` + (r.useNitro && res.tier ? " · NITRO" : "") + (res.bump ? (res.half ? " · LOST THE TOSS, HALF" : " · WON THE TOSS") : "") }));
 }
 
