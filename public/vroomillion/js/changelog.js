@@ -3,6 +3,14 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-22a",
+    date: "Nov 22, 2026",
+    title: "Race links",
+    items: [
+      "Online 1v1 invite links now always use vroomillion.com.",
+    ],
+  },
+  {
     id: "2026-11-21k",
     date: "Nov 21, 2026",
     title: "Tidy-up",

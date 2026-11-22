@@ -558,7 +558,10 @@ const onlineCall = async (body) => {
   if (!res.ok) { const e = new Error(out.error || "Something went wrong."); e.status = res.status; throw e; }
   return out;
 };
-const inviteLink = (code) => `${location.origin}/vroomillion/?race=${code}`;
+// Invites always point at the real site, whichever address the host is playing on (vercel.app etc.);
+// only a local test copy links to itself.
+const SITE_ORIGIN = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? location.origin : "https://vroomillion.com";
+const inviteLink = (code) => `${SITE_ORIGIN}/vroomillion/?race=${code}`;
 const stopPoll = () => { if (online?.poll) { clearTimeout(online.poll); online.poll = 0; } };
 // a race link (vroomillion.com/vroomillion/?race=CODE) opens straight onto the join screen
 const linkCode = (new URLSearchParams(location.search).get("race") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
