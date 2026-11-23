@@ -7,3 +7,4 @@ node_modules/
 tools/.part*.js
 tools/.gen*.js
 tools/.gtest.js
+media/
