@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-23c",
+    date: "Nov 23, 2026",
+    title: "A world worth racing through",
+    items: [
+      "Every area has its own mountains and a landmark: a lighthouse, a ferris wheel, a needle tower, a casino dome, a giant gold trophy...",
+      "The sky is alive: clouds, birds, planes, blimps, hot-air balloons and shooting stars.",
+      "Slow traffic to blast past, and crowds by the road that go wild for rare answers (and shrug at common ones).",
+      "Rare answers set off fireworks, auroras and comets, light up the roadside, and leave banners in their colour along the road for the rest of the race.",
+    ],
+  },
+  {
     id: "2026-11-23b",
     date: "Nov 23, 2026",
     title: "24 hours of Unlimited, free",

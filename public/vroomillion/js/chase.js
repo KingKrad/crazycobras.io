@@ -10,6 +10,7 @@
 // gradient skies with parallax mountains, and sprites smoothed with Scale2x (rounded diagonals,
 // more detail) plus soft shading on the cars.
 import { rearSprite } from "./cars.js";
+import { drawClouds, drawSkyLife, skyShow, drawSkyShow, MOUNTAINS, drawLandmark, bits, GROUND, updateTraffic, trafficSprite } from "./scenery.js";
 import { pixelText } from "./scene.js";
 
 const SEG = 200; // length of one road segment (world units)
@@ -662,6 +663,15 @@ export class ChaseScene {
     this.arrival = null; // { zone, t }: the race is over and the road becomes its destination
     this.drops = [];
     this.tod = timeOfDay(0);
+    // scenery: banners left by rare answers stay for the race; traffic, crowds, sky shows
+    this.banners = [];
+    this.traffic = [];
+    this.fireworks = [];
+    this.aurora = 0;
+    this.comet = 0;
+    this.cheer = 0;
+    this.cheerTier = 0;
+    this.worldFx = null;
   }
 
   setRacers(list) {
@@ -700,6 +710,7 @@ export class ChaseScene {
     r.tier = tier;
     r.launchT = 0.7;
     if (tier === 0) {
+      this.cheer = Math.max(this.cheer, 2); this.cheerTier = Math.max(i === 0 ? 0 : this.cheerTier, 0); // the crowd goes quiet
       // STALLED: the engine coughs black smoke out of the exhausts
       r.sputterT = 0.9;
       for (let k = 0; k < 14; k++) {
@@ -707,6 +718,13 @@ export class ChaseScene {
       }
       return;
     }
+    // the world reacts: crowds cheer (or shrug), the sky puts on a show, and a rare answer leaves a banner
+    this.cheer = Math.max(this.cheer, 2.4);
+    this.cheerTier = Math.max(i === 0 ? 0 : this.cheerTier, tier);
+    skyShow(this, tier);
+    if (tier >= 3 && this.banners.length < 12) this.banners.push(tier);
+    if (tier >= 2 && (!this.worldFx || this.worldFx.tier <= tier)) this.worldFx = { tier, t: seconds };
+    if (tier === 3) this.glow = Math.max(this.glow, 1.3); // FAST LANE: the road edges light up
     // exhaust fire: none for TRAFFIC, a flicker for CRUISING, up to a huge blast for ONE IN A VROOMILLION
     if (tier >= 2) { r.fireTier = tier; r.fireT = seconds; r.fireMax = seconds; }
     const power = [0, 0.25, 0.4, 0.6, 0.85, 1.2][tier] + (nitro ? 0.35 : 0);
@@ -1055,6 +1073,19 @@ export class ChaseScene {
     this.glow = Math.max(0, this.glow - dt * 0.7);
     this.tunnel = Math.max(0, this.tunnel - dt * 0.75);
     this.revT = Math.max(0, this.revT - dt);
+    // scenery timers
+    for (const f of this.fireworks || []) f.t += dt;
+    this.fireworks = (this.fireworks || []).filter((f) => f.t < 2.2);
+    this.aurora = Math.max(0, (this.aurora || 0) - dt);
+    this.comet = Math.max(0, (this.comet || 0) - dt);
+    this.cheer = Math.max(0, (this.cheer || 0) - dt);
+    if (this.worldFx) { this.worldFx.t -= dt; if (this.worldFx.t <= 0) this.worldFx = null; }
+    // CRUISING and up: sparkles drift up off the roadside while you boost
+    if (this.worldFx && this.worldFx.tier >= 2 && !this.calm && Math.random() < (this.lite ? 0.3 : 0.7)) {
+      const side = Math.random() < 0.5 ? Math.random() * this.W * 0.22 : this.W * (0.78 + Math.random() * 0.22);
+      this.particles.push({ x: side, y: this.horizon + Math.random() * (this.H - this.horizon) * 0.7, vx: 0, vy: -(20 + Math.random() * 40) * u, life: 0.9, size: Math.max(1, u), color: Math.random() < 0.6 ? TIER_COL[this.worldFx.tier] : "#ffffff", g: 0 });
+    }
+    updateTraffic(this, dt, this.camZ, SEG, DRAW, ZONES[this.zones[this.shown]?.zone]?.id);
     const segsPerSec = 4 + this.speed * 46;
     this.camZ += SEG * segsPerSec * dt;
     const camSeg = Math.floor(this.camZ / SEG);
@@ -1234,6 +1265,13 @@ export class ChaseScene {
   }
 
   draw() {
+    // slow phone? quietly drop the extra scenery (fewer clouds, no ground detail, less traffic)
+    const nowMs = performance.now();
+    if (this.lastDraw && !this.lite) {
+      const ms = nowMs - this.lastDraw;
+      if (ms < 250) { this.frameMs = (this.frameMs || 16) * 0.95 + ms * 0.05; this.slowFrames = this.frameMs > 30 ? (this.slowFrames || 0) + 1 : 0; if (this.slowFrames > 90) this.lite = true; }
+    }
+    this.lastDraw = nowMs;
     const { W, H, g, u } = this;
     const wg = this.wg;
     const tod = this.tod;
@@ -1342,6 +1380,20 @@ export class ChaseScene {
       const zi = this.zoneAt(i);
       const zone = ZONES[this.zones[zi].zone].id;
       if (this.zones[zi].start === i && zi > 0) items.push({ z: p.z, p, gantry: ZONES[this.zones[zi].zone].name });
+      // ground detail on the verge (tufts, shells, cones...) so it's never just a flat colour
+      const B = bits();
+      if (!this.lite && i % 2 === 0 && GROUND[zone]) {
+        const pick = GROUND[zone][Math.floor(hash(i * 6.7) * GROUND[zone].length)];
+        push(p, B[pick], (hash(i * 8.3) < 0.5 ? -1 : 1) * (1.18 + hash(i * 2.7) * 1.6));
+      }
+      // crowds by the road, thicker where a new area starts; they react to your answers
+      const nearGate = this.zones[zi].start > -Infinity && Math.abs(i - this.zones[zi].start) < 8;
+      if ((nearGate && i % 2 === 0) || i % 31 === 0) push(p, B.crowd[0], (hash(i * 4.9) < 0.5 ? -1 : 1) * (1.32 + hash(i) * 0.25), { crowd: true, seed: i });
+      // banners left by this race's rare answers line the road
+      if (this.banners.length && i % 5 === 0) {
+        const k = Math.floor(i / 5);
+        push(p, B.banner[this.banners[k % this.banners.length]][0], k % 2 ? -1.17 : 1.17, { banner: this.banners[k % this.banners.length], flip: k % 2 === 1 });
+      }
       const side = hash(i * 7.7) < 0.5 ? -1 : 1;
       const far = hash(i * 5.3);
       const roll = hash(i * 3.1);
@@ -1402,6 +1454,11 @@ export class ChaseScene {
         if (i % 47 === 0) push(p, spr.sign, hash(i) < 0.5 ? -1.9 : 1.9, { neon: true });
       }
     }
+    // traffic to overtake
+    for (const t of this.traffic) {
+      const rel = t.z - this.camZ;
+      if (rel > SEG * 1.5 && rel < SEG * DRAW) items.push({ z: rel, traffic: t });
+    }
     this.racers.forEach((r, idx) => {
       const lunge = Math.min(7, r.boost * 2.2);
       items.push({ z: playerZ + (r.gap + lunge + r.charge) * SEG, car: true, r, idx });
@@ -1422,8 +1479,18 @@ export class ChaseScene {
     const lights = [];
     for (const it of items) {
       if (it.car) { this.drawCar(wg, it.r, interp(it.z), playerZ / it.z, lights); continue; }
+      if (it.traffic) { this.drawTraffic(wg, it.traffic, interp(it.z), playerZ / it.z); continue; }
       if (it.gantry) { this.drawGantry(wg, it.p, it.gantry); continue; }
-      const sprite = it.img;
+      let sprite = it.img;
+      let hop = 0;
+      if (it.crowd) {
+        // rare answer: they jump and cheer; common answer: they just stand there; otherwise a little sway
+        const B = bits();
+        if (this.cheer > 0 && this.cheerTier >= 2) { sprite = B.crowd[Math.floor(this.time * 8 + it.seed) % 2]; hop = Math.abs(Math.sin(this.time * 14 + it.seed)) * (this.cheerTier >= 4 ? 2.2 : 1.2); }
+        else if (this.cheer > 0) sprite = B.crowd[0];
+        else sprite = B.crowd[Math.floor(this.time * 1.5 + it.seed) % 7 === 0 ? 1 : 0];
+      }
+      if (it.banner !== undefined) sprite = bits().banner[it.banner][Math.floor(this.time * 4 + it.p.i) % 2];
       const ps = it.p.scale * k * SPR;
       if (ps < 0.12) continue;
       const w = sprite.width * ps;
@@ -1431,7 +1498,7 @@ export class ChaseScene {
       const bx = it.p.sx + it.p.sw * it.off;
       if (bx + w < -10 || bx - w > W + 10) continue;
       const left = Math.round(bx - w / 2);
-      const top = Math.round(it.p.sy - h);
+      const top = Math.round(it.p.sy - h - hop * ps);
       if (it.flip) {
         wg.save();
         wg.translate(Math.round(bx + w / 2), 0);
@@ -1482,7 +1549,7 @@ export class ChaseScene {
       wg.globalAlpha = 1;
     }
     wg.globalCompositeOperation = "lighter";
-    const night = tod.lamps;
+    const night = Math.max(tod.lamps, this.worldFx && this.worldFx.tier >= 3 ? 0.9 : 0);
     if (night > 0.05) {
       this.drawSkyline(wg, night);
       for (const gl of glows) {
@@ -1640,7 +1707,12 @@ export class ChaseScene {
       g.fillStyle = glow;
       g.fillRect(sx - R * 3.2, sy - R * 3.2, R * 6.4, R * 6.4);
     }
-    if (ZONES[this.zones[this.shown]?.zone]?.id !== "moon") this.drawMountains(g, stops);
+    const zid = ZONES[this.zones[this.shown]?.zone]?.id || "city";
+    drawClouds(this, g, zid, tod);
+    this.drawMountains(g, stops);
+    drawSkyLife(this, g, zid, tod);
+    drawClouds(this, g, zid, tod, true);
+    drawSkyShow(this, g);
 
     // heavy weather greys the sky out
     const grey = this.wx.fog * 0.45 + this.wx.rain * 0.3 + this.wx.snow * 0.2 + this.wx.sand * 0.3;
@@ -1650,34 +1722,45 @@ export class ChaseScene {
     }
   }
 
+  // Distant mountains: each area has its own range (scenery.js MOUNTAINS), crossfading between areas.
   drawMountains(g, stops) {
+    const cur = ZONES[this.zones[this.shown]?.zone]?.id || "city";
+    if (this.fade < 1) { g.globalAlpha = 1 - this.fade; this.mountainRange(g, stops, ZONES[this.prevZone].id); }
+    g.globalAlpha = this.fade < 1 ? this.fade : 1;
+    this.mountainRange(g, stops, cur);
+    g.globalAlpha = 1;
+  }
+
+  mountainRange(g, stops, zone) {
     const { W, u } = this;
     const hz = this.horizon;
     const low = stops[stops.length - 1];
-    const top = stops[Math.max(0, stops.length - 3)];
-    const ranges = [
-      { par: 0.05, h: 0.34, f: 0.011, col: mixC(mixC(top, low, 0.5), rgb("#1b0b3a"), 0.38), snow: true },
-      { par: 0.12, h: 0.2, f: 0.023, col: mixC(low, rgb("#12061f"), 0.55), snow: false },
-    ];
-    for (const m of ranges) {
+    for (const m of MOUNTAINS[zone] || []) {
       const off = this.bgX * m.par;
       const step = 2 * u;
-      g.fillStyle = css(m.col);
+      const col = mixC(low, rgb(m.tone), m.mix);
+      const peak = (x) => {
+        const v = ((x + off) * m.f) / u;
+        const soft = 0.45 + 0.35 * Math.abs(Math.sin(v)) + 0.2 * Math.abs(Math.sin(v * 2.7 + 1.3));
+        const sharp = 0.3 + 0.7 * Math.abs(((v / Math.PI) % 2) - 1) * (0.6 + 0.4 * Math.abs(Math.sin(v * 0.37)));
+        let h = m.h * (soft * (1 - m.jag) + sharp * m.jag);
+        if (m.islands) h *= Math.max(0, Math.sin(v * 0.5) - 0.2) * 1.6; // separate islands with sea between
+        return hz - hz * h;
+      };
+      g.fillStyle = css(col);
       g.beginPath();
       g.moveTo(0, hz + u);
-      const peak = (x) => {
-        const v = (x + off) * m.f / u;
-        return hz - hz * m.h * (0.45 + 0.35 * Math.abs(Math.sin(v)) + 0.2 * Math.abs(Math.sin(v * 2.7 + 1.3)));
-      };
       for (let x = 0; x <= W + step; x += step) g.lineTo(x, Math.round(peak(x) / u) * u);
       g.lineTo(W, hz + u);
       g.fill();
-      // lit edge on the sun side and snowcaps on the tall far peaks
-      g.fillStyle = css(mixC(m.col, rgb("#ffffff"), 0.18));
+      // a lit edge on the slopes, snow on the high peaks, or a neon outline on the strip
+      const edge = m.neon || css(mixC(col, rgb("#ffffff"), 0.18));
       for (let x = 0; x <= W; x += step) {
         const y = Math.round(peak(x) / u) * u, yn = Math.round(peak(x + step) / u) * u;
-        if (yn > y) g.fillRect(x, y, step, u);
-        if (m.snow && y < hz - hz * m.h * 0.82) { g.fillStyle = "rgba(240,240,255,0.55)"; g.fillRect(x, y, step, 2 * u); g.fillStyle = css(mixC(m.col, rgb("#ffffff"), 0.18)); }
+        if (y >= hz) continue;
+        g.fillStyle = edge;
+        if (m.neon || yn > y) g.fillRect(x, y, step, u);
+        if (m.snow && y < hz - hz * m.h * 0.72) { g.fillStyle = "rgba(240,244,255,0.75)"; g.fillRect(x, y, step, 3 * u); }
       }
     }
   }
@@ -1689,9 +1772,13 @@ export class ChaseScene {
     if (this.fade < 1) {
       g.globalAlpha = 1 - this.fade;
       this.skyline(g, ZONES[this.prevZone].id, lit);
+      g.globalAlpha = (1 - this.fade) * (lit || 1);
+      drawLandmark(this, g, ZONES[this.prevZone].id, lit);
     }
     g.globalAlpha = this.fade;
     this.skyline(g, ZONES[cur].id, lit);
+    g.globalAlpha = this.fade * (lit || 1);
+    drawLandmark(this, g, ZONES[cur].id, lit);
     g.globalAlpha = 1;
   }
 
@@ -2054,6 +2141,19 @@ export class ChaseScene {
         g.fillRect(Math.round(x - fw / 2) + wob, Math.round(y + d), fw, step);
       }
     });
+  }
+
+  // a slow car on the road ahead, drawn like the racers but plainer
+  drawTraffic(g, t, p, rel) {
+    if (!p || p.hidden) return;
+    const frame = trafficSprite(t.car, Math.floor(this.time * 6) % 2);
+    const s = Math.max(0.2, this.carPx * rel * 0.92);
+    const w = (frame.width * s) / (frame.res || 1), h = (frame.height * s) / (frame.res || 1);
+    const cx = p.sx + p.sw * t.lane;
+    const bottom = Math.round(p.sy);
+    g.fillStyle = "rgba(0,0,10,0.35)";
+    g.fillRect(Math.round(cx - w * 0.5), bottom - Math.max(1, Math.round(h * 0.06)), Math.round(w), Math.max(1, Math.round(h * 0.1)));
+    g.drawImage(frame, Math.round(cx - w / 2), Math.round(bottom - h), Math.round(w), Math.round(h));
   }
 
   drawCar(g, r, p, rel, lights) {
