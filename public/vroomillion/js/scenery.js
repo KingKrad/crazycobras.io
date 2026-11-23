@@ -382,13 +382,15 @@ export const GROUND = {
 // ---------- traffic: slow cars you overtake (just for show) ----------
 const TRAFFIC_CARS = CARS.filter((c) => ["D", "C"].includes(c.cls) && !c.premium && !c.giftOnly && !c.hiRes).map((c) => c.id);
 export function updateTraffic(s, dt, camZ, SEG, DRAW, zone) {
-  if (!s.traffic) s.traffic = [];
-  const want = zone === "moon" || zone === "volcano" || s.arrival ? 0 : s.lite ? 2 : 4;
+  if (!s.traffic || s.trafficOff) s.traffic = [];
+  // none where it can't fit beside you on this screen (s.trafficOff, worked out by the steering)
+  const want = zone === "moon" || zone === "volcano" || s.arrival || s.trafficOff ? 0 : s.lite ? 2 : 4;
   // traffic drives at a steady pace; you go faster, and much faster on a boost
   for (const t of s.traffic) t.z += SEG * 11 * dt;
   s.traffic = s.traffic.filter((t) => t.z - camZ > -SEG * 2 && t.z - camZ < SEG * (DRAW + 40));
   while (s.traffic.length < want) {
-    const lanes = s.racers.length > 1 ? [0, -0.86, 0.86] : [-0.62, 0.62];
+    // 1P: either side of you; 2P: down the middle, and you two move over to let it through
+    const lanes = s.racers.length > 1 ? [0] : [-0.6, 0.6];
     const ahead = s.traffic.length ? Math.max(...s.traffic.map((t) => t.z)) + SEG * (14 + Math.random() * 20) : camZ + SEG * (30 + Math.random() * 40);
     s.traffic.push({ z: Math.max(ahead, camZ + SEG * (DRAW * 0.7)), lane: lanes[Math.floor(Math.random() * lanes.length)], car: TRAFFIC_CARS[Math.floor(Math.random() * TRAFFIC_CARS.length)] });
   }

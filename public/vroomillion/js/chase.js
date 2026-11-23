@@ -2150,14 +2150,20 @@ export class ChaseScene {
     });
   }
 
-  // Swerving round traffic: each racer looks a few segments ahead; a traffic car that would overlap it
-  // pushes it out to whichever side has more room (onto the shoulder if it must), then it eases back
-  // into its lane. The traffic car edges the other way a little too. dodge is in half-road widths.
+  // Swerving round traffic, staying on the road: each racer looks ahead; a traffic car that would
+  // overlap it pushes it to whichever side has room on the tarmac, and the traffic car moves over the
+  // other way to make the gap if it has to. If two cars can't fit side by side on this screen at all,
+  // there's no traffic (s.trafficOff). Positions are in half-road widths: the road is -1..1.
   steer(dt) {
     if (!this.playerZ) return;
+    const half = Math.max(...this.racers.map((r) => r.halfW || 0.2));
+    const tHalf = half * 0.92;
+    const need = half + tHalf + 0.05; // centre-to-centre gap for two cars to pass cleanly
+    const edge = 1 - half - 0.03, tEdge = 1 - tHalf - 0.03; // furthest a centre can go and stay on the road
+    // room on this road for a racer and a traffic car side by side (2P: a car on each side of one in the middle)
+    this.trafficOff = this.racers.length > 1 ? edge < need : edge + tEdge < need;
     for (const r of this.racers) {
       r.dodge = r.dodge || 0;
-      const half = r.halfW || 0.2; // the racer's half width, in half-road widths (worked out when drawn)
       const rz = this.playerZ + ((r.gap || 0) + Math.min(7, (r.boost || 0) * 2.2) + (r.charge || 0)) * SEG;
       const x = r.lane + r.dodge;
       let target = 0;
@@ -2165,27 +2171,39 @@ export class ChaseScene {
       for (const t of this.traffic || []) {
         const ahead = t.z - this.camZ - rz;
         if (ahead < -SEG * 1.2 || ahead > SEG * 15) continue; // look about fifteen segments ahead
-        const need = half + half * 0.92 + 0.06;
         const tx = t.lane + (t.shift || 0);
-        if (Math.abs(tx - x) < need && (!threat || ahead < threat.ahead)) threat = { t, ahead, tx, need };
+        if (Math.abs(tx - x) < need && (!threat || ahead < threat.ahead)) threat = { t, ahead, tx };
       }
       if (threat) {
-        const { tx, need, t } = threat;
-        // go round on the side with more room; the road is ±1, the shoulders go to about ±1.6
+        const { t, tx } = threat;
+        // pass on a side that keeps the whole car on the road; if neither has room, take the side
+        // away from the traffic car and it moves over to make the gap
         const left = tx - need, right = tx + need;
-        const goLeft = Math.abs(left - x) <= Math.abs(right - x) ? left >= -1.55 : right > 1.55;
-        target = (goLeft ? left : right) - r.lane;
-        t.shift = (t.shift || 0) + (goLeft ? 1 : -1) * dt * 0.25; // the traffic car edges out of the way
-        t.shift = clamp(t.shift, -0.25, 0.25);
-        r.swerve = goLeft ? -1 : 1;
+        const okL = left >= -edge, okR = right <= edge;
+        let side;
+        if (okL && okR) side = Math.abs(left - x) <= Math.abs(right - x) ? -1 : 1;
+        else if (okL || okR) side = okL ? -1 : 1;
+        else side = tx >= 0 ? -1 : 1;
+        const want = side < 0 ? Math.max(-edge, Math.min(left, x)) : Math.min(edge, Math.max(right, x));
+        target = clamp(want, -edge, edge) - r.lane;
+        // the traffic car keeps at least `need` away on the other side, inside the road
+        const tWant = clamp((r.lane + target) - side * need, -tEdge, tEdge);
+        const cur = t.lane + (t.shift || 0);
+        t.shift = (t.shift || 0) + clamp(tWant - cur, -dt * 1.6, dt * 1.6) * (Math.abs(tWant - cur) > 0.01 ? 1 : 0);
+        r.swerve = side;
       } else r.swerve = 0;
-      // ease towards it: quick to dodge, gentler coming back
+      // ease towards it: quick to dodge, gentler coming back; never past the edge of the road
       const rate = threat ? 11 : 2.5;
       const before = r.dodge;
       r.dodge += (target - r.dodge) * Math.min(1, dt * rate);
+      r.dodge = clamp(r.lane + r.dodge, -edge, edge) - r.lane;
       r.steerV = (r.dodge - before) / Math.max(dt, 1e-3);
     }
-    for (const t of this.traffic || []) if (t.shift) t.shift *= Math.max(0, 1 - dt * 0.4);
+    // traffic drifts back to its lane once nobody needs the room, and always stays on the road
+    for (const t of this.traffic || []) {
+      if (t.shift) t.shift *= Math.max(0, 1 - dt * 0.3);
+      t.shift = clamp(t.lane + (t.shift || 0), -tEdge, tEdge) - t.lane;
+    }
   }
 
   // a slow car on the road ahead, drawn like the racers but plainer
