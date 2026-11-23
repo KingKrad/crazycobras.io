@@ -142,6 +142,11 @@ export async function currentUser(request, env) {
 
 // Admins are the emails listed in the ADMIN_EMAILS secret (comma separated). They always have
 // Unlimited and can use the admin screen (src/admin.js).
+// FREE TRIAL: every new account has Unlimited for its first 24 hours (from created_at, on the server).
+export const TRIAL_MS = 24 * 3600 * 1000;
+export const inTrial = (u, now = Date.now()) => !!u && u.unlimited !== 1 && Number(u.created_at) > now - TRIAL_MS;
+// Unlimited right now: paid, admin, or still in the free first day
+export const hasUnlimited = (u, env) => !!u && (u.unlimited === 1 || isAdmin(u, env) || inTrial(u));
 export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email);
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
@@ -152,7 +157,9 @@ export function parseGifts(text) {
 }
 export const publicUser = (u, env) => ({
   email: u.email,
-  unlimited: u.unlimited === 1 || isAdmin(u, env),
+  unlimited: hasUnlimited(u, env),
+  // the free first day: when it ends (null once it's over, or for paid and admin accounts)
+  trialEndsAt: !isAdmin(u, env) && inTrial(u) ? Number(u.created_at) + TRIAL_MS : null,
   ...(isAdmin(u, env) ? { admin: true } : {}),
   hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
   gifts: parseGifts(u.gifts), // cars an admin gave this account
@@ -304,7 +311,7 @@ export async function handleSignup(request, env) {
   } catch {
     return taken();
   }
-  return json({ email, unlimited: false, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
+  return json({ email, unlimited: true, trialEndsAt: Date.now() + TRIAL_MS, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
 }
 
 export async function handleLogin(request, env) {

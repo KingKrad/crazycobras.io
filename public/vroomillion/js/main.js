@@ -343,6 +343,9 @@ function renderDaily() {
   const today = dday();
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
+  } else if (unlimitedNow() && account.trialEndsAt) {
+    box.append(h("div", { class: "daily-line good", text: `★ FREE UNLIMITED · ${trialLeft()} LEFT` }),
+      h("button", { class: "btn small unlock-cta", type: "button", text: "KEEP UNLIMITED FOREVER — $5", onclick: () => { audio.sfx.click(); openPaywall("trial"); } }));
   } else if (unlimitedNow()) {
     box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
   } else if (dailyLeft(save, today) > 0) {
@@ -358,7 +361,13 @@ function renderDaily() {
 
 // ---------- accounts ----------
 let account = null; // { email, unlimited } from the server, or null when logged out / offline
-const unlimitedNow = () => account?.unlimited === true;
+const unlimitedNow = () => account?.unlimited === true && !(account.trialEndsAt && Date.now() > account.trialEndsAt);
+// time left in the free first day, like "23H 10M"
+const trialLeft = () => {
+  const ms = Math.max(0, (account?.trialEndsAt || 0) - Date.now());
+  const hh = Math.floor(ms / 3600000), mm = Math.floor((ms % 3600000) / 60000);
+  return hh ? `${hh}H ${mm}M` : `${mm}M`;
+};
 const me = () => ({ ...save, unlimited: unlimitedNow() });
 
 // Talk to the account API. Throws "offline" when there's no server (e.g. the artifact preview).
@@ -540,7 +549,7 @@ function authForm(mode, onDone) {
     wireForm(form, submit, msg, "Resetting…",
       () => api("reset-password", { method: "POST", body: JSON.stringify({ email: email.value, code: code.value, password: password.value }) }),
       (body) => {
-        account = { email: body.email, unlimited: body.unlimited }; syncSeen();
+        account = { email: body.email, unlimited: body.unlimited, trialEndsAt: body.trialEndsAt || null }; syncSeen();
         form.replaceWith(recoveryPanel(body.recoveryCode, onDone, "Password changed and other devices signed out. Your old recovery code no longer works — here's your new one."));
       });
     return form;
@@ -561,8 +570,9 @@ function authForm(mode, onDone) {
   wireForm(form, submit, msg, signup ? "Creating your account…" : "Logging in…",
     () => api(mode, { method: "POST", body: JSON.stringify({ email: email.value, password: password.value, ...(bots ? { turnstile: bots.take() } : {}) }) }),
     (body) => {
-      account = { email: body.email, unlimited: body.unlimited }; syncSeen();
+      account = { email: body.email, unlimited: body.unlimited, trialEndsAt: body.trialEndsAt || null }; syncSeen();
       password.value = "";
+      if (body.trialEndsAt && body.recoveryCode) { overlay("24 HOURS OF UNLIMITED, FREE!", "small"); audio.sfx.win(); setTimeout(() => overlay(""), 2600); }
       if (body.recoveryCode) form.replaceWith(recoveryPanel(body.recoveryCode, onDone));
       else onDone();
     });
@@ -596,7 +606,7 @@ async function logOut() {
 let paywallReason = "used"; // "used" (no free races left) or "mode" (a mode free players don't get)
 function openPaywall(reason) { paywallReason = reason; show("paywall"); }
 function renderPaywall() {
-  $("pay-lead").textContent = paywallReason === "mode"
+  $("pay-lead").textContent = paywallReason === "trial" ? "Your free day of Unlimited ends soon. Keep it forever, for one payment." : paywallReason === "mode"
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
     : dailyLeft(save, dday()) > 0
       ? "Unlimited races on top of the daily two, in every mode."
@@ -605,12 +615,14 @@ function renderPaywall() {
   const step = $("pay-step");
   step.textContent = "";
   if (!account) {
-    step.append(h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall));
-  } else if (account.unlimited) {
+    step.append(h("div", { class: "daily-line good", text: "NEW HERE? MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }),
+      h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall));
+  } else if (account.unlimited && !account.trialEndsAt) {
     step.append(h("div", { class: "daily-line good", text: `★ ${account.email.toUpperCase()} HAS UNLIMITED` }),
       h("button", { class: "btn big", type: "button", text: "RACE ▶", onclick: () => { audio.sfx.click(); show("leagues"); } }));
   } else {
     step.append(
+      account.trialEndsAt && unlimitedNow() ? h("div", { class: "daily-line good", text: `★ YOUR FREE UNLIMITED ENDS IN ${trialLeft()}. KEEP IT FOREVER:` }) : null,
       h("div", { class: "step-label", text: "STEP 2 OF 2 · PAY" }),
       h("div", { class: "signed-in", text: `LOGGED IN AS ${account.email.toUpperCase()}` }),
       h("label", { class: "agree" },
@@ -633,10 +645,10 @@ function renderAccount() {
   signInError = null;
   box.append(...[
     h("div", { class: "signed-in", text: account.email.toUpperCase() }),
-    h("div", { class: "daily-line" + (account.unlimited ? " good" : ""), text: account.unlimited ? (account.admin ? "★ ADMIN · UNLIMITED" : "★ UNLIMITED") : "FREE PLAYER — 1 DAILY RACE A DAY" }),
+    h("div", { class: "daily-line" + (unlimitedNow() ? " good" : ""), text: unlimitedNow() ? (account.admin ? "★ ADMIN · UNLIMITED" : account.trialEndsAt ? `★ FREE UNLIMITED · ${trialLeft()} LEFT` : "★ UNLIMITED") : "FREE PLAYER — 1 DAILY RACE A DAY" }),
     nicknameForm(),
     account.admin ? h("button", { class: "btn big", type: "button", text: "ADMIN", onclick: () => { audio.sfx.click(); show("admin"); } }) : null,
-    account.unlimited || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
+    (unlimitedNow() && !account.trialEndsAt) || FREE_PLAY ? null : h("button", { class: "btn big unlock-cta", type: "button", text: account.trialEndsAt && unlimitedNow() ? "KEEP UNLIMITED FOREVER — $5" : "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
     h("button", { class: "btn", type: "button", text: "LOG OUT", onclick: logOut }),
     account.hasPassword === false ? h("p", { class: "note", text: "You sign in with Google or Apple." }) : newCodeForm(),
     deleteAccountForm(),
@@ -2970,7 +2982,10 @@ function toggleSound() {
 $("btn-sound").addEventListener("click", toggleSound);
 $("btn-sound-race").addEventListener("click", toggleSound);
 // refresh the "next free run" countdown on the title screen
-setInterval(() => { if (current === "title") renderDaily(); }, 30000);
+setInterval(() => {
+  if (account?.trialEndsAt && Date.now() > account.trialEndsAt && !account.trialChecked) { account.trialChecked = true; refreshAccount(); }
+  if (current === "title") renderDaily();
+}, 30000);
 
 audio.setMuted(save.muted);
 renderSound();

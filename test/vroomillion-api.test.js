@@ -61,7 +61,8 @@ test("sign up creates an account, a session cookie and a hashed password", async
   const { res, cookie, body } = await signup("  Racer@Example.com ");
   assert.equal(res.status, 201);
   assert.equal(body.email, "racer@example.com");
-  assert.equal(body.unlimited, false);
+  assert.equal(body.unlimited, true, "the free first day");
+  assert.ok(body.trialEndsAt > Date.now() + 23 * 3600000);
   assert.match(body.recoveryCode, /^[A-Z2-9]{5}(-[A-Z2-9]{5}){3}$/);
   assert.ok(!JSON.stringify(db.sql.prepare("SELECT * FROM users").get()).includes(body.recoveryCode), "only a hash of the code is stored");
   const setCookie = res.headers.get("set-cookie");
@@ -72,7 +73,7 @@ test("sign up creates an account, a session cookie and a hashed password", async
   assert.ok(!JSON.stringify(db.sql.prepare("SELECT * FROM sessions").all()).includes(cookie.split("=")[1]), "only a hash of the token is stored");
 
   const me = await worker.fetch(get("me", { cookie }), env());
-  { const j = await me.json(); assert.deepEqual({ email: j.email, unlimited: j.unlimited, freeResetAt: j.freeResetAt, streak: j.streak }, { email: "racer@example.com", unlimited: false, freeResetAt: 0, streak: 0 }); assert.match(j.nickname, /^RACER [A-Z0-9]{4}$/); }
+  { const j = await me.json(); assert.deepEqual({ email: j.email, unlimited: j.unlimited, freeResetAt: j.freeResetAt, streak: j.streak }, { email: "racer@example.com", unlimited: true, freeResetAt: 0, streak: 0 }); assert.match(j.nickname, /^RACER [A-Z0-9]{4}$/); }
 });
 
 test("sign up rejects bad emails, short passwords and duplicate accounts", async () => {
@@ -601,6 +602,7 @@ test("online 1v1: an Unlimited host makes a room, a friend joins without an acco
   const prompts = ["Name a fruit", "Name a dog breed", "Name a country", "Name a colour", "Name a sport", "Name a car brand", "Name a bird"];
   const on = (body, h = {}) => worker.fetch(post("online", body, h), env());
   const host = await signup("host@example.com");
+  db.sql.prepare("UPDATE users SET created_at = 0 WHERE email = 'host@example.com'").run(); // past the free first day
   // needs Unlimited to create
   let r = await on({ action: "create", deck: "classic", name: "Hosty", prompts }, { cookie: host.cookie });
   assert.equal(r.status, 402);
@@ -841,4 +843,24 @@ test("premium cars: the server's list, prices and daily rotation match the game'
   const { PREMIUM, premiumFor } = await import("../public/vroomillion/js/cars.js");
   assert.deepEqual(PREMIUM_CARS.map((c) => [c.id, c.name, c.cents]), PREMIUM.map((c) => [c.id, c.name, c.premium]));
   for (const day of ["2026-11-22", "2026-11-23", "2027-03-01"]) assert.equal(premiumOn(Date.parse(day + "T12:00:00Z")).id, premiumFor(day).id, day);
+});
+
+test("new accounts get Unlimited free for their first 24 hours, checked on the server", async () => {
+  const { cookie } = await signup("fresh@example.com");
+  let me = await (await worker.fetch(get("me", { cookie }), env())).json();
+  assert.equal(me.unlimited, true);
+  assert.ok(me.trialEndsAt > Date.now());
+  // they can still buy Unlimited to keep it
+  stripeReply = { body: { id: "cs_test_trial1234567890", url: "https://checkout.stripe.com/c/pay/x" } };
+  assert.equal((await worker.fetch(post("checkout", { acceptNoRefunds: true }, { cookie }), env())).status, 200);
+  // a day and a bit later it's over
+  db.sql.prepare("UPDATE users SET created_at = ? WHERE email = 'fresh@example.com'").run(Date.now() - 25 * 3600000);
+  me = await (await worker.fetch(get("me", { cookie }), env())).json();
+  assert.equal(me.unlimited, false);
+  assert.equal(me.trialEndsAt, null);
+  // a paid account never shows a trial
+  db.sql.prepare("UPDATE users SET unlimited = 1, created_at = ? WHERE email = 'fresh@example.com'").run(Date.now());
+  me = await (await worker.fetch(get("me", { cookie }), env())).json();
+  assert.equal(me.unlimited, true);
+  assert.equal(me.trialEndsAt, null);
 });

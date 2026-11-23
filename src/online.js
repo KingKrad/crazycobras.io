@@ -14,7 +14,7 @@
 //   A rematch is a new room: the host sends create with { from, fromToken } (the finished room), and
 //   that room's state then names the new code (next), so the friend's game joins it.
 // Tokens are random per player and only their hashes are stored; rooms expire after two hours.
-import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin } from "./accounts.js";
+import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, hasUnlimited } from "./accounts.js";
 
 const ROOM_TTL = 2 * 3600 * 1000;
 const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no I, L, O, 0, 1
@@ -91,7 +91,7 @@ export async function handleOnline(request, env) {
   if (action === "create") {
     const user = await currentUser(request, env);
     if (!user) return json({ error: "Log in to create an online race." }, 401);
-    if (user.unlimited !== 1 && !isAdmin(user, env)) return json({ error: "Creating online races is part of Unlimited. Your friend can join free.", unlimited: false }, 402);
+    if (!hasUnlimited(user, env)) return json({ error: "Creating online races is part of Unlimited. Your friend can join free.", unlimited: false }, 402);
     if (!(await underLimit(env, "online-create", user.id, 20, 3600))) return json({ error: "That's a lot of races — try again later." }, 429);
     const deck = DECKS.has(body.deck) ? body.deck : "classic";
     const prompts = (Array.isArray(body.prompts) ? body.prompts : []).slice(0, ROUNDS).map((p) => clean(p, 120)).filter(Boolean);
