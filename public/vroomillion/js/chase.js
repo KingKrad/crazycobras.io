@@ -768,7 +768,8 @@ export class ChaseScene {
 
   backfire(i) {
     const r = this.racers[i];
-    if (!r?.box || r.fireT <= 0) return;
+    if (!r?.box || (r.fireT <= 0 && !r.car?.v12)) return;
+    if (r.car?.v12 && !r.fireTier) r.fireTier = 3; // the crazy car spits flames on every shift
     const u = this.u;
     r.popT = 0.14;
     if (elec(r)) r.zapT = 0.18; // a laser blast instead of a backfire
@@ -2276,6 +2277,14 @@ export class ChaseScene {
       this.drawLasers(g, r, pipes, bottom - h * 0.2, h, fade);
       for (const fx of pipes) this.drawFlame(g, fx, bottom - h * 0.2, Math.max(3, s * (2.6 + r.fireTier * 0.5)), len * 0.8, PLASMA[r.fireTier], true);
       this.drawArcs(g, pipes, bottom - h * 0.2, len, r.fireTier);
+    } else if (r.car?.v12 && !this.calm && (r.fireT > 0 || r.boost > 0.05 || r.popT > 0)) {
+      // NICO'S CRAZY CAR: giant flames out of both huge tips, even on a common answer, flaring on every pop
+      const tier = Math.max(2, r.fireTier || 0);
+      const fade = (r.fireT > 0 ? Math.min(1, r.fireT / 0.6) : Math.min(0.7, 0.3 + r.boost * 0.4)) * (r.popT > 0 ? 2.1 : 1);
+      const len = h * Math.max(0.35, FIRE_LEN[tier]) * 1.8 * fade;
+      const rgb = (hue, l) => `rgb(${hsl(mod(hue, 360), 1, l).map(Math.round).join(",")})`;
+      const cols = tier === 5 ? [rgb(this.time * 540, 0.55), rgb(this.time * 540 + 90, 0.65), "#ffffff"] : r.popT > 0 ? ["#ff5a1f", "#ffd23a", "#ffffff"] : FIRE[tier];
+      for (const fx of [left + w * 0.167, left + w * 0.833]) this.drawFlame(g, fx, bottom - h * 0.18, Math.max(4, s * (4.6 + tier * 0.8)), len, cols, true);
     } else if (r.fireT > 0 && !this.calm) {
       const fade = Math.min(1, r.fireT / 0.6) * (r.popT > 0 ? 1.7 : 1);
       const len = h * FIRE_LEN[r.fireTier] * fade;

@@ -2011,7 +2011,8 @@ function startRace(setup) {
   $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible
   show("race");
   // an electric car on this screen (yours, in 1P) whines instead of growling
-  audio.engineStart(racers[setup.online?.seat ?? 0]?.car?.electric === true);
+  const myCar = racers[setup.online?.seat ?? 0]?.car;
+  audio.engineStart(myCar?.electric ? "electric" : myCar?.v12 ? "v12" : false);
   audio.engineSet(0.1);
   runRace(token);
 }
@@ -2139,6 +2140,7 @@ async function runRace(token) {
       if (tier === 0) sfx.sputter();
       if (nitro) sfx.nitro();
       if (r.car.rocket) { audio.rocket.roar(tier); if (nitro) audio.rocket.surge(); } // the Hondeezy's booster
+      if (r.car.v12) audio.v12.scream(tier); // NICO'S CRAZY CAR
       if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
     };
     scene.onEvent = (type, card) => {
@@ -2179,7 +2181,8 @@ async function runRace(token) {
           if (g > R.gear && b > 0.3) {
             R.gear = g;
             audio.sfx.shift();
-            if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
+            if (r.car.v12) { scene.backfire(i); audio.v12.pop(R.tier); } // NICO'S CRAZY CAR crackles on every shift
+            else if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
           }
           if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));
         });

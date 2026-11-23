@@ -112,6 +112,9 @@ export const CARS = [
   { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true, hiRes: true },
   // a 2006 sedan in silver with a huge rocket booster strapped to its back. Ties for the best in the game.
   { ...C("hondeezy", "A-DOG'S HONDEEZY", "X", 0, 9.0, 8, "civic", "#b9bec6", "#2a2c31"), giftOnly: true, rim: "#c9ced6", glass: "#1e2836", seats: "#3a3c42", hiRes: true, rocket: true },
+  // a black hot sedan (wide arches, big black grille, red brake callipers) with an outrageous exhaust:
+  // huge oval tips, giant flames, crackle on every shift, and a screaming V12 sound. Ties for the best.
+  { ...C("nico", "NICO'S CRAZY CAR", "X", 0, 9.0, 8, "rs3", "#17181c", "#0a0a0c"), giftOnly: true, rim: "#2f3138", glass: "#10151e", seats: "#1e1f24", hiRes: true, v12: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -379,7 +382,7 @@ const cache = new Map();
 export function carSprite(car, frame = 0) {
   const ck = car.id + ":" + car.color + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
-  if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : car.v12 ? rs3Side(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
   const wheelTop = tpl.rows.length - 2;
@@ -576,7 +579,7 @@ const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
   const key = car.id + ":" + car.color + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
-  if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : car.v12 ? rs3Rear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);
   const cv = document.createElement("canvas");
   cv.width = rows[0].length;
@@ -787,5 +790,93 @@ function civicRear(car, frame) {
   g.fillStyle = "#0a0a0c";
   for (const [ex, ey] of eng) { g.beginPath(); g.arc(ex, ey, 1.3, 0, Math.PI * 2); g.fill(); }
   g.fillStyle = "#3a3c42"; g.fillRect(24, 2, 4, 3); g.fillRect(52, 2, 4, 3); // grid fins poking out
+  return crisp(cv);
+}
+
+
+// NICO'S CRAZY CAR: a black compact sports sedan, low and wide: flared arches, a big black
+// honeycomb grille, slim lights, red brake callipers, a lip spoiler and two huge oval exhaust tips.
+function rs3Side(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 72; cv.height = 25;
+  const g = cv.getContext("2d");
+  // black paint needs strong highlights to read: a bright top edge, a lit shoulder, a dark sill
+  const base = "#1c1d22", light = "#4a4d57", shine = "#7d828f", deep = "#0b0b0e";
+  const body = [[3, 12], [6, 9.4], [14, 8.6], [22, 3], [31, 1.6], [41, 1.8], [49, 6.2], [55, 8.6], [64, 10.2], [70, 11.6], [71, 14.5], [70, 18.4], [3, 18.4], [2, 15]];
+  const grad = g.createLinearGradient(0, 0, 0, 19);
+  grad.addColorStop(0, light); grad.addColorStop(0.35, base); grad.addColorStop(1, deep);
+  poly(g, body, grad);
+  // flared wheel arches
+  poly(g, [[8, 12.2], [11, 10.4], [21, 10.4], [24, 12.2]], "#26272d");
+  poly(g, [[51, 12], [54, 10.2], [64, 10.4], [67, 12.2]], "#26272d");
+  // windows, trim, pillar
+  poly(g, [[14.6, 9], [22.6, 3.6], [31, 2.4], [40.6, 2.6], [48.4, 8.8]], "#000000");
+  poly(g, [[16.6, 8.6], [23.2, 4.2], [30.8, 3.2], [40, 3.4], [46.6, 8.4]], car.glass);
+  g.fillStyle = "#000000"; g.fillRect(31.6, 2.6, 1.6, 6.2);
+  poly(g, [[24, 4.8], [29.6, 3.8], [26.4, 6.6]], "rgba(255,255,255,0.18)");
+  g.fillStyle = shine; g.fillRect(22, 2.4, 18, 0.7); // roof shine
+  g.fillStyle = light; g.fillRect(8, 10.6, 58, 0.8);
+  g.fillStyle = "#08080a"; g.fillRect(32, 9.4, 0.7, 8); g.fillRect(47.6, 9.4, 0.7, 7.6);
+  g.fillStyle = "#3a3d46"; g.fillRect(26, 12, 3, 0.8); g.fillRect(41, 12, 3, 0.8);
+  poly(g, [[48.6, 8.2], [52, 7.8], [52, 9.6], [49, 9.6]], "#000000");
+  // front: big black grille and a slim LED headlight; rear: lip spoiler and a thin tail light
+  poly(g, [[66, 12.6], [70.6, 13.2], [70.6, 16.8], [66.4, 16.8]], "#050506");
+  g.fillStyle = "#2a2c33"; for (let y = 13.4; y < 16.6; y += 1.2) g.fillRect(67, y, 3.2, 0.5);
+  poly(g, [[62.6, 11], [69.6, 12], [69.4, 12.8], [63, 12]], "#e8f2ff");
+  poly(g, [[3, 9.6], [8.6, 8.4], [8.8, 9.2], [3.2, 10.4]], "#050506"); // spoiler lip
+  poly(g, [[2.4, 11.6], [8, 10.4], [8.2, 11.4], [2.6, 12.6]], "#ff2020");
+  g.fillStyle = "#050506"; g.fillRect(5, 16.8, 62, 1.6);
+  // one huge oval exhaust tip poking out the back
+  g.fillStyle = "#c9ced6"; g.beginPath(); g.ellipse(3.6, 16.4, 2.4, 1.4, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#111114"; g.beginPath(); g.ellipse(3.6, 16.4, 1.5, 0.8, 0, 0, Math.PI * 2); g.fill();
+  // dark five-spoke wheels with red brake callipers
+  for (const wx of [16, 59]) {
+    g.fillStyle = "#050506"; g.beginPath(); g.arc(wx, 18.3, 6.6, Math.PI, 0); g.fill();
+    g.fillStyle = "#111114"; g.beginPath(); g.arc(wx, 18.5, 5.8, 0, Math.PI * 2); g.fill();
+    g.fillStyle = car.rim; g.beginPath(); g.arc(wx, 18.5, 4.1, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#e0201b"; g.fillRect(wx + 1.2, 15.6, 2, 2.4); // calliper
+    g.strokeStyle = "#5a5d66"; g.lineWidth = 0.9;
+    for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * Math.PI * 2 + frame * 0.6;
+      g.beginPath(); g.moveTo(wx + Math.cos(a) * 1.1, 18.5 + Math.sin(a) * 1.1); g.lineTo(wx + Math.cos(a) * 3.7, 18.5 + Math.sin(a) * 3.7); g.stroke();
+    }
+    g.fillStyle = "#1a1a1e"; g.beginPath(); g.arc(wx, 18.5, 1, 0, Math.PI * 2); g.fill();
+  }
+  return crisp(cv);
+}
+
+function rs3Rear(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 84; cv.height = 52;
+  const g = cv.getContext("2d");
+  const light = "#4a4d57", base = "#1c1d22", deep = "#0b0b0e";
+  // fat tyres, wide stance
+  for (const tx of [5, 63]) {
+    g.fillStyle = "#111114"; g.fillRect(tx, 39, 16, 13);
+    g.fillStyle = "#26262e"; for (let y = 40 + frame; y < 52; y += 2) g.fillRect(tx + 1, y, 14, 1);
+  }
+  const grad = g.createLinearGradient(0, 18, 0, 46);
+  grad.addColorStop(0, light); grad.addColorStop(0.35, base); grad.addColorStop(1, deep);
+  poly(g, [[5, 25], [11, 20], [73, 20], [79, 25], [82, 31], [82, 43], [78, 46], [6, 46], [2, 43], [2, 31]], grad);
+  // the rear window, roof and spoiler
+  poly(g, [[24, 4], [60, 4], [68, 20], [16, 20]], base);
+  poly(g, [[26, 6], [58, 6], [65, 20], [19, 20]], car.glass);
+  g.fillStyle = "#7d828f"; g.fillRect(26, 4, 32, 1); // roof shine
+  poly(g, [[30, 7], [37, 7], [27, 17], [23, 17]], "rgba(255,255,255,0.12)");
+  poly(g, [[6, 17], [13, 17.5], [15, 20], [6, 20]], "#000000"); poly(g, [[78, 17], [71, 17.5], [69, 20], [78, 20]], "#000000");
+  g.fillStyle = "#050506"; g.fillRect(15, 20, 54, 1.8);
+  // slim tail lights joined by a thin light bar
+  poly(g, [[4, 25], [24, 24], [24, 27], [4, 28.6]], "#ff2020"); poly(g, [[80, 25], [60, 24], [60, 27], [80, 28.6]], "#ff2020");
+  g.fillStyle = "#a01818"; g.fillRect(24, 25, 36, 1);
+  g.fillStyle = "#e9e6d8"; g.fillRect(33, 31, 18, 6);
+  g.fillStyle = "#7d828f"; for (const x of [35, 38, 42, 45, 48]) g.fillRect(x, 33, 2, 2);
+  // a big black diffuser with two huge oval exhaust tips
+  g.fillStyle = "#050506"; g.fillRect(4, 39, 76, 7);
+  g.fillStyle = "#2a2c33"; for (let x = 26; x < 58; x += 5) g.fillRect(x, 39, 1, 7);
+  for (const ex of [14, 70]) {
+    g.fillStyle = "#e8ecf4"; g.beginPath(); g.ellipse(ex, 42.5, 6.4, 3.6, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#9aa0ac"; g.beginPath(); g.ellipse(ex, 42.8, 5.2, 2.7, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#050506"; g.beginPath(); g.ellipse(ex, 43, 4.2, 2, 0, 0, Math.PI * 2); g.fill();
+  }
   return crisp(cv);
 }

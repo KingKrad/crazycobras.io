@@ -260,11 +260,62 @@ export const rocket = {
   surge: () => { noiseF(0.9, { vol: 0.16, type: "lowpass", freq: 300, sweep: 2500, attack: 0.1 }); tone(45, 0.9, { type: "sine", vol: 0.28, slide: 1.6 }); },
 };
 
+// NICO'S CRAZY CAR: a V12 scream on launch and big exhaust pops and crackles on every gear change.
+export const v12 = {
+  scream: (t) => {
+    if (t <= 0) return;
+    const dur = 0.6 + t * 0.15;
+    for (const [mul, vol] of [[1, 0.09], [1.5, 0.06], [2, 0.05], [3, 0.025]]) tone(180 * mul, dur, { type: "sawtooth", vol, slide: 2.4 + t * 0.2 });
+    noiseF(dur, { vol: 0.05, type: "bandpass", freq: 2000, sweep: 5000, q: 1.5 });
+    v12.pop(t, 0.2);
+  },
+  // a string of pops and bangs, more for rarer answers
+  pop: (t = 3, at = 0) => {
+    const n = 2 + Math.min(4, Math.max(0, t - 1));
+    for (let k = 0; k < n; k++) {
+      const a = at + k * (0.06 + Math.random() * 0.05);
+      noiseF(0.05, { vol: 0.2 + Math.random() * 0.08, type: "highpass", freq: 500, at: a });
+      tone(60 + Math.random() * 30, 0.08, { type: "square", vol: 0.16, slide: 0.5, at: a });
+    }
+  },
+};
+
 // Engine drone that follows car speed (0..1).
 // electric: a spaceship's engine instead (AMELIA'S TESSY): two low detuned tones and thruster rumble,
 // throbbing slowly, that only get a little deeper and louder with speed
-export function engineStart(electric = false) {
+export function engineStart(kind = false) {
   if (!ctx || engine) return;
+  // a V12 (NICO'S CRAZY CAR): three sawtooth voices (the note, a fifth and an octave up) with a wobble,
+  // revving high and bright, like a screaming twelve-cylinder
+  if (kind === "v12") {
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    const f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 1200;
+    f.Q.value = 2;
+    const voices = [1, 1.5, 2].map((mul, k) => {
+      const o = ctx.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.value = 80 * mul;
+      const vg = ctx.createGain();
+      vg.gain.value = [0.5, 0.3, 0.22][k];
+      o.connect(vg).connect(f);
+      o.start();
+      return { o, mul };
+    });
+    // the firing wobble
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 30;
+    lg.gain.value = 3;
+    lfo.connect(lg);
+    for (const v of voices) lg.connect(v.o.frequency);
+    lfo.start();
+    f.connect(g).connect(master);
+    engine = { v12: true, voices, lfo, g, f };
+    return;
+  }
+  const electric = kind === true || kind === "electric";
   if (electric) {
     const g = ctx.createGain();
     g.gain.value = 0;
@@ -315,6 +366,14 @@ export function engineStart(electric = false) {
 export function engineSet(speed) {
   if (!engine) return;
   const t = ctx.currentTime;
+  if (engine.v12) {
+    const base = 75 + speed * 340; // revs right up when it's flying
+    for (const v of engine.voices) v.o.frequency.setTargetAtTime(base * v.mul, t, 0.06);
+    engine.lfo.frequency.setTargetAtTime(20 + speed * 60, t, 0.1);
+    engine.f.frequency.setTargetAtTime(900 + speed * 4200, t, 0.08);
+    engine.g.gain.setTargetAtTime(0.035 + speed * 0.075, t, 0.08);
+    return;
+  }
   if (engine.electric) {
     // barely any pitch change (no siren): the hum opens up, the thrusters roar and the throb quickens
     engine.o.frequency.setTargetAtTime(52 + speed * 14, t, 0.3);
@@ -334,5 +393,5 @@ export function engineStop() {
   const e = engine;
   engine = null;
   e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
-  for (const x of [e.o, e.o2, e.n, e.lfo]) x?.stop(ctx.currentTime + 0.5);
+  for (const x of [e.o, e.o2, e.n, e.lfo, ...(e.voices || []).map((v) => v.o)]) x?.stop(ctx.currentTime + 0.5);
 }

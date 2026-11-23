@@ -441,7 +441,8 @@ test("DEAN'S MAZZY: gift-only, and the best car in the game by a big margin", as
   const { CARS, GIFT_CARS, carById } = await import("../public/vroomillion/js/cars.js");
   const mazzy = carById("mazzy");
   assert.equal(mazzy.name, "DEAN'S MAZZY");
-  assert.deepEqual(GIFT_CARS, ["mazzy", "tessy", "hondeezy"]);
+  assert.deepEqual(GIFT_CARS, ["mazzy", "tessy", "hondeezy", "nico"]);
+  assert.equal(carById("nico").name, "NICO'S CRAZY CAR");
   assert.equal(carById("hondeezy").name, "A-DOG'S HONDEEZY");
   assert.equal(carById("tessy").name, "AMELIA'S TESSY");
   assert.equal(carById("tessy").power, mazzy.power, "the two gift cars tie for the best");
