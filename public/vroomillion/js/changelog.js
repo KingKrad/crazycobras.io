@@ -7,7 +7,7 @@ export const CHANGELOG = [
     date: "Nov 23, 2026",
     title: "24 hours of Unlimited, free",
     items: [
-      "Make an account and get Unlimited free for your first 24 hours: race as much as you like, in every mode, and host online 1v1s.",
+      "Launch offer, until Nov 25: make an account and get Unlimited free for your first 24 hours. Race as much as you like, in every mode, and host online 1v1s.",
     ],
   },
   {

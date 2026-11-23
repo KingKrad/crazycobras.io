@@ -142,11 +142,16 @@ export async function currentUser(request, env) {
 
 // Admins are the emails listed in the ADMIN_EMAILS secret (comma separated). They always have
 // Unlimited and can use the admin screen (src/admin.js).
-// FREE TRIAL: every new account has Unlimited for its first 24 hours (from created_at, on the server).
+// LAUNCH OFFER: accounts made before TRIAL_OFFER_ENDS get Unlimited free for their first 24 hours
+// (from created_at, on the server). Accounts made after that don't. The variable TRIAL_OFFER_ENDS
+// (an ISO date) can move the end without a code change.
 export const TRIAL_MS = 24 * 3600 * 1000;
-export const inTrial = (u, now = Date.now()) => !!u && u.unlimited !== 1 && Number(u.created_at) > now - TRIAL_MS;
+const TRIAL_OFFER_ENDS = "2026-11-26T00:00:00Z";
+export const trialOfferOpen = (env, now = Date.now()) => now < Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS);
+export const inTrial = (u, now = Date.now(), env = null) => !!u && u.unlimited !== 1 && Number(u.created_at) > now - TRIAL_MS
+  && Number(u.created_at) < Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS);
 // Unlimited right now: paid, admin, or still in the free first day
-export const hasUnlimited = (u, env) => !!u && (u.unlimited === 1 || isAdmin(u, env) || inTrial(u));
+export const hasUnlimited = (u, env) => !!u && (u.unlimited === 1 || isAdmin(u, env) || inTrial(u, Date.now(), env));
 export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email);
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
@@ -159,7 +164,7 @@ export const publicUser = (u, env) => ({
   email: u.email,
   unlimited: hasUnlimited(u, env),
   // the free first day: when it ends (null once it's over, or for paid and admin accounts)
-  trialEndsAt: !isAdmin(u, env) && inTrial(u) ? Number(u.created_at) + TRIAL_MS : null,
+  trialEndsAt: !isAdmin(u, env) && inTrial(u, Date.now(), env) ? Number(u.created_at) + TRIAL_MS : null,
   ...(isAdmin(u, env) ? { admin: true } : {}),
   hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
   gifts: parseGifts(u.gifts), // cars an admin gave this account
@@ -278,6 +283,7 @@ export async function handleConfig(request, env) {
   return json({
     turnstileSiteKey: turnstileSecret(env) && env.TURNSTILE_SITE_KEY ? String(env.TURNSTILE_SITE_KEY) : null,
     signIn: oauthProviders(env), // which "Continue with..." buttons to show
+    trialOffer: trialOfferOpen(env), // the launch offer (24 hours of Unlimited for new accounts) is on
     announcement: await announcement(env), // the title-screen message set on the admin screen
   });
 }
@@ -311,7 +317,8 @@ export async function handleSignup(request, env) {
   } catch {
     return taken();
   }
-  return json({ email, unlimited: true, trialEndsAt: Date.now() + TRIAL_MS, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
+  const trial = trialOfferOpen(env);
+  return json({ email, unlimited: trial, trialEndsAt: trial ? Date.now() + TRIAL_MS : null, recoveryCode }, 201, { "set-cookie": await startSession(env, id) });
 }
 
 export async function handleLogin(request, env) {

@@ -615,7 +615,7 @@ function renderPaywall() {
   const step = $("pay-step");
   step.textContent = "";
   if (!account) {
-    step.append(h("div", { class: "daily-line good", text: "NEW HERE? MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }),
+    step.append(trialOffer ? h("div", { class: "daily-line good", text: "LAUNCH OFFER: MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }) : null,
       h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall));
   } else if (account.unlimited && !account.trialEndsAt) {
     step.append(h("div", { class: "daily-line good", text: `★ ${account.email.toUpperCase()} HAS UNLIMITED` }),
@@ -943,11 +943,14 @@ function reportLink(prompt, entry) {
 
 // The announcement set on the admin screen, shown at the top of the title screen.
 let announcementText = null;
+let trialOffer = false; // the launch offer: 24 hours of Unlimited for new accounts (from the server)
 let signInWith = {}; // { google: bool, apple: bool }: which "Continue with..." buttons the server has set up
 api("config").then(({ body }) => {
   announcementText = body.announcement || null;
   if (current === "title") renderDaily();
   signInWith = body.signIn || {};
+  trialOffer = body.trialOffer === true;
+  if (current === "paywall") renderPaywall();
   if (!account && (signInWith.google || signInWith.apple)) { if (current === "account") renderAccount(); if (current === "paywall") renderPaywall(); }
 }).catch(() => {});
 

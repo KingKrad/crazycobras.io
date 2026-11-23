@@ -38,7 +38,7 @@ test.beforeEach(() => {
 });
 
 const ok = { limit: async () => ({ success: true }) };
-const env = (o = {}) => ({ STRIPE_SECRET_KEY: "sk_test_x", DB: db, PAY_LIMITER: ok, AUTH_LIMITER: ok, PBKDF2_ITERATIONS: "10000", ...o });
+const env = (o = {}) => ({ STRIPE_SECRET_KEY: "sk_test_x", DB: db, PAY_LIMITER: ok, AUTH_LIMITER: ok, PBKDF2_ITERATIONS: "10000", TRIAL_OFFER_ENDS: "2099-01-01T00:00:00Z", ...o }); // (the launch offer stays on in tests)
 const BASE = "https://game.test/api/vroomillion/";
 const post = (path, body, headers = {}) => new Request(BASE + path, {
   method: "POST", body: body == null ? undefined : JSON.stringify(body),
@@ -863,4 +863,16 @@ test("new accounts get Unlimited free for their first 24 hours, checked on the s
   me = await (await worker.fetch(get("me", { cookie }), env())).json();
   assert.equal(me.unlimited, true);
   assert.equal(me.trialEndsAt, null);
+});
+
+test("the free first day is a launch offer: accounts made after it ends don't get it", async () => {
+  const later = env({ TRIAL_OFFER_ENDS: "2020-01-01T00:00:00Z" });
+  const res = await worker.fetch(post("signup", { email: "late@example.com", password: "hunter2hunter2" }), later);
+  const body = await res.json();
+  assert.equal(body.unlimited, false);
+  assert.equal(body.trialEndsAt, null);
+  const cookie = cookieOf(res);
+  assert.equal((await (await worker.fetch(get("me", { cookie }), later)).json()).unlimited, false);
+  assert.equal((await (await worker.fetch(get("config"), later)).json()).trialOffer, false);
+  assert.equal((await (await worker.fetch(get("config"), env())).json()).trialOffer, true);
 });
