@@ -132,6 +132,16 @@ export async function induce(fam) {
     }
   }
   if (!pick) return { skip: `nothing shared by ${need}+ answers that's a sensible size`, shared: shared.slice(0, 4).map(([pv, n]) => pv + "×" + n) };
+  // Specific enough? The prompt's own answers are its most obvious ones, so for the right rule they sit
+  // near the top of what it matches (ranked by Wikipedia languages). "Anywhere in the UK" for Scotland,
+  // or "anyone who ever modelled" for supermodels, puts London or Picasso on top instead: rejected.
+  await sleep(1200);
+  const top = await sparql(`SELECT ?i WHERE { ${pick.where} ?i wikibase:sitelinks ?s. FILTER(?s >= ${pick.min}) } ORDER BY DESC(?s) LIMIT 40`).catch(() => []);
+  const topIds = new Set(top.map((r) => r.i.value.split("/").pop()));
+  const ours = new Set(found.map((a) => best.get(a).id));
+  const inTop = [...ours].filter((id) => topIds.has(id)).length;
+  const wantTop = Math.max(4, Math.ceil(ours.size * 0.4));
+  if (inTop < wantTop) return { skip: `too broad: only ${inTop} of its answers are in the top 40 (needs ${wantTop})`, rule: undefined, tried: pick.where };
   return { rule: `min=${pick.min} w:${pick.where}`, size: pick.n, covered: `${pick.covered}/${found.length} found (${answers.length} answers)`, parts: pick.parts };
 }
 
