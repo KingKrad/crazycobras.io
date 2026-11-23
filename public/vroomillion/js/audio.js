@@ -320,6 +320,32 @@ function siren(dur, { from = 500, to = 1100, rate = 7, depth = 90, vol = 0.07, a
 // the offbeat guitar "skank": a short bright chord chop
 const skank = (notes, at = 0, vol = 0.03, out) => { for (const f of notes) { tone(f * 2, 0.07, { type: "square", vol, at, out }); tone(f * 4, 0.04, { type: "triangle", vol: vol * 0.6, at, out }); } };
 const rim = (at = 0, vol = 0.12, out) => { noiseF(0.04, { vol, at, type: "bandpass", freq: 2400, q: 3, out }); tone(820, 0.03, { type: "triangle", vol: vol * 0.8, at, out }); };
+// ZIG'S WHIP's exhaust is a real recording (audio/zig-exhaust.mp3), loaded once when the truck races
+let zigClip = null, zigLoading = null;
+export function loadZigExhaust() {
+  if (!ctx || zigClip || zigLoading) return;
+  zigLoading = fetch("/vroomillion/audio/zig-exhaust.mp3")
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error("missing"))))
+    .then((b) => new Promise((ok, bad) => ctx.decodeAudioData(b, ok, bad)))
+    .then((buf) => { zigClip = buf; })
+    .catch(() => { zigLoading = null; }); // the synth sounds stand in if it can't load
+}
+// play some or all of the recording: rate pitches it up (faster) or down; echo sends a copy into the dub delay
+function clip(buf, { rate = 1, vol = 0.6, at = 0, offset = 0, dur = 0, echo = 0 } = {}) {
+  if (!ctx || !buf) return false;
+  const t = ctx.currentTime + at;
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf;
+  src.playbackRate.value = rate;
+  const len = (dur || buf.duration - offset) / rate;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.setValueAtTime(vol, t + Math.max(0, len - 0.06));
+  g.gain.linearRampToValueAtTime(0, t + len);
+  src.connect(g).connect(master);
+  if (echo) { const e = ctx.createGain(); e.gain.value = echo; g.connect(e).connect(dub()); }
+  src.start(t, offset, dur || undefined);
+  return true;
+}
 export const reggae = {
   // the air horn: "bap bap baaaa"
   horn: (at = 0, vol = 0.07) => {
@@ -331,9 +357,11 @@ export const reggae = {
   // off the line: a skank and a bass drop, the air horn from Rare up, a dub siren for the rarest
   launch: (t) => {
     if (t === 0) return; // the stall plays reggae.sputter
-    const out = dub();
-    skank([NR.A3, NR.C4, NR.E4], 0, 0.05, out);
-    tone(NR.A2, 0.5, { type: "sine", vol: 0.3, slide: 0.5 });
+    // the real exhaust: revved a little higher and louder for rarer answers
+    if (!clip(zigClip, { rate: 0.94 + t * 0.05, vol: 0.55 + t * 0.07, echo: t >= 3 ? 0.35 : 0 })) {
+      skank([NR.A3, NR.C4, NR.E4], 0, 0.05, dub());
+      tone(NR.A2, 0.5, { type: "sine", vol: 0.3, slide: 0.5 });
+    }
     if (t >= 2) reggae.horn(0.12, 0.05 + t * 0.01);
     if (t >= 3) siren(1 + t * 0.25, { from: 420, to: 900 + t * 120, vol: 0.05 + t * 0.008, at: 0.5 });
     if (t >= 5) siren(1.6, { from: 1400, to: 380, rate: 11, vol: 0.06, at: 1.6 });
@@ -343,10 +371,11 @@ export const reggae = {
     noiseF(0.5 + t * 0.1, { vol: 0.05 + t * 0.012, type: "bandpass", freq: 300, sweep: 1600, q: 4, attack: 0.1, out: dub() });
   },
   // a gear change: a rimshot (and a kick) that echoes away
-  backfire: () => { rim(0, 0.16, dub()); kick(0, 0.25); },
+  backfire: () => { if (!clip(zigClip, { rate: 1.25, vol: 0.5, offset: 0.35, dur: 0.3, echo: 0.6 })) { rim(0, 0.16, dub()); kick(0, 0.25); } },
   pop: (t = 3) => {
     const out = dub();
-    rim(0, 0.14 + t * 0.01, out);
+    // a short blip of the exhaust on every shift, echoing; the rimshot if the recording isn't loaded
+    if (!clip(zigClip, { rate: 1.1 + t * 0.05, vol: 0.45, offset: 0.35 + Math.random() * 0.8, dur: 0.28, echo: 0.55 })) rim(0, 0.14 + t * 0.01, out);
     if (t >= 3) skank([NR.G3, NR.B3, NR.D4], 0.18, 0.035, out);
   },
   shift: () => rim(0, 0.07),
@@ -367,7 +396,7 @@ export const reggae = {
     if (t >= 5) reggae.horn(8 * e + 0.4, 0.06);
   },
   // nitro: the dub siren climbs and the bass drops
-  nitro: () => { siren(1.2, { from: 300, to: 1500, rate: 9, vol: 0.07 }); tone(55, 0.9, { type: "sine", vol: 0.3, slide: 0.6 }); },
+  nitro: () => { clip(zigClip, { rate: 1.3, vol: 0.6, at: 0.15, echo: 0.3 }); siren(1.2, { from: 300, to: 1500, rate: 9, vol: 0.06 }); tone(55, 0.9, { type: "sine", vol: 0.3, slide: 0.6 }); },
   // STALLED: a sad trombone-ish fall, echoing
   sputter: () => { const out = dub(); [0, 0.22, 0.44].forEach((at, k) => tone([233, 220, 208][k], k === 2 ? 0.6 : 0.2, { type: "sawtooth", vol: 0.05, at, slide: k === 2 ? 0.8 : 1, out })); },
 };
@@ -411,7 +440,7 @@ function reggaeEngine() {
 // throbbing slowly, that only get a little deeper and louder with speed
 export function engineStart(kind = false) {
   if (!ctx || engine) return;
-  if (kind === "reggae") { engine = reggaeEngine(); return; }
+  if (kind === "reggae") { loadZigExhaust(); engine = reggaeEngine(); return; }
   // a V12 (NICO'S CRAZY CAR): three sawtooth voices (the note, a fifth and an octave up) with a wobble,
   // revving high and bright, like a screaming twelve-cylinder
   if (kind === "v12") {
