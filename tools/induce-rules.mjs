@@ -52,11 +52,31 @@ async function lookup(answers) {
   const props = Object.keys(PROPS).filter((p) => /^P\d+$/.test(p));
   const facts = await sparql(`SELECT ?i ?p ?v WHERE { VALUES ?i { ${ids.map((x) => "wd:" + x).join(" ")} } VALUES ?p { ${props.map((p) => "wdt:" + p).join(" ")} } ?i ?p ?v. FILTER(isIRI(?v)) }`);
   const byItem = new Map();
+  const ups = new Set();
   for (const r of facts) {
     const id = r.i.value.split("/").pop();
     const p = r.p.value.split("/").pop(), v = r.v.value.split("/").pop();
     if (!byItem.has(id)) byItem.set(id, new Set());
     byItem.get(id).add(p + "=" + v);
+    if (p === "P31" || p === "P106" || p === "P279") ups.add(v);
+  }
+  // one level up: physicist and chemist are both "scientist"; different kinds of dish are all "dish"
+  if (ups.size) {
+    await sleep(1500);
+    const parents = await sparql(`SELECT ?c ?up WHERE { VALUES ?c { ${[...ups].slice(0, 400).map((x) => "wd:" + x).join(" ")} } ?c wdt:P279 ?up. }`).catch(() => []);
+    const upOf = new Map();
+    for (const r of parents) {
+      const c = r.c.value.split("/").pop(), up = r.up.value.split("/").pop();
+      if (!upOf.has(c)) upOf.set(c, new Set());
+      upOf.get(c).add(up);
+    }
+    for (const set of byItem.values()) {
+      for (const pv of [...set]) {
+        const [p, v] = pv.split("=");
+        if (!["P31", "P106", "P279"].includes(p)) continue;
+        for (const up of upOf.get(v) || []) set.add(p + "^=" + up);
+      }
+    }
   }
   return { best, facts: byItem };
 }
@@ -68,8 +88,12 @@ async function size(where, min) {
 }
 const clause = (pv) => {
   const [p, v] = pv.split("=");
-  return p === "P31" ? `{ ?i wdt:P31/wdt:P279* wd:${v}. }` : p === "P279" ? `{ ?i wdt:P279+ wd:${v}. }` : `?i wdt:${p} wd:${v}.`;
+  if (p === "P31" || p === "P31^") return `{ ?i wdt:P31/wdt:P279* wd:${v}. }`;
+  if (p === "P279" || p === "P279^") return `{ ?i wdt:P279+ wd:${v}. }`;
+  if (p === "P106^") return `?i wdt:P106/wdt:P279* wd:${v}.`;
+  return `?i wdt:${p} wd:${v}.`;
 };
+const kindOf = (pv) => pv.split("=")[0].replace("^", "");
 
 export async function induce(fam) {
   const answers = answersOf(fam);
@@ -86,23 +110,29 @@ export async function induce(fam) {
   const broad = [...count].filter(([pv, n]) => n >= need && TOO_BROAD.has(pv.split("=")[1]) && /^P31=/.test(pv)).sort((a, b) => b[1] - a[1]);
   const tries = [];
   for (const [pv] of shared.slice(0, 4)) tries.push([pv]);
-  for (const [b] of broad.slice(0, 2)) for (const [pv] of shared.filter(([x]) => !/^P31=|^P279=/.test(x)).slice(0, 3)) tries.push([b, pv]);
-  for (const [a] of shared.slice(0, 3)) for (const [pv] of shared.slice(0, 4)) if (a < pv && a.split("=")[0] !== pv.split("=")[0]) tries.push([a, pv]);
+  for (const [b] of broad.slice(0, 2)) for (const [pv] of shared.filter(([x]) => !/^P31|^P279/.test(x)).slice(0, 3)) tries.push([b, pv]);
+  for (const [a] of shared.slice(0, 3)) for (const [pv] of shared.slice(0, 5)) if (a < pv && kindOf(a) !== kindOf(pv)) tries.push([a, pv]);
   let pick = null;
-  for (const t of tries) {
+  for (const t of tries.slice(0, 9)) {
     const where = t.map(clause).join(" ");
-    let n;
-    try { n = await size(where, 3); } catch { continue; }
-    await sleep(1200);
     const covered = found.filter((a) => t.every((pv) => facts.get(best.get(a).id).has(pv))).length;
-    // big enough to add answers, small enough to mean the prompt; prefer covering more answers
-    if (n >= 25 && n < 6000 && covered >= need) {
-      const score = covered * 10 - Math.log10(n);
-      if (!pick || score > pick.score) pick = { where, n, covered, score, parts: t };
+    if (covered < need) continue;
+    // big enough to add answers, small enough to mean the prompt. Too big (every model, every scientist)?
+    // keep only the better-known ones: items in more Wikipedia languages.
+    for (const min of [3, 10, 25]) {
+      let n;
+      try { n = await size(where, min); } catch { break; }
+      await sleep(1200);
+      if (n < 25) break;
+      if (n < 6000) {
+        const score = covered * 10 - Math.log10(n) - (min > 3 ? 1 : 0);
+        if (!pick || score > pick.score) pick = { where, n, covered, score, parts: t, min };
+        break;
+      }
     }
   }
   if (!pick) return { skip: `nothing shared by ${need}+ answers that's a sensible size`, shared: shared.slice(0, 4).map(([pv, n]) => pv + "×" + n) };
-  return { rule: `min=3 w:${pick.where}`, size: pick.n, covered: `${pick.covered}/${found.length} found (${answers.length} answers)`, parts: pick.parts };
+  return { rule: `min=${pick.min} w:${pick.where}`, size: pick.n, covered: `${pick.covered}/${found.length} found (${answers.length} answers)`, parts: pick.parts };
 }
 
 // ---- run ----
@@ -116,4 +146,47 @@ if (tryIds) {
     console.log(id, "|", f.prompts[0], "→", JSON.stringify(r));
     await sleep(2000);
   }
+}
+
+// --write: add the rules to the catalog lines (the rule column is the 6th), most-played pools first
+if (args.includes("--write")) {
+  const limit = Number(arg("--limit") || 100);
+  const pool = arg("--pool");
+  const CAT = new URL("../public/vroomillion/js/catalog/", import.meta.url);
+  const files = fs.readdirSync(CAT).filter((f) => /^w\d+\.js$/.test(f));
+  // which families still have no rule, straight from the catalog lines
+  const lines = new Map(); // id -> { file, line }
+  for (const f of files) {
+    const text = fs.readFileSync(new URL(f, CAT), "utf8");
+    for (const line of text.split("\n")) {
+      const m = line.match(/^\s*([a-z0-9]+\/[a-z0-9-]+)\s*\|/);
+      if (!m) continue;
+      const cols = line.split("|");
+      if (cols.length >= 7 && !cols[5].trim()) lines.set(m[1], { file: f, line });
+    }
+  }
+  const order = (f) => (f.pools.includes("daily") ? 0 : f.pools.includes("main") ? 1 : 2);
+  const todo = FAMILIES.filter((f) => lines.has(f.id) && !done[f.id] && (!pool || f.pools.includes(pool))).sort((a, b) => order(a) - order(b)).slice(0, limit);
+  console.log(`${todo.length} families to try (${lines.size} without a rule)`);
+  let found = 0;
+  for (const f of todo) {
+    let r;
+    try { r = await induce(famBySlug(f)); } catch (e) { r = { error: e.message }; }
+    done[f.id] = { at: Date.now(), ...r };
+    if (r.rule) {
+      const { file, line } = lines.get(f.id);
+      const url = new URL(file, CAT);
+      const text = fs.readFileSync(url, "utf8");
+      const cols = line.split("|").map((c) => c.trim());
+      if (cols.length >= 7 && text.includes(line)) {
+        cols[5] = r.rule;
+        fs.writeFileSync(url, text.replace(line, cols.join(" | ")));
+        found++;
+      }
+    }
+    fs.writeFileSync(LOG, JSON.stringify(done, null, 1));
+    console.log(`${f.id} | ${f.prompts[0]} → ${r.rule ? "RULE " + r.size + " items, " + r.covered : "skip: " + (r.skip || r.error)}`);
+    await sleep(1500);
+  }
+  console.log(`done: ${found} rules added`);
 }
