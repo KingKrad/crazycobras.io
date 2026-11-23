@@ -11,6 +11,21 @@
 import fs from "node:fs";
 import { FAMILIES } from "../public/vroomillion/js/catalog/index.js";
 import { sparql, sleep } from "./wd-lib.mjs";
+import { execFile } from "node:child_process";
+
+// one try, 20 seconds at most: a size check that takes longer than that is far too broad anyway
+function quick(query) {
+  return new Promise((resolve, reject) => {
+    execFile("curl", ["-s", "-m", "20", "-X", "POST", "-H", "Accept: application/sparql-results+json",
+      "-H", "User-Agent: vroomillion-answer-builder/1.0 (trivia game data)", "--data-urlencode", "query@-",
+      "-w", "\n%{http_code}", "https://query.wikidata.org/sparql"], { maxBuffer: 16 << 20 }, (err, out) => {
+      const cut = out ? out.lastIndexOf("\n") : -1;
+      const code = cut >= 0 ? out.slice(cut + 1).trim() : "000";
+      if (!err && code === "200") { try { return resolve(JSON.parse(out.slice(0, cut)).results.bindings); } catch { /* bad JSON */ } }
+      reject(new Error("HTTP " + code));
+    }).stdin.end(query);
+  });
+}
 import { normalize } from "../public/vroomillion/js/logic.js";
 
 const args = process.argv.slice(2);
@@ -83,7 +98,7 @@ async function lookup(answers) {
 
 // how many items a rule matches (stops counting at 6000), keeping items in at least `min` languages
 async function size(where, min) {
-  const rows = await sparql(`SELECT (COUNT(*) AS ?n) WHERE { SELECT ?i WHERE { ${where} ?i wikibase:sitelinks ?s. FILTER(?s >= ${min}) } LIMIT 6000 }`);
+  const rows = await quick(`SELECT (COUNT(*) AS ?n) WHERE { SELECT ?i WHERE { ${where} ?i wikibase:sitelinks ?s. FILTER(?s >= ${min}) } LIMIT 6000 }`);
   return Number(rows[0]?.n?.value || 0);
 }
 const clause = (pv) => {
@@ -113,7 +128,7 @@ export async function induce(fam) {
   for (const [b] of broad.slice(0, 2)) for (const [pv] of shared.filter(([x]) => !/^P31|^P279/.test(x)).slice(0, 3)) tries.push([b, pv]);
   for (const [a] of shared.slice(0, 3)) for (const [pv] of shared.slice(0, 5)) if (a < pv && kindOf(a) !== kindOf(pv)) tries.push([a, pv]);
   let pick = null;
-  for (const t of tries.slice(0, 9)) {
+  for (const t of tries.slice(0, 6)) {
     const where = t.map(clause).join(" ");
     const covered = found.filter((a) => t.every((pv) => facts.get(best.get(a).id).has(pv))).length;
     if (covered < need) continue;
@@ -121,8 +136,8 @@ export async function induce(fam) {
     // keep only the better-known ones: items in more Wikipedia languages.
     for (const min of [3, 10, 25]) {
       let n;
-      try { n = await size(where, min); } catch { break; }
-      await sleep(1200);
+      try { n = await size(where, min); } catch { n = 1e9; } // timed out: far too broad at this level
+      await sleep(400);
       if (n < 25) break;
       if (n < 6000) {
         const score = covered * 10 - Math.log10(n) - (min > 3 ? 1 : 0);
@@ -136,7 +151,7 @@ export async function induce(fam) {
   // near the top of what it matches (ranked by Wikipedia languages). "Anywhere in the UK" for Scotland,
   // or "anyone who ever modelled" for supermodels, puts London or Picasso on top instead: rejected.
   await sleep(1200);
-  const top = await sparql(`SELECT ?i WHERE { ${pick.where} ?i wikibase:sitelinks ?s. FILTER(?s >= ${pick.min}) } ORDER BY DESC(?s) LIMIT 40`).catch(() => []);
+  const top = await quick(`SELECT ?i WHERE { ${pick.where} ?i wikibase:sitelinks ?s. FILTER(?s >= ${pick.min}) } ORDER BY DESC(?s) LIMIT 40`).catch(() => []);
   const topIds = new Set(top.map((r) => r.i.value.split("/").pop()));
   const ours = new Set(found.map((a) => best.get(a).id));
   const inTop = [...ours].filter((id) => topIds.has(id)).length;
@@ -186,7 +201,7 @@ if (args.includes("--write")) {
     if (r.rule) found++; // kept in the log; --apply writes them into the catalog in one go
     fs.writeFileSync(LOG, JSON.stringify(done, null, 1));
     console.log(`${f.id} | ${f.prompts[0]} → ${r.rule ? "RULE " + r.size + " items, " + r.covered : "skip: " + (r.skip || r.error)}`);
-    await sleep(1500);
+    await sleep(600);
   }
   console.log(`done: ${found} rules added`);
 }
