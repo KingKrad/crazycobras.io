@@ -2138,6 +2138,7 @@ async function runRace(token) {
       if (tier >= 2) sfx.whoosh(tier);
       if (tier === 0) sfx.sputter();
       if (nitro) sfx.nitro();
+      if (r.car.rocket) { audio.rocket.roar(tier); if (nitro) audio.rocket.surge(); } // the Hondeezy's booster
       if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
     };
     scene.onEvent = (type, card) => {

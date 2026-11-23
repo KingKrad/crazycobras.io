@@ -159,7 +159,7 @@ export function drawSkyLife(s, g, zone, tod) {
 export function skyShow(s, tier) {
   if (s.calm || tier < 3) return;
   s.fireworks = s.fireworks || [];
-  const bursts = [0, 0, 0, 3, 6, 12][tier];
+  const bursts = [0, 0, 0, 4, 8, 16][tier];
   for (let b = 0; b < bursts; b++) s.fireworks.push({ t: -b * 0.28 - Math.random() * 0.2, x: 0.12 + Math.random() * 0.76, y: 0.15 + Math.random() * 0.45, col: Math.random() < 0.5 ? TIER_COL[tier] : ["#ff4fd8", "#ffd23a", "#4fd1ff", "#5dff8f", "#ffffff"][b % 5], sparks: null });
   if (tier >= 4) s.aurora = Math.max(s.aurora || 0, tier === 5 ? 6 : 4);
   if (tier === 5) s.comet = 3.2;
@@ -191,26 +191,57 @@ export function drawSkyShow(s, g) {
     }
     g.globalAlpha = 1;
   }
-  // fireworks: a rocket climbs, bursts into a ring of sparks that fall and fade
-  for (const f of s.fireworks || []) {
+}
+
+// Fireworks go on top of everything (mountains, buildings and the rarity tint), glowing:
+// a rocket climbs, bursts into a big double ring of sparks with trails, a flash, then the sparks fall.
+export function drawFireworks(s, g) {
+  if (!s.fireworks?.length) return;
+  const { W, u } = s;
+  const hz = s.horizon;
+  g.save();
+  g.globalCompositeOperation = "lighter";
+  for (const f of s.fireworks) {
     if (f.t < 0) continue;
     const x = f.x * W, y = f.y * hz;
-    if (f.t < 0.5) {
-      g.fillStyle = "#fff6c2";
-      g.fillRect(Math.round(x), Math.round(hz - (hz - y) * (f.t / 0.5)), Math.max(1, u), Math.max(2, 2 * u));
+    if (f.t < 0.45) {
+      // the rocket going up, with a sparkly trail
+      const ry = hz - (hz - y) * (f.t / 0.45);
+      g.fillStyle = "#ffffff";
+      g.fillRect(Math.round(x - u), Math.round(ry), Math.max(2, 2 * u), Math.max(3, 4 * u));
+      g.fillStyle = "#ffd23a";
+      for (let k = 1; k < 6; k++) g.fillRect(Math.round(x + (Math.random() - 0.5) * 2 * u), Math.round(ry + k * 4 * u), Math.max(1, u), Math.max(1, u));
       continue;
     }
-    const k = f.t - 0.5;
-    g.globalAlpha = clamp(1 - k / 1.4, 0, 1);
-    g.fillStyle = f.col;
-    for (let i = 0; i < 18; i++) {
-      const a = (i / 18) * Math.PI * 2;
-      const r = (8 + k * 40) * u;
-      g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r + k * k * 14 * u), Math.max(1, Math.round(u * 1.5)), Math.max(1, Math.round(u * 1.5)));
+    const k = f.t - 0.45;
+    const fade = clamp(1 - k / 1.6, 0, 1);
+    // a bright flash and a soft glow where it bursts
+    if (k < 0.35) {
+      const r = (14 + k * 120) * u;
+      const glow = g.createRadialGradient(x, y, 0, x, y, r);
+      glow.addColorStop(0, `rgba(255,255,255,${(0.9 * (1 - k / 0.35)).toFixed(3)})`);
+      glow.addColorStop(0.4, f.col + "aa");
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = glow;
+      g.fillRect(x - r, y - r, r * 2, r * 2);
     }
-    if (k < 0.15) { g.fillStyle = "#ffffff"; g.fillRect(Math.round(x - 3 * u), Math.round(y - 3 * u), Math.round(6 * u), Math.round(6 * u)); }
+    const sz = Math.max(2, Math.round(u * 2.2));
+    for (const [n, speed, col] of [[28, 58, f.col], [16, 34, "#ffffff"]]) {
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + (n === 16 ? 0.2 : 0);
+        const r = (6 + speed * (1 - Math.pow(1 - Math.min(1, k / 1.2), 2))) * u;
+        const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r + k * k * 22 * u;
+        // a short trail behind each spark
+        g.globalAlpha = fade * 0.45;
+        g.fillStyle = col;
+        g.fillRect(Math.round(px - Math.cos(a) * 5 * u), Math.round(py - Math.sin(a) * 5 * u), sz - 1, sz - 1);
+        g.globalAlpha = fade * (Math.random() < 0.15 ? 0.5 : 1); // twinkle
+        g.fillRect(Math.round(px), Math.round(py), sz, sz);
+      }
+    }
     g.globalAlpha = 1;
   }
+  g.restore();
 }
 
 // ---------- mountains: each area has its own range ----------

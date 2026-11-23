@@ -245,6 +245,21 @@ export const ev = {
   },
 };
 
+// A-DOG'S HONDEEZY's rocket booster: a deep rocket roar on every launch, louder for rarer answers,
+// with crackle on top (the car's own engine sounds still play underneath).
+export const rocket = {
+  roar: (t) => {
+    if (t <= 0) return;
+    const dur = 1 + t * 0.35;
+    noiseF(dur, { vol: 0.14 + t * 0.03, type: "lowpass", freq: 250, sweep: 900, attack: 0.08 });
+    noiseF(dur * 0.8, { vol: 0.06 + t * 0.015, type: "bandpass", freq: 1800, q: 0.8, attack: 0.05 });
+    tone(38, dur, { type: "sine", vol: 0.3, slide: 1.4 });
+    for (let i = 0; i < 6 + t * 3; i++) noiseF(0.03, { vol: 0.07, type: "highpass", freq: 3500, at: 0.1 + Math.random() * dur * 0.8 });
+  },
+  // nitro: the booster throttles up again
+  surge: () => { noiseF(0.9, { vol: 0.16, type: "lowpass", freq: 300, sweep: 2500, attack: 0.1 }); tone(45, 0.9, { type: "sine", vol: 0.28, slide: 1.6 }); },
+};
+
 // Engine drone that follows car speed (0..1).
 // electric: a spaceship's engine instead (AMELIA'S TESSY): two low detuned tones and thruster rumble,
 // throbbing slowly, that only get a little deeper and louder with speed

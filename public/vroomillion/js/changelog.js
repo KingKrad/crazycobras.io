@@ -3,6 +3,12 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-23d",
+    date: "Nov 23, 2026",
+    title: "Brighter fireworks",
+    items: ["Rare answers' fireworks are bigger and brighter, and burst in front of everything."],
+  },
+  {
     id: "2026-11-23c",
     date: "Nov 23, 2026",
     title: "A world worth racing through",

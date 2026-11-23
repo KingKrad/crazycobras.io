@@ -110,6 +110,8 @@ export const CARS = [
   // black window trim, dark aero wheels.
   // Ties the Mazzy for the best in the game.
   { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true, hiRes: true },
+  // a 2006 sedan in silver with a huge rocket booster strapped to its back. Ties for the best in the game.
+  { ...C("hondeezy", "A-DOG'S HONDEEZY", "X", 0, 9.0, 8, "civic", "#b9bec6", "#2a2c31"), giftOnly: true, rim: "#c9ced6", glass: "#1e2836", seats: "#3a3c42", hiRes: true, rocket: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -377,7 +379,7 @@ const cache = new Map();
 export function carSprite(car, frame = 0) {
   const ck = car.id + ":" + car.color + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
-  if (car.hiRes) { const cv = evSide(car, frame); cache.set(ck, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
   const wheelTop = tpl.rows.length - 2;
@@ -574,7 +576,7 @@ const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
   const key = car.id + ":" + car.color + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
-  if (car.hiRes) { const cv = evRear(car, frame); rearCache.set(key, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);
   const cv = document.createElement("canvas");
   cv.width = rows[0].length;
@@ -686,5 +688,104 @@ function evRear(car, frame) {
   g.fillStyle = "#7d8296"; for (const x of [33, 36, 40, 43, 46]) g.fillRect(x, 35, 2, 2);
   g.fillStyle = car.accent; g.fillRect(6, 42, 68, 4);
   g.fillStyle = shade(car.accent, 1.6); for (let x = 12; x < 70; x += 7) g.fillRect(x, 42, 1, 4);
+  return crisp(cv);
+}
+
+
+// A-DOG'S HONDEEZY: a silver 2006 sedan (wedge nose, steep windscreen, high short trunk) with a big
+// white rocket booster on struts over the roof, engine bell out the back. Twice the pixels, like the Tessy.
+function civicSide(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 76; cv.height = 36;
+  const g = cv.getContext("2d");
+  const Y = 11; // the car sits under the rocket
+  const dark = shade(car.color, 0.62), deep = shade(car.color, 0.42), light = lighten(car.color, 0.35);
+  // the rocket: engine bell at the back, black band, white body, grid fins, pointed nose
+  poly(g, [[2, 1.5], [9, 3], [9, 8], [2, 9.5]], "#4a4d55");
+  poly(g, [[3, 3], [8, 3.8], [8, 7.2], [3, 8]], "#2a2c31");
+  g.fillStyle = "#f4f6f8"; g.fillRect(9, 2, 50, 7);
+  g.fillStyle = "#dfe3ea"; g.fillRect(9, 6.6, 50, 2.4);
+  g.fillStyle = "#16171b"; g.fillRect(40, 2, 5, 7); // interstage
+  g.fillStyle = "#c9ced6"; g.fillRect(12, 2, 1, 7); g.fillRect(26, 2, 1, 7);
+  poly(g, [[59, 2], [66, 3.4], [71, 5.5], [66, 7.6], [59, 9]], "#f4f6f8");
+  poly(g, [[59, 6.6], [66, 7.6], [59, 9]], "#dfe3ea");
+  g.fillStyle = "#3a3c42"; g.fillRect(46, 0.4, 3, 1.6); g.fillRect(46, 9, 3, 1.6); // grid fins
+  g.fillStyle = "#2a5bd6"; g.fillRect(30, 3.4, 8, 1.4); // a stripe of livery
+  // struts down to the roof
+  g.fillStyle = "#5a5d66"; g.fillRect(20, 9, 1.4, Y - 7); g.fillRect(38, 9, 1.4, Y - 7); g.fillRect(52, 9, 1.4, Y - 5);
+  // the car body
+  const body = [[3, Y + 11], [5, Y + 8.6], [14, Y + 8], [22, Y + 2.4], [32, Y + 1.2], [42, Y + 1.4], [50, Y + 6.5], [56, Y + 8.6], [66, Y + 10.2], [72, Y + 11.8], [73, Y + 15], [71.5, Y + 18.5], [3, Y + 18.5], [2, Y + 14]];
+  const grad = g.createLinearGradient(0, Y, 0, Y + 19);
+  grad.addColorStop(0, light); grad.addColorStop(0.45, car.color); grad.addColorStop(1, dark);
+  poly(g, body, grad);
+  // windows with black trim and a B-pillar
+  poly(g, [[15, Y + 8.4], [22.6, Y + 3.1], [32, Y + 2], [41.5, Y + 2.2], [49.4, Y + 8.4]], car.accent);
+  poly(g, [[17, Y + 8], [23.2, Y + 3.7], [31.4, Y + 2.8], [40.8, Y + 3], [47.4, Y + 8]], car.glass);
+  g.fillStyle = car.accent; g.fillRect(32.2, Y + 2.2, 1.6, 6.2);
+  poly(g, [[24, Y + 4.2], [30, Y + 3.3], [26.5, Y + 6]], "rgba(255,255,255,0.22)");
+  // shoulder crease, door seams, handles, mirror
+  g.fillStyle = light; g.fillRect(8, Y + 10.4, 60, 0.8);
+  g.fillStyle = deep; g.fillRect(32.6, Y + 9, 0.7, 8); g.fillRect(48, Y + 9, 0.7, 7.5);
+  g.fillStyle = shade(car.color, 0.55); g.fillRect(26, Y + 11.8, 3, 0.9); g.fillRect(42, Y + 11.8, 3, 0.9);
+  poly(g, [[49.6, Y + 7.8], [53, Y + 7.4], [53, Y + 9.2], [50, Y + 9.2]], car.accent);
+  // sharp headlight, big tail light, a dark lower bumper and side skirt
+  poly(g, [[64, Y + 11], [71.6, Y + 12.4], [71.4, Y + 13.4], [64.4, Y + 12.4]], "#f4f6ff");
+  poly(g, [[2.4, Y + 11.4], [8, Y + 9.2], [8.4, Y + 11.4], [2.6, Y + 13]], "#e0201b");
+  g.fillStyle = "#3a3c42"; g.fillRect(6, Y + 17, 61, 1.5); g.fillRect(67, Y + 16.6, 5, 1.4);
+  // wheels: silver five-spoke alloys under dark arches
+  for (const wx of [15.5, 59]) {
+    g.fillStyle = "#08080a"; g.beginPath(); g.arc(wx, Y + 18.3, 6.4, Math.PI, 0); g.fill();
+    g.fillStyle = "#15151c"; g.beginPath(); g.arc(wx, Y + 18.5, 5.6, 0, Math.PI * 2); g.fill();
+    g.fillStyle = car.rim; g.beginPath(); g.arc(wx, Y + 18.5, 3.9, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = "#5a5d66"; g.lineWidth = 0.9;
+    for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * Math.PI * 2 + frame * 0.6;
+      g.beginPath(); g.moveTo(wx + Math.cos(a) * 1.2, Y + 18.5 + Math.sin(a) * 1.2); g.lineTo(wx + Math.cos(a) * 3.4, Y + 18.5 + Math.sin(a) * 3.4); g.stroke();
+    }
+    g.fillStyle = "#2a2c31"; g.beginPath(); g.arc(wx, Y + 18.5, 1, 0, Math.PI * 2); g.fill();
+  }
+  return crisp(cv);
+}
+
+function civicRear(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 80; cv.height = 70;
+  const g = cv.getContext("2d");
+  const Y = 18; // the car sits under the rocket's engines
+  const dark = shade(car.color, 0.66), light = lighten(car.color, 0.3);
+  for (const tx of [7, 59]) {
+    g.fillStyle = "#15151c"; g.fillRect(tx, Y + 40, 14, 12);
+    g.fillStyle = "#2c2c38"; for (let y = Y + 41 + frame; y < Y + 52; y += 2) g.fillRect(tx + 1, y, 12, 1);
+  }
+  // body: a tall, upright trunk
+  const grad = g.createLinearGradient(0, Y + 16, 0, Y + 46);
+  grad.addColorStop(0, light); grad.addColorStop(0.4, car.color); grad.addColorStop(1, dark);
+  poly(g, [[6, Y + 24], [12, Y + 19], [68, Y + 19], [74, Y + 24], [76, Y + 30], [76, Y + 44], [72, Y + 46], [8, Y + 46], [4, Y + 44], [4, Y + 30]], grad);
+  // the rear window and roof
+  poly(g, [[22, Y + 4], [58, Y + 4], [65, Y + 19], [15, Y + 19]], car.color);
+  poly(g, [[24, Y + 6], [56, Y + 6], [62, Y + 19], [18, Y + 19]], car.glass);
+  g.fillStyle = car.seats;
+  for (const hx of [30, 50]) { g.beginPath(); g.ellipse(hx, Y + 14, 3, 2.4, 0, 0, Math.PI * 2); g.fill(); }
+  poly(g, [[7, Y + 16], [13, Y + 16.5], [15, Y + 19], [7, Y + 19]], car.accent); poly(g, [[73, Y + 16], [67, Y + 16.5], [65, Y + 19], [73, Y + 19]], car.accent);
+  // big wraparound tail lights with a chrome bar between
+  poly(g, [[5, Y + 24], [24, Y + 23], [24, Y + 29], [5, Y + 30]], "#e0201b");
+  poly(g, [[75, Y + 24], [56, Y + 23], [56, Y + 29], [75, Y + 30]], "#e0201b");
+  g.fillStyle = "#ff8a8a"; g.fillRect(8, Y + 24.6, 12, 1.2); g.fillRect(60, Y + 24.6, 12, 1.2);
+  g.fillStyle = "#d8dde6"; g.fillRect(24, Y + 25, 32, 2.2);
+  g.fillStyle = "#e9e6d8"; g.fillRect(31, Y + 33, 18, 6);
+  g.fillStyle = "#7d8296"; for (const x of [33, 36, 40, 43, 46]) g.fillRect(x, Y + 35, 2, 2);
+  g.fillStyle = "#3a3c42"; g.fillRect(6, Y + 42, 68, 4);
+  g.fillStyle = "#a7adb8"; g.fillRect(12, Y + 43, 4, 2); // the one exhaust tip
+  // the rocket booster seen from behind: a big round base with nine engines, on struts over the roof
+  g.fillStyle = "#5a5d66"; g.fillRect(24, Y + 1, 2, 5); g.fillRect(54, Y + 1, 2, 5);
+  g.fillStyle = "#f4f6f8"; g.beginPath(); g.arc(40, 14, 14, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#16171b"; g.beginPath(); g.arc(40, 14, 12, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#4a4d55";
+  const eng = [[40, 14]];
+  for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; eng.push([40 + Math.cos(a) * 7.6, 14 + Math.sin(a) * 7.6]); }
+  for (const [ex, ey] of eng) { g.beginPath(); g.arc(ex, ey, 2.4, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = "#0a0a0c";
+  for (const [ex, ey] of eng) { g.beginPath(); g.arc(ex, ey, 1.3, 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = "#3a3c42"; g.fillRect(24, 2, 4, 3); g.fillRect(52, 2, 4, 3); // grid fins poking out
   return crisp(cv);
 }

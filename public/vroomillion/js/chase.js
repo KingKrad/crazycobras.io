@@ -10,7 +10,7 @@
 // gradient skies with parallax mountains, and sprites smoothed with Scale2x (rounded diagonals,
 // more detail) plus soft shading on the cars.
 import { rearSprite } from "./cars.js";
-import { drawClouds, drawSkyLife, skyShow, drawSkyShow, MOUNTAINS, drawLandmark, bits, GROUND, updateTraffic, trafficSprite } from "./scenery.js";
+import { drawClouds, drawSkyLife, skyShow, drawSkyShow, drawFireworks, MOUNTAINS, drawLandmark, bits, GROUND, updateTraffic, trafficSprite } from "./scenery.js";
 import { pixelText } from "./scene.js";
 
 const SEG = 200; // length of one road segment (world units)
@@ -1075,7 +1075,7 @@ export class ChaseScene {
     this.revT = Math.max(0, this.revT - dt);
     // scenery timers
     for (const f of this.fireworks || []) f.t += dt;
-    this.fireworks = (this.fireworks || []).filter((f) => f.t < 2.2);
+    this.fireworks = (this.fireworks || []).filter((f) => f.t < 2.3);
     this.aurora = Math.max(0, (this.aurora || 0) - dt);
     this.comet = Math.max(0, (this.comet || 0) - dt);
     this.cheer = Math.max(0, (this.cheer || 0) - dt);
@@ -1200,6 +1200,10 @@ export class ChaseScene {
           if (r.car?.fx === "rainbow" && Math.random() < 0.6 + r.boost) {
             const hue = Math.floor((this.time * 400 + Math.random() * 60) % 360);
             this.particles.push({ x: r.box.x + r.box.w * (0.2 + Math.random() * 0.6), y: r.box.y - r.box.h * 0.15, vx: (Math.random() - 0.5) * 20 * u, vy: (40 + Math.random() * 50 + r.boost * 60) * u, life: 0.7, size: Math.max(1, u * 1.5), color: `hsl(${hue},100%,60%)`, g: 0 });
+          }
+          // the Hondeezy's rocket leaves a big white smoke trail
+          if (r.car?.rocket && r.boost > 0.1 && Math.random() < 0.8) {
+            this.particles.push({ x: r.box.x + r.box.w * (0.4 + Math.random() * 0.2), y: r.box.y - r.box.h * 0.8, vx: (Math.random() - 0.5) * 60 * u, vy: (60 + Math.random() * 80 + r.boost * 80) * u, life: 0.8, size: 4 * u, grow: 14 * u, color: Math.random() < 0.5 ? "#e8ecf4" : "#c9ced6", g: 0, soft: true });
           }
           // spray off the tyres on a wet road, powder on snow, dust in the desert
           const kick = this.wx.rain > 0.3 ? "#b9c4e6" : this.wx.snow > 0.3 ? "#f4f8ff" : this.wx.sand > 0.3 ? "#e8b878" : null;
@@ -1576,6 +1580,7 @@ export class ChaseScene {
     g.drawImage(this.layer, 0, 0);
 
     this.drawWeather(g);
+    if (!this.calm) drawFireworks(this, g); // in front of the mountains, buildings and rarity tint
     this.drawStreaks(g);
     this.drawSmash(g);
 
@@ -2232,6 +2237,26 @@ export class ChaseScene {
     g.rotate(roll);
     g.drawImage(s >= 1.5 ? carArt(frame) : frame, Math.round(-w / 2), Math.round(-h), Math.round(w), Math.round(h));
     g.restore();
+    // A-DOG'S HONDEEZY: the rocket booster fires straight at the camera while it boosts
+    if (r.car?.rocket && !this.calm && (r.boost > 0.05 || r.fireT > 0)) {
+      const power = Math.min(1.6, Math.max(r.boost, r.fireT > 0 ? 0.6 + r.fireTier * 0.15 : 0));
+      const nx = cx, ny = bottom - h + h * 0.2;
+      const R = w * (0.22 + power * 0.14) * (0.9 + Math.random() * 0.2);
+      g.save();
+      g.globalCompositeOperation = "lighter";
+      const glow = g.createRadialGradient(nx, ny, 0, nx, ny, R * 2.4);
+      glow.addColorStop(0, "rgba(255,255,240,0.95)");
+      glow.addColorStop(0.25, "rgba(255,210,80,0.8)");
+      glow.addColorStop(0.6, "rgba(255,110,30,0.35)");
+      glow.addColorStop(1, "rgba(255,60,0,0)");
+      g.fillStyle = glow;
+      g.fillRect(nx - R * 2.4, ny - R * 2.4, R * 4.8, R * 4.8);
+      g.restore();
+      this.drawFlame(g, nx, ny, Math.max(4, R * 1.5), h * (0.5 + power * 0.6), ["#ff7a1f", "#ffd23a", "#ffffff"], false);
+      // shock diamonds in the plume
+      g.fillStyle = "rgba(200,230,255,0.9)";
+      for (let k = 1; k <= 3; k++) { const d = Math.max(1, Math.round(R * (0.5 - k * 0.1))); g.fillRect(Math.round(nx - d / 2), Math.round(ny + k * R * 0.55), d, d); }
+    }
     lights.push({ r, cx, bottom, w, h, s, roll });
 
     // name tag, in the chunky pixel font
