@@ -571,6 +571,25 @@ test("admin overview, player list, daily moderation, announcement and deleting a
   const list = await call({ action: "players" });
   assert.equal(list.total, 2);
   assert.equal((await call({ action: "players", q: "racer" })).players[0].email, "racer@example.com");
+  // filters (with counts for every chip), sorts, page size and the CSV export
+  assert.equal(list.counts.all, 2);
+  assert.equal(list.counts.paid, 1);
+  assert.equal(list.counts.admin, 1);
+  const paidOnly = await call({ action: "players", filter: "paid" });
+  assert.deepEqual(paidOnly.players.map((p) => p.email), ["racer@example.com"]);
+  assert.equal(paidOnly.players[0].status, "paid");
+  assert.equal((await call({ action: "players", filter: "admin" })).players[0].status, "admin");
+  assert.deepEqual((await call({ action: "players", sort: "email" })).players.map((p) => p.email), ["boss@example.com", "racer@example.com"]);
+  assert.equal((await call({ action: "players", limit: 25, offset: 1 })).players.length, 1);
+  assert.equal((await call({ action: "players", filter: "nope", sort: "drop table" })).total, 2, "unknown filters and sorts fall back");
+  assert.ok(!("progress" in list.players[0]), "the list doesn't carry the big columns");
+  db.sql.prepare("UPDATE users SET nickname = '=HYPERLINK(1)' WHERE email = 'racer@example.com'").run();
+  const csvRes = await worker.fetch(post("admin", { action: "players-csv", filter: "paid" }, { cookie: boss.cookie }), adminEnv());
+  assert.match(csvRes.headers.get("content-type"), /text\/csv/);
+  const csv = (await csvRes.text()).trim().split("\n");
+  assert.equal(csv.length, 2, "header + the one paid player");
+  assert.match(csv[1], /^racer@example\.com,"'=HYPERLINK\(1\)",paid,/, "formulas are defused");
+  db.sql.prepare("UPDATE users SET nickname = NULL WHERE email = 'racer@example.com'").run();
   // leaderboard moderation
   await worker.fetch(post("daily", { race: 1, metres: 5000, tiers: [3, 3, 3, 3, 3, 3, 3] }, { cookie: racer.cookie }), env());
   await worker.fetch(post("nickname", { nickname: "Sneaky Pete" }, { cookie: racer.cookie }), env());

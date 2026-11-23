@@ -102,7 +102,7 @@ export async function ensureSchema(db) {
   for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT", "cars TEXT", "pending_car_session TEXT", "car_checked_at INTEGER"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
-  for (const col of ["google_sub", "apple_sub"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
+  for (const col of ["google_sub", "apple_sub", "created_at", "last_seen"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
   schemaReady = true;
 }
 export const resetSchemaFlagForTests = () => { schemaReady = false; };
@@ -146,7 +146,7 @@ export async function currentUser(request, env) {
 // (from created_at, on the server). Accounts made after that don't. The variable TRIAL_OFFER_ENDS
 // (an ISO date) can move the end without a code change.
 export const TRIAL_MS = 24 * 3600 * 1000;
-const TRIAL_OFFER_ENDS = "2026-11-26T00:00:00Z";
+export const TRIAL_OFFER_ENDS = "2026-11-26T00:00:00Z";
 export const trialOfferOpen = (env, now = Date.now()) => now < Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS);
 export const inTrial = (u, now = Date.now(), env = null) => !!u && u.unlimited !== 1 && Number(u.created_at) > now - TRIAL_MS
   && Number(u.created_at) < Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS);

@@ -1014,50 +1014,123 @@ async function adminOverview(body) {
       ...o.races.slice(0, 7).map((r) => h("tr", {}, ...[fmtDay(r.day), r["solo-classic"], r["solo-car"], r["solo-hard"], r.versus, r.total].map((v) => h("td", { text: String(v) }))))));
 }
 
-async function adminPlayers(body, q = "", offset = 0) {
-  const list = await adminCall({ action: "players", q, offset });
+// The player list, built for lots of players: one compact line each, filter chips with counts,
+// sortable columns, a page size, live search, CSV export, and the player's card in a pop-up.
+const PLAYER_FILTERS = [["all", "ALL"], ["active", "ACTIVE 24H"], ["week", "ACTIVE 7D"], ["new", "NEW 24H"], ["trial", "FREE DAY"], ["paid", "PAID"], ["unlimited", "UNLIMITED"], ["premium", "PREMIUM CAR"], ["gifted", "GIFTED CAR"], ["sso", "GOOGLE/APPLE"], ["dormant", "AWAY 14D+"], ["admin", "ADMIN"]];
+const PLAYER_COLS = [["email", "PLAYER", "email"], ["status", "STATUS", "paid"], ["races", "RACES", "races"], ["streak", "STREAK", "streak"], ["joined", "JOINED", "new"], ["seen", "SEEN", "seen"]];
+const adminList = { q: "", filter: "all", sort: "new", limit: 50, offset: 0 };
+const ago = (t) => {
+  if (!t) return "—";
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? "now" : m < 60 ? m + "m" : m < 1440 ? Math.round(m / 60) + "h" : m < 60 * 24 * 60 ? Math.round(m / 1440) + "d" : fmtDate(t);
+};
+async function adminPlayers(body, patch) {
+  Object.assign(adminList, patch || {});
+  const st = adminList;
+  const list = await adminCall({ action: "players", q: st.q, filter: st.filter, sort: st.sort, limit: st.limit, offset: st.offset });
+  const reload = (ch) => adminPlayers(body, ch).catch((err) => body.append(h("p", { class: "pay-msg bad", text: err.message })));
+  const keepFocus = document.activeElement?.id === "admin-q";
   body.textContent = "";
-  const search = h("input", { type: "search", value: q, placeholder: "search email or nickname", "aria-label": "Search players", autocomplete: "off" });
-  const form = h("form", { class: "admin-search" }, search, h("button", { class: "btn small", type: "submit", text: "SEARCH" }));
-  form.addEventListener("submit", (e) => { e.preventDefault(); adminPlayers(body, search.value.trim(), 0).catch((err) => body.append(h("p", { class: "pay-msg bad", text: err.message }))); });
-  const detail = h("div", { class: "admin-player" });
-  const rows = list.players.map((p) => h("button", { class: "admin-row", type: "button", onclick: () => showPlayer(p) },
-    h("span", { class: "admin-row-main", text: p.email }),
-    h("span", { class: "admin-row-tags", text: [p.admin ? "ADMIN" : null, p.paid ? "PAID" : p.unlimited ? "UNLIMITED" : null, p.streak ? `STREAK ${p.streak}` : null].filter(Boolean).join(" · ") || "FREE" }),
-    h("span", { class: "admin-row-sub", text: `joined ${fmtDate(p.createdAt)} · seen ${fmtDate(p.lastSeen)}` })));
-  const more = h("div", { class: "admin-pager" },
-    offset > 0 ? h("button", { class: "btn small", type: "button", text: "◀ NEWER", onclick: () => adminPlayers(body, q, Math.max(0, offset - 25)) }) : null,
-    h("span", { class: "note", text: `${list.total ? offset + 1 : 0}–${offset + list.players.length} OF ${list.total}` }),
-    offset + 25 < list.total ? h("button", { class: "btn small", type: "button", text: "OLDER ▶", onclick: () => adminPlayers(body, q, offset + 25) }) : null);
-  body.append(form, detail, h("div", { class: "admin-list" }, ...(rows.length ? rows : [h("p", { class: "note", text: "No players found." })])), more);
+  const search = h("input", { id: "admin-q", type: "search", value: st.q, placeholder: "search email or nickname", "aria-label": "Search players", autocomplete: "off" });
+  let timer = 0;
+  search.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => reload({ q: search.value.trim(), offset: 0 }), 350); });
+  const form = h("form", { class: "admin-search" }, search,
+    h("select", { "aria-label": "Players per page", onchange: (e) => reload({ limit: Number(e.target.value), offset: 0 }) },
+      ...[25, 50, 100, 200].map((n) => h("option", { value: String(n), text: `${n} / PAGE`, ...(n === st.limit ? { selected: "" } : {}) }))),
+    h("button", { class: "btn small", type: "button", text: "CSV", title: "Download this list (all pages) as a spreadsheet", onclick: () => downloadPlayersCsv() }));
+  form.addEventListener("submit", (e) => { e.preventDefault(); clearTimeout(timer); reload({ q: search.value.trim(), offset: 0 }); });
+  const chips = h("div", { class: "admin-chips" }, ...PLAYER_FILTERS.map(([id, label]) =>
+    h("button", { class: "admin-chip" + (st.filter === id ? " on" : ""), type: "button", "aria-pressed": String(st.filter === id),
+      onclick: () => reload({ filter: id, offset: 0 }) }, label + " ", h("b", { text: (list.counts?.[id] ?? 0).toLocaleString("en-US") }))));
+  const statusTag = (p) => ({ admin: "ADMIN", paid: "PAID", unlimited: "UNLIMITED", trial: "FREE DAY", free: "FREE" })[p.status] || "FREE";
+  const head = h("tr", {}, ...PLAYER_COLS.map(([key, label, sort]) => {
+    const on = st.sort === sort || (key === "joined" && st.sort === "old");
+    const next = key === "joined" && st.sort === "new" ? "old" : sort;
+    return h("th", { class: "c-" + key, "aria-sort": on ? (st.sort === "old" || st.sort === "email" ? "ascending" : "descending") : "none" },
+      h("button", { type: "button", class: "admin-sort" + (on ? " on" : ""), onclick: () => reload({ sort: next, offset: 0 }) },
+        label + (on ? (st.sort === "old" || st.sort === "email" ? " ▲" : " ▼") : "")));
+  }));
+  const rows = list.players.map((p) => {
+    const tr = h("tr", { class: "admin-tr st-" + p.status, tabindex: "0", onclick: () => showPlayer(p),
+      onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showPlayer(p); } } },
+      h("td", { class: "c-email" }, h("div", { class: "admin-row-main", text: p.email }),
+        h("div", { class: "admin-row-sub", text: [p.nickname, p.signIn !== "password" ? p.signIn.toUpperCase() : null, p.gifts.length ? `GIFT CAR ×${p.gifts.length}` : null, p.cars.length ? `PREMIUM ×${p.cars.length}` : null].filter(Boolean).join(" · ") })),
+      h("td", { class: "c-status" }, h("span", { class: "admin-tag st-" + p.status, text: statusTag(p) })),
+      h("td", { class: "c-races", text: p.races.toLocaleString("en-US") }),
+      h("td", { class: "c-streak", text: p.streak ? String(p.streak) : "—" }),
+      h("td", { class: "c-joined", text: ago(p.createdAt), title: new Date(p.createdAt).toISOString() }),
+      h("td", { class: "c-seen", text: ago(p.lastSeen), title: p.lastSeen ? new Date(p.lastSeen).toISOString() : "never" }));
+    return tr;
+  });
+  const pages = Math.max(1, Math.ceil(list.total / st.limit)), page = Math.floor(st.offset / st.limit) + 1;
+  const jump = h("input", { type: "number", min: "1", max: String(pages), value: String(page), "aria-label": "Page", class: "admin-page-in" });
+  jump.addEventListener("change", () => reload({ offset: (Math.max(1, Math.min(pages, Number(jump.value) || 1)) - 1) * st.limit }));
+  const pager = () => h("div", { class: "admin-pager" },
+    h("button", { class: "btn small", type: "button", text: "◀", "aria-label": "Previous page", disabled: page <= 1 ? "" : null, onclick: () => reload({ offset: Math.max(0, st.offset - st.limit) }) }),
+    h("span", { class: "note" }, `${list.total ? st.offset + 1 : 0}–${st.offset + list.players.length} OF ${list.total.toLocaleString("en-US")} · PAGE `, jump, ` / ${pages}`),
+    h("button", { class: "btn small", type: "button", text: "▶", "aria-label": "Next page", disabled: page >= pages ? "" : null, onclick: () => reload({ offset: st.offset + st.limit }) }));
+  body.append(form, chips,
+    rows.length ? h("div", { class: "admin-table-wrap" }, h("table", { class: "admin-table" }, h("thead", {}, head), h("tbody", {}, ...rows))) : h("p", { class: "note", text: "No players found." }),
+    pager());
+  if (keepFocus) { search.focus(); search.setSelectionRange(search.value.length, search.value.length); }
 
-  function showPlayer(p) {
-    detail.textContent = "";
-    const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite" });
+  async function downloadPlayersCsv() {
+    try {
+      const res = await fetch("/api/vroomillion/admin", { method: "POST", cache: "no-store", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "players-csv", q: st.q, filter: st.filter, sort: st.sort }) });
+      if (!res.ok) throw new Error("Couldn't make the file.");
+      const url = URL.createObjectURL(await res.blob());
+      const a = h("a", { href: url, download: `vroomillion-players-${st.filter}-${new Date().toISOString().slice(0, 10)}.csv` });
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (e) { alert(e.message); }
+  }
+
+  function showPlayer(p, note = "") {
+    document.querySelector(".admin-modal")?.remove();
+    const detail = h("div", { class: "admin-player" });
+    const close = () => { modal.remove(); document.removeEventListener("keydown", esc); };
+    const esc = (e) => { if (e.key === "Escape") close(); };
+    const modal = h("div", { class: "admin-modal", role: "dialog", "aria-modal": "true", "aria-label": "Player " + p.email,
+      onclick: (e) => { if (e.target === modal) close(); } }, detail);
+    document.addEventListener("keydown", esc);
+    document.body.append(modal);
+    const msg = h("p", { class: "pay-msg", role: "status", "aria-live": "polite", text: note });
     const act = async (req, done, after) => {
       msg.textContent = "Working…";
-      try { const out = await adminCall(req); msg.textContent = done; if (after) after(out); } catch (e) { msg.textContent = e.message; }
+      try { const out = await adminCall(req); if (after) after(out, done); else msg.textContent = done; } catch (e) { msg.textContent = e.message; }
     };
     const confirmBox = h("input", { type: "email", placeholder: "type their email to confirm", "aria-label": "Type the email to confirm deleting", autocomplete: "off" });
+    const refresh = (np, done) => { showPlayer({ ...p, ...np }, done); reload(); };
+    const carNames = (ids) => ids.map((id) => carById(id)?.name || id).join(", ");
     detail.append(
-      h("div", { class: "signed-in", text: p.email.toUpperCase() }),
-      h("div", { class: "note", text: [p.admin ? "ADMIN" : null, p.unlimited ? "UNLIMITED" : "FREE PLAYER", p.paid ? `PAID ${fmtDate(p.paidAt)}` : null].filter(Boolean).join(" · ") }),
-      h("div", { class: "note", text: `NAME ${p.nickname || "(default)"} · STREAK ${p.streak} · RACES ${p.races} · JOINED ${fmtDate(p.createdAt)} · LAST SEEN ${fmtDate(p.lastSeen)}` }),
-      h("div", { class: "admin-actions" },
-        h("button", { class: "btn small", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.", (np) => showPlayer({ ...p, ...np })) }),
+      h("div", { class: "admin-modal-head" },
+        h("div", { class: "signed-in", text: p.email.toUpperCase() }),
+        h("button", { class: "btn small", type: "button", text: "✕", "aria-label": "Close", onclick: close })),
+      h("div", { class: "admin-facts" },
+        ...[["STATUS", statusTag(p) + (p.paid ? ` · ${fmtDate(p.paidAt)}` : "") + (p.trialEndsAt ? ` · ENDS IN ${Math.max(0, Math.round((p.trialEndsAt - Date.now()) / 3600000))}H` : "")],
+          ["NAME", p.nickname || "(default)"], ["SIGN-IN", p.signIn.toUpperCase()],
+          ["RACES", p.races.toLocaleString("en-US")], ["STREAK", String(p.streak)],
+          ["JOINED", `${fmtDate(p.createdAt)} (${ago(p.createdAt)} ago)`], ["LAST SEEN", p.lastSeen ? `${fmtDate(p.lastSeen)} (${ago(p.lastSeen)} ago)` : "never"],
+          ["GIFT CARS", p.gifts.length ? carNames(p.gifts) : "none"], ["PREMIUM CARS", p.cars.length ? carNames(p.cars) : "none"]]
+          .map(([k, v]) => h("div", {}, h("span", { class: "note", text: k }), h("span", { text: v })))),
+      h("div", { class: "admin-actions row" },
+        h("button", { class: "btn small", type: "button", text: p.unlimited ? "REMOVE UNLIMITED" : "GIVE UNLIMITED", onclick: () => act({ action: "set-unlimited", email: p.email, unlimited: !p.unlimited }, p.unlimited ? "Unlimited removed." : "Unlimited given.", refresh) }),
+        h("button", { class: "btn small", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") }),
+        p.nickname ? h("button", { class: "btn small", type: "button", text: "RESET NICKNAME", onclick: () => act({ action: "reset-nickname", email: p.email }, "Nickname reset to the default.", refresh) }) : null),
+      h("div", { class: "step-label", text: "GIFT CARS" }),
+      h("div", { class: "admin-actions row" },
         ...GIFT_CARS.map((id) => {
           const has = (p.gifts || []).includes(id);
-          return h("button", { class: "btn small", type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${carById(id).name}`,
-            onclick: () => act({ action: "gift-car", email: p.email, car: id, give: !has }, has ? "Taken back." : "Gifted! It appears in their garage next time they open the game logged in.", (np) => showPlayer({ ...p, ...np })) });
-        }),
-        h("button", { class: "btn small", type: "button", text: "GIVE TODAY'S DAILY RACES BACK", onclick: () => act({ action: "reset-free", email: p.email }, "Done. Their daily races come back next time they open the game while logged in.") }),
-        p.nickname ? h("button", { class: "btn small", type: "button", text: "RESET NICKNAME", onclick: () => act({ action: "reset-nickname", email: p.email }, "Nickname reset to the default.", (np) => showPlayer({ ...p, ...np })) }) : null),
+          return h("button", { class: "btn small" + (has ? " on" : ""), type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${carById(id).name}`,
+            onclick: () => act({ action: "gift-car", email: p.email, car: id, give: !has }, has ? "Taken back." : "Gifted! It appears in their garage next time they open the game logged in.", refresh) });
+        })),
       p.admin ? null : h("details", { class: "danger-zone" }, h("summary", { text: "Delete this account…" }),
         h("p", { class: "note", text: "Deletes the account, its sessions and its leaderboard scores. This can't be undone." }),
         confirmBox,
-        h("button", { class: "btn small danger", type: "button", text: "DELETE ACCOUNT", onclick: () => act({ action: "delete-player", email: p.email, confirm: confirmBox.value }, "Account deleted.", () => adminPlayers(body, q, offset)) })),
+        h("button", { class: "btn small danger", type: "button", text: "DELETE ACCOUNT", onclick: () => act({ action: "delete-player", email: p.email, confirm: confirmBox.value }, "Account deleted.", () => { close(); reload(); }) })),
       msg);
-    detail.scrollIntoView({ block: "nearest" });
+    detail.querySelector("button")?.focus();
   }
 }
 

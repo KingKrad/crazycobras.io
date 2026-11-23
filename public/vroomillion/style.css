@@ -748,7 +748,7 @@ body.smashing #s-race .race-top, body.smashing #s-race .race-dock, body.smashing
 .mode-lock { display: block; margin-top: 6px; font-size: 6px; letter-spacing: 0.15em; color: var(--yellow); }
 
 /* admin screen */
-.admin-box { display: grid; gap: 18px; width: min(560px, 100%); margin: 0 auto 16px; text-align: left; }
+.admin-box { display: grid; gap: 18px; width: min(1000px, 100%); margin: 0 auto 16px; text-align: left; }
 .admin-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
 .admin-tile { background: rgba(0, 0, 0, 0.35); padding: 10px; text-align: center; box-shadow: inset 0 0 0 2px #2b1d5c; }
 .admin-n { font-size: 16px; color: var(--yellow); margin-bottom: 6px; }
@@ -1232,3 +1232,45 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .next-car-fill { display: block; height: 100%; background: var(--green); }
 .next-car.ready { border-color: var(--green); animation: throb 0.8s steps(2) infinite; }
 .next-car.ready .next-car-k { color: var(--green); }
+
+/* admin player list: a compact table for lots of players */
+.admin-search select { font: inherit; font-size: 8px; padding: 6px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
+.admin-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.admin-chip { font: inherit; font-size: 7px; padding: 6px 8px; background: var(--panel); color: var(--dim); border: 2px solid var(--line); cursor: pointer; }
+.admin-chip b { color: var(--yellow); font-weight: normal; }
+.admin-chip.on { color: var(--ink); border-color: var(--cyan); background: var(--panel-2); }
+.admin-table-wrap { overflow-x: auto; border: 2px solid var(--line); max-height: 70vh; overflow-y: auto; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 8px; }
+.admin-table thead th { position: sticky; top: 0; background: #1a1040; z-index: 1; text-align: left; padding: 0; border-bottom: 2px solid var(--line); }
+.admin-sort { font: inherit; font-size: 7px; color: var(--dim); background: none; border: 0; padding: 8px; width: 100%; text-align: inherit; cursor: pointer; white-space: nowrap; }
+.admin-sort.on { color: var(--cyan); }
+.admin-table td { padding: 6px 8px; border-bottom: 1px solid #2b1d5c; white-space: nowrap; }
+.admin-table .c-email { max-width: 0; width: 46%; }
+.admin-table .c-races, .admin-table .c-streak, .admin-table th.c-races, .admin-table th.c-streak { text-align: right; }
+.admin-table th.c-races .admin-sort, .admin-table th.c-streak .admin-sort { text-align: right; }
+.admin-table .c-joined, .admin-table .c-seen { color: var(--dim); }
+.admin-tr { cursor: pointer; }
+.admin-tr:nth-child(even) { background: rgba(255, 255, 255, 0.025); }
+.admin-tr:hover, .admin-tr:focus-visible { background: #241558; outline: none; }
+.admin-tr .admin-row-sub { font-size: 6px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; }
+.admin-tag { font-size: 6px; padding: 3px 5px; border: 1px solid currentColor; color: var(--dim); }
+.admin-tag.st-paid { color: var(--green, #5ef08a); }
+.admin-tag.st-unlimited { color: var(--yellow); }
+.admin-tag.st-trial { color: var(--cyan); }
+.admin-tag.st-admin { color: var(--orange); }
+.admin-page-in { width: 4em; font: inherit; font-size: 8px; padding: 4px; background: #0b0620; color: #fff; border: 2px solid #3b2d70; }
+.admin-pager .btn.small[disabled] { opacity: 0.35; pointer-events: none; }
+.admin-modal { position: fixed; inset: 0; z-index: 900; background: rgba(4, 2, 14, 0.78); display: grid; place-items: center; padding: 16px; }
+.admin-modal .admin-player { width: min(620px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; margin: 0; text-align: left; }
+.admin-modal-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.admin-modal-head .signed-in { overflow: hidden; text-overflow: ellipsis; }
+.admin-modal-head .btn.small { width: auto; }
+.admin-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; font-size: 8px; margin: 6px 0; line-height: 1.5; }
+.admin-facts > div > span:last-child { overflow-wrap: anywhere; }
+.admin-facts > div { display: grid; gap: 3px; }
+.admin-facts .note { font-size: 6px; }
+.admin-player .btn.small.on { border-color: var(--yellow); color: var(--yellow); }
+@media (max-width: 620px) {
+  .admin-table .c-streak, .admin-table .c-joined { display: none; }
+  .admin-modal { padding: 8px; }
+}

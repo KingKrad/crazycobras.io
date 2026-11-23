@@ -1,6 +1,6 @@
 // The admin screen's API. Only accounts listed in the ADMIN_EMAILS secret can use it.
 // Also POST /race-start, which counts races for the stats.
-import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts } from "./accounts.js";
+import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts, inTrial, TRIAL_MS, TRIAL_OFFER_ENDS } from "./accounts.js";
 import { ensureDailySchema, utcDay, cleanNickname } from "./daily.js";
 import { parseCars } from "./premium.js";
 import { ensureStatsSchema } from "./stats.js";
@@ -36,21 +36,58 @@ async function adminGuard(request, env) {
   return { user };
 }
 
-const playerView = (u, env) => ({
-  email: u.email,
-  unlimited: u.unlimited === 1,
-  paid: !!u.paid_session,
-  paidAt: u.paid_at || null,
-  admin: isAdmin(u, env),
-  createdAt: u.created_at,
-  lastSeen: u.last_seen || null,
-  nickname: u.nickname || null,
-  streak: Number(u.streak) || 0,
-  races: Number(u.unl_races) || 0,
-  freeResetAt: u.free_reset_at || 0,
-  gifts: parseGifts(u.gifts),
-  cars: parseCars(u.cars),
-});
+const adminEmails = (env) => String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+const playerView = (u, env) => {
+  const admin = isAdmin(u, env), trial = !admin && inTrial(u, Date.now(), env);
+  return {
+    email: u.email,
+    unlimited: u.unlimited === 1,
+    paid: !!u.paid_session,
+    paidAt: u.paid_at || null,
+    admin,
+    trialEndsAt: trial ? Number(u.created_at) + TRIAL_MS : null,
+    status: admin ? "admin" : u.paid_session ? "paid" : u.unlimited === 1 ? "unlimited" : trial ? "trial" : "free",
+    signIn: [(u.has_pw ?? u.pw_hash) ? "password" : null, u.google_sub ? "google" : null, u.apple_sub ? "apple" : null].filter(Boolean).join("+") || "password",
+    createdAt: u.created_at,
+    lastSeen: u.last_seen || null,
+    nickname: u.nickname || null,
+    // a streak only counts while it's alive (played today or yesterday)
+    streak: [utcDay(), utcDay(Date.now() - DAY_MS)].includes(u.streak_day) ? Number(u.streak) || 0 : 0,
+    races: Number(u.unl_races) || 0,
+    freeResetAt: u.free_reset_at || 0,
+    gifts: parseGifts(u.gifts),
+    cars: parseCars(u.cars),
+  };
+};
+
+// the player list: columns it needs (not progress or seen prompts, which are big), filters and sorts
+const LIST_COLS = "id, email, (pw_hash <> '') AS has_pw, google_sub, apple_sub, unlimited, paid_session, paid_at, created_at, last_seen, nickname, streak, streak_day, unl_races, free_reset_at, gifts, cars";
+const PAGE_SIZES = [25, 50, 100, 200];
+const PLAYER_SORTS = {
+  new: "created_at DESC",
+  old: "created_at ASC",
+  seen: "COALESCE(last_seen, 0) DESC",
+  races: "COALESCE(unl_races, 0) DESC",
+  streak: "CASE WHEN streak_day IN (strftime('%Y-%m-%d', 'now'), strftime('%Y-%m-%d', 'now', '-1 day')) THEN COALESCE(streak, 0) ELSE 0 END DESC",
+  paid: "COALESCE(paid_at, 0) DESC",
+  email: "email ASC",
+};
+// each returns [sql, ...args]; "" = no condition
+const inList = (l) => l.length ? `email IN (${l.map(() => "?").join(",")})` : "0";
+const PLAYER_FILTERS = {
+  all: () => [""],
+  active: (now) => ["last_seen > ?", now - DAY_MS],
+  week: (now) => ["last_seen > ?", now - 7 * DAY_MS],
+  new: (now) => ["created_at > ?", now - DAY_MS],
+  trial: (now, admins, env) => [`unlimited <> 1 AND created_at > ? AND created_at < ?${admins.length ? ` AND NOT ${inList(admins)}` : ""}`, now - TRIAL_MS, Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS), ...admins],
+  paid: () => ["paid_session IS NOT NULL"],
+  unlimited: () => ["unlimited = 1"],
+  premium: () => ["cars IS NOT NULL AND cars NOT IN ('', '[]')"],
+  gifted: () => ["gifts IS NOT NULL AND gifts NOT IN ('', '[]')"],
+  sso: () => ["(google_sub IS NOT NULL OR apple_sub IS NOT NULL)"],
+  dormant: (now) => ["COALESCE(last_seen, created_at) < ?", now - 14 * DAY_MS],
+  admin: (now, admins) => [inList(admins), ...admins],
+};
 
 // counts per UTC day from a list of timestamps
 const perDay = (stamps, days) => {
@@ -61,7 +98,8 @@ const perDay = (stamps, days) => {
 
 // POST /api/vroomillion/admin { action, ... }
 //   stats | overview                  money, players, activity, races (last 14 days)
-//   players { q?, offset? }           newest players first, or search by email / nickname
+//   players { q?, filter?, sort?, limit?, offset? }  a page of players, with counts per filter
+//   players-csv { q?, filter?, sort? } the same list as a CSV file (up to 10,000 rows)
 //   lookup { email }                  one player
 //   set-unlimited { email, unlimited } | gift-car { email, car, give } | reset-free { email } | delete-player { email, confirm: email }
 //   daily { day? }                    both daily races: players, average and top distance, every score
@@ -121,14 +159,39 @@ export async function handleAdmin(request, env) {
     });
   }
 
-  if (action === "players") {
+  if (action === "players" || action === "players-csv") {
+    // filter + sort + page, built for thousands of players; the list never loads the big progress columns
     const q = String(body.q || "").trim().toLowerCase().slice(0, 100);
-    const offset = Math.max(0, Math.min(100000, Number(body.offset) || 0));
-    const where = q ? "WHERE LOWER(email) LIKE ? OR LOWER(COALESCE(nickname, '')) LIKE ?" : "";
-    const args = q ? [`%${q}%`, `%${q}%`] : [];
-    const list = await all(`SELECT * FROM users ${where} ORDER BY created_at DESC LIMIT 25 OFFSET ?`, ...args, offset);
+    const csv = action === "players-csv";
+    const limit = csv ? 10000 : PAGE_SIZES.includes(Number(body.limit)) ? Number(body.limit) : 50;
+    const offset = csv ? 0 : Math.max(0, Math.min(1000000, Number(body.offset) || 0));
+    const filter = PLAYER_FILTERS[body.filter] ? body.filter : "all";
+    const sort = PLAYER_SORTS[body.sort] ? body.sort : "new";
+    const admins = adminEmails(env);
+    const cond = (f) => PLAYER_FILTERS[f](now, admins, env);
+    const parts = [], args = [];
+    if (q) { parts.push("(LOWER(email) LIKE ? OR LOWER(COALESCE(nickname, '')) LIKE ?)"); args.push(`%${q}%`, `%${q}%`); }
+    const [fw, ...fa] = cond(filter);
+    if (fw) { parts.push(fw); args.push(...fa); }
+    const where = parts.length ? "WHERE " + parts.join(" AND ") : "";
+    const list = await all(`SELECT ${LIST_COLS} FROM users ${where} ORDER BY ${PLAYER_SORTS[sort]}, id LIMIT ? OFFSET ?`, ...args, limit, offset);
+    const players = list.map((u) => playerView(u, env));
+    if (csv) {
+      const cols = ["email", "nickname", "status", "races", "streak", "gifts", "premiumCars", "signIn", "joined", "lastSeen", "paidAt"];
+      const cell = (v) => { const t = String(v ?? ""); return /[",\n]/.test(t) || /^[=+\-@]/.test(t) ? `"${t.replace(/^([=+\-@])/, "'$1").replace(/"/g, '""')}"` : t; };
+      const iso = (t) => (t ? new Date(t).toISOString() : "");
+      const lines = players.map((p) => [p.email, p.nickname, p.status, p.races, p.streak, p.gifts.join(" "), p.cars.join(" "), p.signIn, iso(p.createdAt), iso(p.lastSeen), iso(p.paidAt)].map(cell).join(","));
+      return new Response([cols.join(","), ...lines].join("\n") + "\n", { headers: { "content-type": "text/csv; charset=utf-8", "cache-control": "no-store", "content-disposition": `attachment; filename="vroomillion-players-${day()}.csv"` } });
+    }
     const total = await one(`SELECT COUNT(*) AS n FROM users ${where}`, ...args);
-    return json({ players: list.map((u) => playerView(u, env)), total: total.n, offset });
+    // how many players each filter would show (with the same search), for the filter chips
+    const counts = {};
+    await Promise.all(Object.keys(PLAYER_FILTERS).map(async (f) => {
+      const [w, ...a] = cond(f);
+      const ps = [...(q ? ["(LOWER(email) LIKE ? OR LOWER(COALESCE(nickname, '')) LIKE ?)"] : []), ...(w ? [w] : [])];
+      counts[f] = (await one(`SELECT COUNT(*) AS n FROM users ${ps.length ? "WHERE " + ps.join(" AND ") : ""}`, ...(q ? [`%${q}%`, `%${q}%`] : []), ...a)).n;
+    }));
+    return json({ players, total: total.n, offset, limit, filter, sort, counts });
   }
 
   if (action === "daily") {
