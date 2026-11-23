@@ -6,7 +6,7 @@ export const CHANGELOG = [
     id: "2026-11-23e",
     date: "Nov 23, 2026",
     title: "Dodging traffic",
-    items: ["Your car now swerves round the traffic instead of driving through it, leaning into the turn, and the other cars edge out of your way."],
+    items: ["Your car now swerves round the traffic instead of driving through it, staying on the road, and the other cars move over to make room."],
   },
   {
     id: "2026-11-23d",
