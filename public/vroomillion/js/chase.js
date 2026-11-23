@@ -1086,6 +1086,7 @@ export class ChaseScene {
       this.particles.push({ x: side, y: this.horizon + Math.random() * (this.H - this.horizon) * 0.7, vx: 0, vy: -(20 + Math.random() * 40) * u, life: 0.9, size: Math.max(1, u), color: Math.random() < 0.6 ? TIER_COL[this.worldFx.tier] : "#ffffff", g: 0 });
     }
     updateTraffic(this, dt, this.camZ, SEG, DRAW, ZONES[this.zones[this.shown]?.zone]?.id);
+    this.steer(dt);
     const segsPerSec = 4 + this.speed * 46;
     this.camZ += SEG * segsPerSec * dt;
     const camSeg = Math.floor(this.camZ / SEG);
@@ -1295,6 +1296,7 @@ export class ChaseScene {
     const depth = BASE_DEPTH * (this.calm ? 1 : 1 - Math.min(0.22, this.kick * 0.16));
     const k = W / 2;
     const playerZ = (depth * CAM_H * k) / Math.max(20, this.carBottom - this.horizon);
+    this.playerZ = playerZ;
 
     this.drawSky(g);
 
@@ -2148,13 +2150,51 @@ export class ChaseScene {
     });
   }
 
+  // Swerving round traffic: each racer looks a few segments ahead; a traffic car that would overlap it
+  // pushes it out to whichever side has more room (onto the shoulder if it must), then it eases back
+  // into its lane. The traffic car edges the other way a little too. dodge is in half-road widths.
+  steer(dt) {
+    if (!this.playerZ) return;
+    for (const r of this.racers) {
+      r.dodge = r.dodge || 0;
+      const half = r.halfW || 0.2; // the racer's half width, in half-road widths (worked out when drawn)
+      const rz = this.playerZ + ((r.gap || 0) + Math.min(7, (r.boost || 0) * 2.2) + (r.charge || 0)) * SEG;
+      const x = r.lane + r.dodge;
+      let target = 0;
+      let threat = null;
+      for (const t of this.traffic || []) {
+        const ahead = t.z - this.camZ - rz;
+        if (ahead < -SEG * 1.2 || ahead > SEG * 9) continue; // look about nine segments ahead
+        const need = half + half * 0.92 + 0.06;
+        const tx = t.lane + (t.shift || 0);
+        if (Math.abs(tx - x) < need && (!threat || ahead < threat.ahead)) threat = { t, ahead, tx, need };
+      }
+      if (threat) {
+        const { tx, need, t } = threat;
+        // go round on the side with more room; the road is ±1, the shoulders go to about ±1.6
+        const left = tx - need, right = tx + need;
+        const goLeft = Math.abs(left - x) <= Math.abs(right - x) ? left >= -1.55 : right > 1.55;
+        target = (goLeft ? left : right) - r.lane;
+        t.shift = (t.shift || 0) + (goLeft ? 1 : -1) * dt * 0.25; // the traffic car edges out of the way
+        t.shift = clamp(t.shift, -0.25, 0.25);
+        r.swerve = goLeft ? -1 : 1;
+      } else r.swerve = 0;
+      // ease towards it: quick to dodge, gentler coming back
+      const rate = threat ? 7 : 2.5;
+      const before = r.dodge;
+      r.dodge += (target - r.dodge) * Math.min(1, dt * rate);
+      r.steerV = (r.dodge - before) / Math.max(dt, 1e-3);
+    }
+    for (const t of this.traffic || []) if (t.shift) t.shift *= Math.max(0, 1 - dt * 0.4);
+  }
+
   // a slow car on the road ahead, drawn like the racers but plainer
   drawTraffic(g, t, p, rel) {
     if (!p || p.hidden) return;
     const frame = trafficSprite(t.car, Math.floor(this.time * 6) % 2);
     const s = Math.max(0.2, this.carPx * rel * 0.92);
     const w = (frame.width * s) / (frame.res || 1), h = (frame.height * s) / (frame.res || 1);
-    const cx = p.sx + p.sw * t.lane;
+    const cx = p.sx + p.sw * (t.lane + (t.shift || 0));
     const bottom = Math.round(p.sy);
     g.fillStyle = "rgba(0,0,10,0.35)";
     g.fillRect(Math.round(cx - w * 0.5), bottom - Math.max(1, Math.round(h * 0.06)), Math.round(w), Math.max(1, Math.round(h * 0.1)));
@@ -2171,7 +2211,8 @@ export class ChaseScene {
     const bounce = Math.sin(this.time * 24 + r.lane * 5) > 0.6 && this.speed > 0.1 ? Math.round(u) : 0;
     const lift = this.calm ? 0 : Math.sin((1 - r.lift) * Math.PI) * r.lift * h * 0.25;
     const jitter = this.revT > 0 && !this.calm ? Math.round((Math.random() - 0.5) * 2 * u) : 0;
-    const cx = p.sx + p.sw * r.lane + r.drift * this.W * rel;
+    const cx = p.sx + p.sw * (r.lane + (r.dodge || 0)) + r.drift * this.W * rel;
+    r.halfW = p.sw > 0 ? w / 2 / p.sw : 0.2;
     const bottom = Math.round(p.sy - lift - bounce + jitter);
     const left = Math.round(cx - w / 2);
     r.box = { x: left, y: bottom, w, h };
@@ -2231,7 +2272,7 @@ export class ChaseScene {
     }
 
     // lean into bends
-    const roll = this.calm ? 0 : clamp(-curveAt(p.i) * 0.016, -0.07, 0.07);
+    const roll = this.calm ? 0 : clamp(-curveAt(p.i) * 0.016 + clamp((r.steerV || 0) * 0.05, -0.12, 0.12), -0.16, 0.16);
     g.save();
     g.translate(cx, bottom);
     g.rotate(roll);
