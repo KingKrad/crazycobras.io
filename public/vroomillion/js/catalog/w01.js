@@ -66,7 +66,7 @@ movie/heist | 2 | daily |  | Name a crime or gangster movie |  | the godfather, 
 # sports
 sport/olympian | 1 | main | =athlete/athlete | Name an Olympic gold medalist | | michael phelps, usain bolt, simone biles, carl lewis, jesse owens, mary lou retton, michael johnson, katie ledecky, jackie joyner-kersee, nadia comaneci, mark spitz, shaun white
 sport/skill | 2 | daily | | Name a gymnastics event or move | | floor, vault, balance beam, uneven bars, rings, pommel horse, parallel bars, handspring, cartwheel, back flip, round-off, split
-sport/college | 2 | daily |  | Name a college sports team | min=3 w:?i wdt:P17 wd:Q30. { ?i wdt:P31/wdt:P279* wd:Q1685451. } | alabama crimson tide, duke blue devils, michigan wolverines, ohio state buckeyes, notre dame fighting irish, kentucky wildcats, unc tar heels, texas longhorns, usc trojans, florida gators, lsu tigers, georgia bulldogs
+sport/college | 2 | daily |  | Name a college sports team |  | alabama crimson tide, duke blue devils, michigan wolverines, ohio state buckeyes, notre dame fighting irish, kentucky wildcats, unc tar heels, texas longhorns, usc trojans, florida gators, lsu tigers, georgia bulldogs
 sport/racetrack | 2 | main | =horse/horse | Name a horse race or famous racehorse | | kentucky derby, preakness, belmont stakes, secretariat, seabiscuit, triple crown, grand national, american pharoah, man o' war, war admiral, melbourne cup, royal ascot
 sport/mascot | 1 | daily | | Name a sports mascot | | phillie phanatic, mr. met, benny the bull, the san diego chicken, gritty, rocky, wally the green monster, bucky badger, the stanford tree, uga, mike the tiger, brutus buckeye
 # brands
