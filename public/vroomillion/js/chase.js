@@ -2164,7 +2164,7 @@ export class ChaseScene {
       let threat = null;
       for (const t of this.traffic || []) {
         const ahead = t.z - this.camZ - rz;
-        if (ahead < -SEG * 1.2 || ahead > SEG * 9) continue; // look about nine segments ahead
+        if (ahead < -SEG * 1.2 || ahead > SEG * 15) continue; // look about fifteen segments ahead
         const need = half + half * 0.92 + 0.06;
         const tx = t.lane + (t.shift || 0);
         if (Math.abs(tx - x) < need && (!threat || ahead < threat.ahead)) threat = { t, ahead, tx, need };
@@ -2180,7 +2180,7 @@ export class ChaseScene {
         r.swerve = goLeft ? -1 : 1;
       } else r.swerve = 0;
       // ease towards it: quick to dodge, gentler coming back
-      const rate = threat ? 7 : 2.5;
+      const rate = threat ? 11 : 2.5;
       const before = r.dodge;
       r.dodge += (target - r.dodge) * Math.min(1, dt * rate);
       r.steerV = (r.dodge - before) / Math.max(dt, 1e-3);
