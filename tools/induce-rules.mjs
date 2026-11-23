@@ -110,7 +110,11 @@ const clause = (pv) => {
 };
 const kindOf = (pv) => pv.split("=")[0].replace("^", "");
 
+// prompts with an extra condition ("from the '70s", "by ABBA", "in Scotland", "that starts with B",
+// "X or Y") need that condition in the rule, which a learned rule can't promise: leave those to hand
+const QUALIFIED = /'\d0s|\b\d{4}s?\b|\b(from|by|in|on|with|without|that|who|which|or|and|than|under|over|for|at|of)\b|\b(famous|first|last|best|worst|most|least)\b.*\b(of|in)\b/i;
 export async function induce(fam) {
+  if (QUALIFIED.test(fam.prompts[0].replace(/^Name (a|an|the|some)\s+/i, ""))) return { skip: "the prompt has a condition a learned rule can't promise" };
   const answers = answersOf(fam);
   if (answers.length < 6) return { skip: "too few answers" };
   const { best, facts } = await lookup(answers);
