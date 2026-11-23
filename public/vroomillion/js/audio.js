@@ -70,7 +70,7 @@ function noise(dur, { vol = 0.2, at = 0, hp = 800 } = {}) {
 
 // filtered noise: type "bandpass" / "highpass" / "lowpass", optional sweep (filter glides to that frequency)
 // and attack (seconds to swell in)
-function noiseF(dur, { vol = 0.2, at = 0, type = "bandpass", freq = 1000, q = 1, sweep = 0, attack = 0 } = {}) {
+function noiseF(dur, { vol = 0.2, at = 0, type = "bandpass", freq = 1000, q = 1, sweep = 0, attack = 0, out = master } = {}) {
   if (!ctx) return;
   const t = ctx.currentTime + at;
   const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * dur), ctx.sampleRate);
@@ -87,7 +87,7 @@ function noiseF(dur, { vol = 0.2, at = 0, type = "bandpass", freq = 1000, q = 1,
   if (attack) { g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); }
   else g.gain.setValueAtTime(vol, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-  src.connect(f).connect(g).connect(master);
+  src.connect(f).connect(g).connect(out);
   src.start(t);
 }
 // a bass drum hit
@@ -280,11 +280,122 @@ export const v12 = {
   },
 };
 
+
+// ZIG'S WHIP: everything is reggae. Sounds go through a dub echo (a tape-style delay that repeats and
+// fades), so every backfire is a rimshot that echoes "pop... pop.. pop.", launches blow an air horn,
+// rare answers wail a dub siren, and the engine itself is a one-drop rhythm with a deep bassline.
+let dubIn = null;
+function dub() {
+  if (dubIn || !ctx) return dubIn;
+  dubIn = ctx.createGain();
+  const delay = ctx.createDelay(1.5), fb = ctx.createGain(), tape = ctx.createBiquadFilter(), wet = ctx.createGain();
+  delay.delayTime.value = 0.36; // a dotted-eighth at about 125 bpm
+  fb.gain.value = 0.48;
+  tape.type = "lowpass"; tape.frequency.value = 1800;
+  wet.gain.value = 0.7;
+  dubIn.connect(master);
+  dubIn.connect(delay);
+  delay.connect(tape).connect(fb).connect(delay);
+  tape.connect(wet).connect(master);
+  return dubIn;
+}
+const NR = { D2: 73.4, E2: 82.4, F2: 87.3, G2: 98, A2: 110, C3: 130.8, D3: 146.8, E3: 164.8, G3: 196, A3: 220, B3: 246.9, C4: 261.6, D4: 293.7, E4: 329.6, Fs4: 370, G4: 392, A4: 440 };
+// a dub siren: a square wave whose pitch wobbles fast and climbs (or falls)
+function siren(dur, { from = 500, to = 1100, rate = 7, depth = 90, vol = 0.07, at = 0 } = {}) {
+  if (!ctx) return;
+  const t = ctx.currentTime + at;
+  const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+  o.type = "square";
+  o.frequency.setValueAtTime(from, t);
+  o.frequency.exponentialRampToValueAtTime(to, t + dur * 0.8);
+  lfo.type = "triangle"; lfo.frequency.value = rate; lg.gain.value = depth;
+  lfo.connect(lg).connect(o.frequency);
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.05);
+  g.gain.setValueAtTime(vol, t + dur * 0.75);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(dub());
+  for (const x of [o, lfo]) { x.start(t); x.stop(t + dur + 0.05); }
+}
+// the offbeat guitar "skank": a short bright chord chop
+const skank = (notes, at = 0, vol = 0.03, out) => { for (const f of notes) { tone(f * 2, 0.07, { type: "square", vol, at, out }); tone(f * 4, 0.04, { type: "triangle", vol: vol * 0.6, at, out }); } };
+const rim = (at = 0, vol = 0.12, out) => { noiseF(0.04, { vol, at, type: "bandpass", freq: 2400, q: 3, out }); tone(820, 0.03, { type: "triangle", vol: vol * 0.8, at, out }); };
+export const reggae = {
+  // the air horn: "bap bap baaaa"
+  horn: (at = 0, vol = 0.07) => {
+    const out = dub();
+    [[0, 0.1], [0.16, 0.1], [0.32, 0.45]].forEach(([d, len]) => {
+      for (const f of [466, 349, 233]) tone(f, len, { type: "sawtooth", vol, at: at + d, out });
+    });
+  },
+  // off the line: a skank and a bass drop, the air horn from Rare up, a dub siren for the rarest
+  launch: (t) => {
+    if (t === 0) return; // the stall plays reggae.sputter
+    const out = dub();
+    skank([NR.A3, NR.C4, NR.E4], 0, 0.05, out);
+    tone(NR.A2, 0.5, { type: "sine", vol: 0.3, slide: 0.5 });
+    if (t >= 2) reggae.horn(0.12, 0.05 + t * 0.01);
+    if (t >= 3) siren(1 + t * 0.25, { from: 420, to: 900 + t * 120, vol: 0.05 + t * 0.008, at: 0.5 });
+    if (t >= 5) siren(1.6, { from: 1400, to: 380, rate: 11, vol: 0.06, at: 1.6 });
+  },
+  // the thrusters, reggae style: a "wah" wobble-bass swell
+  whoosh: (t) => {
+    noiseF(0.5 + t * 0.1, { vol: 0.05 + t * 0.012, type: "bandpass", freq: 300, sweep: 1600, q: 4, attack: 0.1, out: dub() });
+  },
+  // a gear change: a rimshot (and a kick) that echoes away
+  backfire: () => { rim(0, 0.16, dub()); kick(0, 0.25); },
+  pop: (t = 3) => {
+    const out = dub();
+    rim(0, 0.14 + t * 0.01, out);
+    if (t >= 3) skank([NR.G3, NR.B3, NR.D4], 0.18, 0.035, out);
+  },
+  shift: () => rim(0, 0.07),
+  // nitro: the dub siren climbs and the bass drops
+  nitro: () => { siren(1.2, { from: 300, to: 1500, rate: 9, vol: 0.07 }); tone(55, 0.9, { type: "sine", vol: 0.3, slide: 0.6 }); },
+  // STALLED: a sad trombone-ish fall, echoing
+  sputter: () => { const out = dub(); [0, 0.22, 0.44].forEach((at, k) => tone([233, 220, 208][k], k === 2 ? 0.6 : 0.2, { type: "sawtooth", vol: 0.05, at, slide: k === 2 ? 0.8 : 1, out })); },
+};
+// the engine: a one-drop groove (kick and rim on beat three, offbeat skanks, a bassline) over a low
+// diesel rumble. The faster the truck goes, the faster and louder the groove.
+const RIDDIM = [
+  // [bass note or 0, chord on this eighth?] for two bars of eighths: Am then G
+  [NR.A2, 0], [0, 1], [0, 0], [NR.E2, 1], [NR.G2, 0], [0, 1], [NR.A2, 0], [0, 1],
+  [NR.G2, 0], [0, 1], [0, 0], [NR.D2, 1], [NR.F2, 0], [0, 1], [NR.G2, 0], [0, 1],
+];
+function reggaeEngine() {
+  const g = ctx.createGain(); g.gain.value = 0;
+  const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 220;
+  const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = 38;
+  const rg = ctx.createGain(); rg.gain.value = 0.35;
+  o.connect(f).connect(rg).connect(g);
+  const band = ctx.createGain(); band.gain.value = 1;
+  band.connect(g);
+  g.connect(master);
+  o.start();
+  const e = { reggae: true, o, f, g, band, speed: 0.1, step: 0, next: ctx.currentTime + 0.05 };
+  e.timer = setInterval(() => {
+    if (!ctx) return;
+    const bpm = 72 + e.speed * 48;
+    const eighth = 60 / bpm / 2;
+    while (e.next < ctx.currentTime + 0.15) {
+      const at = Math.max(0, e.next - ctx.currentTime), k = e.step % 16, [bass, chord] = RIDDIM[k];
+      if (bass) { tone(bass, eighth * 1.8, { type: "sine", vol: 0.5, at, out: band }); tone(bass * 2, eighth * 1.2, { type: "triangle", vol: 0.12, at, out: band }); }
+      if (chord) skank(k < 8 ? [NR.A3, NR.C4, NR.E4] : [NR.G3, NR.B3, NR.D4], at, 0.045, band);
+      if (k % 8 === 4) { kick(at, 0.5); rim(at, 0.12, band); } // the one drop
+      if (e.speed > 0.45 && k % 2 === 1) noiseF(0.02, { vol: 0.04, at, type: "highpass", freq: 7000, out: band }); // hats when it's flying
+      e.next += eighth;
+      e.step++;
+    }
+  }, 30);
+  return e;
+}
+
 // Engine drone that follows car speed (0..1).
 // electric: a spaceship's engine instead (AMELIA'S TESSY): two low detuned tones and thruster rumble,
 // throbbing slowly, that only get a little deeper and louder with speed
 export function engineStart(kind = false) {
   if (!ctx || engine) return;
+  if (kind === "reggae") { engine = reggaeEngine(); return; }
   // a V12 (NICO'S CRAZY CAR): three sawtooth voices (the note, a fifth and an octave up) with a wobble,
   // revving high and bright, like a screaming twelve-cylinder
   if (kind === "v12") {
@@ -366,6 +477,13 @@ export function engineStart(kind = false) {
 export function engineSet(speed) {
   if (!engine) return;
   const t = ctx.currentTime;
+  if (engine.reggae) {
+    engine.speed = speed;
+    engine.o.frequency.setTargetAtTime(34 + speed * 40, t, 0.15);
+    engine.f.frequency.setTargetAtTime(180 + speed * 500, t, 0.15);
+    engine.g.gain.setTargetAtTime(0.05 + speed * 0.07, t, 0.15);
+    return;
+  }
   if (engine.v12) {
     const base = 75 + speed * 340; // revs right up when it's flying
     for (const v of engine.voices) v.o.frequency.setTargetAtTime(base * v.mul, t, 0.06);
@@ -392,6 +510,7 @@ export function engineStop() {
   if (!engine) return;
   const e = engine;
   engine = null;
+  if (e.timer) clearInterval(e.timer);
   e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
   for (const x of [e.o, e.o2, e.n, e.lfo, ...(e.voices || []).map((v) => v.o)]) x?.stop(ctx.currentTime + 0.5);
 }

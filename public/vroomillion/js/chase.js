@@ -587,6 +587,10 @@ const FIRE_LEN = [0, 0, 0.22, 0.4, 0.6, 0.85];
 const PLASMA = [null, null, ["#0d6b8a", "#2fd8ff", "#e6fdff"], ["#2a3bd6", "#5d8bff", "#e8eeff"], ["#8a1fd6", "#ff4fd8", "#ffe6fb"], ["#00b3ff", "#ff4fd8", "#ffffff"]];
 const SPARK = ["#2fd8ff", "#ff4fd8", "#ffffff", "#9d7bff"];
 const elec = (r) => r?.car?.electric === true;
+// ZIG'S WHIP: red, gold and green exhaust, and music notes that bob up out of the pipes
+const RASTA = ["#e0201b", "#ffd23a", "#1fae4a"];
+const RASTA_FLAME = ["#1fae4a", "#ffd23a", "#fff2b0"];
+const noteParticle = (x, y, u) => ({ x: x + (Math.random() - 0.5) * 8 * u, y, vx: (Math.random() - 0.5) * 50 * u, vy: -(25 + Math.random() * 45) * u, life: 1 + Math.random() * 0.6, size: Math.max(2, 2.2 * u), color: Math.random() < 0.25 ? "#ffffff" : RASTA[Math.floor(Math.random() * 3)], g: -6 * u, note: Math.random() < 0.5 ? 1 : 2, wob: Math.random() * 6 });
 
 // rare answers build up before they're revealed: the card hides its tier, shakes and glows up the
 // rarity colours (seconds, by effect tier)
@@ -768,16 +772,18 @@ export class ChaseScene {
 
   backfire(i) {
     const r = this.racers[i];
-    if (!r?.box || (r.fireT <= 0 && !r.car?.v12)) return;
+    if (!r?.box || (r.fireT <= 0 && !r.car?.v12 && !r.car?.reggae)) return;
     if (r.car?.v12 && !r.fireTier) r.fireTier = 3; // the crazy car spits flames on every shift
+    if (r.car?.reggae && !r.fireTier) r.fireTier = 2; // ZIG'S WHIP puffs red, gold and green on every shift
     const u = this.u;
     r.popT = 0.14;
     if (elec(r)) r.zapT = 0.18; // a laser blast instead of a backfire
     const { x, y, w, h } = r.box;
     for (const ex of [x + w * 0.2, x + w * 0.8]) {
       for (let k = 0; k < 6 + r.fireTier * 2; k++) {
-        this.particles.push({ x: ex, y: y - h * 0.15, vx: (Math.random() - 0.5) * 90 * u, vy: (40 + Math.random() * 110) * u, life: 0.25 + Math.random() * 0.25, size: Math.max(1, u), color: elec(r) ? SPARK[k % 4] : FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: elec(r) ? 0 : 160 * u, hot: true });
+        this.particles.push({ x: ex, y: y - h * 0.15, vx: (Math.random() - 0.5) * 90 * u, vy: (40 + Math.random() * 110) * u, life: 0.25 + Math.random() * 0.25, size: Math.max(1, u), color: elec(r) ? SPARK[k % 4] : r.car?.reggae ? RASTA[k % 3] : FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: elec(r) ? 0 : 160 * u, hot: true });
       }
+      if (r.car?.reggae) for (let k = 0; k < 2; k++) this.particles.push(noteParticle(ex, y - h * 0.15, u));
     }
   }
 
@@ -1192,8 +1198,10 @@ export class ChaseScene {
           }
           if (r.boost > 0.05 && r.fireT <= 0 && Math.random() < r.boost * 0.8 && !elec(r)) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
-            this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: "#cfd3e6", g: 0, soft: true });
+            this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: r.car?.reggae ? RASTA[Math.floor(Math.random() * 3)] : "#cfd3e6", g: 0, soft: true });
           }
+          // ZIG'S WHIP: music notes drift up out of the pipes while it moves
+          if (r.car?.reggae && Math.random() < 0.04 + Math.min(0.35, r.boost * 0.25 + (r.fireT > 0 ? 0.12 : 0))) this.particles.push(noteParticle(ex[Math.random() < 0.5 ? 0 : 1], ey, u));
           // the exclusive gold car (and sparkle premium cars) leave a sparkle trail in their own colours
           if ((r.car?.exclusive || r.car?.fx === "sparkle") && Math.random() < 0.5 + r.boost) {
             this.particles.push({ x: r.box.x + Math.random() * r.box.w, y: r.box.y - Math.random() * r.box.h, vx: (Math.random() - 0.5) * 30 * u, vy: (20 + Math.random() * 40) * u, life: 0.6, size: Math.max(1, u), color: Math.random() < 0.6 ? (r.car.exclusive ? "#fff3a0" : r.car.accent) : "#ffffff", g: 0 });
@@ -1590,7 +1598,14 @@ export class ChaseScene {
     for (const p of this.particles) {
       g.globalAlpha = Math.min(1, p.life * 3) * (p.soft ? 0.85 : 1);
       g.fillStyle = p.color;
-      if (p.spin !== undefined) {
+      if (p.note) {
+        // a pixel music note: a round head, a stem, and a flag (or a beam joining two)
+        const z = Math.max(1, Math.round(p.size / 2)), x = Math.round(p.x + Math.sin(this.time * 5 + p.wob) * 2 * z), y = Math.round(p.y);
+        g.fillRect(x, y, z * 3, z * 2);
+        g.fillRect(x + z * 2, y - z * 5, z, z * 5);
+        if (p.note === 1) { g.fillRect(x + z * 3, y - z * 5, z, z); g.fillRect(x + z * 4, y - z * 4, z, z * 2); }
+        else { g.fillRect(x + z * 5, y + z, z * 3, z * 2); g.fillRect(x + z * 7, y - z * 4, z, z * 5); g.fillRect(x + z * 2, y - z * 5, z * 6, z); }
+      } else if (p.spin !== undefined) {
         const w = Math.max(1, Math.abs(Math.cos(p.spin)) * p.size);
         g.fillRect(Math.round(p.x - w / 2), Math.round(p.y - p.size / 2), Math.ceil(w), Math.ceil(p.size));
       } else {
@@ -2277,6 +2292,12 @@ export class ChaseScene {
       this.drawLasers(g, r, pipes, bottom - h * 0.2, h, fade);
       for (const fx of pipes) this.drawFlame(g, fx, bottom - h * 0.2, Math.max(3, s * (2.6 + r.fireTier * 0.5)), len * 0.8, PLASMA[r.fireTier], true);
       this.drawArcs(g, pipes, bottom - h * 0.2, len, r.fireTier);
+    } else if (r.car?.reggae && !this.calm && (r.fireT > 0 || r.popT > 0)) {
+      // ZIG'S WHIP: green, gold and white-hot flames, swelling on every rimshot
+      const tier = Math.max(2, r.fireTier || 0);
+      const fade = (r.fireT > 0 ? Math.min(1, r.fireT / 0.6) : 0.6) * (r.popT > 0 ? 1.8 : 1);
+      const len = h * Math.max(0.3, FIRE_LEN[tier]) * 1.3 * fade;
+      for (const fx of [left + w * 0.2, left + w * 0.8]) this.drawFlame(g, fx, bottom - h * 0.16, Math.max(3, s * (3.4 + tier * 0.6)), len, r.popT > 0 ? ["#e0201b", "#ffd23a", "#ffffff"] : RASTA_FLAME, true);
     } else if (r.car?.v12 && !this.calm && (r.fireT > 0 || r.boost > 0.05 || r.popT > 0)) {
       // NICO'S CRAZY CAR: giant flames out of both huge tips, even on a common answer, flaring on every pop
       const tier = Math.max(2, r.fireTier || 0);

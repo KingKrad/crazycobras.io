@@ -2085,7 +2085,7 @@ function startRace(setup) {
   show("race");
   // an electric car on this screen (yours, in 1P) whines instead of growling
   const myCar = racers[setup.online?.seat ?? 0]?.car;
-  audio.engineStart(myCar?.electric ? "electric" : myCar?.v12 ? "v12" : false);
+  audio.engineStart(myCar?.electric ? "electric" : myCar?.v12 ? "v12" : myCar?.reggae ? "reggae" : false);
   audio.engineSet(0.1);
   runRace(token);
 }
@@ -2207,7 +2207,7 @@ async function runRace(token) {
       scene.launch(i, tier, nitro, dur / 1000);
       popGain(i, gain[i], tier, nitro, race.crazy);
       if (topFx >= 3 && !fxShown) { fxShown = true; rareMoment(topFx, race.crazy); }
-      const sfx = r.car.electric ? audio.ev : audio.sfx; // an electric car fires lasers and plasma instead
+      const sfx = r.car.electric ? audio.ev : r.car.reggae ? audio.reggae : audio.sfx; // an electric car fires lasers and plasma instead; ZIG'S WHIP is all reggae
       sfx.launch(tier);
       if (tier >= 2) sfx.whoosh(tier);
       if (tier === 0) sfx.sputter();
@@ -2253,8 +2253,9 @@ async function runRace(token) {
           const g = Math.min(R.gears - 1, Math.floor(e * R.gears));
           if (g > R.gear && b > 0.3) {
             R.gear = g;
-            audio.sfx.shift();
+            (r.car.reggae ? audio.reggae : audio.sfx).shift();
             if (r.car.v12) { scene.backfire(i); audio.v12.pop(R.tier); } // NICO'S CRAZY CAR crackles on every shift
+            else if (r.car.reggae) { scene.backfire(i); audio.reggae.pop(R.tier); } // ZIG'S WHIP: an echoing rimshot on every shift
             else if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
           }
           if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));
