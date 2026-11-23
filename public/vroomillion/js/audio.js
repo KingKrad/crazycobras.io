@@ -350,6 +350,22 @@ export const reggae = {
     if (t >= 3) skank([NR.G3, NR.B3, NR.D4], 0.18, 0.035, out);
   },
   shift: () => rim(0, 0.07),
+  // a right answer: ZIG'S WHIP's own victory riddim (an original tune). Two bars of one-drop with a
+  // horn line on top, a dub siren pull-up for the rare ones, and a bigger horn stack the rarer it is.
+  jingle: (t = 1) => {
+    if (!ctx || t <= 0) return;
+    const out = dub(), beat = 60 / 90, e = beat / 2;
+    const bass = [[0, 73.4], [1.5, 73.4], [3, 87.3], [4, 98], [5.5, 87.3], [6, 65.4], [7, 73.4]]; // in eighths
+    for (const [at, f] of bass) { tone(f, e * 1.6, { type: "sine", vol: 0.32, at: at * e }); tone(f * 2, e, { type: "triangle", vol: 0.08, at: at * e }); }
+    for (let k = 1; k < 8; k += 2) skank(k < 4 ? [NR.D4, 349.2, NR.A4] : [NR.C4, NR.E4, NR.G4], k * e, 0.04, out);
+    kick(4 * e, 0.45); rim(4 * e, 0.12, out);
+    // the horn line: D F G, F D, C D
+    const horn = [[0, 587.3, 1], [1, 698.5, 1], [2, 784, 2], [4, 698.5, 1], [5, 587.3, 1], [6, 523.3, 1], [7, 587.3, 2]];
+    const stack = t >= 4 ? [1, 0.75, 0.5] : t >= 2 ? [1, 0.5] : [1];
+    for (const [at, f, len] of horn) for (const m of stack) tone(f * m, e * len * 0.9, { type: "sawtooth", vol: 0.035 + t * 0.004, at: at * e, out });
+    if (t >= 3) siren(1.1, { from: 600, to: 1300, rate: 9, vol: 0.045, at: 8 * e });
+    if (t >= 5) reggae.horn(8 * e + 0.4, 0.06);
+  },
   // nitro: the dub siren climbs and the bass drops
   nitro: () => { siren(1.2, { from: 300, to: 1500, rate: 9, vol: 0.07 }); tone(55, 0.9, { type: "sine", vol: 0.3, slide: 0.6 }); },
   // STALLED: a sad trombone-ish fall, echoing

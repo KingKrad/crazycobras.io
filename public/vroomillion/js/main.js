@@ -2220,7 +2220,10 @@ async function runRace(token) {
       // a rare one: drumroll while the card builds up, then its own sound on the reveal
       if (type === "slam") { if (card.build) audio.sfx.drumroll(card.build, card.fx); else { audio.sfx.tier(card.fx); showBadge(card.i); } }
       else if (type === "reveal") { audio.sfx.tier(card.fx); showBadge(card.i); }
-      else if (type === "impact") { audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); startRun(card.i); }
+      else if (type === "impact") {
+        audio.sfx.smash(card.tier); if (card.tier === 5) scene.confetti(); startRun(card.i);
+        if (card.tier > 0 && race.racers[card.i]?.car?.reggae) audio.reggae.jingle(card.tier); // ZIG'S WHIP's own tune on every right answer
+      }
       // STALLED: bounce off the card, then cough black smoke
       else if (type === "bonk") { audio.sfx.bonk(); setTimeout(() => startRun(card.i), 450); }
     };
