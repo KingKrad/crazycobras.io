@@ -173,20 +173,31 @@ if (args.includes("--write")) {
     let r;
     try { r = await induce(famBySlug(f)); } catch (e) { r = { error: e.message }; }
     done[f.id] = { at: Date.now(), ...r };
-    if (r.rule) {
-      const { file, line } = lines.get(f.id);
-      const url = new URL(file, CAT);
-      const text = fs.readFileSync(url, "utf8");
-      const cols = line.split("|").map((c) => c.trim());
-      if (cols.length >= 7 && text.includes(line)) {
-        cols[5] = r.rule;
-        fs.writeFileSync(url, text.replace(line, cols.join(" | ")));
-        found++;
-      }
-    }
+    if (r.rule) found++; // kept in the log; --apply writes them into the catalog in one go
     fs.writeFileSync(LOG, JSON.stringify(done, null, 1));
     console.log(`${f.id} | ${f.prompts[0]} → ${r.rule ? "RULE " + r.size + " items, " + r.covered : "skip: " + (r.skip || r.error)}`);
     await sleep(1500);
   }
   console.log(`done: ${found} rules added`);
+}
+
+// --apply: write every rule found so far into the catalog lines that still have no rule
+if (args.includes("--apply")) {
+  const CAT = new URL("../public/vroomillion/js/catalog/", import.meta.url);
+  let n = 0;
+  for (const f of fs.readdirSync(CAT).filter((x) => /^w\d+\.js$/.test(x))) {
+    const url = new URL(f, CAT);
+    let text = fs.readFileSync(url, "utf8");
+    const out = text.split("\n").map((line) => {
+      const m = line.match(/^\s*([a-z0-9]+\/[a-z0-9-]+)\s*\|/);
+      const cols = line.split("|");
+      if (!m || cols.length < 7 || cols[5].trim() || !done[m[1]]?.rule) return line;
+      n++;
+      const c = cols.map((x) => x.trim());
+      c[5] = done[m[1]].rule;
+      return c.join(" | ");
+    }).join("\n");
+    if (out !== text) fs.writeFileSync(url, out);
+  }
+  console.log(`applied ${n} rules`);
 }

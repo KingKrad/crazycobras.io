@@ -43,7 +43,7 @@ place/hawaii | 2 | daily | | Name a Hawaiian island or place | | maui, oahu, kau
 place/scotland | 2 | daily |  | Name a place in Scotland | min=25 w:?i wdt:P17 wd:Q145. | edinburgh, glasgow, aberdeen, inverness, dundee, st andrews, loch ness, stirling, perth, isle of skye
 # people
 people/firstlady | 2 | daily | | Name a US First Lady | | michelle obama, melania trump, jill biden, hillary clinton, laura bush, nancy reagan, jacqueline kennedy, eleanor roosevelt, barbara bush, martha washington, abigail adams, rosalynn carter
-people/supermodel | 2 | daily |  | Name a supermodel |  | tyra banks, kate moss, naomi campbell, gisele bundchen, heidi klum, cindy crawford, claudia schiffer, gigi hadid, bella hadid, kendall jenner, adriana lima, twiggy
+people/supermodel | 2 | daily |  | Name a supermodel | min=25 w:{ ?i wdt:P31/wdt:P279* wd:Q5. } ?i wdt:P106/wdt:P279* wd:Q27943370. | tyra banks, kate moss, naomi campbell, gisele bundchen, heidi klum, cindy crawford, claudia schiffer, gigi hadid, bella hadid, kendall jenner, adriana lima, twiggy
 people/billionaire | 1 | main | | Name a famous billionaire | | elon musk, jeff bezos, bill gates, warren buffett, mark zuckerberg, oprah winfrey, larry page, bernard arnault, steve ballmer, larry ellison, michael bloomberg, jay-z
 people/talkshow | 2 | daily |  | Name a talk show host |  | oprah winfrey, ellen degeneres, jimmy fallon, jimmy kimmel, stephen colbert, david letterman, jay leno, conan o'brien, johnny carson, kelly clarkson, james corden, seth meyers
 people/civilrights | 2 | daily | | Name a civil rights leader | | martin luther king jr, rosa parks, malcolm x, harriet tubman, frederick douglass, john lewis, nelson mandela, cesar chavez, medgar evers, ruby bridges, sojourner truth, w.e.b. du bois
