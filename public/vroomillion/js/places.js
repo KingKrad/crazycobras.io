@@ -42,6 +42,7 @@ export class Places {
   }
   update(dt) {
     this.t += dt;
+    this.dt = dt;
     // the garage turntable: turns on its own, or follows a drag and coasts to a stop
     if (this.dragging) return;
     if (Math.abs(this.spinV) > 0.05) { this.yaw += this.spinV * dt; this.spinV *= Math.pow(0.08, dt); }
@@ -172,7 +173,7 @@ export class Places {
   // the race road with your car on the line and the start lights above it
   grid(W, H, top) {
     const c = this.chase;
-    c.update(1 / 60);
+    c.update(this.dt || 1 / 60);
     c.draw();
     const g = this.g;
     // the light gantry across the top of the screen

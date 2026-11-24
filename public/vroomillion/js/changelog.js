@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-24o",
+    date: "Nov 24, 2026",
+    title: "Faster and smoother",
+    items: [
+      "The game starts up faster: the prompt list now loads in the background.",
+      "Menu screens use about half the battery, and race timers and readouts are lighter on your phone.",
+      "Phones that can't keep up turn down the two heaviest effects first, before switching to lite mode.",
+      "New prompts and daily races now always reach your phone right after an update.",
+    ],
+  },
+  {
     id: "2026-11-24n",
     date: "Nov 24, 2026",
     title: "Title fits every phone",

@@ -1320,9 +1320,18 @@ export class ChaseScene {
   draw() {
     // slow phone? quietly drop the extra scenery (fewer clouds, no ground detail, less traffic)
     const nowMs = performance.now();
-    if (this.lastDraw && !this.lite) {
+    // Two steps: under ~48 fps for two seconds, drop the two costliest effects (glow and speed blur,
+    // see post()); under ~33 fps for a second and a half, go fully lite. (Skipped while a menu draws
+    // this scene at a slower pace on purpose: see places.js.)
+    if (this.lastDraw && !this.lite && !this.paced) {
       const ms = nowMs - this.lastDraw;
-      if (ms < 250) { this.frameMs = (this.frameMs || 16) * 0.95 + ms * 0.05; this.slowFrames = this.frameMs > 30 ? (this.slowFrames || 0) + 1 : 0; if (this.slowFrames > 90) this.lite = true; }
+      if (ms < 250) {
+        this.frameMs = (this.frameMs || 16) * 0.95 + ms * 0.05;
+        this.slowFrames = this.frameMs > 30 ? (this.slowFrames || 0) + 1 : 0;
+        if (this.slowFrames > 90) this.lite = true;
+        this.busyFrames = this.frameMs > 21 ? (this.busyFrames || 0) + 1 : 0;
+        if (this.busyFrames > 120) this.trim = true;
+      }
     }
     this.lastDraw = nowMs;
     const { W, H, g, u } = this;
@@ -1696,7 +1705,8 @@ export class ChaseScene {
   // ---- the look on top: a glossy road, haze, glow, speed blur and a vignette ----
   // A glossy road mirrors the world above the horizon and each car (much more in rain and at night),
   // with red streaks under tail lights; haze softens the distance; bright lights glow; the edges blur
-  // at speed. Cheap blits of the finished frame; glow and speed blur are skipped in auto-lite.
+  // at speed. Cheap blits of the finished frame; glow and speed blur are skipped in auto-lite and on
+  // devices that can't hold ~48 fps with them (this.trim).
   post(g) {
     const { W, H, canvas: cv, tod } = this, hz = this.horizon;
     if (!W || hz <= 0 || hz >= H) return;
@@ -1741,15 +1751,20 @@ export class ChaseScene {
     haze.addColorStop(0.45, `rgba(${hc[0]},${hc[1]},${hc[2]},${(this.rareFx ? 0.06 : 0.14) + (this.wx.fog || 0) * 0.25})`);
     haze.addColorStop(1, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`);
     g.fillStyle = haze; g.fillRect(0, hz - H * 0.1, W, H * 0.26);
-    if (!this.lite) {
+    if (!this.lite && !this.trim) {
       // 4. glow: a tiny, high-contrast copy of the frame, stretched back over it softly
       if (CAN_FILTER) {
         const bw = Math.max(32, Math.round(W / 6)), bh = Math.max(18, Math.round(H / 6));
         const bl = this.bloomCv || (this.bloomCv = document.createElement("canvas"));
-        if (bl.width !== bw || bl.height !== bh) { bl.width = bw; bl.height = bh; }
-        const bg = bl.getContext("2d");
-        bg.filter = "brightness(0.85) contrast(2.6) saturate(1.3)";
-        bg.clearRect(0, 0, bw, bh); bg.drawImage(cv, 0, 0, bw, bh);
+        if (bl.width !== bw || bl.height !== bh) { bl.width = bw; bl.height = bh; bl.dataset.fresh = ""; }
+        // it's a soft blur, so refreshing it every other frame looks the same and halves its cost
+        this.bloomTick = (this.bloomTick || 0) + 1;
+        if (this.bloomTick % 2 || bl.dataset.fresh !== "1") {
+          const bg = bl.getContext("2d");
+          bg.filter = "brightness(0.85) contrast(2.6) saturate(1.3)";
+          bg.clearRect(0, 0, bw, bh); bg.drawImage(cv, 0, 0, bw, bh);
+          bl.dataset.fresh = "1";
+        }
         g.save(); g.globalCompositeOperation = "screen"; g.globalAlpha = 0.2 + night * 0.1; g.imageSmoothingEnabled = true;
         g.drawImage(bl, 0, 0, W, H); g.restore();
       }
@@ -1765,13 +1780,17 @@ export class ChaseScene {
         g.restore();
       }
     }
-    // 6. a soft vignette
-    if (!this.vig || this.vig.w !== W || this.vig.h !== H) {
-      const vg = g.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.45, W / 2, H * 0.55, Math.max(W, H) * 0.75);
+    // 6. a soft vignette, painted once per screen size and reused
+    if (!this.vig || this.vig.width !== W || this.vig.height !== H) {
+      const v = this.vig || document.createElement("canvas");
+      v.width = W; v.height = H;
+      const vx = v.getContext("2d");
+      const vg = vx.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.45, W / 2, H * 0.55, Math.max(W, H) * 0.75);
       vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.38)");
-      this.vig = { w: W, h: H, vg };
+      vx.fillStyle = vg; vx.fillRect(0, 0, W, H);
+      this.vig = v;
     }
-    g.fillStyle = this.vig.vg; g.fillRect(0, 0, W, H);
+    g.drawImage(this.vig, 0, 0);
     g.restore();
   }
 

@@ -13,7 +13,10 @@ import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
 import { Places, PLACE_OF } from "./places.js";
-import { pickRace, dailyRace, famKey, familyOf, answerSlug } from "./racepick.js";
+// The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
+// loads in the background like the answer lists below instead of holding up the title screen.
+let pickRace, dailyRace, famKey, familyOf, answerSlug;
+const racepickLoaded = import("./racepick.js").catch(() => import("./racepick.js")).then((m) => ({ pickRace, dailyRace, famKey, familyOf, answerSlug } = m));
 
 // The built-in answer lists (the game's original prompts, now part of the catalog) are about 2 MB, so they load in the background while the title screen is up
 // instead of holding up the first screen. Races wait for them (usually long since done).
@@ -25,7 +28,7 @@ const buildInWorker = () => new Promise((resolve, reject) => {
   w.onmessage = (e) => { resolve(e.data); w.terminate(); };
   w.onerror = (e) => { e.preventDefault?.(); w.terminate(); reject(new Error("worker failed")); };
 });
-const questionsLoaded = (typeof Worker === "function" ? buildInWorker().catch(buildHere) : buildHere()).then((all) => {
+const questionsLoaded = Promise.all([(typeof Worker === "function" ? buildInWorker().catch(buildHere) : buildHere()), racepickLoaded]).then(([all]) => {
   QUESTIONS = all;
   questionsReady = true;
   if (current === "leagues") renderLeagues();
@@ -34,6 +37,8 @@ const questionsLoaded = (typeof Worker === "function" ? buildInWorker().catch(bu
 });
 
 const $ = (id) => document.getElementById(id);
+// per-frame readouts: only touch the page when the text actually changes (each change costs a layout)
+const setText = (el, t) => { if (el.textContent !== t) el.textContent = t; };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
 
@@ -196,16 +201,26 @@ const places = new Places($("scene"), chaseScene); // each menu screen is a plac
   window.addEventListener("pointercancel", end);
 }
 let last = performance.now();
+let lastPlace = 0, placeDt = 0;
 function frame(now) {
   // the first frame's timestamp can be a hair before `last`; never step time backwards
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
   last = now;
   const place = PLACE_OF[current];
   if (place) {
-    chaseScene.clearHi();
-    places.update(dt);
-    places.draw(place, tuned(carById(save.car)));
+    // the menu places sit mostly behind panels and move slowly, so they're drawn at 30 fps (60 while
+    // you spin the garage car) to save battery and keep scrolling smooth
+    placeDt += dt;
+    if (places.dragging || now - lastPlace >= 30) {
+      lastPlace = now;
+      chaseScene.paced = true;
+      chaseScene.clearHi();
+      places.update(Math.min(0.1, placeDt));
+      places.draw(place, tuned(carById(save.car)));
+      placeDt = 0;
+    }
   } else {
+    chaseScene.paced = false;
     scene.update(dt);
     scene.draw();
   }
@@ -2449,8 +2464,8 @@ async function runRace(token) {
           scene.racers[i].dist = r.dist;
           scene.racers[i].boost = b;
           top = Math.max(top, b);
-          r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
-          r.elSpeed.textContent = (r.car.unlimited && !race.daily && !race.online ? "∞" : Math.round(40 + Math.min(4.5, b) * 85 * Math.min(r.power, 12))) + " KM/H";
+          setText(r.elDist, Math.round(r.dist).toLocaleString("en-US") + " M");
+          setText(r.elSpeed, (r.car.unlimited && !race.daily && !race.online ? "∞" : Math.round(40 + Math.min(4.5, b) * 85 * Math.min(r.power, 12))) + " KM/H");
           // climb through the gears; Fast Lane and up backfire on each shift
           const g = Math.min(R.gears - 1, Math.floor(e * R.gears));
           if (g > R.gear && b > 0.3) {
@@ -2866,7 +2881,7 @@ function askAnswer(r, i, token, index) {
       fill.classList.toggle("low", left < 6);
       ring.style.strokeDashoffset = String(100 - frac * 100);
       ring.classList.toggle("low", left < 6);
-      secs.textContent = String(Math.max(0, Math.ceil(left)));
+      setText(secs, String(Math.max(0, Math.ceil(left))));
       const whole = Math.ceil(left);
       if (whole < lastTick && whole <= 5 && whole > 0) audio.sfx.tick();
       lastTick = whole;

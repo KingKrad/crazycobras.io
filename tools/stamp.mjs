@@ -12,8 +12,8 @@ const tag = (url) => (/\?v=/.test(url) ? url : `${url}?v=${V}`);
 
 // relative module imports: from "./x.js" and import("./x.js")
 const stampJs = (src) => src
-  .replace(/(from\s+["'])(\.\/[\w.-]+\.js)(["'])/g, (m, a, u, b) => a + tag(u) + b)
-  .replace(/(import\(\s*["'])(\.\/[\w.-]+\.js)(["']\s*\))/g, (m, a, u, b) => a + tag(u) + b)
+  .replace(/(from\s+["'])(\.\/[\w./-]+\.js)(["'])/g, (m, a, u, b) => a + tag(u) + b)
+  .replace(/(import\(\s*["'])(\.\/[\w./-]+\.js)(["']\s*\))/g, (m, a, u, b) => a + tag(u) + b)
   // the prompt-list worker: new URL("./questions-worker.js", import.meta.url)
   .replace(/(new URL\(\s*["'])(\.\/[\w.-]+\.js)(["']\s*,\s*import\.meta\.url\))/g, (m, a, u, b) => a + tag(u) + b)
   // the long-tail answer lists (deep.js fetches deep/<file> and deep/index.json)
@@ -29,9 +29,12 @@ fs.writeFileSync(path.join(ROOT, "version.json"), JSON.stringify({ v: V }) + "\n
   const m = path.join(jsDir, "main.js");
   fs.writeFileSync(m, fs.readFileSync(m, "utf8").replace('const BUILD = "dev";', `const BUILD = ${JSON.stringify(V)};`));
 }
-for (const f of fs.readdirSync(jsDir).filter((f) => f.endsWith(".js"))) {
-  const p = path.join(jsDir, f);
-  fs.writeFileSync(p, stampJs(fs.readFileSync(p, "utf8")));
+// every script, including the prompt catalog in js/catalog (cached for a year too, so it must be tagged)
+for (const dir of [jsDir, path.join(jsDir, "catalog")]) {
+  for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".js"))) {
+    const p = path.join(dir, f);
+    fs.writeFileSync(p, stampJs(fs.readFileSync(p, "utf8")));
+  }
 }
 
 // fonts inside the stylesheet
