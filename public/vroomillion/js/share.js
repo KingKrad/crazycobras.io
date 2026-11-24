@@ -4,7 +4,7 @@ import { ChaseScene } from "./chase.js";
 
 const W = 1080, H = 1350;
 const SITE = "vroomillion.com";
-const FONT = '"Press Start 2P", ui-monospace, monospace';
+const FONT = '"Pixelify Sans", "Chakra Petch", sans-serif';
 
 // Long names over two lines, so the big text never runs off the card.
 function lines(g, text, max) {

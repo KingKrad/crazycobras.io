@@ -1,8 +1,12 @@
-@font-face {
-  font-family: "Press Start 2P";
-  src: url("fonts/press-start-2p.woff2") format("woff2");
-  font-display: swap;
-}
+/* Fonts (SIL Open Font License, files and licences in fonts/):
+   Pixelify Sans for titles, buttons and big numbers; Chakra Petch for sentences and small text. */
+@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-600.woff2") format("woff2"); font-weight: 500 600; font-display: swap; }
+@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-700.woff2") format("woff2"); font-weight: 700 900; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 
 :root {
   --bg: #0b0618;
@@ -18,6 +22,8 @@
   --orange: #ffb02e;
   --red: #ff3b5c;
   --px: 4px;
+  --font-title: "Pixelify Sans", "Chakra Petch", system-ui, sans-serif;
+  --font-body: "Chakra Petch", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -28,14 +34,18 @@ body {
   margin: 0;
   min-height: 100dvh;
   color: var(--ink);
-  font-family: "Press Start 2P", ui-monospace, "Courier New", monospace;
+  font-family: var(--font-body);
+  /* the sizes were set for a very wide pixel font: size every font by its x-height so text keeps its
+     height but gets narrower and cleaner */
+  font-size-adjust: 0.56;
   font-size: 12px;
   line-height: 1.6;
   background:
     linear-gradient(rgba(79, 209, 255, 0.05) 1px, transparent 1px) 0 0 / 100% 32px,
     linear-gradient(90deg, rgba(79, 209, 255, 0.05) 1px, transparent 1px) 0 0 / 32px 100%,
     radial-gradient(ellipse at 50% 0%, #2a1160 0%, var(--bg) 70%);
-  -webkit-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -1434,3 +1444,19 @@ body[data-place="booth"] .screen.active { border-color: #5ad8ff; background: rgb
 body[data-place="grid"] .screen.active { border-color: #4fd1ff; background: rgba(12, 8, 30, 0.88); border-top: 8px solid; border-image: repeating-linear-gradient(90deg, #fff 0 12px, #111 12px 24px) 8; }
 body[data-place="reststop"] .screen.active { border-color: #7a5228; background: rgba(36, 24, 12, 0.92); box-shadow: 0 0 0 3px #000, 0 0 0 7px #5a3a20; }
 body[data-place="billboard"] .screen.active { border: 6px solid #e9e6d8; background: linear-gradient(180deg, rgba(42, 17, 96, 0.95), rgba(60, 14, 60, 0.95)); box-shadow: 0 0 0 3px #000, 0 0 30px rgba(255, 210, 58, 0.3); }
+
+/* ---------- type: pixel titles, clean sentences ---------- */
+.btn, h1, h2, h3, .logo, .mode-link, .drawer-item, .drawer-head, .step-label, .admin-tab, .corner-btn, .sub-title, .daily-status,
+.hud-name, .dist, .question, .q-kicker, .q-lead, .q-twist, .badge, .tier-name, .acct-tab, .fs-title, .news-line, .round-label, .mode-tag,
+.overlay-text, .gain-pop, .signed-in, .cash, .icon-btn, .tagline, .result-title, .payout-total, .daily-line, .admin-n, .race-code,
+.brand, .rule-name, .soon-tag, .log-title, .log-head, .pp-cover-title, .arrive-kicker, .next-car-name, .car-name, .admin-row-tags {
+  font-family: var(--font-title);
+  font-size-adjust: 0.62;
+  letter-spacing: 0.02em;
+}
+.drawer-item span, .btn .btn-sub, .rule-note { font-family: var(--font-body); font-size-adjust: 0.56; letter-spacing: 0.01em; }
+p, li, .note, label, input, select, textarea { letter-spacing: 0.01em; }
+@media (min-width: 641px) {
+  #s-race .round-label, #s-race .mode-tag, #s-race .hud-card .hud-car, #s-race .hud-foot .n2o, #s-race .q-hint { font-size: 10px; }
+  #s-race .hud-card .hud-name { font-size: 11px; }
+}

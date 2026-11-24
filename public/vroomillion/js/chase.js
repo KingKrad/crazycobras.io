@@ -516,19 +516,20 @@ function gantryText(name) {
 // ---- the answer card the car smashes through ----
 // rarity colours (style.css --t0..--t5): gray, gray-white, green, blue, purple, gold
 const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
-const FONT_NAME = '"Press Start 2P", monospace';
-if (typeof document !== "undefined" && document.fonts) document.fonts.load('8px "Press Start 2P"').catch(() => {});
+const FONT_NAME = '"Pixelify Sans", "Chakra Petch", sans-serif';
+if (typeof document !== "undefined" && document.fonts) document.fonts.load('600 12px "Pixelify Sans"').catch(() => {});
 
 // Hard-edged pixel text (the font's anti-aliasing is thresholded away).
-function pixelLine(text, size, colour) {
+function pixelLine(text, size0, colour) {
+  const size = Math.round(size0 * 1.3); // the sizes were picked for a wider pixel font
   const m = document.createElement("canvas").getContext("2d");
-  m.font = `${size}px ${FONT_NAME}`;
+  m.font = `600 ${size}px ${FONT_NAME}`;
   const w = Math.max(1, Math.ceil(m.measureText(text).width));
   const cv = document.createElement("canvas");
   cv.width = w;
   cv.height = size + 2;
   const g = cv.getContext("2d");
-  g.font = `${size}px ${FONT_NAME}`;
+  g.font = `600 ${size}px ${FONT_NAME}`;
   g.textBaseline = "top";
   g.fillStyle = colour;
   g.fillText(text, 0, 1);

@@ -15,7 +15,7 @@ export const PLACE_OF = {
   leagues: "grid", versus: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard",
 };
 
-const FONT = '"Press Start 2P", monospace';
+const FONT = '"Pixelify Sans", "Chakra Petch", sans-serif';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // the sky outside follows the real clock, like the title screen
@@ -69,7 +69,8 @@ export class Places {
   neon(text, x, y, size, color, align = "center") {
     const g = this.g;
     g.save();
-    g.font = `${size}px ${FONT}`;
+    size = Math.round(size * 1.3); // the sizes were picked for a wider pixel font
+    g.font = `700 ${size}px ${FONT}`;
     g.textAlign = align;
     g.textBaseline = "middle";
     const on = Math.sin(this.t * 13) > -0.97; // a rare flicker
