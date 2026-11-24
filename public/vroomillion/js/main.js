@@ -186,14 +186,24 @@ requestAnimationFrame(frame);
 
 // The road fills the whole window everywhere: on the title screen your car waits on the line, behind
 // the other menus it runs on dimmed, and in a race it's the race.
+// Pixel-perfect: the canvas is sized so each of its pixels is a whole number of the screen's real
+// pixels (no uneven, soft scaling), at about 640 pixels across (less on a phone that's struggling).
+function crispCanvas(cssW, cssH) {
+  const dpr = window.devicePixelRatio || 1;
+  const target = chaseScene.lite ? 480 : 640;
+  const k = Math.max(1, Math.round((cssW * dpr) / target));
+  const w = Math.ceil((cssW * dpr) / k), hgt = Math.ceil((cssH * dpr) / k);
+  const cv = $("scene");
+  cv.style.width = (w * k) / dpr + "px";
+  cv.style.height = (hgt * k) / dpr + "px";
+  return { w, h: hgt, css: k / dpr }; // css: screen (CSS) pixels per canvas pixel
+}
 function fitScene() {
   scene = chaseScene;
   if (current !== "race") {
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const iw = Math.max(440, Math.min(840, Math.round(vw / 1.6)));
-    const ih = Math.round(vh / (vw / iw));
-    // the car sits just above the start button on the title screen
-    scene.resize(iw, ih, Math.round(ih * (vw < 600 ? 0.6 : 0.64)));
+    const { w, h: ch } = crispCanvas(window.innerWidth, window.innerHeight);
+    // the car sits further up the road, with room under it for the start button
+    scene.resize(w, ch, Math.round(ch * (window.innerWidth < 600 ? 0.6 : 0.66)));
     return;
   }
   const vv = window.visualViewport;
@@ -209,12 +219,10 @@ function fitScene() {
   root.setProperty("--vvh", vh + "px");
   root.setProperty("--vvtop", (vv ? vv.offsetTop : 0) + "px");
   document.body.classList.toggle("kb", kb);
-  const iw = Math.max(440, Math.min(840, Math.round(vw / 1.6))); // 16-bit: twice the old art resolution
-  const k = vw / iw;
-  const ih = Math.round(vh / k);
-  // room for the answer bar (one compact row on the keyboard)
+  const { w: iw, h: ih, css: k } = crispCanvas(vw, vh);
+  // room for the answer bar (one compact row on the keyboard), and the car a little further up the road
   const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
-  scene.resize(iw, ih, ih - dock - 6); // nearest car sits just above the answer bar
+  scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05)); // nearest car sits above the answer bar
   requestAnimationFrame(fitCard);
 }
 let fullH = 0, fullW = 0; // the tallest the visible area has been at this width (no keyboard)
@@ -278,6 +286,8 @@ function fitCard() {
   if (card.scrollHeight > room) card.style.maxHeight = "none";
 }
 window.addEventListener("resize", fitScene);
+let wasLite = false;
+setInterval(() => { if (chaseScene.lite !== wasLite) { wasLite = chaseScene.lite; fitScene(); } }, 2000);
 window.visualViewport?.addEventListener("resize", fitScene);
 window.visualViewport?.addEventListener("scroll", () => {
   if (current !== "race") return;

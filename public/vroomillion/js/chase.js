@@ -648,7 +648,9 @@ export class ChaseScene {
     this.u = w >= 400 ? 2 : 1; // canvas pixels per art pixel: race canvases run at twice the art resolution
     this.horizon = Math.round(Math.min(h * 0.42, carBottom - h * 0.3));
     this.carBottom = Math.round(carBottom);
-    this.carPx = Math.max(1, Math.round((w * 0.22) / 40)); // canvas px per sprite px for the nearest car (~22% of the width) // canvas px per sprite px for the nearest car (~20% of the width)
+    // canvas px per sprite px for the nearest car: about 15% of the width, a quarter to two fifths
+    // smaller than before, so you see more road around it
+    this.carPx = Math.max(1, (w * 0.15) / 40);
     this.canvas.width = w;
     this.canvas.height = h;
     this.layer.width = w;
