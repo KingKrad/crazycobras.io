@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25a",
+    date: "Nov 25, 2026",
+    title: "New mode: WORLD TOUR",
+    items: [
+      "WORLD TOUR is a new themed mode with 600 geography prompts: countries, cities, rivers, mountains, islands and landmarks.",
+      "Every place you name, your car drives there on a real pixel map of the world.",
+      "Rarer places mean bigger trips: a road trip, a ferry across the sea, a plane, or a rocket round the planet.",
+      "Try it with one free race. Unlocking it is $5 once, and it's yours forever.",
+    ],
+  },
+  {
     id: "2026-11-24o",
     date: "Nov 24, 2026",
     title: "Faster and smoother",
