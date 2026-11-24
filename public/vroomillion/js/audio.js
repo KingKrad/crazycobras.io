@@ -344,11 +344,11 @@ function clip(buf, { rate = 1, vol = 0.6, at = 0, offset = 0, dur = 0, echo = 0 
   src.connect(g).connect(master);
   if (echo) { const e = ctx.createGain(); e.gain.value = echo; g.connect(e).connect(dub()); }
   src.start(t, offset, dur || undefined);
-  return true;
+  return src;
 }
 // AUDI 5000's exhaust: the owner's recording of three hard revs (audio/audi5k-exhaust.mp3).
 // In the file: rev one 0-1.95 s (the big one), rev two 2.0-3.25 s, rev three 3.3-4.6 s.
-let audiClip = null, audiLoading = null;
+let audiClip = null, audiLoading = null, audiPlaying = null;
 export function loadAudiExhaust() {
   if (!ctx || audiClip || audiLoading) return;
   audiLoading = fetch("/vroomillion/audio/audi5k-exhaust.mp3")
@@ -362,8 +362,10 @@ export const audi = {
   // off the line: a rev from the recording, the big one for rarer answers, with a deep boom under it
   launch: (t) => {
     if (t <= 0) return;
-    const [off, dur] = REVS[t >= 3 ? 0 : t === 2 ? 1 : 2];
-    if (!clip(audiClip, { rate: 0.96 + t * 0.03, vol: 0.6 + t * 0.06, offset: off, dur })) v12.scream(t);
+    // the whole recording, all three revs, at its real speed; a new launch cuts off the last one
+    try { audiPlaying?.stop(); } catch { /* already over */ }
+    audiPlaying = clip(audiClip, { vol: 0.6 + t * 0.06 });
+    if (!audiPlaying) v12.scream(t);
     tone(45, 0.6 + t * 0.1, { type: "sine", vol: 0.25 + t * 0.03, slide: 0.6 });
     if (t >= 4) noiseF(0.9, { vol: 0.12, type: "lowpass", freq: 200, sweep: 1200, attack: 0.05 }); // the flames whoosh
   },
@@ -374,7 +376,7 @@ export const audi = {
     noiseF(0.09, { vol: 0.22, type: "lowpass", freq: 700 });
     tone(55, 0.14, { type: "square", vol: 0.14, slide: 0.5 });
   },
-  nitro: () => { clip(audiClip, { rate: 1.15, vol: 0.6, offset: REVS[0][0], dur: REVS[0][1], at: 0.12 }); },
+  nitro: () => { tone(40, 1, { type: "sine", vol: 0.3, slide: 0.7 }); noiseF(0.8, { vol: 0.12, type: "lowpass", freq: 250, sweep: 2000, attack: 0.1 }); }, // a deep boom under the full recording, not a second copy of it
 };
 export const reggae = {
   // the air horn: "bap bap baaaa"
