@@ -382,16 +382,17 @@ export const reggae = {
   // a right answer: ZIG'S WHIP's own victory riddim (an original tune). Two bars of one-drop with a
   // horn line on top, a dub siren pull-up for the rare ones, and a bigger horn stack the rarer it is.
   jingle: (t = 1) => {
+    // a right answer: two bars in the same dancehall style (original): the bass walks up, the organ
+    // bubbles, the snare drops, and a horn section answers; bigger horns and sirens the rarer it is
     if (!ctx || t <= 0) return;
-    const out = dub(), beat = 60 / 90, e = beat / 2;
-    const bass = [[0, 73.4], [1.5, 73.4], [3, 87.3], [4, 98], [5.5, 87.3], [6, 65.4], [7, 73.4]]; // in eighths
-    for (const [at, f] of bass) { tone(f, e * 1.6, { type: "sine", vol: 0.32, at: at * e }); tone(f * 2, e, { type: "triangle", vol: 0.08, at: at * e }); }
-    for (let k = 1; k < 8; k += 2) skank(k < 4 ? [NR.D4, 349.2, NR.A4] : [NR.C4, NR.E4, NR.G4], k * e, 0.04, out);
-    kick(4 * e, 0.45); rim(4 * e, 0.12, out);
-    // the horn line: D F G, F D, C D
-    const horn = [[0, 587.3, 1], [1, 698.5, 1], [2, 784, 2], [4, 698.5, 1], [5, 587.3, 1], [6, 523.3, 1], [7, 587.3, 2]];
+    const out = dub(), e = 60 / 84 / 2;
+    [[0, E2], [1.5, E2], [2, G2], [3, A1 * 2], [4, B1 * 2], [5.5, B1], [6, D2], [7, E2]].forEach(([at, f]) => { tone(f, e * 1.5, { type: "sine", vol: 0.36, at: at * e }); tone(f * 2, e * 0.8, { type: "triangle", vol: 0.08, at: at * e }); });
+    for (let k = 1; k < 8; k += 2) bubble(CHORDS[k < 4 ? 0 : k < 6 ? 1 : 2], k * e, e, 0.035, out);
+    kick(4 * e, 0.5); snare(4 * e, 0.15, out);
+    // the horns: B G A, then B D E
+    const horn = [[0.5, 493.9, 1], [1.5, 392, 1], [2.5, 440, 1.4], [4.5, 493.9, 1], [5.5, 587.3, 1], [6.5, 659.3, 1.6]];
     const stack = t >= 4 ? [1, 0.75, 0.5] : t >= 2 ? [1, 0.5] : [1];
-    for (const [at, f, len] of horn) for (const m of stack) tone(f * m, e * len * 0.9, { type: "sawtooth", vol: 0.035 + t * 0.004, at: at * e, out });
+    for (const [at, f, len] of horn) for (const m of stack) tone(f * m, e * len * 0.8, { type: "sawtooth", vol: 0.032 + t * 0.004, at: at * e, out });
     if (t >= 3) siren(1.1, { from: 600, to: 1300, rate: 9, vol: 0.045, at: 8 * e });
     if (t >= 5) reggae.horn(8 * e + 0.4, 0.06);
   },
@@ -402,16 +403,27 @@ export const reggae = {
 };
 // the engine: a one-drop groove (kick and rim on beat three, offbeat skanks, a bassline) over a low
 // diesel rumble. The faster the truck goes, the faster and louder the groove.
+// The engine: an early-80s dancehall-style groove of its own (an original bassline, not any song's): slow
+// and heavy, a deep round bass, an organ "bubble" on the offbeats, a crisp drum-machine snare on the drop,
+// short horn stabs every other bar, all over a low diesel rumble. Faster truck, faster and louder groove.
+const E1 = 41.2, G1 = 49, A1 = 55, B1 = 61.7, C2 = 65.4, D2 = 73.4, E2 = 82.4, G2 = 98;
 const RIDDIM = [
-  // [bass note or 0, chord on this eighth?] for two bars of eighths: Am then G
-  [NR.A2, 0], [0, 1], [0, 0], [NR.E2, 1], [NR.G2, 0], [0, 1], [NR.A2, 0], [0, 1],
-  [NR.G2, 0], [0, 1], [0, 0], [NR.D2, 1], [NR.F2, 0], [0, 1], [NR.G2, 0], [0, 1],
+  // bass note (or 0) for each eighth of two bars: E minor, then C to D
+  E2, 0, 0, E2, G1, 0, B1, 0,
+  C2, 0, 0, C2, D2, 0, A1, E1,
 ];
+const CHORDS = [[164.8, 196, 246.9], [130.8, 164.8, 196], [146.8, 185, 220]]; // Em, C, D voicings
+// the organ bubble: a soft chord and a quieter ghost just after it
+const bubble = (notes, at, len, vol, out) => {
+  for (const f of notes) { tone(f, len * 0.5, { type: "triangle", vol, at, out }); tone(f * 2, len * 0.35, { type: "sine", vol: vol * 0.5, at, out }); tone(f, len * 0.3, { type: "triangle", vol: vol * 0.45, at: at + len * 0.5, out }); }
+};
+// a drum-machine snare: a short tone with a burst of noise
+const snare = (at, vol, out) => { tone(190, 0.08, { type: "triangle", vol: vol * 0.7, at, slide: 0.7, out }); noiseF(0.14, { vol, at, type: "bandpass", freq: 1600, q: 0.8, out }); };
 function reggaeEngine() {
   const g = ctx.createGain(); g.gain.value = 0;
   const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 220;
   const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = 38;
-  const rg = ctx.createGain(); rg.gain.value = 0.35;
+  const rg = ctx.createGain(); rg.gain.value = 0.3;
   o.connect(f).connect(rg).connect(g);
   const band = ctx.createGain(); band.gain.value = 1;
   band.connect(g);
@@ -420,14 +432,16 @@ function reggaeEngine() {
   const e = { reggae: true, o, f, g, band, speed: 0.1, step: 0, next: ctx.currentTime + 0.05 };
   e.timer = setInterval(() => {
     if (!ctx) return;
-    const bpm = 72 + e.speed * 48;
+    const bpm = 66 + e.speed * 34; // slow and heavy, a little quicker flat out
     const eighth = 60 / bpm / 2;
     while (e.next < ctx.currentTime + 0.15) {
-      const at = Math.max(0, e.next - ctx.currentTime), k = e.step % 16, [bass, chord] = RIDDIM[k];
-      if (bass) { tone(bass, eighth * 1.8, { type: "sine", vol: 0.5, at, out: band }); tone(bass * 2, eighth * 1.2, { type: "triangle", vol: 0.12, at, out: band }); }
-      if (chord) skank(k < 8 ? [NR.A3, NR.C4, NR.E4] : [NR.G3, NR.B3, NR.D4], at, 0.045, band);
-      if (k % 8 === 4) { kick(at, 0.5); rim(at, 0.12, band); } // the one drop
-      if (e.speed > 0.45 && k % 2 === 1) noiseF(0.02, { vol: 0.04, at, type: "highpass", freq: 7000, out: band }); // hats when it's flying
+      const at = Math.max(0, e.next - ctx.currentTime), k = e.step % 16, bar = Math.floor(e.step / 16) % 2, bass = RIDDIM[k];
+      if (bass) { tone(bass, eighth * 1.7, { type: "sine", vol: 0.6, at, out: band }); tone(bass * 2, eighth * 0.9, { type: "triangle", vol: 0.1, at, out: band }); }
+      if (k % 2 === 1) bubble(CHORDS[k < 8 ? 0 : k < 12 ? 1 : 2], at, eighth, 0.03, band);
+      if (k % 8 === 4) { kick(at, 0.55); snare(at, 0.13, band); } // the drop
+      if (k === 0 && e.speed > 0.3) kick(at, 0.3);
+      if (k % 2 === 0) noiseF(0.015, { vol: 0.02 + e.speed * 0.025, at, type: "highpass", freq: 8000, out: band }); // a ticking hat
+      if (bar === 1 && (k === 7 || k === 15)) for (const m of [1, 1.5]) tone(329.6 * m, eighth * 0.6, { type: "sawtooth", vol: 0.018, at, out: band }); // horn stab
       e.next += eighth;
       e.step++;
     }
