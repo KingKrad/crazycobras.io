@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lesson · Gameillion</title>
+<meta name="description" content="Build your own one-in-a-million daily game. A bite-size, hands-on course where AI helps you make and launch a real browser game. No coding experience needed.">
+<meta name="theme-color" content="#140f3a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Lesson · Gameillion">
+<meta property="og:description" content="Build your own one-in-a-million daily game. A bite-size, hands-on course where AI helps you make and launch a real browser game. No coding experience needed.">
+<meta property="og:image" content="/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/css/site.css">
+<script type="module" src="/js/lesson.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="/"><img src="/img/milli.svg" alt="" width="36" height="36"><span>Game<b>illion</b></span></a>
+  <nav class="nav" aria-label="Main"><a href="/path.html">Course</a><a href="/showcase.html">Showcase</a><a href="/prompts.html">Prompts</a><a href="/settings.html">Settings</a></nav>
+  <div class="chips" id="chips" aria-label="Your stats"></div>
+</header>
+<main id="main">
+<div class="lesson-top">
+  <a class="close" href="/path.html" aria-label="Back to course path">✕</a>
+  <div class="progress" role="progressbar" aria-label="Lesson progress" aria-valuemin="0"><span id="bar"></span></div>
+</div>
+<h1 id="title" class="sr-only">Lesson</h1>
+<div class="lesson" id="lesson">
+  <section class="card step" id="stepCard" aria-live="polite">
+    <div id="step"><p class="muted">Loading lesson…</p></div>
+    <div class="step-actions"><button class="btn big" id="next" type="button" disabled>Continue</button></div>
+  </section>
+  <section class="preview-wrap" aria-label="Your game preview">
+    <p class="preview-label"><span>🎮 Your game (live)</span><span>try it!</span></p>
+    <iframe class="preview" id="preview" sandbox="allow-scripts" title="Live preview of your game"></iframe>
+  </section>
+</div>
+<div class="celebrate" id="overlay" hidden></div>
+</main>
+<footer>
+  <a href="/how.html">How it works</a><a href="/signin.html">Sign in</a><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/refunds.html">Refunds</a>
+  <p>Gameillion is an independent course. Games mentioned as case studies belong to their creators.</p>
+</footer>
+</body>
+</html>

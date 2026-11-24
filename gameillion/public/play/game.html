@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily game</title>
+<style>
+:root { --bg: #1b1446; --accent: #ffc83d; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #fff;
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 22%, var(--bg)) 0%, var(--bg) 60%); display: flex; justify-content: center; padding: 16px; }
+.card { width: 100%; max-width: 420px; text-align: center; }
+.emoji { font-size: 3.2rem; line-height: 1; margin-top: 6px; animation: bob 2.4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px) rotate(-4deg); } }
+h1 { margin: 6px 0 2px; font-size: 2rem; font-weight: 900; letter-spacing: -.01em; color: var(--accent); text-shadow: 0 3px 0 #0006; overflow-wrap: anywhere; }
+.tag { margin: 0 0 6px; opacity: .85; }
+.meta { font-size: .85rem; opacity: .7; margin: 0 0 12px; }
+.form { display: flex; gap: 8px; }
+[hidden] { display: none !important; }
+input { flex: 1; min-width: 0; font: inherit; font-size: 1.3rem; font-weight: 800; text-align: center; padding: 12px; border-radius: 14px; border: 3px solid #ffffff33; background: #0005; color: #fff; }
+input:focus { outline: none; border-color: var(--accent); }
+button { font: inherit; font-weight: 900; font-size: 1.1rem; border: 0; border-radius: 14px; padding: 12px 18px; background: var(--accent); color: #1a1200; cursor: pointer; box-shadow: 0 4px 0 #0007; min-height: 48px; }
+button:active { transform: translateY(3px); box-shadow: 0 1px 0 #0007; }
+button:focus-visible, input:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.dots { display: flex; justify-content: center; gap: 6px; margin: 12px 0; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.dots i.used { background: #ffffff33; }
+.msg { min-height: 1.4em; color: #ffb4b4; font-weight: 700; margin: 6px 0; }
+ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column-reverse; gap: 8px; }
+li { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 12px; font-weight: 700;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) calc(var(--heat) * 70%), #ffffff14) 0%, #ffffff10 100%); }
+li b { font-size: 1.2rem; min-width: 2.6em; }
+li.win { background: #2fbf71; }
+li.pop { animation: pop .35s cubic-bezier(.2,1.6,.4,1); }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } }
+.bump { animation: bump .35s; }
+@keyframes bump { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.end { background: #0004; border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.end h2 { margin: 0 0 4px; color: var(--accent); }
+.end p { margin: 4px 0 10px; }
+.end .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.ghost { background: #ffffff22; color: #fff; }
+#shareMsg { white-space: pre-wrap; font-size: .9rem; opacity: .9; }
+#fx { position: fixed; inset: 0; pointer-events: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="card" id="card">
+  <div class="emoji" id="emoji" aria-hidden="true"></div>
+  <h1 id="name"></h1>
+  <p class="tag" id="tagline"></p>
+  <p class="meta" id="puzzle"></p>
+  <section class="end" id="end" hidden>
+    <h2 id="endTitle"></h2>
+    <p id="endText"></p>
+    <p id="streak"></p>
+    <div class="row">
+      <button type="button" id="share">Share result</button>
+      <button type="button" id="again" class="ghost">Play again</button>
+    </div>
+    <p id="shareMsg" aria-live="polite"></p>
+  </section>
+  <div class="form" id="form">
+    <input id="num" type="number" inputmode="numeric" min="1" required>
+    <button type="button" id="go">Guess</button>
+  </div>
+  <div class="dots" id="dots" role="img"></div>
+  <p class="msg" id="msg" role="alert"></p>
+  <ol id="hints" aria-label="Your guesses"></ol>
+  <p class="sr" id="live" aria-live="polite"></p>
+</main>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in · Gameillion</title>
+<meta name="description" content="Build your own one-in-a-million daily game. A bite-size, hands-on course where AI helps you make and launch a real browser game. No coding experience needed.">
+<meta name="theme-color" content="#140f3a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Sign in · Gameillion">
+<meta property="og:description" content="Build your own one-in-a-million daily game. A bite-size, hands-on course where AI helps you make and launch a real browser game. No coding experience needed.">
+<meta property="og:image" content="/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/css/site.css">
+<script type="module" src="/js/signin.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="/"><img src="/img/milli.svg" alt="" width="36" height="36"><span>Game<b>illion</b></span></a>
+  <nav class="nav" aria-label="Main"><a href="/path.html">Course</a><a href="/showcase.html">Showcase</a><a href="/prompts.html">Prompts</a><a href="/settings.html">Settings</a></nav>
+  <div class="chips" id="chips" aria-label="Your stats"></div>
+</header>
+<main id="main">
+<div class="narrow" style="margin:0 auto">
+<h1>Sign in</h1>
+<div class="card">
+  <form id="form">
+    <p class="muted">No password needed. We’ll email you a one-time link. Use the same email you bought the course with.</p>
+    <label class="field" for="email">Email<input id="email" type="email" autocomplete="email" required></label>
+    <button class="btn" id="send" type="submit">Email me a link</button>
+    <p id="msg" role="status" aria-live="polite" style="font-weight:700"></p>
+  </form>
+  <div id="confirm" hidden>
+    <h2>One tap to sign in</h2>
+    <button class="btn big" id="confirmBtn" type="button">Sign me in</button>
+    <p id="confirmMsg" role="status" aria-live="polite" style="font-weight:700"></p>
+  </div>
+  <div id="already" hidden>
+    <p>Signed in as <b id="who"></b>.</p>
+    <div class="row"><a class="btn" href="/path.html">Go to the course</a><button class="btn ghost" id="logout" type="button">Sign out</button></div>
+  </div>
+</div>
+<p class="muted">Free lessons work without an account — your progress saves on this device and joins your account when you sign in.</p>
+</div>
+</main>
+<footer>
+  <a href="/how.html">How it works</a><a href="/signin.html">Sign in</a><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a><a href="/refunds.html">Refunds</a>
+  <p>Gameillion is an independent course. Games mentioned as case studies belong to their creators.</p>
+</footer>
+</body>
+</html>
