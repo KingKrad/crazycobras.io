@@ -516,20 +516,20 @@ function gantryText(name) {
 // ---- the answer card the car smashes through ----
 // rarity colours (style.css --t0..--t5): gray, gray-white, green, blue, purple, gold
 const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
-const FONT_NAME = '"Pixelify Sans", "Chakra Petch", sans-serif';
-if (typeof document !== "undefined" && document.fonts) document.fonts.load('600 12px "Pixelify Sans"').catch(() => {});
+const FONT_NAME = '"Bungee", "Space Grotesk", sans-serif';
+if (typeof document !== "undefined" && document.fonts) document.fonts.load('12px "Bungee"').catch(() => {});
 
 // Hard-edged pixel text (the font's anti-aliasing is thresholded away).
 function pixelLine(text, size0, colour) {
-  const size = Math.round(size0 * 1.3); // the sizes were picked for a wider pixel font
+  const size = Math.round(size0 * 1.1); // the sizes were picked for a different font
   const m = document.createElement("canvas").getContext("2d");
-  m.font = `600 ${size}px ${FONT_NAME}`;
+  m.font = `${size}px ${FONT_NAME}`;
   const w = Math.max(1, Math.ceil(m.measureText(text).width));
   const cv = document.createElement("canvas");
   cv.width = w;
   cv.height = size + 2;
   const g = cv.getContext("2d");
-  g.font = `600 ${size}px ${FONT_NAME}`;
+  g.font = `${size}px ${FONT_NAME}`;
   g.textBaseline = "top";
   g.fillStyle = colour;
   g.fillText(text, 0, 1);
@@ -641,9 +641,12 @@ export class ChaseScene {
   }
 
   // carBottom: canvas y where the nearest car's tyres should sit (above the answer bar).
-  resize(w, h, carBottom = h - 12) {
+  // glide: same size, new car position: ease there over a moment instead of jumping (title -> race)
+  resize(w, h, carBottom = h - 12, glide = false) {
     w = Math.max(160, Math.round(w));
     h = Math.max(110, Math.round(h));
+    if (glide && w === this.W && h === this.H && this.carBottom) { this.glideTo = Math.round(carBottom); return; }
+    this.glideTo = null;
     this.W = w;
     this.H = h;
     this.u = w >= 400 ? 2 : 1; // canvas pixels per art pixel: race canvases run at twice the art resolution
@@ -1071,6 +1074,11 @@ export class ChaseScene {
 
   update(dt) {
     const u = this.u;
+    if (this.glideTo != null) {
+      this.carBottom += (this.glideTo - this.carBottom) * Math.min(1, dt * 3.5);
+      if (Math.abs(this.glideTo - this.carBottom) < 0.5) { this.carBottom = this.glideTo; this.glideTo = null; }
+      this.horizon = Math.round(Math.min(this.H * 0.42, this.carBottom - this.H * 0.3));
+    }
     // a One in a Vroomillion smash plays in slow motion for a moment
     if (this.slowmo > 0) { this.slowmo -= dt; dt *= this.calm ? 1 : 0.3; }
     this.updateSmash(dt);

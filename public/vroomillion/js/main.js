@@ -240,7 +240,8 @@ function fitScene() {
   chaseScene.clearTop = 0;
   // room for the answer bar (one compact row on the keyboard), and the car a little further up the road
   const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
-  scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05)); // nearest car sits above the answer bar
+  scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05), !!chaseScene.glideNext); // nearest car sits above the answer bar
+  chaseScene.glideNext = false;
   requestAnimationFrame(fitCard);
 }
 let fullH = 0, fullW = 0; // the tallest the visible area has been at this width (no keyboard)
@@ -2208,7 +2209,8 @@ function startRace(setup) {
     ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
     : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }], fromLine);
   attractCar = null; // the title screen sets its car up again next time
-  scene.speed = fromLine ? 0.15 : 0.05;
+  scene.speed = fromLine ? Math.max(scene.speed, 0.25) : 0.08;
+  chaseScene.glideNext = fromLine; // the camera glides from the title view to the race view
   const hud = $("hud");
   hud.textContent = "";
   for (const id of ["hud", "reveal", "result-body"]) $(id).classList.toggle("solo", solo);
@@ -2238,20 +2240,38 @@ function startRace(setup) {
 
 async function runRace(token) {
   const alive = () => token === raceToken;
-  for (const n of ["3", "2", "1"]) {
-    overlay(n, "count");
-    audio.sfx.beep();
-    await sleep(700);
+  if (race.online) {
+    // online 1v1 keeps the 3-2-1, so both players start on the same beat
+    for (const n of ["3", "2", "1"]) {
+      overlay(n, "count");
+      audio.sfx.beep();
+      await sleep(700);
+      if (!alive()) return;
+    }
+    overlay("GO!", "count go");
+    $("q-card").classList.remove("hidden");
+    audio.sfx.go();
+    scene.speed = 0.3;
+    audio.engineSet(0.3);
+    await sleep(600);
     if (!alive()) return;
+    overlay("");
+  } else {
+    // no countdown: the car is already rolling, it eases up to cruising speed and round 1 slides in
+    const from = scene.speed, t0 = performance.now();
+    await new Promise((done) => {
+      const step = (now) => {
+        if (!alive()) return done();
+        const k = Math.min(1, (now - t0) / 900), e = 1 - (1 - k) ** 3;
+        scene.speed = from + (0.3 - from) * e;
+        audio.engineSet(0.1 + 0.2 * e);
+        if (k < 1) requestAnimationFrame(step); else done();
+      };
+      requestAnimationFrame(step);
+    });
+    if (!alive()) return;
+    $("q-card").classList.remove("hidden");
   }
-  overlay("GO!", "count go");
-  $("q-card").classList.remove("hidden");
-  audio.sfx.go();
-  scene.speed = 0.3;
-  audio.engineSet(0.3);
-  await sleep(600);
-  if (!alive()) return;
-  overlay("");
 
   const rounds = race.questions.length;
   for (let round = 0; round < rounds; round++) {

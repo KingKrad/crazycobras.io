@@ -1,12 +1,10 @@
 /* Fonts (SIL Open Font License, files and licences in fonts/):
-   Pixelify Sans for titles, buttons and big numbers; Chakra Petch for sentences and small text. */
-@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-600.woff2") format("woff2"); font-weight: 500 600; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url("fonts/pixelify-sans-700.woff2") format("woff2"); font-weight: 700 900; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "Chakra Petch"; src: url("fonts/chakra-petch-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+   Bungee for titles, buttons and big numbers; Space Grotesk for sentences and small text. */
+@font-face { font-family: "Bungee"; src: url("fonts/bungee-400.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 
 :root {
   --bg: #0b0618;
@@ -22,8 +20,8 @@
   --orange: #ffb02e;
   --red: #ff3b5c;
   --px: 4px;
-  --font-title: "Pixelify Sans", "Chakra Petch", system-ui, sans-serif;
-  --font-body: "Chakra Petch", system-ui, sans-serif;
+  --font-title: "Bungee", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -1488,3 +1486,13 @@ body[data-screen="title"] .neon-sign { display: block; width: min(94vw, 900px); 
 @media (prefers-reduced-motion: reduce) { .neon-sign tspan, .neon-sign tspan.flick { animation: none; } }
 body[data-screen="title"] .tagline { font-family: var(--font-title); font-size: clamp(11px, 2.6vw, 17px); color: #ffffff; letter-spacing: 0.08em; margin-top: 0.2em;
   text-shadow: 0 0 6px rgba(63, 240, 255, 0.9), 0 0 16px rgba(63, 240, 255, 0.5), 2px 2px 0 #000; }
+
+/* the race screen arrives smoothly: the HUD drops in from the top, the answer bar rises from below */
+#s-race.active { animation: none; }
+#s-race.active .race-top { animation: race-in-top 0.55s cubic-bezier(0.2, 1, 0.3, 1) both; }
+#s-race.active .race-dock { animation: race-in-bottom 0.6s cubic-bezier(0.2, 1, 0.3, 1) 0.1s both; }
+#s-race .q-card:not(.hidden) { animation: card-in 0.45s cubic-bezier(0.2, 1.2, 0.4, 1) both; }
+@keyframes race-in-top { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes race-in-bottom { from { transform: translateY(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes card-in { from { transform: translateY(-18px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #s-race.active .race-top, #s-race.active .race-dock, #s-race .q-card:not(.hidden) { animation: none; } }
