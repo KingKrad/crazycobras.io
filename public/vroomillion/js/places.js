@@ -8,6 +8,7 @@
 //   reststop a road-trip rest stop: a diner, a map board, your car parked outside
 //   billboard a huge roadside billboard, lit up, your car parked below
 import { carSprite, rearSprite } from "./cars.js";
+import { voxelModel, drawVoxel } from "./voxel.js";
 
 // which place each screen is
 export const PLACE_OF = {
@@ -32,10 +33,31 @@ export class Places {
     this.g = canvas.getContext("2d");
     this.chase = chase;
     this.t = 0;
+    this.yaw = 0.6; // the garage car's turn
+    this.spinV = 0;
+    this.dragging = false;
+    this.models = new Map();
     this.inset = 0; // canvas px covered by the top bar (logo, cash, sound): the place starts below it
     this.stars = [...Array(70)].map(() => [Math.random(), Math.random() * 0.5, Math.random()]);
   }
-  update(dt) { this.t += dt; }
+  update(dt) {
+    this.t += dt;
+    // the garage turntable: turns on its own, or follows a drag and coasts to a stop
+    if (this.dragging) return;
+    if (Math.abs(this.spinV) > 0.05) { this.yaw += this.spinV * dt; this.spinV *= Math.pow(0.08, dt); }
+    else this.yaw += dt * 0.55;
+  }
+  model(car) {
+    const key = car.id + ":" + car.color;
+    if (!this.models.has(key)) this.models.set(key, voxelModel(carSprite(car, 0), rearSprite(car, 0)));
+    return this.models.get(key);
+  }
+  // drag to spin (main.js passes the pointer's x movement in screen pixels)
+  dragBy(dx, dt) {
+    const turn = dx * 0.012;
+    this.yaw += turn;
+    if (dt > 0) this.spinV = this.spinV * 0.5 + (turn / dt) * 0.5;
+  }
 
   // the screen's car, as a side view and a rear view at a given width in canvas pixels
   side(car) { return carSprite(car, Math.floor(this.t * 6) % 2); }
@@ -210,20 +232,13 @@ export class Places {
       g.beginPath(); g.moveTo(sx - 6, 0); g.lineTo(sx + 6, 0); g.lineTo(tx + (tx - sx) * -0.1 + tr * 0.5, ty); g.lineTo(tx + (tx - sx) * -0.1 - tr * 0.5, ty); g.closePath(); g.fill();
     }
     g.restore();
-    // your car spinning slowly: the side view squashing through to show it turning
-    const spin = Math.cos(this.t * 0.9);
+    // your car in 3D, turning slowly on the turntable (drag it to spin it yourself)
     const cw = Math.min(W * 0.46, 260);
-    if (Math.abs(spin) > 0.28) {
-      const sp = this.side(car), res = sp.res || 1;
-      const k = cw / (sp.width / res);
-      const w = Math.round(cw * Math.abs(spin)), h = Math.round((sp.height / res) * k);
-      g.save(); g.translate(Math.round(tx), Math.round(ty - 2));
-      g.scale(spin < 0 ? -1 : 1, 1);
-      g.drawImage(sp, Math.round(-w / 2), -h, w, h);
-      g.restore();
-    } else {
-      this.drawSprite(this.rear(car), tx, ty - 2, cw * 0.45);
-    }
+    const model = this.model(car);
+    // seen from a little above, so the shadow sits on the turntable under the car
+    const len = Math.min(cw * 0.9, (top * 0.82) / (model.H / model.L + 0.3)); // fits under the sign
+    g.fillStyle = "rgba(0,0,0,0.35)"; g.beginPath(); g.ellipse(tx, ty - 2 - len * 0.1, len * 0.62, len * 0.12, 0, 0, Math.PI * 2); g.fill();
+    drawVoxel(g, model, Math.round(tx), Math.round(ty - 2 - len * 0.1), len / model.L, this.yaw);
     // tyre stacks on the floor at the sides
     for (const sx of [24, W - 24 - 34]) for (let k = 0; k < 3; k++) {
       g.fillStyle = "#0c0c10"; g.fillRect(sx, fy - 12 - k * 14, 34, 13);

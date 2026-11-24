@@ -1,4 +1,4 @@
-import { CARS, CLASSES, GIFT_CARS, carById, carSprite, painted, paintsFor, rarityOf, RARITIES, COLLECTION, PREMIUM, premiumFor } from "./cars.js";
+import { CARS, CLASSES, GIFT_CARS, carById, carSprite, painted, paintsFor, rarityOf, RARITIES, COLLECTION, PREMIUM, premiumFor, fairCar } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
@@ -175,6 +175,26 @@ const sideScene = new Scene($("scene"));
 const chaseScene = new ChaseScene($("scene"));
 let scene = chaseScene;
 const places = new Places($("scene"), chaseScene); // each menu screen is a place on the road
+// the garage: drag (or swipe) across the showroom at the top to spin your car on the turntable
+{
+  let lastX = 0, lastT = 0, id = null;
+  const inShowroom = (e) => current === "garage" && e.clientY < (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--place-top")) || 200)
+    && !e.target.closest("button, a, input, select, textarea, .screen, .topbar");
+  window.addEventListener("pointerdown", (e) => {
+    if (!inShowroom(e)) return;
+    id = e.pointerId; lastX = e.clientX; lastT = performance.now();
+    places.dragging = true; places.spinV = 0;
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== id) return;
+    const now = performance.now();
+    places.dragBy(e.clientX - lastX, (now - lastT) / 1000);
+    lastX = e.clientX; lastT = now;
+  });
+  const end = (e) => { if (e.pointerId === id) { id = null; places.dragging = false; } };
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+}
 let last = performance.now();
 function frame(now) {
   // the first frame's timestamp can be a hair before `last`; never step time backwards
@@ -847,7 +867,7 @@ function renderOnline() {
     save.onlineName = jName.value.trim().slice(0, 16); persist();
     const car = tuned(carById(save.car));
     try {
-      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: car.power, nitro: car.nitro, seen: seenList() });
+      const out = await onlineCall({ action: "join", code: code.value.trim().toUpperCase(), name: jName.value || "RACER", car: car.id, power: fairCar(car).power, nitro: car.nitro, seen: seenList() });
       online = { code: code.value.trim().toUpperCase(), token: out.token, seat: 1, host: false };
       renderOnline();
     } catch (err) { jMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
@@ -874,7 +894,7 @@ function renderOnline() {
       const prompts = []; // picked at START, once the friend's history is in
       const car = tuned(carById(save.car));
       try {
-        const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: car.power, nitro: car.nitro, prompts, crazy: !!save.crazy, equalCars: !!save.equalCars });
+        const out = await onlineCall({ action: "create", deck, name: cName.value || "YOU", car: car.id, power: fairCar(car).power, nitro: car.nitro, prompts, crazy: !!save.crazy, equalCars: !!save.equalCars });
         online = { code: out.code, token: out.token, seat: 0, host: true };
           renderOnline();
       } catch (err) { cMsg.textContent = err.message === "offline" ? "Online races work on the VROOMILLION website." : err.message; }
@@ -988,7 +1008,7 @@ function rematchPoll(r) {
 async function rematchJoin(r) {
   const car = tuned(carById(save.car));
   try {
-    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: car.power, nitro: car.nitro, seen: seenList() });
+    const out = await onlineCall({ action: "join", code: r.next, name: r.name, car: car.id, power: fairCar(car).power, nitro: car.nitro, seen: seenList() });
     rematch = null; clearTimeout(r.poll);
     online = { code: r.next, token: out.token, seat: 1, host: false };
     show("online");
@@ -1009,7 +1029,7 @@ async function rematchGo() {
   const prompts = []; // the host picks fresh ones at START
   const car = tuned(carById(save.car));
   try {
-    const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: car.power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token, crazy: !!r.crazy, equalCars: !!r.equal });
+    const out = await onlineCall({ action: "create", deck: r.deck, name: r.name, car: car.id, power: fairCar(car).power, nitro: car.nitro, prompts, from: r.code, fromToken: r.token, crazy: !!r.crazy, equalCars: !!r.equal });
     rematch = null; clearTimeout(r.poll);
     online = { code: out.code, token: out.token, seat: 0, host: true };
     show("online");
@@ -1581,12 +1601,12 @@ const tuned = (car) => painted(tunedCar(car, save.carXp), save.paint?.[car.id] |
 const carLevel = (id) => levelFor(save.carXp?.[id]);
 function statLine(car0) {
   const car = tuned(car0);
-  const pct = Math.round(((car.power - 1) / 5) * 100);
+  const pct = car.unlimited ? 999 : Math.round(((car.power - 1) / 5) * 100);
   // a car beyond the scale (an admin gift) maxes the bar out and makes it glow
   const bar = h("span", { class: "bar" + (pct > 100 ? " over" : "") }, h("span", { class: "bar-fill" }));
   bar.firstChild.style.width = Math.min(100, Math.max(4, pct)) + "%";
   return h("div", { class: "statline" },
-    h("span", { text: "PWR" }), bar, h("span", { class: "num", text: "×" + car.power.toFixed(2) }),
+    h("span", { text: "PWR" }), bar, h("span", { class: "num" + (car.unlimited ? " inf" : ""), text: car.unlimited ? "×∞" : "×" + car.power.toFixed(2), title: car.unlimited ? "Unlimited power (the daily race and online races count it as ×" + fairCar(car).power.toFixed(2) + ")" : "" }),
     h("span", { class: "n2o", text: "N2O " + car.nitro }),
     h("span", { class: "reach", text: "GOES AS FAR AS " + carReach(car).name }));
 }
@@ -2196,7 +2216,8 @@ function startRace(setup) {
   api("race-start", { method: "POST", body: JSON.stringify({ kind: daily ? "solo-classic" : kind.mode === "versus" ? "versus" : "solo-" + (kind.deck || "classic") }) }).catch(() => {});
   const token = ++raceToken;
   const solo = setup.mode === "solo";
-  const mk = (name, car) => ({ name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false });
+  // an UNLIMITED car (AMELIA'S TESSY) counts at its fair power in the daily race and online races
+  const mk = (name, car0) => { const car = daily || setup.online ? fairCar(car0) : car0; return { name, car, power: car.power, nitro: car.nitro, dist: 0, tiers: [], log: [], useNitro: false }; };
   const racers = solo
     ? [mk("YOU", tuned(carById(save.car)))]
     : [mk(setup.names[0], tuned(carById(setup.cars[0]))), mk(setup.names[1], tuned(carById(setup.cars[1])))];
@@ -2429,7 +2450,7 @@ async function runRace(token) {
           scene.racers[i].boost = b;
           top = Math.max(top, b);
           r.elDist.textContent = Math.round(r.dist).toLocaleString("en-US") + " M";
-          r.elSpeed.textContent = Math.round(40 + Math.min(4.5, b) * 85 * r.power) + " KM/H";
+          r.elSpeed.textContent = (r.car.unlimited && !race.daily && !race.online ? "∞" : Math.round(40 + Math.min(4.5, b) * 85 * Math.min(r.power, 12))) + " KM/H";
           // climb through the gears; Fast Lane and up backfire on each shift
           const g = Math.min(R.gears - 1, Math.floor(e * R.gears));
           if (g > R.gear && b > 0.3) {

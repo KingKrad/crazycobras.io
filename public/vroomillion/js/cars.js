@@ -111,7 +111,9 @@ export const CARS = [
   // a 2026 electric fastback in dark stealth grey: no grille, all-glass roof, white seats showing through,
   // black window trim, dark aero wheels.
   // Ties the Mazzy for the best in the game.
-  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 9.0, 8, "ev", "#3e4047", "#111215"), giftOnly: true, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true, hiRes: true },
+  // UNLIMITED power: x1,000 in solo and 2-player races, and the gift-car top power (fairPower) in the
+  // daily race and online races, so leaderboard scores stay possible
+  { ...C("tessy", "AMELIA'S TESSY", "X", 0, 1000, 8, "ev", "#3e4047", "#111215"), giftOnly: true, unlimited: true, fairPower: 9.0, rim: "#2b2d33", glass: "#232a36", seats: "#d8d6d0", aero: true, electric: true, hiRes: true },
   // a 2006 sedan in silver with a huge rocket booster strapped to its back. Ties for the best in the game.
   { ...C("hondeezy", "A-DOG'S HONDEEZY", "X", 0, 9.0, 8, "civic", "#b9bec6", "#2a2c31"), giftOnly: true, rim: "#c9ced6", glass: "#1e2836", seats: "#3a3c42", hiRes: true, rocket: true },
   // a black hot sedan (wide arches, big black grille, red brake callipers) with an outrageous exhaust:
@@ -1091,3 +1093,6 @@ function ttRear(car, frame) {
   }
   return crisp(cv);
 }
+
+// the car as it counts in the daily race and online races: an UNLIMITED car races at its fair power
+export const fairCar = (car) => (car?.unlimited ? { ...car, power: Math.min(car.power, car.fairPower * (car.power / 1000)) } : car);

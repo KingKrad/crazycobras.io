@@ -446,7 +446,13 @@ test("DEAN'S MAZZY: gift-only, and the best car in the game by a big margin", as
   assert.equal(carById("nico").name, "NICO'S CRAZY CAR");
   assert.equal(carById("hondeezy").name, "A-DOG'S HONDEEZY");
   assert.equal(carById("tessy").name, "AMELIA'S TESSY");
-  assert.equal(carById("tessy").power, mazzy.power, "the two gift cars tie for the best");
+  // AMELIA'S TESSY has UNLIMITED power: x1,000 in solo and 2-player, but the gift-car top power where
+  // scores are compared (the daily race, online races)
+  const { fairCar } = await import("../public/vroomillion/js/cars.js");
+  const tessy = carById("tessy");
+  assert.ok(tessy.unlimited && tessy.power >= 1000);
+  assert.equal(fairCar(tessy).power, mazzy.power, "in the daily race it ties with the other top gift car");
+  assert.equal(fairCar(mazzy), mazzy, "other cars race as they are");
   assert.equal(mazzy.price, 0);
   assert.equal(mazzy.cls, "X");
   const next = Math.max(...CARS.filter((c) => !c.giftOnly).map((c) => c.power));
