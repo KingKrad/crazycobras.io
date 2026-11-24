@@ -30,6 +30,8 @@ const hash = (n) => {
 const mod = (a, n) => ((a % n) + n) % n;
 const smooth = (t) => t * t * (3 - 2 * t);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+// canvas filters (for the glow pass) aren't in every browser
+const CAN_FILTER = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
 
 // ---- colour helpers ----
 const rgbCache = new Map();
@@ -1648,6 +1650,89 @@ export class ChaseScene {
       g.fillRect(-W, -H, W * 3, H * 3);
       g.globalAlpha = 1;
     }
+    g.restore();
+    this.post(g);
+  }
+
+  // ---- the look on top: a glossy road, haze, glow, speed blur and a vignette ----
+  // A glossy road mirrors the world above the horizon and each car (much more in rain and at night),
+  // with red streaks under tail lights; haze softens the distance; bright lights glow; the edges blur
+  // at speed. Cheap blits of the finished frame; glow and speed blur are skipped in auto-lite.
+  post(g) {
+    const { W, H, canvas: cv, tod } = this, hz = this.horizon;
+    if (!W || hz <= 0 || hz >= H) return;
+    const rain = this.wx.rain || 0, night = tod.lamps || 0;
+    const wet = clamp(0.08 + rain * 0.32 + night * 0.07, 0, 0.42);
+    g.save();
+    g.imageSmoothingEnabled = false;
+    // 1. the world above the horizon, mirrored softly into the road
+    const band = Math.min(hz, H - hz, Math.round(H * 0.3));
+    g.save();
+    g.beginPath(); g.rect(0, hz, W, H - hz); g.clip();
+    g.globalAlpha = wet;
+    g.translate(0, hz * 2); g.scale(1, -1);
+    g.drawImage(cv, 0, hz - band, W, band, 0, hz - band, W, band);
+    g.restore();
+    // 2. each car mirrored under itself, and red streaks from its tail lights
+    for (const r of this.racers) {
+      const b = r.box;
+      if (!b || b.w < 4) continue;
+      g.save();
+      g.globalAlpha = 0.18 + wet * 0.45;
+      g.beginPath(); g.rect(b.x - 2, b.y, b.w + 4, b.h * 0.65); g.clip();
+      g.translate(0, b.y * 2); g.scale(1, -1);
+      g.drawImage(cv, b.x - 2, b.y - b.h, b.w + 4, b.h, b.x - 2, b.y - b.h, b.w + 4, b.h);
+      g.restore();
+      const glow = clamp(night * 0.6 + rain * 0.4, 0, 0.7);
+      if (glow > 0.05) {
+        g.save(); g.globalCompositeOperation = "lighter";
+        for (const fx of [b.x + b.w * 0.2, b.x + b.w * 0.8]) {
+          const len = b.h * (1.2 + rain);
+          const gr = g.createLinearGradient(0, b.y, 0, b.y + len);
+          gr.addColorStop(0, `rgba(255,50,50,${glow})`); gr.addColorStop(1, "rgba(255,50,50,0)");
+          g.fillStyle = gr; g.fillRect(Math.round(fx - b.w * 0.035), Math.round(b.y), Math.max(2, Math.round(b.w * 0.07)), Math.round(len));
+        }
+        g.restore();
+      }
+    }
+    // 3. haze: the far road and scenery fade into the colour of the horizon
+    const hc = tod.sky[tod.sky.length - 1].map(Math.round);
+    const haze = g.createLinearGradient(0, hz - H * 0.1, 0, hz + H * 0.16);
+    haze.addColorStop(0, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`);
+    haze.addColorStop(0.45, `rgba(${hc[0]},${hc[1]},${hc[2]},${(this.rareFx ? 0.06 : 0.14) + (this.wx.fog || 0) * 0.25})`);
+    haze.addColorStop(1, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`);
+    g.fillStyle = haze; g.fillRect(0, hz - H * 0.1, W, H * 0.26);
+    if (!this.lite) {
+      // 4. glow: a tiny, high-contrast copy of the frame, stretched back over it softly
+      if (CAN_FILTER) {
+        const bw = Math.max(32, Math.round(W / 6)), bh = Math.max(18, Math.round(H / 6));
+        const bl = this.bloomCv || (this.bloomCv = document.createElement("canvas"));
+        if (bl.width !== bw || bl.height !== bh) { bl.width = bw; bl.height = bh; }
+        const bg = bl.getContext("2d");
+        bg.filter = "brightness(0.85) contrast(2.6) saturate(1.3)";
+        bg.clearRect(0, 0, bw, bh); bg.drawImage(cv, 0, 0, bw, bh);
+        g.save(); g.globalCompositeOperation = "screen"; g.globalAlpha = 0.2 + night * 0.1; g.imageSmoothingEnabled = true;
+        g.drawImage(bl, 0, 0, W, H); g.restore();
+      }
+      // 5. speed: the frame zooms a touch at the edges while you fly
+      const k = this.calm ? 0 : clamp((this.speed - 0.45) * 1.8, 0, 1);
+      if (k > 0.02) {
+        g.save();
+        for (let i = 1; i <= 2; i++) {
+          const sc = 1 + i * 0.009 * k;
+          g.globalAlpha = 0.11 * k;
+          g.drawImage(cv, (W - W * sc) / 2, hz - hz * sc, W * sc, H * sc);
+        }
+        g.restore();
+      }
+    }
+    // 6. a soft vignette
+    if (!this.vig || this.vig.w !== W || this.vig.h !== H) {
+      const vg = g.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.45, W / 2, H * 0.55, Math.max(W, H) * 0.75);
+      vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.38)");
+      this.vig = { w: W, h: H, vg };
+    }
+    g.fillStyle = this.vig.vg; g.fillRect(0, 0, W, H);
     g.restore();
   }
 
