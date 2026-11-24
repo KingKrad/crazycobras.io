@@ -1295,3 +1295,98 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .acct-why { margin: 0 0 12px; }
 /* BACK at the top of every menu screen */
 .btn.small.top-back { width: auto; justify-self: start; align-self: flex-start; margin: 0 0 10px; }
+
+/* ---------- you've already landed in the game ----------
+   The road fills the window behind every menu. On the title screen your car waits on the start line
+   under a neon sign; other menus slide up as panels over the dimmed road. */
+body:not([data-screen="race"]) .stage {
+  position: fixed; inset: 0; z-index: 0; border: 0; box-shadow: none; animation: none;
+}
+body:not([data-screen="race"]) #scene { width: 100%; height: 100%; aspect-ratio: auto; }
+body:not([data-screen="race"]) main, body:not([data-screen="race"]) .topbar, body:not([data-screen="race"]) footer { position: relative; z-index: 1; }
+/* behind other menus: dimmed, so the panels read clearly */
+body:not([data-screen="race"]):not([data-screen="title"]) .stage { filter: brightness(0.42) saturate(0.85); }
+body:not([data-screen="race"]):not([data-screen="title"]) .screen.active {
+  background: rgba(13, 7, 32, 0.9); border: 3px solid var(--line); box-shadow: 0 0 0 3px #000, 0 18px 60px rgba(0, 0, 0, 0.6);
+  padding: 14px 14px 18px; margin: 8px auto 16px; max-width: 760px; animation: panel-up 0.28s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes panel-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+body:not([data-screen="race"]):not([data-screen="title"]) .topbar { background: rgba(11, 6, 24, 0.72); margin: 0 -12px; padding: 10px 12px; }
+@media (max-width: 520px) {
+  body:is([data-screen="leagues"], [data-screen="versus"], [data-screen="garage"], [data-screen="passport"], [data-screen="how"], [data-screen="account"], [data-screen="paywall"], [data-screen="board"], [data-screen="admin"]) .stage { display: block; }
+}
+
+/* the title screen */
+body[data-screen="title"] .topbar, body[data-screen="title"] footer { display: none; }
+body[data-screen="title"] #app { padding-bottom: 0; }
+#s-title.active { min-height: 100dvh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0; animation: none; }
+/* the neon sign in the sky */
+body[data-screen="title"] .title-art { padding-top: max(9vh, 64px); }
+body[data-screen="title"] .logo { font-size: clamp(30px, 9vw, 84px); animation: logo-in 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) both, neon-flicker 7s steps(1) 1.2s infinite; }
+body[data-screen="title"] .logo-a { color: #fff6c8; text-shadow: 0 0 4px #ffd23a, 0 0 14px #ffb02e, 0 0 32px #ff8a1f, 0.1em 0.1em 0 #000; }
+body[data-screen="title"] .logo-b { color: #ffe1f7; text-shadow: 0 0 4px #ff4fd8, 0 0 14px #ff4fd8, 0 0 32px #b31fd6, 0.1em 0.1em 0 #000; }
+body[data-screen="title"] .tagline { font-size: clamp(8px, 2.2vw, 13px); color: #e8f9ff; text-shadow: 0 0 8px #4fd1ff, 2px 2px 0 #000; margin-top: 1.4em; }
+@keyframes neon-flicker { 0%, 100% { opacity: 1; } 91% { opacity: 1; } 92% { opacity: 0.55; } 93% { opacity: 1; } 95% { opacity: 0.7; } 96% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { body[data-screen="title"] .logo { animation: none; } }
+
+.title-bottom { width: min(520px, 100%); margin: 0 auto; padding: 0 0 calc(18px + env(safe-area-inset-bottom)); text-align: center; display: grid; gap: 10px; }
+.daily-status { margin: 0; font-size: 9px; color: #fff; text-shadow: 2px 2px 0 #000, 0 0 10px rgba(0, 0, 0, 0.9); letter-spacing: 0.5px; }
+#s-title .btn.daily-hero { margin: 0; padding: 20px 14px; font-size: clamp(14px, 4.2vw, 20px); }
+.mode-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mode-link { font: inherit; font-size: 8px; padding: 12px 4px; background: rgba(13, 7, 32, 0.82); color: var(--ink); border: 2px solid var(--line); cursor: pointer; line-height: 1.4; }
+.mode-link:hover, .mode-link:focus-visible { border-color: var(--cyan); color: var(--cyan); outline: none; }
+#s-title .daily { display: grid; gap: 8px; }
+#s-title .daily:empty { display: none; }
+#s-title .daily .btn.big.unlock-cta { font-size: 10px; padding: 10px; }
+#s-title .first-steps { margin: 0; background: rgba(13, 7, 32, 0.9); }
+#s-title .whats-new { background: none; border: 0; padding: 0; margin: 0; }
+.news-line { font: inherit; font-size: 8px; background: rgba(13, 7, 32, 0.7); color: var(--dim); border: 0; padding: 7px 10px; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.news-line:hover, .news-line:focus-visible { color: var(--ink); outline: 2px solid var(--cyan); }
+.news-k { color: var(--cyan); }
+
+/* corner buttons: the menu top-left, sound / garage / account top-right */
+.corner-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; height: 44px; padding: 0 10px; font: inherit; font-size: 9px;
+  background: rgba(13, 7, 32, 0.82); color: var(--ink); border: 2px solid #6a5aa8; box-shadow: 0 3px 0 #000; cursor: pointer; }
+.corner-btn:hover, .corner-btn:focus-visible { border-color: var(--cyan); color: var(--cyan); outline: none; }
+.corner-btn svg { width: 18px; height: 18px; fill: currentColor; shape-rendering: crispEdges; }
+.menu-btn { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; z-index: 5; }
+.corner-icons { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 5; display: grid; gap: 8px; }
+#ico-sound .mute { display: none; }
+#ico-sound.muted .wave { display: none; }
+#ico-sound.muted .mute { display: block; }
+#ico-sound.muted { color: var(--dim); }
+
+/* the slide-out menu */
+.drawer-shade { position: fixed; inset: 0; z-index: 20; background: rgba(4, 2, 14, 0.6); }
+.drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 21; width: min(330px, 88vw); overflow-y: auto; padding: calc(12px + env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom));
+  background: #110a2a; border-right: 3px solid var(--line); box-shadow: 8px 0 40px rgba(0, 0, 0, 0.6); transform: translateX(-105%); transition: transform 0.25s cubic-bezier(0.2, 1, 0.4, 1); visibility: hidden; }
+.drawer.open { transform: none; visibility: visible; }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; color: var(--yellow); font-size: 12px; margin-bottom: 10px; }
+.drawer-cash { color: var(--green); font-size: 10px; margin-bottom: 8px; }
+.drawer .next-car { margin-bottom: 10px; }
+.drawer-list { display: grid; gap: 6px; }
+.drawer-item { font: inherit; font-size: 10px; text-align: left; padding: 12px; background: var(--panel); color: var(--ink); border: 2px solid var(--line); cursor: pointer; line-height: 1.5; }
+.drawer-item span { display: block; font-size: 7px; color: var(--dim); margin-top: 3px; }
+.drawer-item:hover, .drawer-item:focus-visible { border-color: var(--cyan); outline: none; }
+.drawer-item.hot { background: #7cf9ff; color: #120a2a; border-color: #fff; }
+.drawer .stats { font-size: 7px; color: var(--dim); margin: 12px 0 6px; }
+.drawer-foot { font-size: 7px; color: var(--dim); }
+.drawer-foot a { color: var(--dim); }
+@media (prefers-reduced-motion: reduce) { .drawer { transition: none; } }
+
+/* pulling off the line: the menu fades away and the race takes over the same road */
+body.launching .title-bottom, body.launching .corner-btn, body.launching .title-art { opacity: 0; transform: translateY(24px); transition: opacity 0.45s, transform 0.45s; pointer-events: none; }
+#s-title .first-steps { padding: 8px 12px; }
+#s-title .first-steps .fs-title { font-size: 10px; margin-bottom: 4px; }
+#s-title .first-steps ol { font-size: 9px; gap: 2px; margin-bottom: 4px; }
+#s-title .first-steps .note { font-size: 7px; margin: 0; }
+@media (max-width: 600px) {
+  .corner-icons { grid-auto-flow: column; }
+  body[data-screen="title"] .title-art { padding-top: calc(72px + env(safe-area-inset-top)); }
+  body[data-screen="title"] .logo { font-size: clamp(22px, 7.6vw, 44px); }
+  .menu-btn span { display: none; }
+}
+/* the new-player steps sit in the sky under the sign, clear of the car and the start button */
+#s-title.active { justify-content: space-between; }
+#s-title .first-steps { width: min(520px, calc(100% - 8px)); margin: clamp(190px, 27vh, 270px) auto 12px; text-align: left; }
+#s-title .first-steps.hidden + .title-bottom { margin-top: auto; }

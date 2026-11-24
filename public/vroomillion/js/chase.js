@@ -616,6 +616,8 @@ export class ChaseScene {
     this.camZ = 0;
     this.bgX = 0;
     this.speed = 0.3; // 0..1 overall sense of speed, set by the race
+    this.parked = false; // the title screen: the car waits on the line, the road doesn't move
+    this.todBase = 0; // where in the day the sky starts (the title screen follows the real clock)
     this.shake = 0;
     this.flash = 0;
     this.flashColor = "#ffffff";
@@ -678,7 +680,8 @@ export class ChaseScene {
     this.worldFx = null;
   }
 
-  setRacers(list) {
+  // keepWorld: the race starts right where the title screen's car was waiting (same road, same sky)
+  setRacers(list, keepWorld = false) {
     this.racers = list.map((r, i) => ({
       ...r,
       frames: [rearSprite(r.car, 0), rearSprite(r.car, 1)],
@@ -698,7 +701,7 @@ export class ChaseScene {
     this.rareFx = null;
     this.zoom = 0;
     if (this.smashDone) { this.smashDone(); this.smashDone = null; }
-    this.resetWorld();
+    if (keepWorld) { this.progress = 0; this.arrival = null; } else this.resetWorld();
   }
 
   rev(seconds) {
@@ -1100,7 +1103,7 @@ export class ChaseScene {
     }
     updateTraffic(this, dt, this.camZ, SEG, DRAW, ZONES[this.zones[this.shown]?.zone]?.id);
     this.steer(dt);
-    const segsPerSec = 4 + this.speed * 46;
+    const segsPerSec = this.parked ? 0 : 4 + this.speed * 46;
     this.camZ += SEG * segsPerSec * dt;
     const camSeg = Math.floor(this.camZ / SEG);
     const bend = curveAt(camSeg + 8);
@@ -1131,7 +1134,7 @@ export class ChaseScene {
       const target = k === weather ? 1 : 0;
       this.wx[k] += clamp(target - this.wx[k], -dt * 0.45, dt * 0.45);
     }
-    let goal = timeOfDay(this.progress / DAY_M);
+    let goal = timeOfDay(this.todBase + this.progress / DAY_M);
     if (this.arrival) {
       this.arrival.t += dt;
       const sky = DEST_SKY[ZONES[this.arrival.zone].id];

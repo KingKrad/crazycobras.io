@@ -41,21 +41,55 @@
 
     <main>
       <section class="screen" id="s-title">
-        <div class="first-steps hidden" id="first-steps"></div>
-        <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
-        <div class="menu">
-          <button class="btn big" id="btn-1p" type="button">SOLO RACES<span class="btn-sub">ANY TOPIC, ANY TIME</span></button>
-          <button class="btn big alt" id="btn-2p" type="button">2 PLAYERS<span class="btn-sub">TAKE TURNS ON THIS SCREEN</span></button>
-          <button class="btn big online-btn" id="btn-online" type="button">RACE A FRIEND ONLINE<span class="btn-sub">SEND THEM A LINK</span></button>
-          <button class="btn" id="btn-garage" type="button">GARAGE</button>
-          <button class="btn" id="btn-passport" type="button">PASSPORT</button>
-          <button class="btn" id="btn-how" type="button">HOW TO PLAY</button>
-          <button class="btn" id="btn-account" type="button">SIGN UP / LOG IN</button>
-          <button class="btn admin-btn hidden" id="btn-admin-title" data-go="admin" type="button">ADMIN</button>
+        <!-- the road fills the screen behind this: your car waits on the start line -->
+        <button class="corner-btn menu-btn" id="btn-menu" type="button" aria-label="Open the menu" aria-expanded="false" aria-controls="drawer">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h12v2H2z"/></svg><span>MENU</span>
+        </button>
+        <div class="corner-icons">
+          <button class="corner-btn" id="ico-sound" type="button" aria-label="Sound on" title="Sound">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path class="spk" d="M2 6h3l4-3v10l-4-3H2z"/><path class="wave" d="M11 5h1v6h-1zM13 3h1v10h-1z"/><path class="mute" d="M11 5l4 6h-1.4L10 5zM15 5l-4 6H9.6L13.6 5z"/></svg>
+          </button>
+          <button class="corner-btn" id="ico-garage" type="button" aria-label="Garage" title="Garage">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg>
+          </button>
+          <button class="corner-btn" id="ico-account" type="button" aria-label="Account" title="Account">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4v1h1v4h-1v1H6V7H5V3h1zM3 10h10v1h1v3H2v-3h1z"/></svg>
+          </button>
         </div>
-        <div class="daily" id="daily"></div>
-        <p class="stats" id="stats"></p>
-        <div class="whats-new" id="whats-new"></div>
+        <div class="first-steps hidden" id="first-steps"></div>
+        <div class="title-bottom">
+          <p class="daily-status" id="daily-status"></p>
+          <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
+          <div class="mode-links">
+            <button class="mode-link" id="btn-1p" type="button">SOLO RACES</button>
+            <button class="mode-link" id="btn-2p" type="button">2 PLAYERS</button>
+            <button class="mode-link" id="btn-online" type="button">RACE A FRIEND</button>
+          </div>
+          <div class="daily" id="daily"></div>
+          <div class="whats-new" id="whats-new"></div>
+        </div>
+        <!-- the slide-out menu: every screen, with clear labels -->
+        <div class="drawer-shade hidden" id="drawer-shade"></div>
+        <nav class="drawer" id="drawer" aria-label="Menu" aria-hidden="true">
+          <div class="drawer-head"><span>MENU</span><button class="corner-btn" id="btn-drawer-close" type="button" aria-label="Close the menu">✕</button></div>
+          <div class="drawer-cash" id="drawer-cash"></div>
+          <div id="drawer-next"></div>
+          <div class="drawer-list">
+            <button class="drawer-item hot" id="dr-daily" type="button">▶ TODAY'S DAILY RACE</button>
+            <button class="drawer-item" data-go="leagues" type="button">SOLO RACES<span>Any topic, any time</span></button>
+            <button class="drawer-item" data-go="versus" type="button">2 PLAYERS<span>Take turns on this screen</span></button>
+            <button class="drawer-item" data-go="online" type="button">RACE A FRIEND ONLINE<span>Send them a link</span></button>
+            <button class="drawer-item" data-go="board" type="button">TODAY'S LEADERBOARD</button>
+            <button class="drawer-item" id="btn-garage" type="button">GARAGE<span>Your cars and today's deals</span></button>
+            <button class="drawer-item" id="btn-passport" type="button">PASSPORT<span>Places you've driven to</span></button>
+            <button class="drawer-item" id="btn-how" type="button">HOW TO PLAY</button>
+            <button class="drawer-item" id="btn-account" type="button">SIGN UP / LOG IN</button>
+            <button class="drawer-item" data-go="updates" type="button">WHAT'S NEW</button>
+            <button class="drawer-item admin-btn hidden" id="btn-admin-title" data-go="admin" type="button">ADMIN</button>
+          </div>
+          <p class="stats" id="stats"></p>
+          <p class="drawer-foot"><a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="mailto:support@vroomillion.com">Support</a></p>
+        </nav>
       </section>
 
       <section class="screen" id="s-updates">

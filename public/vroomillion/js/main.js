@@ -172,7 +172,7 @@ if (stored) persist(); // keeps the server copy and the backup up to date from t
 // Menus show a side-on banner; races use the behind-the-car road. Both draw on one canvas.
 const sideScene = new Scene($("scene"));
 const chaseScene = new ChaseScene($("scene"));
-let scene = sideScene;
+let scene = chaseScene;
 let last = performance.now();
 function frame(now) {
   // the first frame's timestamp can be a hair before `last`; never step time backwards
@@ -184,14 +184,18 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
-// Menus show the scene as a banner; races fill the whole window.
+// The road fills the whole window everywhere: on the title screen your car waits on the line, behind
+// the other menus it runs on dimmed, and in a race it's the race.
 function fitScene() {
+  scene = chaseScene;
   if (current !== "race") {
-    scene = sideScene;
-    scene.resize(384, 150);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const iw = Math.max(440, Math.min(840, Math.round(vw / 1.6)));
+    const ih = Math.round(vh / (vw / iw));
+    // the car sits just above the start button on the title screen
+    scene.resize(iw, ih, Math.round(ih * (vw < 600 ? 0.6 : 0.64)));
     return;
   }
-  scene = chaseScene;
   const vv = window.visualViewport;
   const vw = window.innerWidth;
   const vh = vv ? vv.height : window.innerHeight;
@@ -287,10 +291,29 @@ window.addEventListener("scroll", unscroll, { passive: true });
 $("answer").addEventListener("focus", () => { unscroll(); fitScene(); requestAnimationFrame(() => { unscroll(); fitScene(); }); setTimeout(fitScene, 120); setTimeout(fitScene, 350); setTimeout(fitScene, 700); });
 $("answer").addEventListener("blur", () => setTimeout(fitScene, 350));
 
-function attract() {
-  scene.setRacers([{ car: tuned(carById(save.car)), label: "P1", color: "#4fd1ff", lane: 1 }]);
-  scene.speed = 0.3;
+// Where the real clock is in the scene's day (0 sunrise, 0.22-0.5 day, 0.72 sunset, 0.9-1.25 night, 1.45 dawn)
+function clockPhase(d = new Date()) {
+  const hr = d.getHours() + d.getMinutes() / 60;
+  const K = [[0, 1.1], [4.5, 1.25], [5.9, 1.44], [6, 0], [9, 0.22], [15, 0.5], [18.6, 0.72], [20.6, 0.9], [22.5, 1.05], [24, 1.1]];
+  for (let i = 0; i < K.length - 1; i++) {
+    const [h0, p0] = K[i], [h1, p1] = K[i + 1];
+    if (hr >= h0 && hr <= h1) return h1 === h0 ? p1 : p0 + (p1 - p0) * ((hr - h0) / (h1 - h0));
+  }
+  return 0.5;
 }
+// The title screen: your car on the start line, engine idling, the sky as it is outside right now.
+let attractCar = null;
+function attract() {
+  chaseScene.todBase = clockPhase();
+  chaseScene.parked = true;
+  chaseScene.speed = 0;
+  if (attractCar !== save.car || !chaseScene.racers.length) {
+    attractCar = save.car;
+    chaseScene.setRacers([{ car: tuned(carById(save.car)), label: "P1", color: "#4fd1ff", lane: 1 }]);
+  }
+}
+// the engine ticks over now and then while it waits (a little exhaust puff)
+setInterval(() => { if (current === "title" && chaseScene.parked && !document.hidden) chaseScene.rev(0.35); }, 3200);
 
 // ---------- chrome ----------
 let shownCash = save.cash;
@@ -321,6 +344,9 @@ function renderSound() {
     b.textContent = save.muted ? "SND OFF" : "SND ON";
     b.setAttribute("aria-pressed", String(!save.muted));
   }
+  const ico = $("ico-sound");
+  ico.classList.toggle("muted", !!save.muted);
+  ico.setAttribute("aria-label", save.muted ? "Sound off. Turn it on" : "Sound on. Turn it off");
 }
 
 // ---------- daily free run + unlimited ----------
@@ -339,7 +365,9 @@ function renderDaily() {
   $("btn-admin-title")?.classList.toggle("hidden", !account?.admin);
   if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
   const nextCar = nextCarCard();
-  if (nextCar) box.append(nextCar);
+  $("drawer-next").textContent = "";
+  if (nextCar) $("drawer-next").append(nextCar);
+  $("drawer-cash").textContent = `CASH ${money(save.cash)}`;
   const today = dday();
   drawDailyHero(today);
   if (FREE_PLAY) {
@@ -363,29 +391,67 @@ function drawDailyHero(today) {
   const n = nextDaily(save, today);
   const done = dailyDone(save, today);
   const st = streakNow();
-  btn.textContent = "";
+  const streak = st ? ` · ${st}-DAY STREAK` : "";
+  const free = unlimitedNow() || FREE_PLAY;
   btn.classList.toggle("done", !n);
   if (n) {
-    btn.append("▶ PLAY TODAY'S DAILY RACE",
-      h("span", { class: "btn-sub", text: `FREE · 7 QUESTIONS · ABOUT 3 MINUTES${st ? ` · ${st}-DAY STREAK` : ""}` }));
-    btn.onclick = () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); };
+    btn.textContent = "▶ START TODAY'S RACE";
+    $("daily-status").textContent = `TODAY'S DAILY RACE · FREE · 7 QUESTIONS${streak}`;
+    btn.onclick = () => launchFromLine({ mode: "solo", daily: n });
   } else {
     const m = Object.values(done).find((v) => typeof v === "number" && v > 0);
-    btn.append("✓ DAILY RACE DONE TODAY",
-      h("span", { class: "btn-sub", text: `${m ? `YOU WENT ${m.toLocaleString("en-US")} M · ` : ""}TAP FOR THE LEADERBOARD · NEW ONE IN ${timeLeft()}` }));
-    btn.onclick = () => { audio.sfx.click(); show("board"); };
+    $("daily-status").textContent = `✓ DAILY DONE${m ? `: ${m.toLocaleString("en-US")} M` : ""} · NEXT ONE IN ${timeLeft()}${streak}`;
+    // Unlimited players race again from here; everyone else sees how they did
+    btn.textContent = free ? "▶ RACE AGAIN" : "SEE TODAY'S LEADERBOARD";
+    btn.onclick = free ? () => launchFromLine({ mode: "solo", crazy: !!save.crazy }) : () => { audio.sfx.click(); show("board"); };
   }
+  $("dr-daily").onclick = () => { closeDrawer(); if (n) launchFromLine({ mode: "solo", daily: n }); else { audio.sfx.click(); show("board"); } };
   const steps = $("first-steps");
   steps.textContent = "";
   steps.classList.toggle("hidden", !!save.races);
   if (!save.races) steps.append(
     h("div", { class: "fs-title", text: "NEW HERE? IT'S EASY:" }),
     h("ol", {},
-      h("li", { text: "Tap PLAY TODAY'S DAILY RACE below." }),
-      h("li", { text: "You get a question like \"Name a fruit\". Type any answer that fits and tap GO." }),
-      h("li", { text: "The rarer your answer, the further your car drives. That's it!" })),
-    h("div", { class: "note", text: "No account needed to play." }));
+      h("li", { text: "Tap START TODAY'S RACE." }),
+      h("li", { text: "Type any answer that fits the question." }),
+      h("li", { text: "Rarer answers drive further!" })),
+    h("div", { class: "note", text: "No account needed." }));
   $("btn-account").textContent = account ? "MY ACCOUNT" : "SIGN UP / LOG IN";
+  $("ico-account").setAttribute("aria-label", account ? "My account" : "Sign up or log in");
+  $("ico-account").title = account ? "My account" : "Sign up / log in";
+}
+
+// The start button: the menu fades away, the car revs and pulls off the line, and the race begins on
+// the same road (no screen change).
+let lineLaunch = false;
+function launchFromLine(setup) {
+  audio.sfx.click();
+  if (current !== "title" || chaseScene.calm) { startRace(setup); return; }
+  lineLaunch = true;
+  document.body.classList.add("launching");
+  closeDrawer();
+  chaseScene.parked = false;
+  chaseScene.rev(0.9);
+  chaseScene.speed = 0.35;
+  audio.sfx.go();
+  setTimeout(() => { document.body.classList.remove("launching"); startRace(setup); }, 520);
+}
+
+// the slide-out menu
+function openDrawer() {
+  audio.sfx.click();
+  $("drawer").classList.add("open");
+  $("drawer").setAttribute("aria-hidden", "false");
+  $("drawer-shade").classList.remove("hidden");
+  $("btn-menu").setAttribute("aria-expanded", "true");
+  $("drawer").querySelector(".drawer-item")?.focus();
+}
+function closeDrawer() {
+  if (!$("drawer").classList.contains("open")) return;
+  $("drawer").classList.remove("open");
+  $("drawer").setAttribute("aria-hidden", "true");
+  $("drawer-shade").classList.add("hidden");
+  $("btn-menu").setAttribute("aria-expanded", "false");
 }
 
 // ---------- accounts ----------
@@ -1339,10 +1405,10 @@ function renderWhatsNew() {
   if (!latest) return;
   let seen = null;
   try { seen = localStorage.getItem(LOG_SEEN_KEY); } catch {}
-  const head = h("p", { class: "log-head" }, h("span", { text: "WHAT'S NEW" }), " ", h("span", { class: "log-date", text: latest.date }));
-  if (seen !== latest.id) head.append(" ", h("span", { class: "soon-tag", text: "NEW" }));
-  box.append(head, h("p", { class: "log-title", text: latest.title }), logItems(latest),
-    h("button", { class: "btn small", type: "button", "data-go": "updates", text: "ALL UPDATES" }));
+  // one short line on the title screen; it opens the full list
+  box.append(h("button", { class: "news-line", type: "button", "data-go": "updates" },
+    seen !== latest.id ? h("span", { class: "soon-tag", text: "NEW" }) : h("span", { class: "news-k", text: "UPDATE" }),
+    " ", latest.title.toUpperCase(), " ›"));
 }
 function renderUpdates() {
   const list = $("updates-list");
@@ -1388,7 +1454,9 @@ function show(name) {
     document.querySelector(".stage").classList.remove("launch", ...[0, 1, 2, 3, 4, 5].map((t) => "launch-t" + t));
   }
   fitScene();
+  if (name !== "title") closeDrawer();
   if (name === "title") {
+    lineLaunch = false;
     raceToken++;
     audio.engineStop();
     attract();
@@ -2102,10 +2170,15 @@ function startRace(setup) {
   race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy };
 
   scene = chaseScene; // races use the behind-the-car view
+  const fromLine = (chaseScene.parked || lineLaunch) && solo; // launched off the title screen's start line: same road, same sky
+  lineLaunch = false;
+  chaseScene.parked = false;
+  if (!fromLine) chaseScene.todBase = clockPhase();
   scene.setRacers(solo
     ? [{ car: racers[0].car, label: "P1", color: "#4fd1ff", lane: 1 }]
-    : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }]);
-  scene.speed = 0.05;
+    : [{ car: racers[0].car, label: "P1", color: "#4fd1ff" }, { car: racers[1].car, label: "P2", color: "#ff4fd8" }], fromLine);
+  attractCar = null; // the title screen sets its car up again next time
+  scene.speed = fromLine ? 0.15 : 0.05;
   const hud = $("hud");
   hud.textContent = "";
   for (const id of ["hud", "reveal", "result-body"]) $(id).classList.toggle("solo", solo);
@@ -3085,6 +3158,14 @@ document.addEventListener("click", (e) => {
   if (go) { audio.sfx.click(); overlay(""); show(go.dataset.go); }
 });
 $("btn-home").addEventListener("click", () => { overlay(""); show("title"); });
+$("btn-menu").addEventListener("click", openDrawer);
+$("btn-drawer-close").addEventListener("click", () => { audio.sfx.click(); closeDrawer(); $("btn-menu").focus(); });
+$("drawer-shade").addEventListener("click", closeDrawer);
+$("drawer").addEventListener("click", (e) => { if (e.target.closest(".drawer-item")) closeDrawer(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("drawer").classList.contains("open")) { closeDrawer(); $("btn-menu").focus(); } });
+$("ico-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
+$("ico-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
+$("ico-sound").addEventListener("click", () => $("btn-sound").click());
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
 $("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
