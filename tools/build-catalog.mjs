@@ -52,7 +52,15 @@ export function parseRule(rule) {
     else if (k === "tiers") src.tiers = v.split(",").map(Number);
     else if (k === "not") src.not = v.split(",");
     else if (k === "exclude") src.exclude = v;
-    else if (k === "surnames" || k === "taxa" || k === "nocheck") src[k] = true;
+    else if (k === "surnames" || k === "taxa" || k === "nocheck" || k === "geo") src[k] = true;
+    // autotop=N: no hand-picked obvious answers; Wikidata's N best-known items are TRAFFIC
+    else if (k === "autotop") src.autotop = Number(v);
+    // noadmin: no "canton of X" / "province of Y" style entries in a list of cities
+    // notcounty: places found by population: no counties, districts or regions in the list
+    else if (k === "notcounty") src.exclude = "(\\b(county|district|region|municipality|regional municipality|division|parish|borough|shire|province|census area)$)|^(canton|county|province|department|prefecture|district|municipality|region|state|governorate)\\s+of\\s";
+    else if (k === "noadmin") src.exclude ??= "^(canton|county|province|department|prefecture|district|municipality|region|state|governorate)\\s+of\\s";
+    // minans=N: fewer answers than usual are fine (a country's neighbours, a small country's regions)
+    else if (k === "minans") src.minans = Number(v);
     else if (/^[ki]:/.test(tok)) {
       const qs = tok.slice(2).split(",");
       src.where = qs.map((q) => tok[0] === "k" ? `{ ?i wdt:P31/wdt:P279* wd:${q}. } UNION { ?i wdt:P279+ wd:${q}. }` : `{ ?i wdt:P31 wd:${q}. }`).join(" UNION ");
@@ -100,6 +108,8 @@ async function main() {
   // hand-written families (no Wikidata rule): their answers are in catalog/hand.js, tiers as written
   for (const f of FAMILIES.filter((x) => !x.src && x.top && (only ? only.has(x.id) : true))) {
     const q = f.prompts[0];
+    // never over an existing file (later tools merge extra answers into it) unless asked to
+    if (!only && !args.includes("--force") && fs.existsSync(new URL(answerSlug(q) + ".json", DIR))) continue;
     // with the AI judge, a hand family may have only its obvious answers (and maybe a tier or two)
     const tiersText = HAND[q] || ["", "", "", "", ""];
     const a = tiersText.map((t) => t.split(",").map((x) => x.trim()).filter(Boolean));
@@ -125,7 +135,9 @@ async function main() {
     }
     let items;
     try { items = await fetchPrompt(q, src); } catch (e) { console.log("!! failed", f.id, e.message); continue; }
-    const { a, tiers } = tiersFor(f.top || [], items, src);
+    // (a short list keeps rarity in it: TRAFFIC is at most its best-known 30%)
+    const top = f.top || (src.autotop ? items.slice(0, Math.min(src.autotop, Math.max(5, Math.round(items.length * 0.3)))).map((it) => it.forms[0]) : []);
+    const { a, tiers } = tiersFor(top, items, src);
     const n = a.flat().length;
     // the right kind of thing? enough of the obvious answers should be on Wikidata's list
     const wdKeys = new Set(items.flatMap((it) => it.forms.map(normalize)));
@@ -135,11 +147,19 @@ async function main() {
       thin.push(`${f.id} (only ${matched}/${f.top.length} obvious answers on Wikidata${src.qid ? " " + src.qid : ""})`);
       console.log(`-- mismatch: ${f.id} ${matched}/${f.top.length}`); continue;
     }
-    if (n < MIN_ANSWERS || a[0].length === 0) { thin.push(`${f.id} (${n})`); console.log(`-- too few: ${f.id} ${n}`); continue; }
+    if (n < (src.minans ?? MIN_ANSWERS) || a[0].length === 0) { thin.push(`${f.id} (${n})`); console.log(`-- too few: ${f.id} ${n}`); continue; }
     if (args.includes("--check")) { console.log(`${f.id}: ${n}`); continue; }
     // the live check's rule travels in the file; --classes collects them (so several builders can run at once)
     const live = { where: branches(src.where).map((b) => `{ ${b} }`).join(" UNION "), tiers, exclude: src.exclude || null, taxa: !!src.taxa };
-    fs.writeFileSync(file, JSON.stringify({ q, a, tiers, fam: f.id, ...(src.qid ? { qid: src.qid } : {}), live }));
+    // WORLD TOUR: where each answer is on the map (keyed by its first spelling)
+    let at = null;
+    if (src.geo) {
+      const byForm = new Map();
+      for (const it of items) if (it.at) for (const fm of it.forms) if (!byForm.has(normalize(fm))) byForm.set(normalize(fm), it.at);
+      at = {};
+      for (const e of a.flat()) { const forms = e.split("|"); const hit = forms.map((x) => byForm.get(normalize(x))).find(Boolean); if (hit) at[normalize(forms[0])] = hit; }
+    }
+    fs.writeFileSync(file, JSON.stringify({ q, a, tiers, fam: f.id, ...(src.qid ? { qid: src.qid } : {}), live, ...(at ? { at } : {}) }));
     console.log(`${f.id}: ${n} answers (${a.map((t) => t.length).join("/")})  ${a[1].slice(0, 5).map((e) => e.split("|")[0]).join(", ")}`);
     await sleep(300);
   }

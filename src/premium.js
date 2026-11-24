@@ -23,7 +23,7 @@ export function parseCars(text) {
   try { const l = JSON.parse(text || "[]"); return Array.isArray(l) ? l.filter((c) => PREMIUM_CARS.some((p) => p.id === c)) : []; } catch { return []; }
 }
 
-async function stripe(env, path, init = {}) {
+export async function stripe(env, path, init = {}) {
   const res = await fetch("https://api.stripe.com/v1/" + path, {
     ...init,
     headers: { authorization: "Bearer " + env.STRIPE_SECRET_KEY, "content-type": "application/x-www-form-urlencoded", ...(init.headers || {}) },

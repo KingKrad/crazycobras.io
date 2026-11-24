@@ -857,6 +857,32 @@ test("premium cars: only today's car, right price, kept on the account once Stri
   assert.equal((await worker.fetch(post("car-checkout", { car: today.id, acceptNoRefunds: true }, { cookie }), env())).status, 409, "already owned");
 });
 
+// ---------- themed game modes ----------
+test("game modes: $5 one-time, kept on the account once Stripe says it's paid; admins have them all", async () => {
+  assert.equal((await worker.fetch(post("mode-checkout", { mode: "geo", acceptNoRefunds: true }), env())).status, 401, "needs an account");
+  const { cookie } = await signup("traveller@example.com");
+  assert.equal((await worker.fetch(post("mode-checkout", { mode: "nope", acceptNoRefunds: true }, { cookie }), env())).status, 400, "unknown mode");
+  assert.equal((await worker.fetch(post("mode-checkout", { mode: "geo" }, { cookie }), env())).status, 400, "must accept no refunds");
+  stripeReply = { body: { id: "cs_test_mode1234567890", url: "https://checkout.stripe.com/c/pay/m" } };
+  const r = await worker.fetch(post("mode-checkout", { mode: "geo", acceptNoRefunds: true }, { cookie }), env());
+  assert.equal(r.status, 200);
+  const sent = new URLSearchParams(String(stripeCalls.at(-1).init.body));
+  assert.equal(sent.get("line_items[0][price_data][unit_amount]"), "500");
+  assert.equal(sent.get("metadata[mode_id]"), "geo");
+  const uid = userId("traveller@example.com");
+  // a forged or underpaid session gives nothing
+  stripeReply = { body: { payment_status: "paid", amount_total: 100, metadata: { product: "vroomillion_mode", mode_id: "geo", user_id: uid } } };
+  assert.equal((await (await worker.fetch(get("mode-verify?session_id=cs_test_mode1234567890"), env())).json()).paid, false);
+  stripeReply = { body: { payment_status: "paid", amount_total: 500, metadata: { product: "vroomillion_car", mode_id: "geo", user_id: uid } } };
+  assert.equal((await (await worker.fetch(get("mode-verify?session_id=cs_test_mode1234567890"), env())).json()).paid, false, "a car receipt isn't a mode");
+  stripeReply = { body: { payment_status: "paid", amount_total: 500, metadata: { product: "vroomillion_mode", mode_id: "geo", user_id: uid } } };
+  assert.deepEqual(await (await worker.fetch(get("mode-verify?session_id=cs_test_mode1234567890"), env())).json(), { paid: true, mode: "geo" });
+  assert.deepEqual((await (await worker.fetch(get("me", { cookie }), env())).json()).modes, ["geo"]);
+  assert.equal((await worker.fetch(post("mode-checkout", { mode: "geo", acceptNoRefunds: true }, { cookie }), env())).status, 409, "already owned");
+  const boss = await signup("other@example.com");
+  assert.equal((await worker.fetch(post("mode-checkout", { mode: "geo", acceptNoRefunds: true }, { cookie: boss.cookie }), adminEnv())).status, 409, "admins don't pay");
+});
+
 test("premium cars: the server's list, prices and daily rotation match the game's", async () => {
   const { PREMIUM_CARS, premiumOn } = await import("../src/premium.js");
   const { PREMIUM, premiumFor } = await import("../public/vroomillion/js/cars.js");

@@ -13,6 +13,8 @@ import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
 import { Places, PLACE_OF } from "./places.js";
+import { WorldScene, loadMap } from "./world.js";
+import { DriveInScene } from "./drivein.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
 let pickRace, dailyRace, famKey, familyOf, answerSlug;
@@ -180,6 +182,21 @@ const sideScene = new Scene($("scene"));
 const chaseScene = new ChaseScene($("scene"));
 let scene = chaseScene;
 const places = new Places($("scene"), chaseScene); // each menu screen is a place on the road
+// WORLD TOUR races on a map of the world instead of the road
+const worldScene = new WorldScene($("scene"));
+places.world = worldScene;
+// BOX OFFICE races at the drive-in
+const driveInScene = new DriveInScene($("scene"));
+places.drivein = driveInScene;
+// THEMED MODES: each has its own home screen (a "place"), its own race scene and a $5 one-time unlock.
+// ids: the prefix of its home screen's elements (index.html), e.g. wt-go, wt-status.
+const THEMED = {
+  geo: { name: "WORLD TOUR", screen: "worldtour", ids: "wt", scene: () => worldScene, go: "▶ HIT THE ROAD",
+    info: "700+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
+};
+const THEMED_IDS = Object.keys(THEMED);
+// the scene a themed race uses (the results screen keeps it too)
+const themedScene = () => (race && THEMED[race.themed] && (current === "race" || current === "results") ? THEMED[race.themed].scene() : null);
 // the garage: drag (or swipe) across the showroom at the top to spin your car on the turntable
 {
   let lastX = 0, lastT = 0, id = null;
@@ -247,17 +264,19 @@ function crispCanvas(cssW, cssH) {
     hi.style.width = cv.style.width;
     hi.style.height = cv.style.height;
     chaseScene.setHi(hi, k);
+    for (const t of THEMED_IDS) THEMED[t].scene().setHi(hi, k);
   }
   return { w, h: hgt, css: k / dpr }; // css: screen (CSS) pixels per canvas pixel
 }
 function fitScene() {
-  scene = chaseScene;
+  scene = themedScene() || chaseScene;
   if (current !== "race") {
     const { w, h: ch, css } = crispCanvas(window.innerWidth, window.innerHeight);
     // the place's centrepiece fills the top of the screen; menu panels start below it
     document.documentElement.style.setProperty("--place-top", Math.round(Math.max(130, Math.min(250, ch * 0.26)) * css) + "px");
     places.inset = Math.round((document.querySelector(".topbar")?.offsetHeight || 60) / css);
     chaseScene.cssPx = css;
+    for (const t of THEMED_IDS) THEMED[t].scene().cssPx = css;
     // the title screen keeps the sky clear behind the neon sign and tagline
     chaseScene.clearTop = 0;
     if (current === "title") requestAnimationFrame(() => {
@@ -284,6 +303,7 @@ function fitScene() {
   const { w: iw, h: ih, css: k } = crispCanvas(vw, vh);
   chaseScene.clearTop = 0;
   chaseScene.cssPx = k; // so in-scene text can be sized for the screen
+  for (const t of THEMED_IDS) THEMED[t].scene().cssPx = k;
   // room for the answer bar (one compact row on the keyboard), and the car a little further up the road
   const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
   scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05), !!chaseScene.glideNext); // nearest car sits above the answer bar
@@ -1308,6 +1328,13 @@ async function adminPlayers(body, patch) {
           return h("button", { class: "btn small" + (has ? " on" : ""), type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${carById(id).name}`,
             onclick: () => act({ action: "gift-car", email: p.email, car: id, give: !has }, has ? "Taken back." : "Gifted! It appears in their garage next time they open the game logged in.", refresh) });
         })),
+      h("div", { class: "step-label", text: "GAME MODES" }),
+      h("div", { class: "admin-actions row" },
+        ...THEMED_IDS.map((id) => [id, THEMED[id].name]).map(([id, name]) => {
+          const has = (p.modes || []).includes(id);
+          return h("button", { class: "btn small" + (has ? " on" : ""), type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${name}`,
+            onclick: () => act({ action: "gift-mode", email: p.email, mode: id, give: !has }, has ? "Taken back." : "Gifted! It unlocks next time they open the game logged in.", refresh) });
+        })),
       p.admin ? null : h("details", { class: "danger-zone" }, h("summary", { text: "Delete this account…" }),
         h("p", { class: "note", text: "Deletes the account, its sessions and its leaderboard scores. This can't be undone." }),
         confirmBox,
@@ -1497,7 +1524,7 @@ function renderUpdates() {
 // reloads itself to pick it up: right away on menu screens, or as soon as the player is back on one
 // (never mid-race, in an online room, or while filling in a form). Progress is saved first.
 const BUILD = "dev";
-const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues"]);
+const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues", "worldtour"]);
 let updateReady = null;
 function reloadForUpdate() {
   if (!updateReady || !SAFE_TO_RELOAD.has(current) || online) return;
@@ -1555,6 +1582,8 @@ function show(name) {
   if (name !== "passport") closeStamp();
   if (name === "board") renderBoardScreen();
   if (name === "online") renderOnline();
+  for (const t of THEMED_IDS) if (name === THEMED[t].screen) renderModeLobby(t);
+  if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
   window.scrollTo({ top: 0 });
 }
 
@@ -1653,7 +1682,7 @@ const MODES = [
   { id: "car", name: "GEARHEAD", info: "CARS & HOW THEY WORK" },
   { id: "hard", name: "HARD MODE", info: "NICHE & EXPERT" },
 ];
-const modeName = (id) => MODES.find((m) => m.id === id)?.name || "CLASSIC";
+const modeName = (id) => THEMED[id]?.name || MODES.find((m) => m.id === id)?.name || "CLASSIC";
 
 function modeSwitch(mount, onChange, lockTags = true) {
   mount.textContent = "";
@@ -1671,6 +1700,17 @@ function modeSwitch(mount, onChange, lockTags = true) {
 let qIndex = null;
 const qByText = () => (qIndex && qIndex.size === QUESTIONS.length ? qIndex : (qIndex = new Map(QUESTIONS.map((q) => [q.q, q]))));
 const famKeyOf = (prompt) => { const f = familyOf(prompt); return f ? famKey(f) : prompt; };
+// WORLD TOUR: an answer's coordinates. The prompt's own answer file has them for most answers; a
+// world gazetteer (geo/places.json: countries, capitals and big cities) covers the rest.
+let GAZ = null;
+const loadGazetteer = () => GAZ || (GAZ = fetch("geo/places.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((d) => (GAZ.data = d, d)));
+function placeOf(q, res) {
+  const keys = [res.key, normalize(res.display || "")].filter(Boolean);
+  for (const k of keys) if (q?.at?.[k]) return q.at[k];
+  const g = GAZ?.data;
+  for (const k of keys) if (g?.[k]) return g[k];
+  return null;
+}
 // prompts added with the new catalog keep their answers in answers/<slug>.json, loaded for the race
 const extraQ = new Map();
 const getQ = (p) => qByText().get(p) || extraQ.get(p);
@@ -1687,7 +1727,7 @@ function v2Questions(picks) {
 async function startRaceV2(setup) {
   await questionsLoaded;
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
-  const picks = daily ? dailyRace(dday()) : pickRace(save.deck, seenList(), ROUNDS, Math.random, { has: hasQ });
+  const picks = daily ? dailyRace(dday()) : pickRace(setup.deck || save.deck, seenList(), ROUNDS, Math.random, { has: hasQ });
   overlay("LOADING…", "small");
   await Promise.race([loadAnswers(picks.map((x) => x.prompt)), new Promise((r) => setTimeout(r, 6000))]);
   overlay("");
@@ -1843,6 +1883,15 @@ function renderLeagues() {
     ? "Same 7 prompts for everyone today. Free, once a day."
     : `Done. A new daily race in ${timeLeft()}.`) + (st ? ` Streak: ${st} day${st === 1 ? "" : "s"}.` : "");
   modeSwitch($("mode-solo"), renderLeagues);
+  // the themed modes: each has its own home screen
+  const themed = $("themed-modes");
+  if (themed) {
+    themed.textContent = "";
+    themed.append(...THEMED_IDS.map((id) => h("button", { class: "themed-mode tm-" + id, type: "button", onclick: () => { audio.sfx.click(); show(THEMED[id].screen); } },
+      h("span", { class: "tm-name", text: THEMED[id].name }),
+      h("span", { class: "tm-info", text: THEMED[id].card }),
+      h("span", { class: "tm-tag", text: ownsMode(id) ? "YOURS" : modeTrialLeft(id) ? "1 FREE RACE" : "$5" }))));
+  }
   const rules1p = $("rules-solo");
   rules1p.textContent = "";
   rules1p.append(ruleToggles(false));
@@ -1871,11 +1920,20 @@ function ruleToggles(versusRules) {
   return box;
 }
 
+let versusDeck = null; // a themed mode's id: 2 players in it (opened from its home screen)
 function renderVersus() {
-  modeSwitch($("mode-2p"), renderVersus, false); // 2P is Unlimited as a whole, so no lock on each mode
-  renderPromptsLeft($("left-2p"), $("btn-start-2p"), () => {
-    $("btn-start-2p").textContent = canRace(me(), dayKey(), { mode: "versus", deck: save.deck }) ? "START RACE" : "2P IS UNLIMITED — $5";
-  });
+  const themed = !!THEMED[versusDeck];
+  $("vs-themed").classList.toggle("hidden", !themed);
+  $("vs-themed").textContent = themed ? `${THEMED[versusDeck].name} · 2 PLAYERS` : "";
+  $("mode-2p").classList.toggle("hidden", themed);
+  $("left-2p").classList.toggle("hidden", themed);
+  if (themed) { $("btn-start-2p").textContent = "START " + THEMED[versusDeck].name; $("btn-start-2p").disabled = !ownsMode(versusDeck); }
+  else {
+    modeSwitch($("mode-2p"), renderVersus, false); // 2P is Unlimited as a whole, so no lock on each mode
+    renderPromptsLeft($("left-2p"), $("btn-start-2p"), () => {
+      $("btn-start-2p").textContent = canRace(me(), dayKey(), { mode: "versus", deck: save.deck }) ? "START RACE" : "2P IS UNLIMITED — $5";
+    });
+  }
   const rules2p = $("rules-2p");
   rules2p.textContent = "";
   rules2p.append(ruleToggles(true));
@@ -2105,6 +2163,45 @@ function revealCar(car, milestones = [], kicker = "NEW CAR!") {
   }, 950);
 }
 
+// ---------- themed game modes ($5 each, one-time, on the account; admins get them all) ----------
+const ownsMode = (id) => !!account && (!!account.admin || (account.modes || []).includes(id));
+const modeTrialLeft = (id) => !save.trials?.[id];
+function renderModeLobby(id) {
+  const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
+  const owned = ownsMode(id), trial = modeTrialLeft(id);
+  const go = $m("go");
+  $m("status").textContent = owned ? (account?.admin && !(account.modes || []).includes(id) ? "ADMIN · YOURS FREE" : "YOURS FOREVER · RACE AS MUCH AS YOU LIKE")
+    : trial ? "1 FREE RACE · THEN $5 ONE-TIME, YOURS FOREVER" : "YOUR FREE RACE IS USED · $5 ONE-TIME UNLOCKS IT FOREVER";
+  $m("info").textContent = m.info;
+  $m("agree").classList.toggle("hidden", owned || trial);
+  $m("2p").classList.toggle("hidden", !owned);
+  go.textContent = owned ? m.go : trial ? "▶ FREE TEST DRIVE" : `UNLOCK ${m.name} · $5`;
+  go.classList.toggle("unlock-cta", !owned && !trial);
+  go.disabled = false;
+}
+for (const id of THEMED_IDS) {
+  const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
+  $m("go").addEventListener("click", () => {
+    audio.sfx.click();
+    if (ownsMode(id) || modeTrialLeft(id)) { startRace({ mode: "solo", deck: id }); return; }
+    buyMode(id, $m("agree-box").checked, $m("go"));
+  });
+  $m("2p").addEventListener("click", () => { audio.sfx.click(); versusDeck = id; show("versus"); });
+}
+async function buyMode(id, agreed, btn) {
+  if (!account) { audio.sfx.deny(); overlay("LOG IN TO BUY", "small"); setTimeout(() => overlay(""), 1400); show("account"); return; }
+  if (!agreed) { audio.sfx.deny(); overlay("TICK THE BOX FIRST", "small"); setTimeout(() => overlay(""), 1400); return; }
+  btn.disabled = true;
+  btn.textContent = "OPENING CHECKOUT…";
+  try {
+    const { res, body } = await api("mode-checkout", { method: "POST", body: JSON.stringify({ mode: id, acceptNoRefunds: true }) });
+    if (res.ok && typeof body.url === "string" && body.url.startsWith("https://checkout.stripe.com/")) { location.href = body.url; return; }
+    overlay((body.error || "Couldn't open checkout.").toUpperCase(), "small");
+  } catch (e) { overlay(e.message.toUpperCase(), "small"); }
+  setTimeout(() => overlay(""), 2400);
+  renderModeLobby(id);
+}
+
 // PREMIUM: today's car for real money (Stripe, like Unlimited). Needs an account so the car is kept.
 async function buyPremium(car, agreed, btn) {
   if (!account) { audio.sfx.deny(); overlay("LOG IN TO BUY", "small"); setTimeout(() => overlay(""), 1400); show("account"); return; }
@@ -2187,6 +2284,11 @@ function popGain(i, metres, tier, nitro, crazy = false) {
 
 // setup.redo replays setup.questions exactly; otherwise the race gets prompts never seen before.
 function startRace(setup) {
+  // WORLD TOUR: yours (bought, or an admin), or its one free race; otherwise its home screen sells it
+  if (THEMED[setup.deck] && !setup.online) {
+    if (!setup.redo && !ownsMode(setup.deck) && !modeTrialLeft(setup.deck)) { show(THEMED[setup.deck].screen); return; }
+    if (!setup.v2questions && !(setup.redo && setup.questions?.length)) return startRaceV2(setup);
+  }
   if (!setup.online && !setup.v2questions && !(setup.redo && setup.questions?.length)) {
     const today = dday();
     const daily = setup.daily && !setup.redo ? setup.daily : 0;
@@ -2196,7 +2298,7 @@ function startRace(setup) {
   const today = dday();
   const daily = setup.daily && !setup.redo ? setup.daily : 0;
   const kind = daily ? { daily } : { mode: setup.mode === "solo" ? "solo" : "versus", deck: save.deck };
-  if (!setup.online && !canRace(me(), today, kind)) {
+  if (!setup.online && !THEMED[setup.deck] && !canRace(me(), today, kind)) {
     if (daily) { show("leagues"); return; } // already played today: the screen says so
     openPaywall(setup.mode === "solo" && save.deck === "classic" ? "used" : "mode");
     return;
@@ -2245,10 +2347,14 @@ function startRace(setup) {
   // 1v1 with "cars don't matter": everyone races as a x1 car with 2 nitro charges (the car still shows)
   if (!solo && setup.equal) racers.forEach((r) => { r.power = EQUAL_CAR.power; r.nitro = EQUAL_CAR.nitro; });
   const crazy = !!setup.crazy && !daily; // CRAZY MODE never applies to the daily race
-  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy };
+  const deck = setup.online ? setup.online.deck : setup.deck || save.deck;
+  const themed = !daily && THEMED[deck] ? deck : null; // a themed mode races in its own scene
+  const geo = themed === "geo"; // WORLD TOUR: the world map, and places on it
+  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy, geo, themed };
 
-  scene = chaseScene; // races use the behind-the-car view
-  const fromLine = (chaseScene.parked || lineLaunch) && solo; // launched off the title screen's start line: same road, same sky
+  scene = themed ? THEMED[themed].scene() : chaseScene; // races use the behind-the-car view (themed modes: their own)
+  if (geo) { loadMap(); loadGazetteer(); }
+  const fromLine = (chaseScene.parked || lineLaunch) && solo && !themed; // launched off the title screen's start line: same road, same sky
   lineLaunch = false;
   chaseScene.parked = false;
   if (!fromLine) chaseScene.todBase = clockPhase();
@@ -2271,8 +2377,10 @@ function startRace(setup) {
   $("q-twist").classList.add("hidden");
   $("round-label").textContent = `ROUND 1 OF ${questions.length}`;
   $("q-kicker").textContent = "GET READY";
-  $("mode-label").textContent = daily ? label : `${label} · ${modeName(setup.online ? setup.online.deck : save.deck)}` + (crazy ? " · CRAZY" : "") + (!solo && setup.equal ? " · EQUAL CARS" : "");
-  $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : save.deck);
+  $("mode-label").textContent = daily ? label : `${label} · ${modeName(deck)}` + (crazy ? " · CRAZY" : "") + (!solo && setup.equal ? " · EQUAL CARS" : "");
+  $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : deck);
+  // WORLD TOUR's one free race is used the moment it starts
+  if (themed && !ownsMode(themed)) { save.trials = { ...(save.trials || {}), [themed]: Date.now() }; persist(); }
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
   $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible
@@ -2384,6 +2492,8 @@ async function runRace(token) {
         tier: res.tier,
         fx: effectTier(res.tier, race.crazy, res.top), // how big the show is (the payout, in CRAZY MODE)
         color: i ? "#ff4fd8" : "#4fd1ff",
+        // WORLD TOUR: where the place you named is (from its answer file, or the world gazetteer)
+        at: race.geo && res.tier ? placeOf(race.questions[round], res) : null,
       };
     });
     // The boost starts the moment each car breaks through its card, from the speed it hit it at,
@@ -3224,6 +3334,11 @@ function finish(token) {
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
+  if (race.themed) { // a themed mode: its own $5 unlock, not UNLIMITED
+    const own = ownsMode(race.themed), nm = THEMED[race.themed].name;
+    $("btn-again").textContent = own ? "▶ NEXT " + nm : `UNLOCK ${nm} — $5`;
+    $("btn-redo").textContent = own ? "REDO THIS RACE" : "REDO — UNLOCK FIRST";
+  }
   $("btn-results-board").classList.toggle("hidden", !race.daily);
   // online: "again" goes back to the online screen; "redo" becomes REMATCH with the same friend
   if (race.online) {
@@ -3264,7 +3379,7 @@ $("ico-garage").addEventListener("click", () => { audio.sfx.click(); show("garag
 $("ico-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("ico-sound").addEventListener("click", () => $("btn-sound").click());
 $("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
-$("btn-2p").addEventListener("click", () => { audio.sfx.click(); show("versus"); });
+$("btn-2p").addEventListener("click", () => { audio.sfx.click(); versusDeck = null; show("versus"); });
 $("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
@@ -3287,7 +3402,7 @@ $("btn-account").addEventListener("click", () => { audio.sfx.click(); show("acco
 $("btn-start-2p").addEventListener("click", () => {
   audio.sfx.click();
   const clean = (id, fallback) => ($(id).value.trim().toUpperCase().slice(0, 10) || fallback);
-  startRace({ mode: "versus", names: [clean("name-p1", "P1"), clean("name-p2", "P2")], cars: [versus.p1, versus.p2], crazy: !!save.crazy, equal: !!save.equalCars });
+  startRace({ mode: "versus", names: [clean("name-p1", "P1"), clean("name-p2", "P2")], cars: [versus.p1, versus.p2], crazy: !!save.crazy, equal: !!save.equalCars, ...(versusDeck ? { deck: versusDeck } : {}) });
 });
 function toggleSound() {
   save.muted = !save.muted;
@@ -3319,7 +3434,16 @@ if (signInReturn?.[2] !== undefined) {
 } else show(signInReturn && ["paywall", "account", "online"].includes(after) ? after : linkCode ? "online" : "title"); // a race link opens the join screen
 // back from buying a premium car: confirm it with the server, then the account brings it to the garage
 const carSession = new URLSearchParams(location.search).get("car_session");
-if (carSession) {
+const modeSession = new URLSearchParams(location.search).get("mode_session");
+if (modeSession) {
+  // back from buying a game mode: confirm it, then open the mode
+  history.replaceState(null, "", location.pathname);
+  api("mode-verify?session_id=" + encodeURIComponent(modeSession)).then(async ({ body }) => {
+    await refreshAccount();
+    if (body.paid && THEMED[body.mode]) { overlay(THEMED[body.mode].name + " UNLOCKED!", "ok"); audio.sfx.win(); scene.confetti(); setTimeout(() => overlay(""), 2200); show(THEMED[body.mode].screen); }
+    else { overlay((body.error || "Payment not confirmed yet. It'll appear once it goes through.").toUpperCase(), "small"); setTimeout(() => overlay(""), 3000); }
+  }).catch(() => refreshAccount());
+} else if (carSession) {
   history.replaceState(null, "", location.pathname);
   api("car-verify?session_id=" + encodeURIComponent(carSession)).then(({ body }) => {
     if (!body.paid) { overlay((body.error || "Payment not confirmed yet. It'll appear once it goes through.").toUpperCase(), "small"); setTimeout(() => overlay(""), 3000); }

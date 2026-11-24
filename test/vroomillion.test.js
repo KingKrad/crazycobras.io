@@ -315,7 +315,7 @@ test("catalog: every family has a known topic, level and pool, and no prompt is 
   for (const f of FAMILIES) {
     assert.ok(!ids.has(f.id), "duplicate family id " + f.id); ids.add(f.id);
     assert.ok([1, 2, 3].includes(f.level), f.id + " level");
-    assert.ok(f.pools.every((p) => ["main", "daily", "car", "hard"].includes(p)), f.id + " pools");
+    assert.ok(f.pools.every((p) => ["main", "daily", "car", "hard", "geo"].includes(p)), f.id + " pools");
     if (!f.pools.every((p) => p === "car")) assert.ok(TOPICS.includes(f.topic), f.id + " topic " + f.topic);
     for (const p of f.prompts) { assert.ok(!seen.has(p), `${p} is in ${seen.get(p)} and ${f.id}`); seen.set(p, f.id); }
     if (f.pools.includes("daily")) assert.ok(!f.pools.some((p) => p === "main" || p === "hard"), f.id + ": daily families are only for the daily race");

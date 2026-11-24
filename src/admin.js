@@ -1,6 +1,6 @@
 // The admin screen's API. Only accounts listed in the ADMIN_EMAILS secret can use it.
 // Also POST /race-start, which counts races for the stats.
-import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts, inTrial, TRIAL_MS, TRIAL_OFFER_ENDS } from "./accounts.js";
+import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin, normalizeEmail, GIFT_CARS, parseGifts, parseModes, GAME_MODE_IDS, inTrial, TRIAL_MS, TRIAL_OFFER_ENDS } from "./accounts.js";
 import { ensureDailySchema, utcDay, cleanNickname } from "./daily.js";
 import { parseCars } from "./premium.js";
 import { ensureStatsSchema } from "./stats.js";
@@ -57,11 +57,12 @@ const playerView = (u, env) => {
     freeResetAt: u.free_reset_at || 0,
     gifts: parseGifts(u.gifts),
     cars: parseCars(u.cars),
+    modes: parseModes(u.modes),
   };
 };
 
 // the player list: columns it needs (not progress or seen prompts, which are big), filters and sorts
-const LIST_COLS = "id, email, (pw_hash <> '') AS has_pw, google_sub, apple_sub, unlimited, paid_session, paid_at, created_at, last_seen, nickname, streak, streak_day, unl_races, free_reset_at, gifts, cars";
+const LIST_COLS = "id, email, (pw_hash <> '') AS has_pw, google_sub, apple_sub, unlimited, paid_session, paid_at, created_at, last_seen, nickname, streak, streak_day, unl_races, free_reset_at, gifts, cars, modes";
 const PAGE_SIZES = [25, 50, 100, 200];
 const PLAYER_SORTS = {
   new: "created_at DESC",
@@ -101,7 +102,7 @@ const perDay = (stamps, days) => {
 //   players { q?, filter?, sort?, limit?, offset? }  a page of players, with counts per filter
 //   players-csv { q?, filter?, sort? } the same list as a CSV file (up to 10,000 rows)
 //   lookup { email }                  one player
-//   set-unlimited { email, unlimited } | gift-car { email, car, give } | reset-free { email } | delete-player { email, confirm: email }
+//   set-unlimited { email, unlimited } | gift-car { email, car, give } | gift-mode { email, mode, give } | reset-free { email } | delete-player { email, confirm: email }
 //   daily { day? }                    both daily races: players, average and top distance, every score
 //   remove-score { day, race, email } | reset-nickname { email }
 //   prompts                           most played, most stalled, best answers per prompt
@@ -267,6 +268,14 @@ export async function handleAdmin(request, env) {
     const now = new Set(parseGifts(player.gifts));
     if (body.give) now.add(body.car); else now.delete(body.car);
     await db.prepare("UPDATE users SET gifts = ? WHERE id = ?").bind(JSON.stringify([...now]), player.id).run();
+    return json(playerView(await find(), env));
+  }
+  if (action === "gift-mode") {
+    // give or take back a themed game mode (WORLD TOUR...), as if they'd bought it
+    if (!GAME_MODE_IDS.includes(body.mode) || typeof body.give !== "boolean") return json({ error: "Bad request." }, 400);
+    const now = new Set(parseModes(player.modes));
+    if (body.give) now.add(body.mode); else now.delete(body.mode);
+    await db.prepare("UPDATE users SET modes = ? WHERE id = ?").bind(JSON.stringify([...now]), player.id).run();
     return json(playerView(await find(), env));
   }
   if (action === "reset-free") {

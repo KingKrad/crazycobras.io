@@ -16,8 +16,8 @@ const byPrompt = new Map(FAMILIES.flatMap((f) => f.prompts.map((p) => [p, f])));
 export const familyOf = (prompt) => byPrompt.get(prompt) || null;
 
 // which families a mode draws from, and how the topics are counted there
-const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily" };
-const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : f.topic);
+const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily", geo: "geo" };
+const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : pool === "geo" ? f.geoTopic || f.topic : f.topic);
 // word games: rhymes, letters, prefixes, synonyms. One a race is fun; three is a spelling test.
 const WORD_GAME = /\b(rhymes? with|starts? with|begins? with|ends? (in|with)|contains?|spelled|sounds like a letter|letters?|a word that means|word that)\b/i;
 const wordCache = new Map();

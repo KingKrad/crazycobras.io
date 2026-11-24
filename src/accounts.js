@@ -99,7 +99,7 @@ export async function ensureSchema(db) {
     )`),
   ]);
   // Columns added after the first release; ignore "duplicate column" on databases that have them.
-  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT", "cars TEXT", "pending_car_session TEXT", "car_checked_at INTEGER"]) {
+  for (const col of ["pending_checked_at INTEGER", "recovery_hash TEXT", "free_reset_at INTEGER", "seen_prompts TEXT", "unl_races INTEGER", "paid_at INTEGER", "last_seen INTEGER", "progress TEXT", "google_sub TEXT", "apple_sub TEXT", "gifts TEXT", "cars TEXT", "pending_car_session TEXT", "car_checked_at INTEGER", "modes TEXT", "pending_mode_session TEXT", "mode_checked_at INTEGER"]) {
     try { await db.prepare(`ALTER TABLE users ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   for (const col of ["google_sub", "apple_sub", "created_at", "last_seen"]) await db.prepare(`CREATE INDEX IF NOT EXISTS users_${col} ON users (${col})`).run();
@@ -156,6 +156,11 @@ export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
 // cars only an admin can give (public/vroomillion/js/cars.js GIFT_CARS), kept on the account as a JSON list
+// themed game modes ($5 each, one-time; src/modes.js), kept on the account as a JSON list
+export const GAME_MODE_IDS = ["geo"];
+export function parseModes(text) {
+  try { const l = JSON.parse(text || "[]"); return Array.isArray(l) ? l.filter((m) => GAME_MODE_IDS.includes(m)) : []; } catch { return []; }
+}
 export const GIFT_CARS = ["mazzy", "tessy", "hondeezy", "nico", "zig", "audi5k"];
 export function parseGifts(text) {
   try { const l = JSON.parse(text || "[]"); return Array.isArray(l) ? l.filter((c) => GIFT_CARS.includes(c)) : []; } catch { return []; }
@@ -169,6 +174,7 @@ export const publicUser = (u, env) => ({
   hasPassword: !!u.pw_hash, // false: signs in with Google or Apple
   gifts: parseGifts(u.gifts), // cars an admin gave this account
   cars: parseCars(u.cars), // premium cars bought on this account
+  modes: parseModes(u.modes), // themed game modes bought on this account (admins get every one)
   freeResetAt: u.free_reset_at || 0,
   // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
   nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),

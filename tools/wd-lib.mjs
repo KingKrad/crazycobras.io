@@ -150,10 +150,12 @@ export async function fetchPrompt(prompt, src) {
     const batch = top.slice(k, k + 300).map((x) => "wd:" + x.id).join(" ");
     // Wikidata keeps many names only under "mul" (the same in every language) and drops the English copy:
     // Kendrick Lamar, Nicki Minaj, Radiohead. An English label wins when there is one.
-    const rows = await sparql(`SELECT ?i ?l ?alt WHERE { VALUES ?i { ${batch} } ?i rdfs:label ?l. FILTER(lang(?l) IN ("en", "mul")) OPTIONAL { ?i skos:altLabel ?alt. FILTER(lang(?alt) IN ("en", "mul")) } }`);
+    // geography prompts (WORLD TOUR) also fetch each place's coordinates
+    const rows = await sparql(`SELECT ?i ?l ?alt${src.geo ? " ?co" : ""} WHERE { VALUES ?i { ${batch} } ?i rdfs:label ?l. FILTER(lang(?l) IN ("en", "mul")) OPTIONAL { ?i skos:altLabel ?alt. FILTER(lang(?alt) IN ("en", "mul")) }${src.geo ? " OPTIONAL { ?i wdt:P625 ?co }" : ""} }`);
     for (const r of rows) {
       const id = r.i.value.split("/").pop();
       const e = names.get(id) || { label: r.l.value, alts: [] };
+      if (r.co && !e.at) { const m = /Point\(([-\d.eE]+) ([-\d.eE]+)\)/.exec(r.co.value); if (m) e.at = [Math.round(Number(m[2]) * 100) / 100, Math.round(Number(m[1]) * 100) / 100]; }
       if (r.l["xml:lang"] === "en") e.label = r.l.value;
       if (r.alt && e.alts.length < 4 && !e.alts.includes(r.alt.value)) e.alts.push(r.alt.value);
       names.set(id, e);
@@ -169,7 +171,7 @@ export async function fetchPrompt(prompt, src) {
     for (const f of [...forms]) for (const p of src.strip || []) if (f.startsWith(p) && f.length > p.length + 2) forms.push(f.slice(p.length));
     // people: their surname on its own counts too ("einstein")
     if (src.surnames && forms[0]) { const last = forms[0].split(" ").pop(); if (last.length >= 4 && last !== forms[0]) forms.push(last); }
-    return { n: x.n, forms: [...new Set(forms)] };
+    return { n: x.n, forms: [...new Set(forms)], ...(e.at ? { at: e.at } : {}) };
   }).filter((x) => x.forms.length);
 }
 

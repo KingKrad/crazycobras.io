@@ -1503,3 +1503,41 @@ body[data-screen="title"] .tagline { font-family: var(--font-title); font-size: 
 @keyframes race-in-bottom { from { transform: translateY(60px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes card-in { from { transform: translateY(-18px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #s-race.active .race-top, #s-race.active .race-dock, #s-race .q-card:not(.hidden) { animation: none; } }
+
+/* ---------- themed modes ---------- */
+.themed-modes { display: grid; gap: 8px; margin: 4px 0 14px; }
+.themed-mode { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; text-align: left; padding: 12px 14px; cursor: pointer;
+  border: 3px solid #4fd1ff; color: #fff; font: inherit;
+  background: linear-gradient(90deg, rgba(18, 42, 92, 0.95), rgba(32, 78, 148, 0.85)), repeating-linear-gradient(0deg, transparent 0 6px, rgba(255, 255, 255, 0.04) 6px 7px);
+  box-shadow: 0 0 0 3px #000, 0 0 18px rgba(79, 209, 255, 0.35); }
+.themed-mode:hover, .themed-mode:focus-visible { transform: translateY(-2px); }
+.tm-name { font-family: var(--font-title); font-size: 18px; letter-spacing: 0.04em; color: #ffd23a; text-shadow: 2px 2px 0 #000; }
+.tm-info { grid-column: 1; font-size: 12px; color: #d8ecff; }
+.tm-tag { grid-row: 1 / span 2; grid-column: 2; font-family: var(--font-title); font-size: 12px; padding: 6px 8px; border: 2px solid #ffd23a; color: #ffd23a; background: #0b0618; }
+
+/* WORLD TOUR's home: the map fills the screen; the title at the top, the button at the bottom */
+body[data-screen="worldtour"] .stage { filter: none; }
+body[data-screen="worldtour"] .screen.active#s-worldtour { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px 18px; animation: none; }
+.ml-head { text-align: center; margin-top: 8px; }
+.ml-name { font-family: var(--font-title); font-size: clamp(34px, 9vw, 72px); margin: 0; color: #ffd23a; letter-spacing: 0.04em;
+  text-shadow: 0 0 6px #ff9a1f, 0 0 20px #ff6a00, 4px 4px 0 #3a1068; -webkit-text-stroke: 2px #2a0f00; paint-order: stroke fill; }
+.ml-tag { font-family: var(--font-title); font-size: clamp(13px, 3.4vw, 20px); color: #fff; margin: 6px 0 2px; text-shadow: 2px 2px 0 #000, 0 0 10px #000; }
+.ml-sub { font-size: clamp(12px, 3vw, 15px); color: #e6f4ff; margin: 0 auto; max-width: 34em; text-shadow: 1px 1px 0 #000, 0 0 8px #000; }
+.ml-bottom { display: grid; gap: 8px; }
+.ml-status { text-align: center; font-family: var(--font-title); font-size: 12px; color: #ffd23a; margin: 0; text-shadow: 2px 2px 0 #000, 0 0 8px #000; }
+.btn.big.ml-go { background: #ffd23a; color: #120a2a; border-color: #fff; box-shadow: 0 0 0 3px #ff9a1f, 0 0 26px rgba(255, 154, 31, 0.6); font-size: clamp(16px, 4.4vw, 22px); }
+.btn.big.ml-go.unlock-cta { background: #ff4fd8; color: #fff; }
+.ml-agree { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #000; background: rgba(11, 6, 24, 0.7); padding: 6px 8px; }
+.ml-links { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ml-info { font-family: var(--font-title); font-size: 10px; color: #cfe6ff; text-shadow: 1px 1px 0 #000; text-align: right; }
+
+/* the title screen's strip for WORLD TOUR */
+.wt-promo { display: block; width: 100%; margin: 6px 0 0; padding: 8px 10px; cursor: pointer; font-family: var(--font-title); font-size: 11px; letter-spacing: 0.03em; color: #fff;
+  background: linear-gradient(90deg, #12306a, #1d5aa8); border: 2px solid #ffd23a; box-shadow: 0 0 0 2px #000; text-align: center; }
+.wt-new { background: #ffd23a; color: #120a2a; padding: 2px 6px; margin-right: 6px; }
+.vs-themed { font-family: var(--font-title); font-size: 13px; color: #ffd23a; border: 2px solid #4fd1ff; background: #12306a; padding: 8px 10px; text-align: center; }
+/* BOX OFFICE's home */
+body[data-screen="boxoffice"] .stage { filter: none; }
+body[data-screen="boxoffice"] .screen.active#s-boxoffice { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px 18px; animation: none; }
+.ml-name.bo { color: #fff1c8; text-shadow: 0 0 6px #ff4f4f, 0 0 20px #d81b3b, 4px 4px 0 #2a0f3a; -webkit-text-stroke: 2px #2a0008; }
+body[data-screen="boxoffice"] .ml-head { margin-top: 0; }

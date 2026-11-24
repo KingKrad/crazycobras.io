@@ -1,0 +1,9510 @@
+{
+ "countries": [
+  {
+   "q": "Q43",
+   "name": "Turkey",
+   "n": 430,
+   "cont": [
+    "Q46",
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q142",
+   "name": "France",
+   "n": 428,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q30",
+   "name": "United States",
+   "n": 427,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q159",
+   "name": "Russia",
+   "n": 421,
+   "cont": [
+    "Q46",
+    "Q48",
+    "Q5401"
+   ]
+  },
+  {
+   "q": "Q17",
+   "name": "Japan",
+   "n": 419,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q38",
+   "name": "Italy",
+   "n": 409,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q183",
+   "name": "Germany",
+   "n": 405,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q668",
+   "name": "India",
+   "n": 404,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q33",
+   "name": "Finland",
+   "n": 403,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q96",
+   "name": "Mexico",
+   "n": 402,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q148",
+   "name": "People's Republic of China",
+   "n": 401,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q408",
+   "name": "Australia",
+   "n": 400,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q16",
+   "name": "Canada",
+   "n": 398,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q29",
+   "name": "Spain",
+   "n": 397,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q145",
+   "name": "United Kingdom",
+   "n": 396,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q20",
+   "name": "Norway",
+   "n": 394,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q79",
+   "name": "Egypt",
+   "n": 392,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q36",
+   "name": "Poland",
+   "n": 391,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q212",
+   "name": "Ukraine",
+   "n": 390,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q39",
+   "name": "Switzerland",
+   "n": 387,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q155",
+   "name": "Brazil",
+   "n": 387,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q222",
+   "name": "Albania",
+   "n": 387,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q31",
+   "name": "Belgium",
+   "n": 385,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q298",
+   "name": "Chile",
+   "n": 384,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q801",
+   "name": "Israel",
+   "n": 380,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q41",
+   "name": "Greece",
+   "n": 378,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q794",
+   "name": "Iran",
+   "n": 377,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q262",
+   "name": "Algeria",
+   "n": 374,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q40",
+   "name": "Austria",
+   "n": 372,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q414",
+   "name": "Argentina",
+   "n": 372,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q45",
+   "name": "Portugal",
+   "n": 372,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q34",
+   "name": "Sweden",
+   "n": 370,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q881",
+   "name": "Vietnam",
+   "n": 370,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q258",
+   "name": "South Africa",
+   "n": 368,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q739",
+   "name": "Colombia",
+   "n": 367,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q252",
+   "name": "Indonesia",
+   "n": 366,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q227",
+   "name": "Azerbaijan",
+   "n": 364,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q889",
+   "name": "Afghanistan",
+   "n": 364,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q219",
+   "name": "Bulgaria",
+   "n": 361,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q184",
+   "name": "Belarus",
+   "n": 360,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q28",
+   "name": "Hungary",
+   "n": 359,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q843",
+   "name": "Pakistan",
+   "n": 357,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q399",
+   "name": "Armenia",
+   "n": 356,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q189",
+   "name": "Iceland",
+   "n": 356,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q224",
+   "name": "Croatia",
+   "n": 356,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q884",
+   "name": "South Korea",
+   "n": 356,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q869",
+   "name": "Thailand",
+   "n": 356,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q213",
+   "name": "Czech Republic",
+   "n": 355,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q191",
+   "name": "Estonia",
+   "n": 354,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q403",
+   "name": "Serbia",
+   "n": 352,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q37",
+   "name": "Lithuania",
+   "n": 352,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q664",
+   "name": "New Zealand",
+   "n": 352,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q230",
+   "name": "Georgia",
+   "n": 351,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q851",
+   "name": "Saudi Arabia",
+   "n": 351,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q796",
+   "name": "Iraq",
+   "n": 350,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q232",
+   "name": "Kazakhstan",
+   "n": 350,
+   "cont": [
+    "Q46",
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q218",
+   "name": "Romania",
+   "n": 349,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q902",
+   "name": "Bangladesh",
+   "n": 349,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1033",
+   "name": "Nigeria",
+   "n": 349,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q115",
+   "name": "Ethiopia",
+   "n": 348,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q717",
+   "name": "Venezuela",
+   "n": 347,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q27",
+   "name": "Ireland",
+   "n": 343,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q237",
+   "name": "Vatican City",
+   "n": 343,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q225",
+   "name": "Bosnia and Herzegovina",
+   "n": 342,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q833",
+   "name": "Malaysia",
+   "n": 342,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q214",
+   "name": "Slovakia",
+   "n": 341,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q114",
+   "name": "Kenya",
+   "n": 338,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q858",
+   "name": "Syria",
+   "n": 338,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q211",
+   "name": "Latvia",
+   "n": 336,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q32",
+   "name": "Luxembourg",
+   "n": 335,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q974",
+   "name": "Democratic Republic of the Congo",
+   "n": 335,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q928",
+   "name": "Philippines",
+   "n": 335,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1028",
+   "name": "Morocco",
+   "n": 335,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1049",
+   "name": "Sudan",
+   "n": 335,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1016",
+   "name": "Libya",
+   "n": 334,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q334",
+   "name": "Singapore",
+   "n": 333,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q419",
+   "name": "Peru",
+   "n": 333,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q228",
+   "name": "Andorra",
+   "n": 333,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q424",
+   "name": "Cambodia",
+   "n": 332,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q215",
+   "name": "Slovenia",
+   "n": 332,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q217",
+   "name": "Moldova",
+   "n": 331,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q822",
+   "name": "Lebanon",
+   "n": 330,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q948",
+   "name": "Tunisia",
+   "n": 329,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q221",
+   "name": "North Macedonia",
+   "n": 327,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q233",
+   "name": "Malta",
+   "n": 327,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q229",
+   "name": "Cyprus",
+   "n": 327,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q117",
+   "name": "Ghana",
+   "n": 326,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1045",
+   "name": "Somalia",
+   "n": 326,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q77",
+   "name": "Uruguay",
+   "n": 325,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q837",
+   "name": "Nepal",
+   "n": 325,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q916",
+   "name": "Angola",
+   "n": 324,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q711",
+   "name": "Mongolia",
+   "n": 323,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q236",
+   "name": "Montenegro",
+   "n": 323,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q235",
+   "name": "Monaco",
+   "n": 322,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q813",
+   "name": "Kyrgyzstan",
+   "n": 321,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q924",
+   "name": "Tanzania",
+   "n": 321,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1019",
+   "name": "Madagascar",
+   "n": 321,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q878",
+   "name": "United Arab Emirates",
+   "n": 320,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q954",
+   "name": "Zimbabwe",
+   "n": 320,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q657",
+   "name": "Chad",
+   "n": 319,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q836",
+   "name": "Myanmar",
+   "n": 318,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q805",
+   "name": "Yemen",
+   "n": 318,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q736",
+   "name": "Ecuador",
+   "n": 317,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q819",
+   "name": "Laos",
+   "n": 317,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1030",
+   "name": "Namibia",
+   "n": 317,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q347",
+   "name": "Liechtenstein",
+   "n": 316,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q865",
+   "name": "Taiwan",
+   "n": 316,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q963",
+   "name": "Botswana",
+   "n": 315,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q750",
+   "name": "Bolivia",
+   "n": 314,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q810",
+   "name": "Jordan",
+   "n": 314,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q238",
+   "name": "San Marino",
+   "n": 314,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q1008",
+   "name": "Ivory Coast",
+   "n": 314,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1009",
+   "name": "Cameroon",
+   "n": 314,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q423",
+   "name": "North Korea",
+   "n": 313,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q733",
+   "name": "Paraguay",
+   "n": 312,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q241",
+   "name": "Cuba",
+   "n": 312,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q912",
+   "name": "Mali",
+   "n": 312,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1036",
+   "name": "Uganda",
+   "n": 312,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q854",
+   "name": "Sri Lanka",
+   "n": 311,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q265",
+   "name": "Uzbekistan",
+   "n": 310,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q953",
+   "name": "Zambia",
+   "n": 309,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q965",
+   "name": "Burkina Faso",
+   "n": 309,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q986",
+   "name": "Eritrea",
+   "n": 309,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1041",
+   "name": "Senegal",
+   "n": 309,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q962",
+   "name": "Benin",
+   "n": 308,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q863",
+   "name": "Tajikistan",
+   "n": 308,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q398",
+   "name": "Bahrain",
+   "n": 307,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q817",
+   "name": "Kuwait",
+   "n": 306,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q917",
+   "name": "Bhutan",
+   "n": 306,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1025",
+   "name": "Mauritania",
+   "n": 306,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q804",
+   "name": "Panama",
+   "n": 304,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q967",
+   "name": "Burundi",
+   "n": 304,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1037",
+   "name": "Rwanda",
+   "n": 303,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1029",
+   "name": "Mozambique",
+   "n": 303,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q800",
+   "name": "Costa Rica",
+   "n": 302,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q945",
+   "name": "Togo",
+   "n": 302,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q929",
+   "name": "Central African Republic",
+   "n": 302,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1032",
+   "name": "Niger",
+   "n": 302,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q783",
+   "name": "Honduras",
+   "n": 301,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q1006",
+   "name": "Guinea",
+   "n": 301,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1005",
+   "name": "The Gambia",
+   "n": 301,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q971",
+   "name": "Republic of the Congo",
+   "n": 300,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q977",
+   "name": "Djibouti",
+   "n": 300,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1007",
+   "name": "Guinea-Bissau",
+   "n": 300,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q874",
+   "name": "Turkmenistan",
+   "n": 299,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q842",
+   "name": "Oman",
+   "n": 298,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q921",
+   "name": "Brunei",
+   "n": 298,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1020",
+   "name": "Malawi",
+   "n": 298,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1000",
+   "name": "Gabon",
+   "n": 296,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q790",
+   "name": "Haiti",
+   "n": 294,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q1044",
+   "name": "Sierra Leone",
+   "n": 294,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q574",
+   "name": "Timor-Leste",
+   "n": 292,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q1014",
+   "name": "Liberia",
+   "n": 292,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1011",
+   "name": "Cape Verde",
+   "n": 292,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q826",
+   "name": "Maldives",
+   "n": 291,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q846",
+   "name": "Qatar",
+   "n": 291,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q691",
+   "name": "Papua New Guinea",
+   "n": 289,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q792",
+   "name": "El Salvador",
+   "n": 289,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q730",
+   "name": "Suriname",
+   "n": 288,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q734",
+   "name": "Guyana",
+   "n": 287,
+   "cont": [
+    "Q18"
+   ]
+  },
+  {
+   "q": "Q1050",
+   "name": "Eswatini",
+   "n": 287,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q983",
+   "name": "Equatorial Guinea",
+   "n": 285,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1027",
+   "name": "Mauritius",
+   "n": 285,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q1246",
+   "name": "Kosovo",
+   "n": 285,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q811",
+   "name": "Nicaragua",
+   "n": 284,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q970",
+   "name": "Comoros",
+   "n": 284,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q774",
+   "name": "Guatemala",
+   "n": 283,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q766",
+   "name": "Jamaica",
+   "n": 283,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q958",
+   "name": "South Sudan",
+   "n": 283,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q712",
+   "name": "Fiji",
+   "n": 282,
+   "cont": [
+    "Q538"
+   ]
+  },
+  {
+   "q": "Q786",
+   "name": "Dominican Republic",
+   "n": 282,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q242",
+   "name": "Belize",
+   "n": 282,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q1013",
+   "name": "Lesotho",
+   "n": 282,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q778",
+   "name": "The Bahamas",
+   "n": 281,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q1042",
+   "name": "Seychelles",
+   "n": 278,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q244",
+   "name": "Barbados",
+   "n": 277,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q1039",
+   "name": "São Tomé and Príncipe",
+   "n": 274,
+   "cont": [
+    "Q15"
+   ]
+  },
+  {
+   "q": "Q784",
+   "name": "Dominica",
+   "n": 268,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q686",
+   "name": "Vanuatu",
+   "n": 266,
+   "cont": [
+    "Q538"
+   ]
+  },
+  {
+   "q": "Q697",
+   "name": "Nauru",
+   "n": 266,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q781",
+   "name": "Antigua and Barbuda",
+   "n": 266,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q678",
+   "name": "Tonga",
+   "n": 263,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q683",
+   "name": "Samoa",
+   "n": 263,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q695",
+   "name": "Palau",
+   "n": 259,
+   "cont": [
+    "Q538",
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q672",
+   "name": "Tuvalu",
+   "n": 255,
+   "cont": [
+    "Q538",
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q769",
+   "name": "Grenada",
+   "n": 253,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q710",
+   "name": "Kiribati",
+   "n": 251,
+   "cont": [
+    "Q538",
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q754",
+   "name": "Trinidad and Tobago",
+   "n": 251,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q685",
+   "name": "Solomon Islands",
+   "n": 245,
+   "cont": [
+    "Q538",
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q763",
+   "name": "Saint Kitts and Nevis",
+   "n": 239,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q709",
+   "name": "Marshall Islands",
+   "n": 238,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q757",
+   "name": "Saint Vincent and the Grenadines",
+   "n": 238,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q760",
+   "name": "Saint Lucia",
+   "n": 236,
+   "cont": [
+    "Q49"
+   ]
+  },
+  {
+   "q": "Q219060",
+   "name": "Palestine",
+   "n": 226,
+   "cont": [
+    "Q48"
+   ]
+  },
+  {
+   "q": "Q702",
+   "name": "Federated States of Micronesia",
+   "n": 225,
+   "cont": [
+    "Q55643"
+   ]
+  },
+  {
+   "q": "Q29999",
+   "name": "Kingdom of the Netherlands",
+   "n": 108,
+   "cont": [
+    "Q46"
+   ]
+  },
+  {
+   "q": "Q756617",
+   "name": "Kingdom of Denmark",
+   "n": 56,
+   "cont": [
+    "Q46"
+   ]
+  }
+ ],
+ "divisions": {
+  "Q43": [
+   {
+    "q": "Q40249",
+    "name": "Antalya Province",
+    "n": 98
+   },
+   {
+    "q": "Q40549",
+    "name": "Adana Province",
+    "n": 95
+   },
+   {
+    "q": "Q43690",
+    "name": "Bursa Province",
+    "n": 95
+   },
+   {
+    "q": "Q43745",
+    "name": "Artvin Province",
+    "n": 94
+   },
+   {
+    "q": "Q79846",
+    "name": "Aydın Province",
+    "n": 92
+   },
+   {
+    "q": "Q47117",
+    "name": "Balıkesir Province",
+    "n": 92
+   },
+   {
+    "q": "Q83274",
+    "name": "Hatay Province",
+    "n": 92
+   },
+   {
+    "q": "Q43924",
+    "name": "Adıyaman Province",
+    "n": 91
+   },
+   {
+    "q": "Q45220",
+    "name": "Afyonkarahisar Province",
+    "n": 90
+   },
+   {
+    "q": "Q80036",
+    "name": "Amasya Province",
+    "n": 90
+   },
+   {
+    "q": "Q80051",
+    "name": "Ağrı Province",
+    "n": 89
+   },
+   {
+    "q": "Q82089",
+    "name": "Bolu Province",
+    "n": 89
+   },
+   {
+    "q": "Q47813",
+    "name": "Çanakkale Province",
+    "n": 88
+   },
+   {
+    "q": "Q2297724",
+    "name": "Ankara Province",
+    "n": 88
+   },
+   {
+    "q": "Q79760",
+    "name": "Bingöl Province",
+    "n": 87
+   },
+   {
+    "q": "Q46763",
+    "name": "Bilecik Province",
+    "n": 87
+   },
+   {
+    "q": "Q79840",
+    "name": "Ardahan Province",
+    "n": 87
+   },
+   {
+    "q": "Q534799",
+    "name": "Istanbul Province",
+    "n": 87
+   },
+   {
+    "q": "Q344490",
+    "name": "İzmir Province",
+    "n": 87
+   },
+   {
+    "q": "Q130553",
+    "name": "Manisa Province",
+    "n": 86
+   },
+   {
+    "q": "Q83965",
+    "name": "Kocaeli Province",
+    "n": 86
+   },
+   {
+    "q": "Q80550",
+    "name": "Van Province",
+    "n": 86
+   },
+   {
+    "q": "Q123934",
+    "name": "Muğla Province",
+    "n": 86
+   },
+   {
+    "q": "Q80370",
+    "name": "Batman Province",
+    "n": 85
+   },
+   {
+    "q": "Q376797",
+    "name": "Erzurum Province",
+    "n": 85
+   },
+   {
+    "q": "Q83069",
+    "name": "Sakarya Province",
+    "n": 85
+   },
+   {
+    "q": "Q83102",
+    "name": "Edirne Province",
+    "n": 85
+   },
+   {
+    "q": "Q83239",
+    "name": "Bitlis Province",
+    "n": 84
+   },
+   {
+    "q": "Q129387",
+    "name": "Tekirdağ Province",
+    "n": 84
+   },
+   {
+    "q": "Q80088",
+    "name": "Burdur Province",
+    "n": 83
+   },
+   {
+    "q": "Q82096",
+    "name": "Denizli Province",
+    "n": 83
+   },
+   {
+    "q": "Q83073",
+    "name": "Aksaray Province",
+    "n": 83
+   },
+   {
+    "q": "Q388995",
+    "name": "Trabzon Province",
+    "n": 83
+   },
+   {
+    "q": "Q483063",
+    "name": "Bayburt Province",
+    "n": 83
+   },
+   {
+    "q": "Q83342",
+    "name": "Bartın Province",
+    "n": 82
+   },
+   {
+    "q": "Q81551",
+    "name": "Konya Province",
+    "n": 82
+   },
+   {
+    "q": "Q83081",
+    "name": "Diyarbakır Province",
+    "n": 82
+   },
+   {
+    "q": "Q483040",
+    "name": "Samsun Province",
+    "n": 82
+   },
+   {
+    "q": "Q126874",
+    "name": "Kütahya Province",
+    "n": 82
+   },
+   {
+    "q": "Q482779",
+    "name": "Giresun Province",
+    "n": 82
+   },
+   {
+    "q": "Q93209",
+    "name": "Hakkâri Province",
+    "n": 81
+   },
+   {
+    "q": "Q83077",
+    "name": "Kars Province",
+    "n": 81
+   },
+   {
+    "q": "Q483083",
+    "name": "Yalova Province",
+    "n": 81
+   },
+   {
+    "q": "Q272947",
+    "name": "Çorum Province",
+    "n": 81
+   },
+   {
+    "q": "Q75445",
+    "name": "Yozgat Province",
+    "n": 80
+   },
+   {
+    "q": "Q131384",
+    "name": "Malatya Province",
+    "n": 80
+   },
+   {
+    "q": "Q131387",
+    "name": "Muş Province",
+    "n": 80
+   },
+   {
+    "q": "Q132637",
+    "name": "Mersin Province",
+    "n": 80
+   },
+   {
+    "q": "Q131597",
+    "name": "Kırklareli Province",
+    "n": 80
+   },
+   {
+    "q": "Q432391",
+    "name": "Düzce Province",
+    "n": 80
+   },
+   {
+    "q": "Q483180",
+    "name": "Ordu Province",
+    "n": 80
+   },
+   {
+    "q": "Q482834",
+    "name": "Kahramanmaraş Province",
+    "n": 80
+   },
+   {
+    "q": "Q483154",
+    "name": "Gaziantep Province",
+    "n": 80
+   },
+   {
+    "q": "Q483173",
+    "name": "Erzincan Province",
+    "n": 80
+   },
+   {
+    "q": "Q483195",
+    "name": "Tokat Province",
+    "n": 80
+   },
+   {
+    "q": "Q131293",
+    "name": "Mardin Province",
+    "n": 79
+   },
+   {
+    "q": "Q388469",
+    "name": "Şanlıurfa Province",
+    "n": 79
+   },
+   {
+    "q": "Q482788",
+    "name": "Gümüşhane Province",
+    "n": 79
+   },
+   {
+    "q": "Q483091",
+    "name": "Elazığ Province",
+    "n": 79
+   },
+   {
+    "q": "Q483100",
+    "name": "Sivas Province",
+    "n": 79
+   },
+   {
+    "q": "Q268043",
+    "name": "Isparta Province",
+    "n": 79
+   },
+   {
+    "q": "Q125506",
+    "name": "Iğdır Province",
+    "n": 78
+   },
+   {
+    "q": "Q483191",
+    "name": "Kastamonu Province",
+    "n": 78
+   },
+   {
+    "q": "Q647378",
+    "name": "Şırnak Province",
+    "n": 78
+   },
+   {
+    "q": "Q219956",
+    "name": "Zonguldak Province",
+    "n": 78
+   },
+   {
+    "q": "Q483481",
+    "name": "Rize Province",
+    "n": 78
+   },
+   {
+    "q": "Q272662",
+    "name": "Çankırı Province",
+    "n": 78
+   },
+   {
+    "q": "Q281206",
+    "name": "Osmaniye Province",
+    "n": 78
+   },
+   {
+    "q": "Q620742",
+    "name": "Tunceli Province",
+    "n": 78
+   },
+   {
+    "q": "Q482975",
+    "name": "Karaman Province",
+    "n": 77
+   },
+   {
+    "q": "Q430693",
+    "name": "Nevşehir Province",
+    "n": 77
+   },
+   {
+    "q": "Q482825",
+    "name": "Siirt Province",
+    "n": 77
+   },
+   {
+    "q": "Q483053",
+    "name": "Eskişehir Province",
+    "n": 77
+   },
+   {
+    "q": "Q483078",
+    "name": "Uşak Province",
+    "n": 77
+   },
+   {
+    "q": "Q483472",
+    "name": "Kayseri Province",
+    "n": 77
+   },
+   {
+    "q": "Q483168",
+    "name": "Karabük Province",
+    "n": 76
+   },
+   {
+    "q": "Q484392",
+    "name": "Kırıkkale Province",
+    "n": 76
+   },
+   {
+    "q": "Q128978",
+    "name": "Kilis Province",
+    "n": 75
+   },
+   {
+    "q": "Q155219",
+    "name": "Niğde Province",
+    "n": 75
+   },
+   {
+    "q": "Q134187",
+    "name": "Kırşehir Province",
+    "n": 74
+   },
+   {
+    "q": "Q134413",
+    "name": "Sinop Province",
+    "n": 74
+   }
+  ],
+  "Q142": [
+   {
+    "q": "Q3769",
+    "name": "French Guiana",
+    "n": 223
+   },
+   {
+    "q": "Q33788",
+    "name": "New Caledonia",
+    "n": 189
+   },
+   {
+    "q": "Q17054",
+    "name": "Martinique",
+    "n": 187
+   },
+   {
+    "q": "Q14112",
+    "name": "Corsica",
+    "n": 186
+   },
+   {
+    "q": "Q17070",
+    "name": "Réunion",
+    "n": 183
+   },
+   {
+    "q": "Q17012",
+    "name": "Guadeloupe",
+    "n": 179
+   },
+   {
+    "q": "Q30971",
+    "name": "French Polynesia",
+    "n": 174
+   },
+   {
+    "q": "Q17063",
+    "name": "Mayotte",
+    "n": 165
+   },
+   {
+    "q": "Q35555",
+    "name": "Wallis and Futuna",
+    "n": 147
+   },
+   {
+    "q": "Q13917",
+    "name": "Île-de-France",
+    "n": 146
+   },
+   {
+    "q": "Q34617",
+    "name": "Saint Pierre and Miquelon",
+    "n": 144
+   },
+   {
+    "q": "Q16994",
+    "name": "Pays de la Loire",
+    "n": 132
+   },
+   {
+    "q": "Q15104",
+    "name": "Provence-Alpes-Côte d'Azur",
+    "n": 132
+   },
+   {
+    "q": "Q13947",
+    "name": "Centre-Val de Loire",
+    "n": 128
+   },
+   {
+    "q": "Q18338206",
+    "name": "Auvergne-Rhône-Alpes",
+    "n": 121
+   },
+   {
+    "q": "Q25362",
+    "name": "Saint Barthélemy",
+    "n": 120
+   },
+   {
+    "q": "Q12130",
+    "name": "Brittany",
+    "n": 112
+   },
+   {
+    "q": "Q18678082",
+    "name": "Nouvelle-Aquitaine",
+    "n": 109
+   },
+   {
+    "q": "Q18677983",
+    "name": "Grand Est",
+    "n": 108
+   },
+   {
+    "q": "Q18677767",
+    "name": "Hauts-de-France",
+    "n": 105
+   },
+   {
+    "q": "Q18678265",
+    "name": "Occitania",
+    "n": 104
+   },
+   {
+    "q": "Q126125",
+    "name": "Saint-Martin",
+    "n": 102
+   },
+   {
+    "q": "Q18578267",
+    "name": "Bourgogne-Franche-Comté",
+    "n": 102
+   },
+   {
+    "q": "Q18677875",
+    "name": "Normandy",
+    "n": 95
+   },
+   {
+    "q": "Q129003",
+    "name": "French Southern and Antarctic Lands",
+    "n": 93
+   },
+   {
+    "q": "Q161258",
+    "name": "Clipperton Island",
+    "n": 89
+   }
+  ],
+  "Q30": [
+   {
+    "q": "Q99",
+    "name": "California",
+    "n": 289
+   },
+   {
+    "q": "Q782",
+    "name": "Hawaii",
+    "n": 268
+   },
+   {
+    "q": "Q797",
+    "name": "Alaska",
+    "n": 264
+   },
+   {
+    "q": "Q812",
+    "name": "Florida",
+    "n": 261
+   },
+   {
+    "q": "Q1439",
+    "name": "Texas",
+    "n": 260
+   },
+   {
+    "q": "Q1384",
+    "name": "New York",
+    "n": 248
+   },
+   {
+    "q": "Q173",
+    "name": "Alabama",
+    "n": 243
+   },
+   {
+    "q": "Q1204",
+    "name": "Illinois",
+    "n": 238
+   },
+   {
+    "q": "Q1400",
+    "name": "Pennsylvania",
+    "n": 235
+   },
+   {
+    "q": "Q1397",
+    "name": "Ohio",
+    "n": 235
+   },
+   {
+    "q": "Q1370",
+    "name": "Virginia",
+    "n": 234
+   },
+   {
+    "q": "Q1428",
+    "name": "Georgia",
+    "n": 233
+   },
+   {
+    "q": "Q1227",
+    "name": "Nevada",
+    "n": 231
+   },
+   {
+    "q": "Q1408",
+    "name": "New Jersey",
+    "n": 231
+   },
+   {
+    "q": "Q771",
+    "name": "Massachusetts",
+    "n": 230
+   },
+   {
+    "q": "Q1391",
+    "name": "Maryland",
+    "n": 230
+   },
+   {
+    "q": "Q1261",
+    "name": "Colorado",
+    "n": 230
+   },
+   {
+    "q": "Q829",
+    "name": "Utah",
+    "n": 227
+   },
+   {
+    "q": "Q1166",
+    "name": "Michigan",
+    "n": 226
+   },
+   {
+    "q": "Q824",
+    "name": "Oregon",
+    "n": 226
+   },
+   {
+    "q": "Q1509",
+    "name": "Tennessee",
+    "n": 226
+   },
+   {
+    "q": "Q1415",
+    "name": "Indiana",
+    "n": 225
+   },
+   {
+    "q": "Q1537",
+    "name": "Wisconsin",
+    "n": 225
+   },
+   {
+    "q": "Q1558",
+    "name": "Kansas",
+    "n": 225
+   },
+   {
+    "q": "Q1546",
+    "name": "Iowa",
+    "n": 224
+   },
+   {
+    "q": "Q1588",
+    "name": "Louisiana",
+    "n": 224
+   },
+   {
+    "q": "Q779",
+    "name": "Connecticut",
+    "n": 223
+   },
+   {
+    "q": "Q1183",
+    "name": "Puerto Rico",
+    "n": 223
+   },
+   {
+    "q": "Q1223",
+    "name": "Washington",
+    "n": 223
+   },
+   {
+    "q": "Q1527",
+    "name": "Minnesota",
+    "n": 223
+   },
+   {
+    "q": "Q1522",
+    "name": "New Mexico",
+    "n": 223
+   },
+   {
+    "q": "Q1603",
+    "name": "Kentucky",
+    "n": 223
+   },
+   {
+    "q": "Q1612",
+    "name": "Arkansas",
+    "n": 223
+   },
+   {
+    "q": "Q1581",
+    "name": "Missouri",
+    "n": 223
+   },
+   {
+    "q": "Q1221",
+    "name": "Idaho",
+    "n": 222
+   },
+   {
+    "q": "Q1393",
+    "name": "Delaware",
+    "n": 222
+   },
+   {
+    "q": "Q1649",
+    "name": "Oklahoma",
+    "n": 222
+   },
+   {
+    "q": "Q1553",
+    "name": "Nebraska",
+    "n": 221
+   },
+   {
+    "q": "Q1494",
+    "name": "Mississippi",
+    "n": 220
+   },
+   {
+    "q": "Q16551",
+    "name": "Vermont",
+    "n": 220
+   },
+   {
+    "q": "Q1212",
+    "name": "Montana",
+    "n": 217
+   },
+   {
+    "q": "Q1214",
+    "name": "Wyoming",
+    "n": 217
+   },
+   {
+    "q": "Q1456",
+    "name": "South Carolina",
+    "n": 217
+   },
+   {
+    "q": "Q724",
+    "name": "Maine",
+    "n": 216
+   },
+   {
+    "q": "Q759",
+    "name": "New Hampshire",
+    "n": 216
+   },
+   {
+    "q": "Q1454",
+    "name": "North Carolina",
+    "n": 216
+   },
+   {
+    "q": "Q1371",
+    "name": "West Virginia",
+    "n": 215
+   },
+   {
+    "q": "Q1387",
+    "name": "Rhode Island",
+    "n": 214
+   },
+   {
+    "q": "Q1211",
+    "name": "South Dakota",
+    "n": 213
+   },
+   {
+    "q": "Q1207",
+    "name": "North Dakota",
+    "n": 211
+   },
+   {
+    "q": "Q16635",
+    "name": "Guam",
+    "n": 196
+   },
+   {
+    "q": "Q16641",
+    "name": "American Samoa",
+    "n": 179
+   },
+   {
+    "q": "Q16644",
+    "name": "Northern Mariana Islands",
+    "n": 164
+   },
+   {
+    "q": "Q11703",
+    "name": "United States Virgin Islands",
+    "n": 155
+   },
+   {
+    "q": "Q3551781",
+    "name": "District of Columbia",
+    "n": 24
+   }
+  ],
+  "Q159": [
+   {
+    "q": "Q649",
+    "name": "Moscow",
+    "n": 338
+   },
+   {
+    "q": "Q656",
+    "name": "Saint Petersburg",
+    "n": 273
+   },
+   {
+    "q": "Q5187",
+    "name": "Chechnya",
+    "n": 175
+   },
+   {
+    "q": "Q5118",
+    "name": "Dagestan",
+    "n": 166
+   },
+   {
+    "q": "Q5481",
+    "name": "Tatarstan",
+    "n": 165
+   },
+   {
+    "q": "Q5710",
+    "name": "Bashkortostan",
+    "n": 158
+   },
+   {
+    "q": "Q6605",
+    "name": "Sakha Republic",
+    "n": 153
+   },
+   {
+    "q": "Q7525",
+    "name": "Sevastopol",
+    "n": 151
+   },
+   {
+    "q": "Q1749",
+    "name": "Kaliningrad Oblast",
+    "n": 148
+   },
+   {
+    "q": "Q3734",
+    "name": "Adygea",
+    "n": 148
+   },
+   {
+    "q": "Q5237",
+    "name": "North Ossetia–Alania",
+    "n": 145
+   },
+   {
+    "q": "Q3953",
+    "name": "Kalmykia",
+    "n": 143
+   },
+   {
+    "q": "Q5219",
+    "name": "Ingushetia",
+    "n": 143
+   },
+   {
+    "q": "Q1914",
+    "name": "Republic of Karelia",
+    "n": 142
+   },
+   {
+    "q": "Q2073",
+    "name": "Komi Republic",
+    "n": 140
+   },
+   {
+    "q": "Q960",
+    "name": "Tuva",
+    "n": 139
+   },
+   {
+    "q": "Q5267",
+    "name": "Kabardino-Balkaria",
+    "n": 139
+   },
+   {
+    "q": "Q6809",
+    "name": "Buryatia",
+    "n": 139
+   },
+   {
+    "q": "Q5971",
+    "name": "Altai Republic",
+    "n": 139
+   },
+   {
+    "q": "Q5466",
+    "name": "Chuvashia",
+    "n": 138
+   },
+   {
+    "q": "Q5422",
+    "name": "Udmurtia",
+    "n": 136
+   },
+   {
+    "q": "Q5328",
+    "name": "Karachay-Cherkessia",
+    "n": 133
+   },
+   {
+    "q": "Q6886",
+    "name": "Amur Oblast",
+    "n": 133
+   },
+   {
+    "q": "Q6585",
+    "name": "Irkutsk Oblast",
+    "n": 133
+   },
+   {
+    "q": "Q1697",
+    "name": "Moscow Oblast",
+    "n": 132
+   },
+   {
+    "q": "Q2191",
+    "name": "Leningrad Oblast",
+    "n": 132
+   },
+   {
+    "q": "Q3680",
+    "name": "Krasnodar Krai",
+    "n": 132
+   },
+   {
+    "q": "Q3573",
+    "name": "Rostov Oblast",
+    "n": 131
+   },
+   {
+    "q": "Q5340",
+    "name": "Mordovia",
+    "n": 131
+   },
+   {
+    "q": "Q5446",
+    "name": "Mari El",
+    "n": 130
+   },
+   {
+    "q": "Q6543",
+    "name": "Khakassia",
+    "n": 130
+   },
+   {
+    "q": "Q2702",
+    "name": "Vladimir Oblast",
+    "n": 128
+   },
+   {
+    "q": "Q1759",
+    "name": "Murmansk Oblast",
+    "n": 128
+   },
+   {
+    "q": "Q1875",
+    "name": "Arkhangelsk Oblast",
+    "n": 127
+   },
+   {
+    "q": "Q3329",
+    "name": "Belgorod Oblast",
+    "n": 127
+   },
+   {
+    "q": "Q3819",
+    "name": "Volgograd Oblast",
+    "n": 127
+   },
+   {
+    "q": "Q2015",
+    "name": "Vologda Oblast",
+    "n": 126
+   },
+   {
+    "q": "Q2810",
+    "name": "Bryansk Oblast",
+    "n": 126
+   },
+   {
+    "q": "Q3941",
+    "name": "Astrakhan Oblast",
+    "n": 126
+   },
+   {
+    "q": "Q4341",
+    "name": "Primorsky Krai",
+    "n": 125
+   },
+   {
+    "q": "Q2347",
+    "name": "Smolensk Oblast",
+    "n": 125
+   },
+   {
+    "q": "Q2842",
+    "name": "Kaluga Oblast",
+    "n": 125
+   },
+   {
+    "q": "Q5462",
+    "name": "Sverdlovsk Oblast",
+    "n": 125
+   },
+   {
+    "q": "Q7971",
+    "name": "Magadan Oblast",
+    "n": 125
+   },
+   {
+    "q": "Q7730",
+    "name": "Jewish Autonomous Oblast",
+    "n": 125
+   },
+   {
+    "q": "Q2246",
+    "name": "Nizhny Novgorod Oblast",
+    "n": 124
+   },
+   {
+    "q": "Q3447",
+    "name": "Voronezh Oblast",
+    "n": 124
+   },
+   {
+    "q": "Q2753",
+    "name": "Ryazan Oblast",
+    "n": 124
+   },
+   {
+    "q": "Q5207",
+    "name": "Stavropol Krai",
+    "n": 124
+   },
+   {
+    "q": "Q2792",
+    "name": "Tula Oblast",
+    "n": 124
+   },
+   {
+    "q": "Q5338",
+    "name": "Orenburg Oblast",
+    "n": 124
+   },
+   {
+    "q": "Q6563",
+    "name": "Krasnoyarsk Krai",
+    "n": 124
+   },
+   {
+    "q": "Q1727",
+    "name": "Samara Oblast",
+    "n": 123
+   },
+   {
+    "q": "Q3510",
+    "name": "Lipetsk Oblast",
+    "n": 123
+   },
+   {
+    "q": "Q2448",
+    "name": "Yaroslavl Oblast",
+    "n": 123
+   },
+   {
+    "q": "Q2596",
+    "name": "Kostroma Oblast",
+    "n": 123
+   },
+   {
+    "q": "Q5400",
+    "name": "Perm Krai",
+    "n": 123
+   },
+   {
+    "q": "Q7948",
+    "name": "Kamchatka Krai",
+    "n": 123
+   },
+   {
+    "q": "Q7797",
+    "name": "Sakhalin Oblast",
+    "n": 123
+   },
+   {
+    "q": "Q2218",
+    "name": "Pskov Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q3178",
+    "name": "Kursk Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q2654",
+    "name": "Ivanovo Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q2292",
+    "name": "Tver Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q5334",
+    "name": "Saratov Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q5942",
+    "name": "Altai Krai",
+    "n": 122
+   },
+   {
+    "q": "Q5835",
+    "name": "Omsk Oblast",
+    "n": 122
+   },
+   {
+    "q": "Q5387",
+    "name": "Kirov Oblast",
+    "n": 121
+   },
+   {
+    "q": "Q5851",
+    "name": "Novosibirsk Oblast",
+    "n": 121
+   },
+   {
+    "q": "Q5714",
+    "name": "Chelyabinsk Oblast",
+    "n": 121
+   },
+   {
+    "q": "Q7984",
+    "name": "Chukotka Autonomous Okrug",
+    "n": 121
+   },
+   {
+    "q": "Q2240",
+    "name": "Novgorod Oblast",
+    "n": 120
+   },
+   {
+    "q": "Q7788",
+    "name": "Khabarovsk Krai",
+    "n": 120
+   },
+   {
+    "q": "Q5824",
+    "name": "Tyumen Oblast",
+    "n": 120
+   },
+   {
+    "q": "Q3550",
+    "name": "Tambov Oblast",
+    "n": 119
+   },
+   {
+    "q": "Q3129",
+    "name": "Oryol Oblast",
+    "n": 119
+   },
+   {
+    "q": "Q5741",
+    "name": "Kurgan Oblast",
+    "n": 119
+   },
+   {
+    "q": "Q6076",
+    "name": "Kemerovo Oblast",
+    "n": 119
+   },
+   {
+    "q": "Q5634",
+    "name": "Ulyanovsk Oblast",
+    "n": 117
+   },
+   {
+    "q": "Q5545",
+    "name": "Penza Oblast",
+    "n": 117
+   },
+   {
+    "q": "Q5884",
+    "name": "Tomsk Oblast",
+    "n": 116
+   },
+   {
+    "q": "Q2164",
+    "name": "Nenets Autonomous Okrug",
+    "n": 115
+   },
+   {
+    "q": "Q6838",
+    "name": "Zabaykalsky Krai",
+    "n": 115
+   },
+   {
+    "q": "Q6407",
+    "name": "Yamalo-Nenets Autonomous Okrug",
+    "n": 115
+   },
+   {
+    "q": "Q6320",
+    "name": "Khanty-Mansi Autonomous Okrug",
+    "n": 110
+   },
+   {
+    "q": "Q15966495",
+    "name": "Republic of Crimea",
+    "n": 100
+   }
+  ],
+  "Q17": [
+   {
+    "q": "Q1490",
+    "name": "Tokyo",
+    "n": 305
+   },
+   {
+    "q": "Q80434",
+    "name": "Aichi Prefecture",
+    "n": 113
+   },
+   {
+    "q": "Q71707",
+    "name": "Fukushima Prefecture",
+    "n": 112
+   },
+   {
+    "q": "Q766445",
+    "name": "Okinawa Prefecture",
+    "n": 111
+   },
+   {
+    "q": "Q71699",
+    "name": "Aomori Prefecture",
+    "n": 109
+   },
+   {
+    "q": "Q80011",
+    "name": "Chiba Prefecture",
+    "n": 109
+   },
+   {
+    "q": "Q47896",
+    "name": "Miyagi Prefecture",
+    "n": 108
+   },
+   {
+    "q": "Q122723",
+    "name": "Osaka Prefecture",
+    "n": 108
+   },
+   {
+    "q": "Q127513",
+    "name": "Kanagawa Prefecture",
+    "n": 108
+   },
+   {
+    "q": "Q48326",
+    "name": "Iwate Prefecture",
+    "n": 107
+   },
+   {
+    "q": "Q81863",
+    "name": "Akita Prefecture",
+    "n": 106
+   },
+   {
+    "q": "Q120730",
+    "name": "Kyoto Prefecture",
+    "n": 106
+   },
+   {
+    "q": "Q131287",
+    "name": "Nara Prefecture",
+    "n": 106
+   },
+   {
+    "q": "Q83273",
+    "name": "Ibaraki Prefecture",
+    "n": 105
+   },
+   {
+    "q": "Q128186",
+    "name": "Saitama Prefecture",
+    "n": 105
+   },
+   {
+    "q": "Q125863",
+    "name": "Yamagata Prefecture",
+    "n": 103
+   },
+   {
+    "q": "Q127877",
+    "name": "Nagano Prefecture",
+    "n": 103
+   },
+   {
+    "q": "Q129499",
+    "name": "Gunma Prefecture",
+    "n": 102
+   },
+   {
+    "q": "Q130290",
+    "name": "Hyōgo Prefecture",
+    "n": 102
+   },
+   {
+    "q": "Q15701",
+    "name": "Kagoshima Prefecture",
+    "n": 101
+   },
+   {
+    "q": "Q128196",
+    "name": "Mie Prefecture",
+    "n": 101
+   },
+   {
+    "q": "Q131320",
+    "name": "Shizuoka Prefecture",
+    "n": 101
+   },
+   {
+    "q": "Q617375",
+    "name": "Hiroshima Prefecture",
+    "n": 101
+   },
+   {
+    "q": "Q123258",
+    "name": "Fukuoka Prefecture",
+    "n": 100
+   },
+   {
+    "q": "Q132705",
+    "name": "Niigata Prefecture",
+    "n": 100
+   },
+   {
+    "q": "Q131281",
+    "name": "Ishikawa Prefecture",
+    "n": 100
+   },
+   {
+    "q": "Q169376",
+    "name": "Nagasaki Prefecture",
+    "n": 100
+   },
+   {
+    "q": "Q131358",
+    "name": "Shiga Prefecture",
+    "n": 98
+   },
+   {
+    "q": "Q131277",
+    "name": "Gifu Prefecture",
+    "n": 98
+   },
+   {
+    "q": "Q133879",
+    "name": "Fukui Prefecture",
+    "n": 98
+   },
+   {
+    "q": "Q131314",
+    "name": "Wakayama Prefecture",
+    "n": 97
+   },
+   {
+    "q": "Q123376",
+    "name": "Ehime Prefecture",
+    "n": 97
+   },
+   {
+    "q": "Q130300",
+    "name": "Miyazaki Prefecture",
+    "n": 96
+   },
+   {
+    "q": "Q44843",
+    "name": "Tochigi Prefecture",
+    "n": 95
+   },
+   {
+    "q": "Q133935",
+    "name": "Tottori Prefecture",
+    "n": 95
+   },
+   {
+    "q": "Q132720",
+    "name": "Yamanashi Prefecture",
+    "n": 95
+   },
+   {
+    "q": "Q161454",
+    "name": "Kagawa Prefecture",
+    "n": 95
+   },
+   {
+    "q": "Q133924",
+    "name": "Ōita Prefecture",
+    "n": 95
+   },
+   {
+    "q": "Q127264",
+    "name": "Yamaguchi Prefecture",
+    "n": 94
+   },
+   {
+    "q": "Q130308",
+    "name": "Kumamoto Prefecture",
+    "n": 94
+   },
+   {
+    "q": "Q134093",
+    "name": "Kōchi Prefecture",
+    "n": 94
+   },
+   {
+    "q": "Q132929",
+    "name": "Toyama Prefecture",
+    "n": 94
+   },
+   {
+    "q": "Q160420",
+    "name": "Saga Prefecture",
+    "n": 93
+   },
+   {
+    "q": "Q160734",
+    "name": "Tokushima Prefecture",
+    "n": 93
+   },
+   {
+    "q": "Q132751",
+    "name": "Shimane Prefecture",
+    "n": 93
+   },
+   {
+    "q": "Q132936",
+    "name": "Okayama Prefecture",
+    "n": 93
+   },
+   {
+    "q": "Q1037393",
+    "name": "Hokkaido Prefecture",
+    "n": 26
+   }
+  ],
+  "Q38": [
+   {
+    "q": "Q1460",
+    "name": "Sicily",
+    "n": 195
+   },
+   {
+    "q": "Q1462",
+    "name": "Sardinia",
+    "n": 188
+   },
+   {
+    "q": "Q1273",
+    "name": "Tuscany",
+    "n": 165
+   },
+   {
+    "q": "Q1210",
+    "name": "Lombardy",
+    "n": 161
+   },
+   {
+    "q": "Q1282",
+    "name": "Lazio",
+    "n": 157
+   },
+   {
+    "q": "Q1216",
+    "name": "Piedmont",
+    "n": 156
+   },
+   {
+    "q": "Q1447",
+    "name": "Apulia",
+    "n": 155
+   },
+   {
+    "q": "Q1458",
+    "name": "Calabria",
+    "n": 154
+   },
+   {
+    "q": "Q1243",
+    "name": "Veneto",
+    "n": 153
+   },
+   {
+    "q": "Q1263",
+    "name": "Emilia-Romagna",
+    "n": 148
+   },
+   {
+    "q": "Q1284",
+    "name": "Abruzzo",
+    "n": 148
+   },
+   {
+    "q": "Q1438",
+    "name": "Campania",
+    "n": 145
+   },
+   {
+    "q": "Q1256",
+    "name": "Liguria",
+    "n": 143
+   },
+   {
+    "q": "Q1222",
+    "name": "Aosta Valley",
+    "n": 138
+   },
+   {
+    "q": "Q1280",
+    "name": "Umbria",
+    "n": 138
+   },
+   {
+    "q": "Q1452",
+    "name": "Basilicata",
+    "n": 138
+   },
+   {
+    "q": "Q1237",
+    "name": "Trentino-South Tyrol",
+    "n": 134
+   },
+   {
+    "q": "Q1279",
+    "name": "Marche",
+    "n": 134
+   },
+   {
+    "q": "Q1250",
+    "name": "Friuli Venezia Giulia",
+    "n": 133
+   },
+   {
+    "q": "Q1443",
+    "name": "Molise",
+    "n": 132
+   }
+  ],
+  "Q183": [
+   {
+    "q": "Q64",
+    "name": "Berlin",
+    "n": 335
+   },
+   {
+    "q": "Q1055",
+    "name": "Hamburg",
+    "n": 230
+   },
+   {
+    "q": "Q980",
+    "name": "Bavaria",
+    "n": 206
+   },
+   {
+    "q": "Q985",
+    "name": "Baden-Württemberg",
+    "n": 183
+   },
+   {
+    "q": "Q1198",
+    "name": "North Rhine-Westphalia",
+    "n": 183
+   },
+   {
+    "q": "Q1199",
+    "name": "Hesse",
+    "n": 182
+   },
+   {
+    "q": "Q1202",
+    "name": "Saxony",
+    "n": 179
+   },
+   {
+    "q": "Q1208",
+    "name": "Brandenburg",
+    "n": 174
+   },
+   {
+    "q": "Q1205",
+    "name": "Thuringia",
+    "n": 169
+   },
+   {
+    "q": "Q1200",
+    "name": "Rhineland-Palatinate",
+    "n": 168
+   },
+   {
+    "q": "Q1201",
+    "name": "Saarland",
+    "n": 168
+   },
+   {
+    "q": "Q1197",
+    "name": "Lower Saxony",
+    "n": 167
+   },
+   {
+    "q": "Q1196",
+    "name": "Mecklenburg-Vorpommern",
+    "n": 166
+   },
+   {
+    "q": "Q1194",
+    "name": "Schleswig-Holstein",
+    "n": 166
+   },
+   {
+    "q": "Q1206",
+    "name": "Saxony-Anhalt",
+    "n": 161
+   },
+   {
+    "q": "Q1209",
+    "name": "Bremen",
+    "n": 132
+   }
+  ],
+  "Q668": [
+   {
+    "q": "Q1353",
+    "name": "Delhi",
+    "n": 205
+   },
+   {
+    "q": "Q1191",
+    "name": "Maharashtra",
+    "n": 159
+   },
+   {
+    "q": "Q1186",
+    "name": "Kerala",
+    "n": 159
+   },
+   {
+    "q": "Q1445",
+    "name": "Tamil Nadu",
+    "n": 159
+   },
+   {
+    "q": "Q1171",
+    "name": "Goa",
+    "n": 158
+   },
+   {
+    "q": "Q1356",
+    "name": "West Bengal",
+    "n": 158
+   },
+   {
+    "q": "Q1061",
+    "name": "Gujarat",
+    "n": 157
+   },
+   {
+    "q": "Q1164",
+    "name": "Assam",
+    "n": 153
+   },
+   {
+    "q": "Q1185",
+    "name": "Karnataka",
+    "n": 153
+   },
+   {
+    "q": "Q1159",
+    "name": "Andhra Pradesh",
+    "n": 150
+   },
+   {
+    "q": "Q22048",
+    "name": "Odisha",
+    "n": 150
+   },
+   {
+    "q": "Q1498",
+    "name": "Uttar Pradesh",
+    "n": 149
+   },
+   {
+    "q": "Q1437",
+    "name": "Rajasthan",
+    "n": 148
+   },
+   {
+    "q": "Q1165",
+    "name": "Bihar",
+    "n": 147
+   },
+   {
+    "q": "Q1188",
+    "name": "Madhya Pradesh",
+    "n": 147
+   },
+   {
+    "q": "Q1162",
+    "name": "Arunachal Pradesh",
+    "n": 146
+   },
+   {
+    "q": "Q1505",
+    "name": "Sikkim",
+    "n": 144
+   },
+   {
+    "q": "Q1174",
+    "name": "Haryana",
+    "n": 140
+   },
+   {
+    "q": "Q1177",
+    "name": "Himachal Pradesh",
+    "n": 140
+   },
+   {
+    "q": "Q22424",
+    "name": "Punjab",
+    "n": 139
+   },
+   {
+    "q": "Q1193",
+    "name": "Manipur",
+    "n": 138
+   },
+   {
+    "q": "Q1168",
+    "name": "Chhattisgarh",
+    "n": 137
+   },
+   {
+    "q": "Q1499",
+    "name": "Uttarakhand",
+    "n": 136
+   },
+   {
+    "q": "Q1363",
+    "name": "Tripura",
+    "n": 135
+   },
+   {
+    "q": "Q1184",
+    "name": "Jharkhand",
+    "n": 134
+   },
+   {
+    "q": "Q1599",
+    "name": "Nagaland",
+    "n": 132
+   },
+   {
+    "q": "Q677037",
+    "name": "Telangana",
+    "n": 130
+   },
+   {
+    "q": "Q1502",
+    "name": "Mizoram",
+    "n": 128
+   },
+   {
+    "q": "Q40888",
+    "name": "Andaman and Nicobar Islands",
+    "n": 128
+   },
+   {
+    "q": "Q1195",
+    "name": "Meghalaya",
+    "n": 125
+   },
+   {
+    "q": "Q66743",
+    "name": "Puducherry",
+    "n": 109
+   },
+   {
+    "q": "Q26927",
+    "name": "Lakshadweep",
+    "n": 107
+   },
+   {
+    "q": "Q200667",
+    "name": "Ladakh",
+    "n": 103
+   },
+   {
+    "q": "Q46107",
+    "name": "Dadra and Nagar Haveli district",
+    "n": 96
+   },
+   {
+    "q": "Q66278313",
+    "name": "Jammu and Kashmir",
+    "n": 77
+   },
+   {
+    "q": "Q77997266",
+    "name": "Dadra and Nagar Haveli and Daman and Diu",
+    "n": 65
+   },
+   {
+    "q": "Q120971341",
+    "name": "Chandigarh",
+    "n": 8
+   }
+  ],
+  "Q33": [
+   {
+    "q": "Q5689",
+    "name": "Åland",
+    "n": 161
+   },
+   {
+    "q": "Q5700",
+    "name": "Lapland",
+    "n": 86
+   },
+   {
+    "q": "Q5711",
+    "name": "Uusimaa",
+    "n": 74
+   },
+   {
+    "q": "Q5703",
+    "name": "North Karelia",
+    "n": 74
+   },
+   {
+    "q": "Q5704",
+    "name": "North Ostrobothnia",
+    "n": 74
+   },
+   {
+    "q": "Q5701",
+    "name": "Pirkanmaa",
+    "n": 73
+   },
+   {
+    "q": "Q5694",
+    "name": "Kainuu",
+    "n": 71
+   },
+   {
+    "q": "Q5697",
+    "name": "Central Finland",
+    "n": 71
+   },
+   {
+    "q": "Q5691",
+    "name": "South Karelia",
+    "n": 70
+   },
+   {
+    "q": "Q5693",
+    "name": "South Savo",
+    "n": 69
+   },
+   {
+    "q": "Q5708",
+    "name": "Päijät-Häme",
+    "n": 69
+   },
+   {
+    "q": "Q5712",
+    "name": "Southwest Finland",
+    "n": 68
+   },
+   {
+    "q": "Q5702",
+    "name": "Ostrobothnia",
+    "n": 68
+   },
+   {
+    "q": "Q5706",
+    "name": "North Savo",
+    "n": 68
+   },
+   {
+    "q": "Q5709",
+    "name": "Satakunta",
+    "n": 68
+   },
+   {
+    "q": "Q5698",
+    "name": "Kymenlaakso",
+    "n": 67
+   },
+   {
+    "q": "Q5695",
+    "name": "Kanta-Häme",
+    "n": 66
+   },
+   {
+    "q": "Q5692",
+    "name": "South Ostrobothnia",
+    "n": 65
+   },
+   {
+    "q": "Q5696",
+    "name": "Central Ostrobothnia",
+    "n": 63
+   }
+  ],
+  "Q96": [
+   {
+    "q": "Q1489",
+    "name": "Mexico City",
+    "n": 260
+   },
+   {
+    "q": "Q34110",
+    "name": "Oaxaca",
+    "n": 125
+   },
+   {
+    "q": "Q58731",
+    "name": "Baja California",
+    "n": 115
+   },
+   {
+    "q": "Q13160",
+    "name": "Jalisco",
+    "n": 113
+   },
+   {
+    "q": "Q46422",
+    "name": "Sonora",
+    "n": 111
+   },
+   {
+    "q": "Q60176",
+    "name": "Yucatán",
+    "n": 111
+   },
+   {
+    "q": "Q655",
+    "name": "Chihuahua",
+    "n": 110
+   },
+   {
+    "q": "Q60123",
+    "name": "Chiapas",
+    "n": 110
+   },
+   {
+    "q": "Q79923",
+    "name": "Puebla",
+    "n": 109
+   },
+   {
+    "q": "Q79952",
+    "name": "Aguascalientes",
+    "n": 108
+   },
+   {
+    "q": "Q46475",
+    "name": "Guanajuato",
+    "n": 107
+   },
+   {
+    "q": "Q46508",
+    "name": "Baja California Sur",
+    "n": 107
+   },
+   {
+    "q": "Q66117",
+    "name": "Morelos",
+    "n": 106
+   },
+   {
+    "q": "Q60158",
+    "name": "Guerrero",
+    "n": 106
+   },
+   {
+    "q": "Q60130",
+    "name": "Veracruz",
+    "n": 106
+   },
+   {
+    "q": "Q80914",
+    "name": "Tabasco",
+    "n": 106
+   },
+   {
+    "q": "Q80269",
+    "name": "Zacatecas",
+    "n": 106
+   },
+   {
+    "q": "Q80903",
+    "name": "Hidalgo",
+    "n": 105
+   },
+   {
+    "q": "Q82112",
+    "name": "State of Mexico",
+    "n": 105
+   },
+   {
+    "q": "Q15282",
+    "name": "Nuevo León",
+    "n": 104
+   },
+   {
+    "q": "Q79918",
+    "name": "Durango",
+    "n": 104
+   },
+   {
+    "q": "Q80252",
+    "name": "Sinaloa",
+    "n": 104
+   },
+   {
+    "q": "Q80245",
+    "name": "Quintana Roo",
+    "n": 103
+   },
+   {
+    "q": "Q53079",
+    "name": "Coahuila",
+    "n": 102
+   },
+   {
+    "q": "Q80908",
+    "name": "Campeche",
+    "n": 102
+   },
+   {
+    "q": "Q82681",
+    "name": "Tlaxcala",
+    "n": 102
+   },
+   {
+    "q": "Q79861",
+    "name": "Michoacán",
+    "n": 101
+   },
+   {
+    "q": "Q80007",
+    "name": "Tamaulipas",
+    "n": 101
+   },
+   {
+    "q": "Q79754",
+    "name": "Querétaro",
+    "n": 100
+   },
+   {
+    "q": "Q79920",
+    "name": "Nayarit",
+    "n": 99
+   },
+   {
+    "q": "Q78980",
+    "name": "San Luis Potosí",
+    "n": 98
+   },
+   {
+    "q": "Q61309",
+    "name": "Colima",
+    "n": 98
+   }
+  ],
+  "Q148": [
+   {
+    "q": "Q956",
+    "name": "Beijing",
+    "n": 307
+   },
+   {
+    "q": "Q8646",
+    "name": "Hong Kong",
+    "n": 304
+   },
+   {
+    "q": "Q8686",
+    "name": "Shanghai",
+    "n": 251
+   },
+   {
+    "q": "Q14773",
+    "name": "Macau",
+    "n": 226
+   },
+   {
+    "q": "Q34800",
+    "name": "Xinjiang",
+    "n": 163
+   },
+   {
+    "q": "Q11736",
+    "name": "Tianjin",
+    "n": 156
+   },
+   {
+    "q": "Q11725",
+    "name": "Chongqing",
+    "n": 153
+   },
+   {
+    "q": "Q19770",
+    "name": "Sichuan",
+    "n": 141
+   },
+   {
+    "q": "Q42200",
+    "name": "Hainan",
+    "n": 140
+   },
+   {
+    "q": "Q43194",
+    "name": "Yunnan",
+    "n": 139
+   },
+   {
+    "q": "Q15175",
+    "name": "Guangdong",
+    "n": 137
+   },
+   {
+    "q": "Q41705",
+    "name": "Fujian",
+    "n": 134
+   },
+   {
+    "q": "Q46862",
+    "name": "Hubei",
+    "n": 134
+   },
+   {
+    "q": "Q40956",
+    "name": "Anhui",
+    "n": 133
+   },
+   {
+    "q": "Q16963",
+    "name": "Jiangsu",
+    "n": 132
+   },
+   {
+    "q": "Q41079",
+    "name": "Inner Mongolia",
+    "n": 132
+   },
+   {
+    "q": "Q17269",
+    "name": "Tibet Autonomous Region",
+    "n": 130
+   },
+   {
+    "q": "Q42392",
+    "name": "Gansu",
+    "n": 129
+   },
+   {
+    "q": "Q43684",
+    "name": "Henan",
+    "n": 129
+   },
+   {
+    "q": "Q43407",
+    "name": "Shandong",
+    "n": 128
+   },
+   {
+    "q": "Q45761",
+    "name": "Hunan",
+    "n": 127
+   },
+   {
+    "q": "Q19206",
+    "name": "Heilongjiang",
+    "n": 127
+   },
+   {
+    "q": "Q21208",
+    "name": "Hebei",
+    "n": 127
+   },
+   {
+    "q": "Q16967",
+    "name": "Zhejiang",
+    "n": 126
+   },
+   {
+    "q": "Q15176",
+    "name": "Guangxi",
+    "n": 125
+   },
+   {
+    "q": "Q43934",
+    "name": "Liaoning",
+    "n": 124
+   },
+   {
+    "q": "Q47097",
+    "name": "Guizhou",
+    "n": 123
+   },
+   {
+    "q": "Q47974",
+    "name": "Shaanxi",
+    "n": 123
+   },
+   {
+    "q": "Q45833",
+    "name": "Qinghai",
+    "n": 122
+   },
+   {
+    "q": "Q46913",
+    "name": "Shanxi",
+    "n": 122
+   },
+   {
+    "q": "Q45208",
+    "name": "Jilin",
+    "n": 121
+   },
+   {
+    "q": "Q57448",
+    "name": "Ningxia",
+    "n": 120
+   },
+   {
+    "q": "Q57052",
+    "name": "Jiangxi",
+    "n": 119
+   }
+  ],
+  "Q408": [
+   {
+    "q": "Q3224",
+    "name": "New South Wales",
+    "n": 171
+   },
+   {
+    "q": "Q34366",
+    "name": "Tasmania",
+    "n": 169
+   },
+   {
+    "q": "Q36074",
+    "name": "Queensland",
+    "n": 168
+   },
+   {
+    "q": "Q36687",
+    "name": "Victoria",
+    "n": 154
+   },
+   {
+    "q": "Q31063",
+    "name": "Christmas Island",
+    "n": 153
+   },
+   {
+    "q": "Q35715",
+    "name": "South Australia",
+    "n": 152
+   },
+   {
+    "q": "Q3206",
+    "name": "Western Australia",
+    "n": 150
+   },
+   {
+    "q": "Q31057",
+    "name": "Norfolk Island",
+    "n": 144
+   },
+   {
+    "q": "Q3235",
+    "name": "Northern Territory",
+    "n": 139
+   },
+   {
+    "q": "Q36004",
+    "name": "Cocos (Keeling) Islands",
+    "n": 135
+   },
+   {
+    "q": "Q3258",
+    "name": "Australian Capital Territory",
+    "n": 121
+   },
+   {
+    "q": "Q131198",
+    "name": "Heard Island and McDonald Islands",
+    "n": 97
+   },
+   {
+    "q": "Q172216",
+    "name": "Coral Sea Islands",
+    "n": 82
+   },
+   {
+    "q": "Q133888",
+    "name": "Ashmore and Cartier Islands",
+    "n": 79
+   },
+   {
+    "q": "Q15577",
+    "name": "Jervis Bay Territory",
+    "n": 73
+   },
+   {
+    "q": "Q178994",
+    "name": "Australian Antarctic Territory",
+    "n": 70
+   }
+  ],
+  "Q16": [
+   {
+    "q": "Q176",
+    "name": "Quebec",
+    "n": 205
+   },
+   {
+    "q": "Q1904",
+    "name": "Ontario",
+    "n": 187
+   },
+   {
+    "q": "Q1973",
+    "name": "British Columbia",
+    "n": 176
+   },
+   {
+    "q": "Q1951",
+    "name": "Alberta",
+    "n": 172
+   },
+   {
+    "q": "Q1948",
+    "name": "Manitoba",
+    "n": 158
+   },
+   {
+    "q": "Q1952",
+    "name": "Nova Scotia",
+    "n": 157
+   },
+   {
+    "q": "Q1989",
+    "name": "Saskatchewan",
+    "n": 154
+   },
+   {
+    "q": "Q2023",
+    "name": "Nunavut",
+    "n": 153
+   },
+   {
+    "q": "Q2003",
+    "name": "Newfoundland and Labrador",
+    "n": 150
+   },
+   {
+    "q": "Q1965",
+    "name": "New Brunswick",
+    "n": 145
+   },
+   {
+    "q": "Q2009",
+    "name": "Yukon",
+    "n": 144
+   },
+   {
+    "q": "Q1978",
+    "name": "Prince Edward Island",
+    "n": 141
+   },
+   {
+    "q": "Q2007",
+    "name": "Northwest Territories",
+    "n": 139
+   }
+  ],
+  "Q29": [
+   {
+    "q": "Q5705",
+    "name": "Catalonia",
+    "n": 218
+   },
+   {
+    "q": "Q5813",
+    "name": "Canary Islands",
+    "n": 197
+   },
+   {
+    "q": "Q5783",
+    "name": "Andalusia",
+    "n": 177
+   },
+   {
+    "q": "Q5831",
+    "name": "Melilla",
+    "n": 176
+   },
+   {
+    "q": "Q3908",
+    "name": "Galicia",
+    "n": 166
+   },
+   {
+    "q": "Q5823",
+    "name": "Ceuta",
+    "n": 161
+   },
+   {
+    "q": "Q3995",
+    "name": "Basque Country",
+    "n": 156
+   },
+   {
+    "q": "Q4040",
+    "name": "Aragon",
+    "n": 152
+   },
+   {
+    "q": "Q3934",
+    "name": "Asturias",
+    "n": 144
+   },
+   {
+    "q": "Q5739",
+    "name": "Castile and León",
+    "n": 142
+   },
+   {
+    "q": "Q5720",
+    "name": "Valencian Community",
+    "n": 138
+   },
+   {
+    "q": "Q4018",
+    "name": "Navarre",
+    "n": 131
+   },
+   {
+    "q": "Q3946",
+    "name": "Cantabria",
+    "n": 130
+   },
+   {
+    "q": "Q5777",
+    "name": "Extremadura",
+    "n": 130
+   },
+   {
+    "q": "Q5748",
+    "name": "Castilla–La Mancha",
+    "n": 125
+   },
+   {
+    "q": "Q5772",
+    "name": "Region of Murcia",
+    "n": 124
+   },
+   {
+    "q": "Q5727",
+    "name": "La Rioja",
+    "n": 122
+   },
+   {
+    "q": "Q5756",
+    "name": "Community of Madrid",
+    "n": 122
+   },
+   {
+    "q": "Q191011",
+    "name": "plazas de soberanía",
+    "n": 58
+   },
+   {
+    "q": "Q107356467",
+    "name": "Balearic Islands",
+    "n": 3
+   }
+  ],
+  "Q145": [
+   {
+    "q": "Q21",
+    "name": "England",
+    "n": 328
+   },
+   {
+    "q": "Q22",
+    "name": "Scotland",
+    "n": 280
+   },
+   {
+    "q": "Q25",
+    "name": "Wales",
+    "n": 262
+   },
+   {
+    "q": "Q26",
+    "name": "Northern Ireland",
+    "n": 232
+   }
+  ],
+  "Q20": [
+   {
+    "q": "Q25231",
+    "name": "Svalbard",
+    "n": 153
+   },
+   {
+    "q": "Q14056",
+    "name": "Jan Mayen",
+    "n": 114
+   },
+   {
+    "q": "Q23408",
+    "name": "Bouvet Island",
+    "n": 102
+   },
+   {
+    "q": "Q50630",
+    "name": "Nordland",
+    "n": 95
+   },
+   {
+    "q": "Q50624",
+    "name": "Rogaland",
+    "n": 89
+   },
+   {
+    "q": "Q50631",
+    "name": "Troms",
+    "n": 89
+   },
+   {
+    "q": "Q50615",
+    "name": "Akershus",
+    "n": 87
+   },
+   {
+    "q": "Q50618",
+    "name": "Buskerud",
+    "n": 86
+   },
+   {
+    "q": "Q50627",
+    "name": "Møre og Romsdal",
+    "n": 86
+   },
+   {
+    "q": "Q50632",
+    "name": "Finnmark",
+    "n": 85
+   },
+   {
+    "q": "Q2254",
+    "name": "Telemark",
+    "n": 79
+   },
+   {
+    "q": "Q50614",
+    "name": "Østfold",
+    "n": 79
+   },
+   {
+    "q": "Q50619",
+    "name": "Vestfold",
+    "n": 79
+   },
+   {
+    "q": "Q127676",
+    "name": "Trøndelag",
+    "n": 68
+   },
+   {
+    "q": "Q2729021",
+    "name": "Agder",
+    "n": 51
+   },
+   {
+    "q": "Q56404886",
+    "name": "Innlandet",
+    "n": 50
+   },
+   {
+    "q": "Q56407177",
+    "name": "Vestland",
+    "n": 49
+   }
+  ],
+  "Q79": [
+   {
+    "q": "Q29943",
+    "name": "Alexandria Governorate",
+    "n": 61
+   },
+   {
+    "q": "Q30805",
+    "name": "Cairo Governorate",
+    "n": 61
+   },
+   {
+    "q": "Q29937",
+    "name": "Aswan Governorate",
+    "n": 59
+   },
+   {
+    "q": "Q30630",
+    "name": "Beheira Governorate",
+    "n": 59
+   },
+   {
+    "q": "Q30662",
+    "name": "North Sinai Governorate",
+    "n": 57
+   },
+   {
+    "q": "Q29965",
+    "name": "Asyut Governorate",
+    "n": 57
+   },
+   {
+    "q": "Q31067",
+    "name": "Ismailia Governorate",
+    "n": 57
+   },
+   {
+    "q": "Q31065",
+    "name": "Qena Governorate",
+    "n": 56
+   },
+   {
+    "q": "Q30650",
+    "name": "New Valley Governorate",
+    "n": 56
+   },
+   {
+    "q": "Q30815",
+    "name": "South Sinai Governorate",
+    "n": 56
+   },
+   {
+    "q": "Q30831",
+    "name": "Red Sea Governorate",
+    "n": 56
+   },
+   {
+    "q": "Q30683",
+    "name": "Beni Suef Governorate",
+    "n": 55
+   },
+   {
+    "q": "Q31079",
+    "name": "Port Said Governorate",
+    "n": 55
+   },
+   {
+    "q": "Q30797",
+    "name": "Luxor Governorate",
+    "n": 55
+   },
+   {
+    "q": "Q30832",
+    "name": "Giza Governorate",
+    "n": 55
+   },
+   {
+    "q": "Q31068",
+    "name": "Dakahlia Governorate",
+    "n": 54
+   },
+   {
+    "q": "Q30656",
+    "name": "Faiyum Governorate",
+    "n": 54
+   },
+   {
+    "q": "Q30835",
+    "name": "Gharbia Governorate",
+    "n": 54
+   },
+   {
+    "q": "Q30682",
+    "name": "Matruh Governorate",
+    "n": 53
+   },
+   {
+    "q": "Q31070",
+    "name": "Suez Governorate",
+    "n": 53
+   },
+   {
+    "q": "Q30675",
+    "name": "Minya Governorate",
+    "n": 52
+   },
+   {
+    "q": "Q30669",
+    "name": "Sohag Governorate",
+    "n": 52
+   },
+   {
+    "q": "Q30786",
+    "name": "Monufia Governorate",
+    "n": 51
+   },
+   {
+    "q": "Q31075",
+    "name": "Qalyubia Governorate",
+    "n": 51
+   },
+   {
+    "q": "Q31074",
+    "name": "Sharqia Governorate",
+    "n": 51
+   },
+   {
+    "q": "Q30644",
+    "name": "Damietta Governorate",
+    "n": 51
+   },
+   {
+    "q": "Q30946",
+    "name": "Kafr el-Sheikh Governorate",
+    "n": 51
+   }
+  ],
+  "Q36": [
+   {
+    "q": "Q54155",
+    "name": "Lublin Voivodeship",
+    "n": 112
+   },
+   {
+    "q": "Q54169",
+    "name": "Masovian Voivodeship",
+    "n": 112
+   },
+   {
+    "q": "Q54159",
+    "name": "Lesser Poland Voivodeship",
+    "n": 111
+   },
+   {
+    "q": "Q54181",
+    "name": "Silesian Voivodeship",
+    "n": 107
+   },
+   {
+    "q": "Q54188",
+    "name": "West Pomeranian Voivodeship",
+    "n": 107
+   },
+   {
+    "q": "Q54180",
+    "name": "Pomeranian Voivodeship",
+    "n": 105
+   },
+   {
+    "q": "Q54150",
+    "name": "Lower Silesian Voivodeship",
+    "n": 103
+   },
+   {
+    "q": "Q54158",
+    "name": "Łódź Voivodeship",
+    "n": 103
+   },
+   {
+    "q": "Q54177",
+    "name": "Podlaskie Voivodeship",
+    "n": 103
+   },
+   {
+    "q": "Q54153",
+    "name": "Kuyavian-Pomeranian Voivodeship",
+    "n": 102
+   },
+   {
+    "q": "Q54175",
+    "name": "Podkarpackie Voivodeship",
+    "n": 102
+   },
+   {
+    "q": "Q54171",
+    "name": "Opole Voivodeship",
+    "n": 102
+   },
+   {
+    "q": "Q54184",
+    "name": "Warmian-Masurian Voivodeship",
+    "n": 102
+   },
+   {
+    "q": "Q54157",
+    "name": "Lubusz Voivodeship",
+    "n": 101
+   },
+   {
+    "q": "Q54183",
+    "name": "Świętokrzyskie Voivodeship",
+    "n": 100
+   },
+   {
+    "q": "Q54187",
+    "name": "Greater Poland Voivodeship",
+    "n": 100
+   }
+  ],
+  "Q212": [
+   {
+    "q": "Q1899",
+    "name": "Kyiv",
+    "n": 277
+   },
+   {
+    "q": "Q7525",
+    "name": "Sevastopol",
+    "n": 151
+   },
+   {
+    "q": "Q2012050",
+    "name": "Donetsk Oblast",
+    "n": 111
+   },
+   {
+    "q": "Q163271",
+    "name": "Kherson Oblast",
+    "n": 110
+   },
+   {
+    "q": "Q170036",
+    "name": "Kyiv Oblast",
+    "n": 110
+   },
+   {
+    "q": "Q171334",
+    "name": "Zaporizhzhia Oblast",
+    "n": 109
+   },
+   {
+    "q": "Q164193",
+    "name": "Lviv Oblast",
+    "n": 108
+   },
+   {
+    "q": "Q170672",
+    "name": "Dnipropetrovsk Oblast",
+    "n": 108
+   },
+   {
+    "q": "Q171965",
+    "name": "Luhansk Oblast",
+    "n": 107
+   },
+   {
+    "q": "Q171852",
+    "name": "Odesa Oblast",
+    "n": 105
+   },
+   {
+    "q": "Q170213",
+    "name": "Zakarpattia Oblast",
+    "n": 105
+   },
+   {
+    "q": "Q756294",
+    "name": "Autonomous Republic of Crimea",
+    "n": 104
+   },
+   {
+    "q": "Q161808",
+    "name": "Cherkasy Oblast",
+    "n": 103
+   },
+   {
+    "q": "Q167859",
+    "name": "Volyn Oblast",
+    "n": 102
+   },
+   {
+    "q": "Q40637",
+    "name": "Zhytomyr Oblast",
+    "n": 101
+   },
+   {
+    "q": "Q168856",
+    "name": "Chernivtsi Oblast",
+    "n": 101
+   },
+   {
+    "q": "Q166709",
+    "name": "Vinnytsia Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q170666",
+    "name": "Kharkiv Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q181633",
+    "name": "Mykolaiv Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q169501",
+    "name": "Poltava Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q170446",
+    "name": "Sumy Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q173407",
+    "name": "Ternopil Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q174187",
+    "name": "Rivne Oblast",
+    "n": 100
+   },
+   {
+    "q": "Q171331",
+    "name": "Khmelnytskyi Oblast",
+    "n": 99
+   },
+   {
+    "q": "Q167874",
+    "name": "Chernihiv Oblast",
+    "n": 99
+   },
+   {
+    "q": "Q178269",
+    "name": "Ivano-Frankivsk Oblast",
+    "n": 98
+   },
+   {
+    "q": "Q180981",
+    "name": "Kirovohrad Oblast",
+    "n": 98
+   }
+  ],
+  "Q39": [
+   {
+    "q": "Q11925",
+    "name": "Canton of the Grisons",
+    "n": 118
+   },
+   {
+    "q": "Q12724",
+    "name": "Canton of Ticino",
+    "n": 113
+   },
+   {
+    "q": "Q834",
+    "name": "Canton of Valais",
+    "n": 111
+   },
+   {
+    "q": "Q12771",
+    "name": "Canton of Vaud",
+    "n": 105
+   },
+   {
+    "q": "Q11911",
+    "name": "Canton of Berne",
+    "n": 104
+   },
+   {
+    "q": "Q11972",
+    "name": "Canton of Aargau",
+    "n": 103
+   },
+   {
+    "q": "Q12433",
+    "name": "Canton of Schwyz",
+    "n": 103
+   },
+   {
+    "q": "Q12755",
+    "name": "Canton of Jura",
+    "n": 102
+   },
+   {
+    "q": "Q11922",
+    "name": "Canton of Glarus",
+    "n": 101
+   },
+   {
+    "q": "Q11917",
+    "name": "Canton of Geneva",
+    "n": 101
+   },
+   {
+    "q": "Q11943",
+    "name": "Canton of Zurich",
+    "n": 101
+   },
+   {
+    "q": "Q12746",
+    "name": "Canton of St. Gallen",
+    "n": 101
+   },
+   {
+    "q": "Q12121",
+    "name": "Canton of Lucerne",
+    "n": 101
+   },
+   {
+    "q": "Q12640",
+    "name": "Canton of Fribourg",
+    "n": 101
+   },
+   {
+    "q": "Q12738",
+    "name": "Canton of Neuchâtel",
+    "n": 100
+   },
+   {
+    "q": "Q12404",
+    "name": "Canton of Uri",
+    "n": 99
+   },
+   {
+    "q": "Q11933",
+    "name": "Canton of Zug",
+    "n": 98
+   },
+   {
+    "q": "Q12146",
+    "name": "Canton of Basel-Landschaft",
+    "n": 98
+   },
+   {
+    "q": "Q12697",
+    "name": "Canton of Schaffhausen",
+    "n": 97
+   },
+   {
+    "q": "Q12713",
+    "name": "Canton of Thurgau",
+    "n": 97
+   },
+   {
+    "q": "Q12079",
+    "name": "Canton of Appenzell Ausserrhoden",
+    "n": 97
+   },
+   {
+    "q": "Q12094",
+    "name": "Canton of Appenzell Innerrhoden",
+    "n": 97
+   },
+   {
+    "q": "Q12592",
+    "name": "Canton of Nidwalden",
+    "n": 97
+   },
+   {
+    "q": "Q11929",
+    "name": "Canton of Solothurn",
+    "n": 96
+   },
+   {
+    "q": "Q12172",
+    "name": "Canton of Basel-Stadt",
+    "n": 96
+   },
+   {
+    "q": "Q12573",
+    "name": "Canton of Obwalden",
+    "n": 94
+   }
+  ],
+  "Q155": [
+   {
+    "q": "Q175",
+    "name": "São Paulo",
+    "n": 136
+   },
+   {
+    "q": "Q41428",
+    "name": "Rio de Janeiro",
+    "n": 127
+   },
+   {
+    "q": "Q40430",
+    "name": "Bahia",
+    "n": 125
+   },
+   {
+    "q": "Q39109",
+    "name": "Minas Gerais",
+    "n": 124
+   },
+   {
+    "q": "Q40030",
+    "name": "Rio Grande do Sul",
+    "n": 122
+   },
+   {
+    "q": "Q39517",
+    "name": "Pará",
+    "n": 121
+   },
+   {
+    "q": "Q15499",
+    "name": "Paraná",
+    "n": 120
+   },
+   {
+    "q": "Q40780",
+    "name": "Acre",
+    "n": 119
+   },
+   {
+    "q": "Q40040",
+    "name": "Amazonas",
+    "n": 119
+   },
+   {
+    "q": "Q43319",
+    "name": "Mato Grosso do Sul",
+    "n": 119
+   },
+   {
+    "q": "Q40123",
+    "name": "Ceará",
+    "n": 118
+   },
+   {
+    "q": "Q40130",
+    "name": "Amapá",
+    "n": 117
+   },
+   {
+    "q": "Q38088",
+    "name": "Paraíba",
+    "n": 116
+   },
+   {
+    "q": "Q41115",
+    "name": "Santa Catarina",
+    "n": 116
+   },
+   {
+    "q": "Q41587",
+    "name": "Goiás",
+    "n": 116
+   },
+   {
+    "q": "Q42824",
+    "name": "Mato Grosso",
+    "n": 116
+   },
+   {
+    "q": "Q43255",
+    "name": "Rio Grande do Norte",
+    "n": 116
+   },
+   {
+    "q": "Q40885",
+    "name": "Alagoas",
+    "n": 114
+   },
+   {
+    "q": "Q42362",
+    "name": "Maranhão",
+    "n": 114
+   },
+   {
+    "q": "Q43235",
+    "name": "Rondônia",
+    "n": 114
+   },
+   {
+    "q": "Q42508",
+    "name": "Roraima",
+    "n": 113
+   },
+   {
+    "q": "Q42722",
+    "name": "Piauí",
+    "n": 113
+   },
+   {
+    "q": "Q43783",
+    "name": "Sergipe",
+    "n": 112
+   },
+   {
+    "q": "Q43233",
+    "name": "Espírito Santo",
+    "n": 110
+   },
+   {
+    "q": "Q119158",
+    "name": "Federal District",
+    "n": 97
+   }
+  ],
+  "Q222": [
+   {
+    "q": "Q189296",
+    "name": "Berat County",
+    "n": 72
+   },
+   {
+    "q": "Q229892",
+    "name": "Tirana County",
+    "n": 72
+   },
+   {
+    "q": "Q192853",
+    "name": "Durrës County",
+    "n": 70
+   },
+   {
+    "q": "Q192866",
+    "name": "Dibra County",
+    "n": 70
+   },
+   {
+    "q": "Q193464",
+    "name": "Korçë County",
+    "n": 69
+   },
+   {
+    "q": "Q192849",
+    "name": "Vlorë County",
+    "n": 68
+   },
+   {
+    "q": "Q193436",
+    "name": "Lezhë County",
+    "n": 68
+   },
+   {
+    "q": "Q193790",
+    "name": "Elbasan County",
+    "n": 68
+   },
+   {
+    "q": "Q193454",
+    "name": "Gjirokastër County",
+    "n": 67
+   },
+   {
+    "q": "Q193438",
+    "name": "Shkodër County",
+    "n": 67
+   },
+   {
+    "q": "Q231896",
+    "name": "Kukës County",
+    "n": 67
+   },
+   {
+    "q": "Q231900",
+    "name": "Fier County",
+    "n": 67
+   }
+  ],
+  "Q31": [
+   {
+    "q": "Q240",
+    "name": "Brussels-Capital Region",
+    "n": 132
+   },
+   {
+    "q": "Q231",
+    "name": "Wallonia",
+    "n": 118
+   },
+   {
+    "q": "Q9337",
+    "name": "Flemish Region",
+    "n": 62
+   },
+   {
+    "q": "Q90027",
+    "name": "German-speaking Community",
+    "n": 56
+   },
+   {
+    "q": "Q89959",
+    "name": "French Community",
+    "n": 46
+   },
+   {
+    "q": "Q9331",
+    "name": "Flemish Community",
+    "n": 44
+   }
+  ],
+  "Q298": [
+   {
+    "q": "Q2170",
+    "name": "Biobío Region",
+    "n": 98
+   },
+   {
+    "q": "Q2189",
+    "name": "Magellan and the Chilean Antarctic Region",
+    "n": 75
+   },
+   {
+    "q": "Q2120",
+    "name": "Atacama Region",
+    "n": 74
+   },
+   {
+    "q": "Q2178",
+    "name": "Los Lagos Region",
+    "n": 74
+   },
+   {
+    "q": "Q2176",
+    "name": "Araucanía Region",
+    "n": 73
+   },
+   {
+    "q": "Q219458",
+    "name": "Valparaíso Region",
+    "n": 73
+   },
+   {
+    "q": "Q2109",
+    "name": "Arica y Parinacota Region",
+    "n": 71
+   },
+   {
+    "q": "Q2118",
+    "name": "Antofagasta Region",
+    "n": 71
+   },
+   {
+    "q": "Q2114",
+    "name": "Tarapacá Region",
+    "n": 70
+   },
+   {
+    "q": "Q2131",
+    "name": "Santiago Metropolitan Region",
+    "n": 70
+   },
+   {
+    "q": "Q2177",
+    "name": "Los Ríos Region",
+    "n": 70
+   },
+   {
+    "q": "Q2133",
+    "name": "O'Higgins Region",
+    "n": 69
+   },
+   {
+    "q": "Q2166",
+    "name": "Maule Región",
+    "n": 69
+   },
+   {
+    "q": "Q2181",
+    "name": "Aysén Region",
+    "n": 68
+   },
+   {
+    "q": "Q2121",
+    "name": "Coquimbo Region",
+    "n": 67
+   },
+   {
+    "q": "Q24076693",
+    "name": "Ñuble Region",
+    "n": 43
+   }
+  ],
+  "Q801": [
+   {
+    "q": "Q192232",
+    "name": "Jerusalem District",
+    "n": 72
+   },
+   {
+    "q": "Q188781",
+    "name": "Southern District",
+    "n": 70
+   },
+   {
+    "q": "Q192811",
+    "name": "Tel Aviv District",
+    "n": 68
+   },
+   {
+    "q": "Q189942",
+    "name": "Northern District",
+    "n": 68
+   },
+   {
+    "q": "Q185845",
+    "name": "Haifa District",
+    "n": 67
+   },
+   {
+    "q": "Q188785",
+    "name": "Central District",
+    "n": 66
+   },
+   {
+    "q": "Q513200",
+    "name": "Judea and Samaria Area",
+    "n": 45
+   }
+  ],
+  "Q41": [
+   {
+    "q": "Q180484",
+    "name": "Epirus Region",
+    "n": 80
+   },
+   {
+    "q": "Q17152",
+    "name": "Central Macedonia Region",
+    "n": 78
+   },
+   {
+    "q": "Q165408",
+    "name": "Western Macedonia Region",
+    "n": 75
+   },
+   {
+    "q": "Q170291",
+    "name": "West Greece Region",
+    "n": 74
+   },
+   {
+    "q": "Q171314",
+    "name": "Eastern Macedonia and Thrace Region",
+    "n": 73
+   },
+   {
+    "q": "Q173616",
+    "name": "South Aegean Region",
+    "n": 72
+   },
+   {
+    "q": "Q173620",
+    "name": "North Aegean Region",
+    "n": 71
+   },
+   {
+    "q": "Q199580",
+    "name": "Central Greece Region",
+    "n": 69
+   },
+   {
+    "q": "Q202484",
+    "name": "Peloponnese Region",
+    "n": 66
+   },
+   {
+    "q": "Q22807284",
+    "name": "Thessaly Region",
+    "n": 64
+   },
+   {
+    "q": "Q758056",
+    "name": "Attica Region",
+    "n": 63
+   },
+   {
+    "q": "Q1147674",
+    "name": "Ionian Islands Region",
+    "n": 47
+   },
+   {
+    "q": "Q780149",
+    "name": "monastic community of Mount Athos",
+    "n": 31
+   },
+   {
+    "q": "Q1267522",
+    "name": "Crete Region",
+    "n": 28
+   }
+  ],
+  "Q794": [
+   {
+    "q": "Q590866",
+    "name": "Tehran Province",
+    "n": 102
+   },
+   {
+    "q": "Q1004666",
+    "name": "Fars Province",
+    "n": 99
+   },
+   {
+    "q": "Q1367759",
+    "name": "Isfahan Province",
+    "n": 99
+   },
+   {
+    "q": "Q241119",
+    "name": "Khuzestan Province",
+    "n": 97
+   },
+   {
+    "q": "Q928828",
+    "name": "Gilan Province",
+    "n": 95
+   },
+   {
+    "q": "Q939575",
+    "name": "Sistan and Baluchestan Province",
+    "n": 95
+   },
+   {
+    "q": "Q134228",
+    "name": "Ardabil Province",
+    "n": 93
+   },
+   {
+    "q": "Q176081",
+    "name": "East Azerbaijan Province",
+    "n": 92
+   },
+   {
+    "q": "Q633659",
+    "name": "Hormozgan Province",
+    "n": 92
+   },
+   {
+    "q": "Q134386",
+    "name": "Kurdistan Province",
+    "n": 91
+   },
+   {
+    "q": "Q131664",
+    "name": "Qom Province",
+    "n": 89
+   },
+   {
+    "q": "Q132945",
+    "name": "Bushehr Province",
+    "n": 89
+   },
+   {
+    "q": "Q134417",
+    "name": "Markazi Province",
+    "n": 89
+   },
+   {
+    "q": "Q134411",
+    "name": "West Azerbaijan Province",
+    "n": 89
+   },
+   {
+    "q": "Q308864",
+    "name": "Mazandaran Province",
+    "n": 89
+   },
+   {
+    "q": "Q168949",
+    "name": "Semnan Province",
+    "n": 89
+   },
+   {
+    "q": "Q170568",
+    "name": "Yazd Province",
+    "n": 88
+   },
+   {
+    "q": "Q170570",
+    "name": "Ilam Province",
+    "n": 88
+   },
+   {
+    "q": "Q187373",
+    "name": "Hamadan Province",
+    "n": 88
+   },
+   {
+    "q": "Q174010",
+    "name": "Kermanshah Province",
+    "n": 88
+   },
+   {
+    "q": "Q1105893",
+    "name": "Qazvin Province",
+    "n": 87
+   },
+   {
+    "q": "Q170041",
+    "name": "Golestan Province",
+    "n": 87
+   },
+   {
+    "q": "Q146726",
+    "name": "Zanjan Province",
+    "n": 86
+   },
+   {
+    "q": "Q165352",
+    "name": "Kerman Province",
+    "n": 86
+   },
+   {
+    "q": "Q171702",
+    "name": "Chaharmahal and Bakhtiari Province",
+    "n": 86
+   },
+   {
+    "q": "Q1131727",
+    "name": "Lorestan Province",
+    "n": 86
+   },
+   {
+    "q": "Q171551",
+    "name": "South Khorasan Province",
+    "n": 85
+   },
+   {
+    "q": "Q587090",
+    "name": "Razavi Khorasan Province",
+    "n": 85
+   },
+   {
+    "q": "Q392522",
+    "name": "Alborz Province",
+    "n": 84
+   },
+   {
+    "q": "Q180068",
+    "name": "Kohgiluyeh and Boyer-Ahmad Province",
+    "n": 84
+   },
+   {
+    "q": "Q180075",
+    "name": "North Khorasan Province",
+    "n": 83
+   }
+  ],
+  "Q262": [
+   {
+    "q": "Q188166",
+    "name": "Adrar Province",
+    "n": 64
+   },
+   {
+    "q": "Q231331",
+    "name": "Oran Province",
+    "n": 59
+   },
+   {
+    "q": "Q229467",
+    "name": "Tamanrasset Province",
+    "n": 59
+   },
+   {
+    "q": "Q231151",
+    "name": "Tindouf Province",
+    "n": 58
+   },
+   {
+    "q": "Q233637",
+    "name": "Blida Province",
+    "n": 58
+   },
+   {
+    "q": "Q168953",
+    "name": "Aïn Defla Province",
+    "n": 57
+   },
+   {
+    "q": "Q215452",
+    "name": "Batna Province",
+    "n": 57
+   },
+   {
+    "q": "Q213950",
+    "name": "Khenchela Province",
+    "n": 57
+   },
+   {
+    "q": "Q215467",
+    "name": "Béchar Province",
+    "n": 57
+   },
+   {
+    "q": "Q231748",
+    "name": "Laghouat Province",
+    "n": 57
+   },
+   {
+    "q": "Q233632",
+    "name": "Tlemcen Province",
+    "n": 57
+   },
+   {
+    "q": "Q233655",
+    "name": "Bouira Province",
+    "n": 57
+   },
+   {
+    "q": "Q235718",
+    "name": "Jijel Province",
+    "n": 57
+   },
+   {
+    "q": "Q458402",
+    "name": "Biskra Province",
+    "n": 57
+   },
+   {
+    "q": "Q213944",
+    "name": "Annaba Province",
+    "n": 56
+   },
+   {
+    "q": "Q141026",
+    "name": "Algiers Province",
+    "n": 56
+   },
+   {
+    "q": "Q221445",
+    "name": "Mostaganem Province",
+    "n": 56
+   },
+   {
+    "q": "Q233233",
+    "name": "Djelfa Province",
+    "n": 56
+   },
+   {
+    "q": "Q232043",
+    "name": "Constantine Province",
+    "n": 56
+   },
+   {
+    "q": "Q233651",
+    "name": "El Oued Province",
+    "n": 56
+   },
+   {
+    "q": "Q233670",
+    "name": "Aïn Témouchent Province",
+    "n": 56
+   },
+   {
+    "q": "Q233675",
+    "name": "Naama Province",
+    "n": 56
+   },
+   {
+    "q": "Q233659",
+    "name": "Illizi Province",
+    "n": 56
+   },
+   {
+    "q": "Q235705",
+    "name": "Oum El Bouaghi Province",
+    "n": 56
+   },
+   {
+    "q": "Q235814",
+    "name": "Tipasa Province",
+    "n": 56
+   },
+   {
+    "q": "Q236776",
+    "name": "Mascara Province",
+    "n": 56
+   },
+   {
+    "q": "Q237164",
+    "name": "Sétif Province",
+    "n": 56
+   },
+   {
+    "q": "Q231752",
+    "name": "Chlef Province",
+    "n": 55
+   },
+   {
+    "q": "Q233640",
+    "name": "Saïda Province",
+    "n": 55
+   },
+   {
+    "q": "Q233258",
+    "name": "Tiaret Province",
+    "n": 55
+   },
+   {
+    "q": "Q233645",
+    "name": "Tizi Ouzou Province",
+    "n": 55
+   },
+   {
+    "q": "Q233665",
+    "name": "Béjaïa Province",
+    "n": 55
+   },
+   {
+    "q": "Q235709",
+    "name": "Ouargla Province",
+    "n": 55
+   },
+   {
+    "q": "Q236758",
+    "name": "Relizane Province",
+    "n": 55
+   },
+   {
+    "q": "Q266411",
+    "name": "Bordj Bou Arréridj Province",
+    "n": 55
+   },
+   {
+    "q": "Q234227",
+    "name": "Skikda Province",
+    "n": 54
+   },
+   {
+    "q": "Q235703",
+    "name": "El Bayadh Province",
+    "n": 54
+   },
+   {
+    "q": "Q235714",
+    "name": "Sidi Bel Abbès Province",
+    "n": 54
+   },
+   {
+    "q": "Q235727",
+    "name": "Guelma Province",
+    "n": 54
+   },
+   {
+    "q": "Q235810",
+    "name": "Médéa Province",
+    "n": 54
+   },
+   {
+    "q": "Q236788",
+    "name": "El Tarf Province",
+    "n": 54
+   },
+   {
+    "q": "Q236772",
+    "name": "Souk Ahras Province",
+    "n": 54
+   },
+   {
+    "q": "Q235723",
+    "name": "Mila Province",
+    "n": 53
+   },
+   {
+    "q": "Q236752",
+    "name": "Boumerdès Province",
+    "n": 53
+   },
+   {
+    "q": "Q235805",
+    "name": "Tissemsilt Province",
+    "n": 52
+   },
+   {
+    "q": "Q267224",
+    "name": "Tébessa Province",
+    "n": 52
+   },
+   {
+    "q": "Q17601",
+    "name": "Ghardaïa Province",
+    "n": 51
+   },
+   {
+    "q": "Q240870",
+    "name": "M'Sila Province",
+    "n": 51
+   },
+   {
+    "q": "Q77102475",
+    "name": "In Guezzam Province",
+    "n": 19
+   },
+   {
+    "q": "Q76593022",
+    "name": "In Salah Province",
+    "n": 17
+   },
+   {
+    "q": "Q77101547",
+    "name": "Djanet Province",
+    "n": 17
+   },
+   {
+    "q": "Q21606903",
+    "name": "Timimoun Province",
+    "n": 16
+   },
+   {
+    "q": "Q76520264",
+    "name": "El Meniaa Province",
+    "n": 16
+   },
+   {
+    "q": "Q76592938",
+    "name": "Bordj Baji Mokhtar Province",
+    "n": 16
+   },
+   {
+    "q": "Q77103173",
+    "name": "El M'Ghair Province",
+    "n": 16
+   },
+   {
+    "q": "Q77103880",
+    "name": "Touggourt Province",
+    "n": 16
+   },
+   {
+    "q": "Q77105251",
+    "name": "Ouled Djellal Province",
+    "n": 16
+   },
+   {
+    "q": "Q21606902",
+    "name": "Beni Abbes Province",
+    "n": 16
+   }
+  ],
+  "Q40": [
+   {
+    "q": "Q1741",
+    "name": "Vienna",
+    "n": 295
+   },
+   {
+    "q": "Q37985",
+    "name": "Carinthia",
+    "n": 123
+   },
+   {
+    "q": "Q41358",
+    "name": "Styria",
+    "n": 121
+   },
+   {
+    "q": "Q42880",
+    "name": "Tyrol",
+    "n": 121
+   },
+   {
+    "q": "Q38981",
+    "name": "Vorarlberg",
+    "n": 120
+   },
+   {
+    "q": "Q42497",
+    "name": "Lower Austria",
+    "n": 118
+   },
+   {
+    "q": "Q41967",
+    "name": "Upper Austria",
+    "n": 116
+   },
+   {
+    "q": "Q43210",
+    "name": "Burgenland",
+    "n": 116
+   },
+   {
+    "q": "Q43325",
+    "name": "Salzburg",
+    "n": 116
+   }
+  ],
+  "Q414": [
+   {
+    "q": "Q44754",
+    "name": "Buenos Aires Province",
+    "n": 98
+   },
+   {
+    "q": "Q45007",
+    "name": "Chubut Province",
+    "n": 94
+   },
+   {
+    "q": "Q44797",
+    "name": "Mendoza Province",
+    "n": 93
+   },
+   {
+    "q": "Q44803",
+    "name": "Salta Province",
+    "n": 93
+   },
+   {
+    "q": "Q44764",
+    "name": "Jujuy Province",
+    "n": 92
+   },
+   {
+    "q": "Q44823",
+    "name": "Santa Fe Province",
+    "n": 92
+   },
+   {
+    "q": "Q44821",
+    "name": "Santa Cruz Province",
+    "n": 91
+   },
+   {
+    "q": "Q44759",
+    "name": "Córdoba Province",
+    "n": 90
+   },
+   {
+    "q": "Q44756",
+    "name": "Catamarca Province",
+    "n": 89
+   },
+   {
+    "q": "Q44758",
+    "name": "Corrientes Province",
+    "n": 89
+   },
+   {
+    "q": "Q44798",
+    "name": "Misiones Province",
+    "n": 89
+   },
+   {
+    "q": "Q44829",
+    "name": "Tucumán Province",
+    "n": 89
+   },
+   {
+    "q": "Q44757",
+    "name": "Chaco Province",
+    "n": 88
+   },
+   {
+    "q": "Q44762",
+    "name": "Entre Ríos Province",
+    "n": 88
+   },
+   {
+    "q": "Q44800",
+    "name": "Neuquén Province",
+    "n": 88
+   },
+   {
+    "q": "Q44818",
+    "name": "San Luis Province",
+    "n": 88
+   },
+   {
+    "q": "Q44761",
+    "name": "Formosa Province",
+    "n": 87
+   },
+   {
+    "q": "Q44796",
+    "name": "La Rioja Province",
+    "n": 87
+   },
+   {
+    "q": "Q44802",
+    "name": "Río Negro Province",
+    "n": 87
+   },
+   {
+    "q": "Q44805",
+    "name": "San Juan Province",
+    "n": 87
+   },
+   {
+    "q": "Q44795",
+    "name": "La Pampa Province",
+    "n": 86
+   },
+   {
+    "q": "Q44827",
+    "name": "Santiago del Estero Province",
+    "n": 86
+   },
+   {
+    "q": "Q44832",
+    "name": "Tierra del Fuego Province",
+    "n": 82
+   }
+  ],
+  "Q45": [
+   {
+    "q": "Q26253",
+    "name": "Madeira",
+    "n": 153
+   },
+   {
+    "q": "Q25263",
+    "name": "Azores",
+    "n": 138
+   },
+   {
+    "q": "Q207199",
+    "name": "Lisbon District",
+    "n": 57
+   },
+   {
+    "q": "Q244521",
+    "name": "Faro District",
+    "n": 56
+   },
+   {
+    "q": "Q244510",
+    "name": "Santarém District",
+    "n": 54
+   },
+   {
+    "q": "Q321455",
+    "name": "Beja District",
+    "n": 54
+   },
+   {
+    "q": "Q322792",
+    "name": "Porto District",
+    "n": 54
+   },
+   {
+    "q": "Q210527",
+    "name": "Aveiro District",
+    "n": 53
+   },
+   {
+    "q": "Q273525",
+    "name": "Viseu District",
+    "n": 53
+   },
+   {
+    "q": "Q274109",
+    "name": "Setúbal District",
+    "n": 53
+   },
+   {
+    "q": "Q326203",
+    "name": "Braga District",
+    "n": 53
+   },
+   {
+    "q": "Q244517",
+    "name": "Coimbra District",
+    "n": 52
+   },
+   {
+    "q": "Q273533",
+    "name": "Guarda District",
+    "n": 52
+   },
+   {
+    "q": "Q326214",
+    "name": "Viana do Castelo District",
+    "n": 52
+   },
+   {
+    "q": "Q244512",
+    "name": "Leiria District",
+    "n": 51
+   },
+   {
+    "q": "Q274118",
+    "name": "Évora District",
+    "n": 51
+   },
+   {
+    "q": "Q273529",
+    "name": "Castelo Branco District",
+    "n": 50
+   },
+   {
+    "q": "Q225189",
+    "name": "Portalegre District",
+    "n": 49
+   },
+   {
+    "q": "Q373528",
+    "name": "Bragança District",
+    "n": 49
+   },
+   {
+    "q": "Q379372",
+    "name": "Vila Real District",
+    "n": 48
+   }
+  ],
+  "Q34": [
+   {
+    "q": "Q103659",
+    "name": "Skåne County",
+    "n": 85
+   },
+   {
+    "q": "Q103686",
+    "name": "Norrbotten County",
+    "n": 84
+   },
+   {
+    "q": "Q102377",
+    "name": "Blekinge County",
+    "n": 84
+   },
+   {
+    "q": "Q104877",
+    "name": "Västerbotten County",
+    "n": 84
+   },
+   {
+    "q": "Q103093",
+    "name": "Västra Götaland County",
+    "n": 83
+   },
+   {
+    "q": "Q104231",
+    "name": "Stockholm County",
+    "n": 83
+   },
+   {
+    "q": "Q103691",
+    "name": "Halland County",
+    "n": 81
+   },
+   {
+    "q": "Q103732",
+    "name": "Dalarna County",
+    "n": 80
+   },
+   {
+    "q": "Q103679",
+    "name": "Jämtland County",
+    "n": 79
+   },
+   {
+    "q": "Q103699",
+    "name": "Gävleborg County",
+    "n": 79
+   },
+   {
+    "q": "Q103707",
+    "name": "Kalmar County",
+    "n": 79
+   },
+   {
+    "q": "Q106789",
+    "name": "Värmland County",
+    "n": 79
+   },
+   {
+    "q": "Q104746",
+    "name": "Kronoberg County",
+    "n": 79
+   },
+   {
+    "q": "Q104891",
+    "name": "Västernorrland County",
+    "n": 78
+   },
+   {
+    "q": "Q104257",
+    "name": "Örebro County",
+    "n": 78
+   },
+   {
+    "q": "Q103672",
+    "name": "Jönköping County",
+    "n": 77
+   },
+   {
+    "q": "Q104926",
+    "name": "Uppsala County",
+    "n": 77
+   },
+   {
+    "q": "Q104940",
+    "name": "Östergötland County",
+    "n": 76
+   },
+   {
+    "q": "Q103738",
+    "name": "Gotland County",
+    "n": 75
+   },
+   {
+    "q": "Q106915",
+    "name": "Södermanland County",
+    "n": 75
+   },
+   {
+    "q": "Q105075",
+    "name": "Västmanland County",
+    "n": 74
+   }
+  ],
+  "Q881": [
+   {
+    "q": "Q1854",
+    "name": "Ho Chi Minh City",
+    "n": 257
+   },
+   {
+    "q": "Q1858",
+    "name": "Hanoi",
+    "n": 203
+   },
+   {
+    "q": "Q25282",
+    "name": "Da Nang",
+    "n": 141
+   },
+   {
+    "q": "Q36399",
+    "name": "Huế",
+    "n": 99
+   },
+   {
+    "q": "Q72818",
+    "name": "Haiphong",
+    "n": 91
+   },
+   {
+    "q": "Q216075",
+    "name": "Cần Thơ",
+    "n": 82
+   },
+   {
+    "q": "Q33354",
+    "name": "Cà Mau",
+    "n": 56
+   },
+   {
+    "q": "Q33408",
+    "name": "Bắc Ninh",
+    "n": 54
+   },
+   {
+    "q": "Q33396",
+    "name": "Quảng Ninh",
+    "n": 53
+   },
+   {
+    "q": "Q36579",
+    "name": "Quảng Trị",
+    "n": 52
+   },
+   {
+    "q": "Q36610",
+    "name": "Phú Thọ",
+    "n": 52
+   },
+   {
+    "q": "Q36865",
+    "name": "Cao Bằng",
+    "n": 52
+   },
+   {
+    "q": "Q36409",
+    "name": "Lai Châu",
+    "n": 52
+   },
+   {
+    "q": "Q36592",
+    "name": "An Giang",
+    "n": 51
+   },
+   {
+    "q": "Q36587",
+    "name": "Nghệ An",
+    "n": 51
+   },
+   {
+    "q": "Q36900",
+    "name": "Ninh Bình",
+    "n": 51
+   },
+   {
+    "q": "Q33271",
+    "name": "Đồng Nai",
+    "n": 50
+   },
+   {
+    "q": "Q33369",
+    "name": "Khánh Hòa",
+    "n": 50
+   },
+   {
+    "q": "Q36690",
+    "name": "Đắk Lắk",
+    "n": 50
+   },
+   {
+    "q": "Q2332060",
+    "name": "Tuyên Quang",
+    "n": 50
+   },
+   {
+    "q": "Q36955",
+    "name": "Điện Biên",
+    "n": 50
+   },
+   {
+    "q": "Q36446",
+    "name": "Lào Cai",
+    "n": 49
+   },
+   {
+    "q": "Q36512",
+    "name": "Thanh Hóa",
+    "n": 49
+   },
+   {
+    "q": "Q33351",
+    "name": "Hà Tĩnh",
+    "n": 49
+   },
+   {
+    "q": "Q36662",
+    "name": "Gia Lai",
+    "n": 49
+   },
+   {
+    "q": "Q33379",
+    "name": "Sơn La",
+    "n": 49
+   },
+   {
+    "q": "Q33403",
+    "name": "Lạng Sơn",
+    "n": 49
+   },
+   {
+    "q": "Q26575",
+    "name": "Thái Nguyên",
+    "n": 48
+   },
+   {
+    "q": "Q36608",
+    "name": "Tây Ninh",
+    "n": 48
+   },
+   {
+    "q": "Q36721",
+    "name": "Lâm Đồng",
+    "n": 48
+   },
+   {
+    "q": "Q7333405",
+    "name": "Vĩnh Long",
+    "n": 48
+   },
+   {
+    "q": "Q33304",
+    "name": "Quảng Ngãi",
+    "n": 47
+   },
+   {
+    "q": "Q36235",
+    "name": "Hưng Yên",
+    "n": 47
+   },
+   {
+    "q": "Q36676",
+    "name": "Đồng Tháp",
+    "n": 47
+   }
+  ],
+  "Q258": [
+   {
+    "q": "Q81725",
+    "name": "KwaZulu-Natal",
+    "n": 99
+   },
+   {
+    "q": "Q133083",
+    "name": "Gauteng",
+    "n": 99
+   },
+   {
+    "q": "Q127167",
+    "name": "Western Cape",
+    "n": 96
+   },
+   {
+    "q": "Q130840",
+    "name": "Eastern Cape",
+    "n": 92
+   },
+   {
+    "q": "Q160284",
+    "name": "Free State",
+    "n": 92
+   },
+   {
+    "q": "Q132410",
+    "name": "Mpumalanga",
+    "n": 91
+   },
+   {
+    "q": "Q134907",
+    "name": "Limpopo",
+    "n": 91
+   },
+   {
+    "q": "Q132418",
+    "name": "Northern Cape",
+    "n": 90
+   },
+   {
+    "q": "Q165956",
+    "name": "North West",
+    "n": 85
+   }
+  ],
+  "Q739": [
+   {
+    "q": "Q2841",
+    "name": "Bogotá",
+    "n": 284
+   },
+   {
+    "q": "Q123304",
+    "name": "Antioquia",
+    "n": 77
+   },
+   {
+    "q": "Q26855",
+    "name": "Archipelago of San Andrés, Providencia and Santa Catalina",
+    "n": 76
+   },
+   {
+    "q": "Q121233",
+    "name": "Boyacá Department",
+    "n": 73
+   },
+   {
+    "q": "Q232564",
+    "name": "Cundinamarca Department",
+    "n": 72
+   },
+   {
+    "q": "Q230217",
+    "name": "Nariño Department",
+    "n": 72
+   },
+   {
+    "q": "Q230597",
+    "name": "Bolívar Department",
+    "n": 71
+   },
+   {
+    "q": "Q230602",
+    "name": "Cauca Department",
+    "n": 71
+   },
+   {
+    "q": "Q199910",
+    "name": "Magdalena Department",
+    "n": 71
+   },
+   {
+    "q": "Q230882",
+    "name": "Atlántico Department",
+    "n": 70
+   },
+   {
+    "q": "Q44724",
+    "name": "Amazonas Department",
+    "n": 69
+   },
+   {
+    "q": "Q234501",
+    "name": "Tolima Department",
+    "n": 69
+   },
+   {
+    "q": "Q234912",
+    "name": "Córdoba Department",
+    "n": 69
+   },
+   {
+    "q": "Q13990",
+    "name": "Valle del Cauca Department",
+    "n": 68
+   },
+   {
+    "q": "Q13993",
+    "name": "Risaralda Department",
+    "n": 67
+   },
+   {
+    "q": "Q13995",
+    "name": "Quindío Department",
+    "n": 67
+   },
+   {
+    "q": "Q233058",
+    "name": "Norte de Santander Department",
+    "n": 67
+   },
+   {
+    "q": "Q230584",
+    "name": "Chocó Department",
+    "n": 67
+   },
+   {
+    "q": "Q230607",
+    "name": "Caldas Department",
+    "n": 66
+   },
+   {
+    "q": "Q234920",
+    "name": "Huila Department",
+    "n": 66
+   },
+   {
+    "q": "Q234916",
+    "name": "Cesar Department",
+    "n": 66
+   },
+   {
+    "q": "Q235166",
+    "name": "Santander Department",
+    "n": 66
+   },
+   {
+    "q": "Q13985",
+    "name": "Caquetá Department",
+    "n": 65
+   },
+   {
+    "q": "Q230223",
+    "name": "Arauca Department",
+    "n": 65
+   },
+   {
+    "q": "Q13984",
+    "name": "Casanare Department",
+    "n": 64
+   },
+   {
+    "q": "Q235188",
+    "name": "Sucre Department",
+    "n": 64
+   },
+   {
+    "q": "Q238629",
+    "name": "Meta",
+    "n": 64
+   },
+   {
+    "q": "Q272747",
+    "name": "La Guajira Department",
+    "n": 64
+   },
+   {
+    "q": "Q232953",
+    "name": "Putumayo Department",
+    "n": 63
+   },
+   {
+    "q": "Q272885",
+    "name": "Guaviare Department",
+    "n": 62
+   },
+   {
+    "q": "Q238645",
+    "name": "Guainía Department",
+    "n": 59
+   },
+   {
+    "q": "Q268729",
+    "name": "Vichada Department",
+    "n": 59
+   },
+   {
+    "q": "Q234505",
+    "name": "Vaupés Department",
+    "n": 57
+   }
+  ],
+  "Q252": [
+   {
+    "q": "Q3630",
+    "name": "Jakarta",
+    "n": 252
+   },
+   {
+    "q": "Q1823",
+    "name": "Aceh",
+    "n": 114
+   },
+   {
+    "q": "Q3586",
+    "name": "East Java",
+    "n": 101
+   },
+   {
+    "q": "Q3724",
+    "name": "West Java",
+    "n": 95
+   },
+   {
+    "q": "Q2140",
+    "name": "North Sumatra",
+    "n": 92
+   },
+   {
+    "q": "Q3557",
+    "name": "Central Java",
+    "n": 92
+   },
+   {
+    "q": "Q2772",
+    "name": "West Sumatra",
+    "n": 88
+   },
+   {
+    "q": "Q3125978",
+    "name": "Bali",
+    "n": 88
+   },
+   {
+    "q": "Q5095",
+    "name": "Papua",
+    "n": 86
+   },
+   {
+    "q": "Q3891",
+    "name": "Central Kalimantan",
+    "n": 84
+   },
+   {
+    "q": "Q3540",
+    "name": "Banten",
+    "n": 84
+   },
+   {
+    "q": "Q3899",
+    "name": "East Kalimantan",
+    "n": 84
+   },
+   {
+    "q": "Q2223",
+    "name": "Riau Islands",
+    "n": 83
+   },
+   {
+    "q": "Q2051",
+    "name": "Jambi",
+    "n": 82
+   },
+   {
+    "q": "Q2175",
+    "name": "Riau",
+    "n": 80
+   },
+   {
+    "q": "Q2110",
+    "name": "Lampung",
+    "n": 79
+   },
+   {
+    "q": "Q3916",
+    "name": "West Kalimantan",
+    "n": 79
+   },
+   {
+    "q": "Q1890",
+    "name": "Bengkulu",
+    "n": 78
+   },
+   {
+    "q": "Q2271",
+    "name": "South Sumatra",
+    "n": 78
+   },
+   {
+    "q": "Q3906",
+    "name": "South Kalimantan",
+    "n": 77
+   },
+   {
+    "q": "Q5096",
+    "name": "West Papua",
+    "n": 77
+   },
+   {
+    "q": "Q5078",
+    "name": "South Sulawesi",
+    "n": 76
+   },
+   {
+    "q": "Q1866",
+    "name": "Bangka Belitung Islands",
+    "n": 75
+   },
+   {
+    "q": "Q5062",
+    "name": "West Nusa Tenggara",
+    "n": 74
+   },
+   {
+    "q": "Q5061",
+    "name": "East Nusa Tenggara",
+    "n": 74
+   },
+   {
+    "q": "Q5068",
+    "name": "North Sulawesi",
+    "n": 73
+   },
+   {
+    "q": "Q5075",
+    "name": "Southeast Sulawesi",
+    "n": 72
+   },
+   {
+    "q": "Q3741",
+    "name": "Yogyakarta",
+    "n": 71
+   },
+   {
+    "q": "Q5082",
+    "name": "West Sulawesi",
+    "n": 71
+   },
+   {
+    "q": "Q5093",
+    "name": "Maluku",
+    "n": 71
+   },
+   {
+    "q": "Q3903",
+    "name": "North Kalimantan",
+    "n": 70
+   },
+   {
+    "q": "Q5065",
+    "name": "Central Sulawesi",
+    "n": 70
+   },
+   {
+    "q": "Q5094",
+    "name": "North Maluku",
+    "n": 69
+   },
+   {
+    "q": "Q5067",
+    "name": "Gorontalo",
+    "n": 67
+   },
+   {
+    "q": "Q61439296",
+    "name": "South Papua",
+    "n": 42
+   },
+   {
+    "q": "Q12486766",
+    "name": "Central Papua",
+    "n": 41
+   },
+   {
+    "q": "Q112810104",
+    "name": "Highland Papua",
+    "n": 41
+   },
+   {
+    "q": "Q115253263",
+    "name": "Southwest Papua",
+    "n": 41
+   }
+  ],
+  "Q227": [
+   {
+    "q": "Q9248",
+    "name": "Baku",
+    "n": 249
+   },
+   {
+    "q": "Q129352",
+    "name": "Khankendi",
+    "n": 113
+   },
+   {
+    "q": "Q131290",
+    "name": "Ganja",
+    "n": 102
+   },
+   {
+    "q": "Q179833",
+    "name": "Sumgait",
+    "n": 90
+   },
+   {
+    "q": "Q234783",
+    "name": "Shaki",
+    "n": 86
+   },
+   {
+    "q": "Q228811",
+    "name": "Lankaran",
+    "n": 79
+   },
+   {
+    "q": "Q158903",
+    "name": "Shusha",
+    "n": 73
+   },
+   {
+    "q": "Q230932",
+    "name": "Mingachevir",
+    "n": 73
+   },
+   {
+    "q": "Q241116",
+    "name": "Shirvan",
+    "n": 60
+   },
+   {
+    "q": "Q179538",
+    "name": "Absheron District",
+    "n": 60
+   },
+   {
+    "q": "Q201647",
+    "name": "Aghdam",
+    "n": 59
+   },
+   {
+    "q": "Q152825",
+    "name": "Naftalan",
+    "n": 57
+   },
+   {
+    "q": "Q175459",
+    "name": "Yevlakh",
+    "n": 57
+   },
+   {
+    "q": "Q330818",
+    "name": "Aghjabadi District",
+    "n": 56
+   },
+   {
+    "q": "Q457513",
+    "name": "Kalbajar District",
+    "n": 55
+   },
+   {
+    "q": "Q372795",
+    "name": "Jalilabad District",
+    "n": 55
+   },
+   {
+    "q": "Q301832",
+    "name": "Lachin District",
+    "n": 55
+   },
+   {
+    "q": "Q593872",
+    "name": "Qabala District",
+    "n": 54
+   },
+   {
+    "q": "Q331687",
+    "name": "Fuzuli District",
+    "n": 53
+   },
+   {
+    "q": "Q249252",
+    "name": "Zangilan District",
+    "n": 53
+   },
+   {
+    "q": "Q275784",
+    "name": "Aghdash District",
+    "n": 53
+   },
+   {
+    "q": "Q269680",
+    "name": "Astara District",
+    "n": 52
+   },
+   {
+    "q": "Q644048",
+    "name": "Gubadly District",
+    "n": 52
+   },
+   {
+    "q": "Q275744",
+    "name": "Aghstafa District",
+    "n": 52
+   },
+   {
+    "q": "Q330843",
+    "name": "Goranboy District",
+    "n": 51
+   },
+   {
+    "q": "Q330857",
+    "name": "Barda District",
+    "n": 51
+   },
+   {
+    "q": "Q457491",
+    "name": "Jabrayil District",
+    "n": 51
+   },
+   {
+    "q": "Q477168",
+    "name": "Tartar District",
+    "n": 51
+   },
+   {
+    "q": "Q269986",
+    "name": "Lankaran District",
+    "n": 51
+   },
+   {
+    "q": "Q382132",
+    "name": "Sabirabad District",
+    "n": 51
+   },
+   {
+    "q": "Q330749",
+    "name": "Gadabay District",
+    "n": 51
+   },
+   {
+    "q": "Q330796",
+    "name": "Qakh District",
+    "n": 51
+   },
+   {
+    "q": "Q330834",
+    "name": "Bilasuvar District",
+    "n": 51
+   },
+   {
+    "q": "Q389381",
+    "name": "Gazakh District",
+    "n": 51
+   },
+   {
+    "q": "Q330850",
+    "name": "Balakan District",
+    "n": 50
+   },
+   {
+    "q": "Q457494",
+    "name": "Dashkasan District",
+    "n": 50
+   },
+   {
+    "q": "Q330864",
+    "name": "Shaki District",
+    "n": 50
+   },
+   {
+    "q": "Q330807",
+    "name": "Beylagan District",
+    "n": 50
+   },
+   {
+    "q": "Q388960",
+    "name": "Shusha District",
+    "n": 50
+   },
+   {
+    "q": "Q147553",
+    "name": "Zaqatala District",
+    "n": 49
+   },
+   {
+    "q": "Q127255",
+    "name": "Yardimli District",
+    "n": 49
+   },
+   {
+    "q": "Q476690",
+    "name": "Hajigabul District",
+    "n": 49
+   },
+   {
+    "q": "Q467491",
+    "name": "Shamkir District",
+    "n": 49
+   },
+   {
+    "q": "Q643989",
+    "name": "Oghuz District",
+    "n": 49
+   },
+   {
+    "q": "Q330800",
+    "name": "Agsu District",
+    "n": 49
+   },
+   {
+    "q": "Q330813",
+    "name": "Khojavend District",
+    "n": 49
+   },
+   {
+    "q": "Q477163",
+    "name": "Goychay District",
+    "n": 48
+   },
+   {
+    "q": "Q343908",
+    "name": "Imishli District",
+    "n": 48
+   },
+   {
+    "q": "Q458524",
+    "name": "Yevlakh District",
+    "n": 48
+   },
+   {
+    "q": "Q476708",
+    "name": "Khizi District",
+    "n": 48
+   },
+   {
+    "q": "Q344252",
+    "name": "Ismayilli District",
+    "n": 48
+   },
+   {
+    "q": "Q330790",
+    "name": "Khojaly District",
+    "n": 48
+   },
+   {
+    "q": "Q457485",
+    "name": "Salyan Rayon",
+    "n": 47
+   },
+   {
+    "q": "Q457499",
+    "name": "Guba District",
+    "n": 47
+   },
+   {
+    "q": "Q457508",
+    "name": "Gobustan District",
+    "n": 47
+   },
+   {
+    "q": "Q498437",
+    "name": "Samukh District",
+    "n": 47
+   },
+   {
+    "q": "Q688589",
+    "name": "Kurdamir District",
+    "n": 47
+   },
+   {
+    "q": "Q476703",
+    "name": "Ujar District",
+    "n": 47
+   },
+   {
+    "q": "Q688626",
+    "name": "Lerik District",
+    "n": 47
+   },
+   {
+    "q": "Q820940",
+    "name": "Siyazan District",
+    "n": 47
+   },
+   {
+    "q": "Q386506",
+    "name": "Qusar District",
+    "n": 47
+   },
+   {
+    "q": "Q388087",
+    "name": "Goygol District",
+    "n": 47
+   },
+   {
+    "q": "Q330839",
+    "name": "Shamakhi District",
+    "n": 47
+   },
+   {
+    "q": "Q388980",
+    "name": "Tovuz District",
+    "n": 47
+   },
+   {
+    "q": "Q249293",
+    "name": "Zardab District",
+    "n": 46
+   },
+   {
+    "q": "Q476695",
+    "name": "Masally District",
+    "n": 46
+   },
+   {
+    "q": "Q6398826",
+    "name": "Khachmaz District",
+    "n": 46
+   },
+   {
+    "q": "Q387994",
+    "name": "Shabran District",
+    "n": 46
+   },
+   {
+    "q": "Q601105",
+    "name": "Saatly District",
+    "n": 45
+   },
+   {
+    "q": "Q688633",
+    "name": "Neftchala District",
+    "n": 45
+   }
+  ],
+  "Q889": [
+   {
+    "q": "Q165376",
+    "name": "Badakhshan Province",
+    "n": 84
+   },
+   {
+    "q": "Q121104",
+    "name": "Balkh Province",
+    "n": 81
+   },
+   {
+    "q": "Q167485",
+    "name": "Nuristan Province",
+    "n": 80
+   },
+   {
+    "q": "Q171382",
+    "name": "Bamyan Province",
+    "n": 79
+   },
+   {
+    "q": "Q172052",
+    "name": "Badghis Province",
+    "n": 79
+   },
+   {
+    "q": "Q173821",
+    "name": "Helmand Province",
+    "n": 79
+   },
+   {
+    "q": "Q173808",
+    "name": "Kandahar Province",
+    "n": 78
+   },
+   {
+    "q": "Q182844",
+    "name": "Herat Province",
+    "n": 77
+   },
+   {
+    "q": "Q183028",
+    "name": "Uruzgan Province",
+    "n": 76
+   },
+   {
+    "q": "Q186392",
+    "name": "Ghor Province",
+    "n": 76
+   },
+   {
+    "q": "Q178471",
+    "name": "Nangarhar Province",
+    "n": 76
+   },
+   {
+    "q": "Q183021",
+    "name": "Nimruz Province",
+    "n": 75
+   },
+   {
+    "q": "Q170309",
+    "name": "Baghlan Province",
+    "n": 75
+   },
+   {
+    "q": "Q186418",
+    "name": "Kunduz Province",
+    "n": 75
+   },
+   {
+    "q": "Q188933",
+    "name": "Kabul Province",
+    "n": 75
+   },
+   {
+    "q": "Q180330",
+    "name": "Farah Province",
+    "n": 75
+   },
+   {
+    "q": "Q180415",
+    "name": "Ghazni Province",
+    "n": 75
+   },
+   {
+    "q": "Q173830",
+    "name": "Faryab Province",
+    "n": 74
+   },
+   {
+    "q": "Q188147",
+    "name": "Kunar Province",
+    "n": 74
+   },
+   {
+    "q": "Q183015",
+    "name": "Samangan Province",
+    "n": 74
+   },
+   {
+    "q": "Q181235",
+    "name": "Panjshir Province",
+    "n": 74
+   },
+   {
+    "q": "Q173816",
+    "name": "Kapisa Province",
+    "n": 73
+   },
+   {
+    "q": "Q183036",
+    "name": "Jowzjan Province",
+    "n": 73
+   },
+   {
+    "q": "Q181220",
+    "name": "Daykundi Province",
+    "n": 73
+   },
+   {
+    "q": "Q185752",
+    "name": "Khost Province",
+    "n": 72
+   },
+   {
+    "q": "Q6667298",
+    "name": "Logar Province",
+    "n": 72
+   },
+   {
+    "q": "Q139126",
+    "name": "Zabul Province",
+    "n": 71
+   },
+   {
+    "q": "Q183056",
+    "name": "Maidan Wardak Province",
+    "n": 71
+   },
+   {
+    "q": "Q182493",
+    "name": "Paktia Province",
+    "n": 71
+   },
+   {
+    "q": "Q185442",
+    "name": "Laghman Province",
+    "n": 71
+   },
+   {
+    "q": "Q188157",
+    "name": "Parwan Province",
+    "n": 71
+   },
+   {
+    "q": "Q182487",
+    "name": "Sar-e Pol Province",
+    "n": 71
+   },
+   {
+    "q": "Q186395",
+    "name": "Takhar Province",
+    "n": 70
+   },
+   {
+    "q": "Q185575",
+    "name": "Paktika Province",
+    "n": 69
+   }
+  ],
+  "Q219": [
+   {
+    "q": "Q804311",
+    "name": "Blagoevgrad Province",
+    "n": 76
+   },
+   {
+    "q": "Q369220",
+    "name": "Burgas Province",
+    "n": 75
+   },
+   {
+    "q": "Q187874",
+    "name": "Plovdiv Province",
+    "n": 74
+   },
+   {
+    "q": "Q2012772",
+    "name": "Vidin Province",
+    "n": 74
+   },
+   {
+    "q": "Q907395",
+    "name": "Dobrich Province",
+    "n": 74
+   },
+   {
+    "q": "Q1251933",
+    "name": "Ruse Province",
+    "n": 74
+   },
+   {
+    "q": "Q183487",
+    "name": "Varna Province",
+    "n": 73
+   },
+   {
+    "q": "Q1007272",
+    "name": "Gabrovo Province",
+    "n": 73
+   },
+   {
+    "q": "Q2012242",
+    "name": "Pleven Province",
+    "n": 72
+   },
+   {
+    "q": "Q2012430",
+    "name": "Smolyan Province",
+    "n": 72
+   },
+   {
+    "q": "Q182809",
+    "name": "Haskovo Province",
+    "n": 71
+   },
+   {
+    "q": "Q2012785",
+    "name": "Vratsa Province",
+    "n": 71
+   },
+   {
+    "q": "Q1104675",
+    "name": "Kardzhali Province",
+    "n": 71
+   },
+   {
+    "q": "Q2790675",
+    "name": "Razgrad Province",
+    "n": 71
+   },
+   {
+    "q": "Q184981",
+    "name": "Shumen Province",
+    "n": 70
+   },
+   {
+    "q": "Q2012423",
+    "name": "Silistra Province",
+    "n": 70
+   },
+   {
+    "q": "Q220736",
+    "name": "Yambol Province",
+    "n": 70
+   },
+   {
+    "q": "Q2012583",
+    "name": "Stara Zagora Province",
+    "n": 70
+   },
+   {
+    "q": "Q2012621",
+    "name": "Veliko Tarnovo Province",
+    "n": 70
+   },
+   {
+    "q": "Q6587068",
+    "name": "Lovech Province",
+    "n": 70
+   },
+   {
+    "q": "Q1112985",
+    "name": "Kyustendil Province",
+    "n": 70
+   },
+   {
+    "q": "Q2012057",
+    "name": "Montana Province",
+    "n": 69
+   },
+   {
+    "q": "Q2012234",
+    "name": "Pernik Province",
+    "n": 69
+   },
+   {
+    "q": "Q113120",
+    "name": "Sliven Province",
+    "n": 67
+   },
+   {
+    "q": "Q2012589",
+    "name": "Targovishte Province",
+    "n": 67
+   },
+   {
+    "q": "Q2012227",
+    "name": "Pazardzhik Province",
+    "n": 67
+   },
+   {
+    "q": "Q202904",
+    "name": "Sofia Province",
+    "n": 66
+   },
+   {
+    "q": "Q1585725",
+    "name": "Sofia City Province",
+    "n": 41
+   }
+  ],
+  "Q184": [
+   {
+    "q": "Q2280",
+    "name": "Minsk",
+    "n": 232
+   },
+   {
+    "q": "Q185700",
+    "name": "Vitebsk Region",
+    "n": 88
+   },
+   {
+    "q": "Q173822",
+    "name": "Brest region",
+    "n": 85
+   },
+   {
+    "q": "Q192959",
+    "name": "Minsk region",
+    "n": 84
+   },
+   {
+    "q": "Q189822",
+    "name": "Mogilev Region",
+    "n": 80
+   },
+   {
+    "q": "Q191061",
+    "name": "Grodno Region",
+    "n": 80
+   },
+   {
+    "q": "Q188732",
+    "name": "Gomel Region",
+    "n": 79
+   }
+  ],
+  "Q28": [
+   {
+    "q": "Q1781",
+    "name": "Budapest",
+    "n": 260
+   },
+   {
+    "q": "Q181018",
+    "name": "Bács-Kiskun County",
+    "n": 71
+   },
+   {
+    "q": "Q185368",
+    "name": "Hajdú-Bihar County",
+    "n": 70
+   },
+   {
+    "q": "Q187693",
+    "name": "Fejér County",
+    "n": 70
+   },
+   {
+    "q": "Q188612",
+    "name": "Pest County",
+    "n": 70
+   },
+   {
+    "q": "Q187677",
+    "name": "Vas County",
+    "n": 69
+   },
+   {
+    "q": "Q187753",
+    "name": "Győr-Moson-Sopron County",
+    "n": 69
+   },
+   {
+    "q": "Q190018",
+    "name": "Komárom-Esztergom County",
+    "n": 69
+   },
+   {
+    "q": "Q188890",
+    "name": "Veszprém County",
+    "n": 68
+   },
+   {
+    "q": "Q188895",
+    "name": "Borsod-Abaúj-Zemplén County",
+    "n": 68
+   },
+   {
+    "q": "Q190522",
+    "name": "Somogy County",
+    "n": 68
+   },
+   {
+    "q": "Q185374",
+    "name": "Zala County",
+    "n": 67
+   },
+   {
+    "q": "Q186195",
+    "name": "Baranya County",
+    "n": 67
+   },
+   {
+    "q": "Q194273",
+    "name": "Nógrád County",
+    "n": 67
+   },
+   {
+    "q": "Q190518",
+    "name": "Szabolcs-Szatmár-Bereg County",
+    "n": 67
+   },
+   {
+    "q": "Q191604",
+    "name": "Heves County",
+    "n": 67
+   },
+   {
+    "q": "Q191616",
+    "name": "Békés County",
+    "n": 66
+   },
+   {
+    "q": "Q191625",
+    "name": "Tolna County",
+    "n": 66
+   },
+   {
+    "q": "Q189655",
+    "name": "Jász-Nagykun-Szolnok County",
+    "n": 66
+   },
+   {
+    "q": "Q193031",
+    "name": "Csongrád-Csanád County",
+    "n": 65
+   }
+  ],
+  "Q843": [
+   {
+    "q": "Q37211",
+    "name": "Sindh",
+    "n": 118
+   },
+   {
+    "q": "Q4478",
+    "name": "Punjab",
+    "n": 113
+   },
+   {
+    "q": "Q163239",
+    "name": "Balochistan",
+    "n": 109
+   },
+   {
+    "q": "Q183314",
+    "name": "Khyber Pakhtunkhwa",
+    "n": 91
+   },
+   {
+    "q": "Q200697",
+    "name": "Gilgit-Baltistan",
+    "n": 86
+   },
+   {
+    "q": "Q200130",
+    "name": "Azad Kashmir",
+    "n": 85
+   },
+   {
+    "q": "Q848613",
+    "name": "Islamabad Capital Territory",
+    "n": 48
+   },
+   {
+    "q": "Q19807103",
+    "name": "Junagadh and Manavadar",
+    "n": 0
+   }
+  ],
+  "Q399": [
+   {
+    "q": "Q1953",
+    "name": "Yerevan",
+    "n": 214
+   },
+   {
+    "q": "Q2523428",
+    "name": "Syunik Province",
+    "n": 78
+   },
+   {
+    "q": "Q17915",
+    "name": "Aragatsotn Province",
+    "n": 76
+   },
+   {
+    "q": "Q201140",
+    "name": "Tavush Province",
+    "n": 74
+   },
+   {
+    "q": "Q200350",
+    "name": "Lori Province",
+    "n": 73
+   },
+   {
+    "q": "Q199905",
+    "name": "Gegharkunik Province",
+    "n": 73
+   },
+   {
+    "q": "Q4511",
+    "name": "Kotayk Province",
+    "n": 73
+   },
+   {
+    "q": "Q201063",
+    "name": "Shirak Province",
+    "n": 73
+   },
+   {
+    "q": "Q200124",
+    "name": "Vayots Dzor Province",
+    "n": 72
+   },
+   {
+    "q": "Q199880",
+    "name": "Ararat Province",
+    "n": 72
+   },
+   {
+    "q": "Q201147",
+    "name": "Armavir Province",
+    "n": 71
+   }
+  ],
+  "Q189": [
+   {
+    "q": "Q2001582",
+    "name": "Northwest",
+    "n": 19
+   },
+   {
+    "q": "Q2037988",
+    "name": "Reykjavík South",
+    "n": 18
+   },
+   {
+    "q": "Q1526538",
+    "name": "Reykjavík North",
+    "n": 18
+   },
+   {
+    "q": "Q770576",
+    "name": "Southwest",
+    "n": 18
+   },
+   {
+    "q": "Q2001559",
+    "name": "Northeast",
+    "n": 18
+   },
+   {
+    "q": "Q1419190",
+    "name": "South Constituency",
+    "n": 18
+   }
+  ],
+  "Q224": [
+   {
+    "q": "Q1435",
+    "name": "Zagreb",
+    "n": 218
+   },
+   {
+    "q": "Q58253",
+    "name": "Split-Dalmatia County",
+    "n": 66
+   },
+   {
+    "q": "Q58268",
+    "name": "Istria County",
+    "n": 66
+   },
+   {
+    "q": "Q58289",
+    "name": "Dubrovnik-Neretva County",
+    "n": 65
+   },
+   {
+    "q": "Q58071",
+    "name": "Primorje-Gorski Kotar County",
+    "n": 64
+   },
+   {
+    "q": "Q58146",
+    "name": "Zadar County",
+    "n": 64
+   },
+   {
+    "q": "Q27038",
+    "name": "Zagreb County",
+    "n": 63
+   },
+   {
+    "q": "Q58060",
+    "name": "Bjelovar-Bilogora County",
+    "n": 62
+   },
+   {
+    "q": "Q58129",
+    "name": "Brod-Posavina County",
+    "n": 62
+   },
+   {
+    "q": "Q57071",
+    "name": "Karlovac County",
+    "n": 60
+   },
+   {
+    "q": "Q58194",
+    "name": "Šibenik-Knin County",
+    "n": 60
+   },
+   {
+    "q": "Q57967",
+    "name": "Varaždin County",
+    "n": 59
+   },
+   {
+    "q": "Q58081",
+    "name": "Lika-Senj County",
+    "n": 59
+   },
+   {
+    "q": "Q58225",
+    "name": "Vukovar-Srijem County",
+    "n": 58
+   },
+   {
+    "q": "Q57056",
+    "name": "Krapina-Zagorje County",
+    "n": 57
+   },
+   {
+    "q": "Q58159",
+    "name": "Osijek-Baranja County",
+    "n": 57
+   },
+   {
+    "q": "Q58330",
+    "name": "Međimurje County",
+    "n": 57
+   },
+   {
+    "q": "Q57060",
+    "name": "Sisak-Moslavina County",
+    "n": 56
+   },
+   {
+    "q": "Q58092",
+    "name": "Virovitica-Podravina County",
+    "n": 56
+   },
+   {
+    "q": "Q58111",
+    "name": "Požega-Slavonia County",
+    "n": 55
+   },
+   {
+    "q": "Q58026",
+    "name": "Koprivnica-Križevci County",
+    "n": 55
+   }
+  ]
+ },
+ "cities": [
+  {
+   "q": "Q90",
+   "name": "Paris",
+   "n": 367,
+   "country": "Q142"
+  },
+  {
+   "q": "Q84",
+   "name": "London",
+   "n": 357,
+   "country": "Q145"
+  },
+  {
+   "q": "Q220",
+   "name": "Rome",
+   "n": 344,
+   "country": "Q38"
+  },
+  {
+   "q": "Q237",
+   "name": "Vatican City",
+   "n": 343,
+   "country": "Q237"
+  },
+  {
+   "q": "Q649",
+   "name": "Moscow",
+   "n": 338,
+   "country": "Q159"
+  },
+  {
+   "q": "Q64",
+   "name": "Berlin",
+   "n": 335,
+   "country": "Q183"
+  },
+  {
+   "q": "Q334",
+   "name": "Singapore",
+   "n": 333,
+   "country": "Q334"
+  },
+  {
+   "q": "Q60",
+   "name": "New York City",
+   "n": 326,
+   "country": "Q30"
+  },
+  {
+   "q": "Q235",
+   "name": "Monaco",
+   "n": 322,
+   "country": "Q235"
+  },
+  {
+   "q": "Q956",
+   "name": "Beijing",
+   "n": 307,
+   "country": "Q148"
+  },
+  {
+   "q": "Q1490",
+   "name": "Tokyo",
+   "n": 305,
+   "country": "Q17"
+  },
+  {
+   "q": "Q8646",
+   "name": "Hong Kong",
+   "n": 304,
+   "country": "Q148"
+  },
+  {
+   "q": "Q8678",
+   "name": "Rio de Janeiro",
+   "n": 303,
+   "country": "Q155"
+  },
+  {
+   "q": "Q1218",
+   "name": "Jerusalem",
+   "n": 300,
+   "country": "Q219060"
+  },
+  {
+   "q": "Q61",
+   "name": "Washington, D.C.",
+   "n": 299,
+   "country": "Q30"
+  },
+  {
+   "q": "Q1741",
+   "name": "Vienna",
+   "n": 295,
+   "country": "Q40"
+  },
+  {
+   "q": "Q1757",
+   "name": "Helsinki",
+   "n": 293,
+   "country": "Q33"
+  },
+  {
+   "q": "Q406",
+   "name": "Istanbul",
+   "n": 290,
+   "country": "Q43"
+  },
+  {
+   "q": "Q270",
+   "name": "Warsaw",
+   "n": 289,
+   "country": "Q36"
+  },
+  {
+   "q": "Q1524",
+   "name": "Athens",
+   "n": 289,
+   "country": "Q41"
+  },
+  {
+   "q": "Q727",
+   "name": "Amsterdam",
+   "n": 286,
+   "country": "Q55"
+  },
+  {
+   "q": "Q2841",
+   "name": "Bogotá",
+   "n": 284,
+   "country": "Q739"
+  },
+  {
+   "q": "Q43387",
+   "name": "Edirne",
+   "n": 283,
+   "country": "Q43"
+  },
+  {
+   "q": "Q19689",
+   "name": "Tirana",
+   "n": 280,
+   "country": "Q222"
+  },
+  {
+   "q": "Q1297",
+   "name": "Chicago",
+   "n": 280,
+   "country": "Q30"
+  },
+  {
+   "q": "Q1754",
+   "name": "Stockholm",
+   "n": 279,
+   "country": "Q34"
+  },
+  {
+   "q": "Q1899",
+   "name": "Kyiv",
+   "n": 277,
+   "country": "Q212"
+  },
+  {
+   "q": "Q1486",
+   "name": "Buenos Aires",
+   "n": 276,
+   "country": "Q414"
+  },
+  {
+   "q": "Q2887",
+   "name": "Santiago",
+   "n": 276,
+   "country": "Q298"
+  },
+  {
+   "q": "Q656",
+   "name": "Saint Petersburg",
+   "n": 273,
+   "country": "Q159"
+  },
+  {
+   "q": "Q1085",
+   "name": "Prague",
+   "n": 270,
+   "country": "Q213"
+  },
+  {
+   "q": "Q597",
+   "name": "Lisbon",
+   "n": 267,
+   "country": "Q45"
+  },
+  {
+   "q": "Q3130",
+   "name": "Sydney",
+   "n": 266,
+   "country": "Q408"
+  },
+  {
+   "q": "Q1861",
+   "name": "Bangkok",
+   "n": 263,
+   "country": "Q1155700"
+  },
+  {
+   "q": "Q85",
+   "name": "Cairo",
+   "n": 262,
+   "country": "Q79"
+  },
+  {
+   "q": "Q8684",
+   "name": "Seoul",
+   "n": 260,
+   "country": "Q884"
+  },
+  {
+   "q": "Q1781",
+   "name": "Budapest",
+   "n": 260,
+   "country": "Q28"
+  },
+  {
+   "q": "Q1489",
+   "name": "Mexico City",
+   "n": 260,
+   "country": "Q96"
+  },
+  {
+   "q": "Q34600",
+   "name": "Kyoto",
+   "n": 260,
+   "country": "Q17"
+  },
+  {
+   "q": "Q4361",
+   "name": "Curitiba",
+   "n": 259,
+   "country": "Q155"
+  },
+  {
+   "q": "Q1854",
+   "name": "Ho Chi Minh City",
+   "n": 257,
+   "country": "Q881"
+  },
+  {
+   "q": "Q174",
+   "name": "São Paulo",
+   "n": 256,
+   "country": "Q155"
+  },
+  {
+   "q": "Q3630",
+   "name": "Jakarta",
+   "n": 252,
+   "country": "Q252"
+  },
+  {
+   "q": "Q1530",
+   "name": "Baghdad",
+   "n": 251,
+   "country": "Q796"
+  },
+  {
+   "q": "Q8686",
+   "name": "Shanghai",
+   "n": 251,
+   "country": "Q148"
+  },
+  {
+   "q": "Q9248",
+   "name": "Baku",
+   "n": 249,
+   "country": "Q227"
+  },
+  {
+   "q": "Q1492",
+   "name": "Barcelona",
+   "n": 246,
+   "country": "Q29"
+  },
+  {
+   "q": "Q1748",
+   "name": "Copenhagen",
+   "n": 245,
+   "country": "Q35"
+  },
+  {
+   "q": "Q3640",
+   "name": "Ankara",
+   "n": 243,
+   "country": "Q43"
+  },
+  {
+   "q": "Q3766",
+   "name": "Damascus",
+   "n": 243,
+   "country": "Q858"
+  },
+  {
+   "q": "Q3616",
+   "name": "Tehran",
+   "n": 242,
+   "country": "Q794"
+  },
+  {
+   "q": "Q239",
+   "name": "Brussels",
+   "n": 241,
+   "country": "Q31"
+  },
+  {
+   "q": "Q1726",
+   "name": "Munich",
+   "n": 240,
+   "country": "Q183"
+  },
+  {
+   "q": "Q1761",
+   "name": "Dublin",
+   "n": 239,
+   "country": "Q27"
+  },
+  {
+   "q": "Q33986",
+   "name": "Valparaíso",
+   "n": 239,
+   "country": "Q298"
+  },
+  {
+   "q": "Q62",
+   "name": "San Francisco",
+   "n": 239,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3870",
+   "name": "Nairobi",
+   "n": 239,
+   "country": "Q114"
+  },
+  {
+   "q": "Q19660",
+   "name": "Bucharest",
+   "n": 238,
+   "country": "Q218"
+  },
+  {
+   "q": "Q1930",
+   "name": "Ottawa",
+   "n": 233,
+   "country": "Q16"
+  },
+  {
+   "q": "Q641",
+   "name": "Venice",
+   "n": 232,
+   "country": "Q38"
+  },
+  {
+   "q": "Q1156",
+   "name": "Mumbai",
+   "n": 232,
+   "country": "Q668"
+  },
+  {
+   "q": "Q2280",
+   "name": "Minsk",
+   "n": 232,
+   "country": "Q184"
+  },
+  {
+   "q": "Q216",
+   "name": "Vilnius",
+   "n": 230,
+   "country": "Q37"
+  },
+  {
+   "q": "Q1770",
+   "name": "Tallinn",
+   "n": 230,
+   "country": "Q191"
+  },
+  {
+   "q": "Q3711",
+   "name": "Belgrade",
+   "n": 230,
+   "country": "Q403"
+  },
+  {
+   "q": "Q1055",
+   "name": "Hamburg",
+   "n": 230,
+   "country": "Q183"
+  },
+  {
+   "q": "Q1877",
+   "name": "Đồng Hới",
+   "n": 230,
+   "country": "Q881"
+  },
+  {
+   "q": "Q994",
+   "name": "Tbilisi",
+   "n": 229,
+   "country": "Q230"
+  },
+  {
+   "q": "Q472",
+   "name": "Sofia",
+   "n": 228,
+   "country": "Q219"
+  },
+  {
+   "q": "Q1880",
+   "name": "Concepción",
+   "n": 228,
+   "country": "Q298"
+  },
+  {
+   "q": "Q5838",
+   "name": "Kabul",
+   "n": 227,
+   "country": "Q889"
+  },
+  {
+   "q": "Q490",
+   "name": "Milan",
+   "n": 226,
+   "country": "Q38"
+  },
+  {
+   "q": "Q1780",
+   "name": "Bratislava",
+   "n": 226,
+   "country": "Q214"
+  },
+  {
+   "q": "Q2844",
+   "name": "Brasília",
+   "n": 226,
+   "country": "Q155"
+  },
+  {
+   "q": "Q3646",
+   "name": "Krasnodar",
+   "n": 226,
+   "country": "Q159"
+  },
+  {
+   "q": "Q14773",
+   "name": "Macau",
+   "n": 226,
+   "country": "Q148"
+  },
+  {
+   "q": "Q1404",
+   "name": "Uetersen",
+   "n": 226,
+   "country": "Q183"
+  },
+  {
+   "q": "Q172",
+   "name": "Toronto",
+   "n": 225,
+   "country": "Q16"
+  },
+  {
+   "q": "Q1773",
+   "name": "Riga",
+   "n": 225,
+   "country": "Q211"
+  },
+  {
+   "q": "Q1354",
+   "name": "Dhaka",
+   "n": 223,
+   "country": "Q902"
+  },
+  {
+   "q": "Q987",
+   "name": "New Delhi",
+   "n": 222,
+   "country": "Q668"
+  },
+  {
+   "q": "Q1410",
+   "name": "Gibraltar",
+   "n": 221,
+   "country": "Q145"
+  },
+  {
+   "q": "Q2868",
+   "name": "Lima",
+   "n": 220,
+   "country": "Q419"
+  },
+  {
+   "q": "Q612",
+   "name": "Dubai",
+   "n": 219,
+   "country": "Q878"
+  },
+  {
+   "q": "Q5465",
+   "name": "Cape Town",
+   "n": 219,
+   "country": "Q258"
+  },
+  {
+   "q": "Q11194",
+   "name": "Sarajevo",
+   "n": 218,
+   "country": "Q225"
+  },
+  {
+   "q": "Q1435",
+   "name": "Zagreb",
+   "n": 218,
+   "country": "Q224"
+  },
+  {
+   "q": "Q1764",
+   "name": "Reykjavík",
+   "n": 218,
+   "country": "Q189"
+  },
+  {
+   "q": "Q1520",
+   "name": "Astana",
+   "n": 218,
+   "country": "Q232"
+  },
+  {
+   "q": "Q100",
+   "name": "Boston",
+   "n": 217,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3561",
+   "name": "Algiers",
+   "n": 216,
+   "country": "Q262"
+  },
+  {
+   "q": "Q1533",
+   "name": "Caracas",
+   "n": 216,
+   "country": "Q717"
+  },
+  {
+   "q": "Q1865",
+   "name": "Kuala Lumpur",
+   "n": 214,
+   "country": "Q833"
+  },
+  {
+   "q": "Q1953",
+   "name": "Yerevan",
+   "n": 214,
+   "country": "Q399"
+  },
+  {
+   "q": "Q2044",
+   "name": "Florence",
+   "n": 214,
+   "country": "Q38"
+  },
+  {
+   "q": "Q3114",
+   "name": "Canberra",
+   "n": 213,
+   "country": "Q408"
+  },
+  {
+   "q": "Q3820",
+   "name": "Beirut",
+   "n": 213,
+   "country": "Q822"
+  },
+  {
+   "q": "Q1794",
+   "name": "Frankfurt",
+   "n": 212,
+   "country": "Q2415901"
+  },
+  {
+   "q": "Q3141",
+   "name": "Melbourne",
+   "n": 210,
+   "country": "Q408"
+  },
+  {
+   "q": "Q1461",
+   "name": "Manila",
+   "n": 209,
+   "country": "Q928"
+  },
+  {
+   "q": "Q3838",
+   "name": "Kinshasa",
+   "n": 209,
+   "country": "Q974"
+  },
+  {
+   "q": "Q23556",
+   "name": "Atlanta",
+   "n": 209,
+   "country": "Q30"
+  },
+  {
+   "q": "Q1348",
+   "name": "Kolkata",
+   "n": 208,
+   "country": "Q668"
+  },
+  {
+   "q": "Q2634",
+   "name": "Naples",
+   "n": 207,
+   "country": "Q38"
+  },
+  {
+   "q": "Q70",
+   "name": "Bern",
+   "n": 207,
+   "country": "Q39"
+  },
+  {
+   "q": "Q437",
+   "name": "Ljubljana",
+   "n": 206,
+   "country": "Q215"
+  },
+  {
+   "q": "Q8660",
+   "name": "Karachi",
+   "n": 206,
+   "country": "Q843"
+  },
+  {
+   "q": "Q1335",
+   "name": "Montevideo",
+   "n": 206,
+   "country": "Q77"
+  },
+  {
+   "q": "Q6022566",
+   "name": "Monte Águila",
+   "n": 206,
+   "country": "Q298"
+  },
+  {
+   "q": "Q1353",
+   "name": "Delhi",
+   "n": 205,
+   "country": "Q668"
+  },
+  {
+   "q": "Q3856",
+   "name": "Nicosia",
+   "n": 204,
+   "country": "Q229"
+  },
+  {
+   "q": "Q1858",
+   "name": "Hanoi",
+   "n": 203,
+   "country": "Q881"
+  },
+  {
+   "q": "Q18808",
+   "name": "Pyongyang",
+   "n": 202,
+   "country": "Q423"
+  },
+  {
+   "q": "Q3761",
+   "name": "Accra",
+   "n": 202,
+   "country": "Q117"
+  },
+  {
+   "q": "Q3787",
+   "name": "Abuja",
+   "n": 201,
+   "country": "Q1033"
+  },
+  {
+   "q": "Q1867",
+   "name": "Taipei",
+   "n": 200,
+   "country": "Q865"
+  },
+  {
+   "q": "Q71",
+   "name": "Geneva",
+   "n": 200,
+   "country": "Q39"
+  },
+  {
+   "q": "Q3624",
+   "name": "Addis Ababa",
+   "n": 200,
+   "country": "Q115"
+  },
+  {
+   "q": "Q3037",
+   "name": "Kathmandu",
+   "n": 199,
+   "country": "Q837"
+  },
+  {
+   "q": "Q1563",
+   "name": "Havana",
+   "n": 199,
+   "country": "Q241"
+  },
+  {
+   "q": "Q72",
+   "name": "Zurich",
+   "n": 199,
+   "country": "Q39"
+  },
+  {
+   "q": "Q35765",
+   "name": "Osaka",
+   "n": 198,
+   "country": "Q17"
+  },
+  {
+   "q": "Q456",
+   "name": "Lyon",
+   "n": 197,
+   "country": "Q142"
+  },
+  {
+   "q": "Q3692",
+   "name": "Riyadh",
+   "n": 197,
+   "country": "Q851"
+  },
+  {
+   "q": "Q23768",
+   "name": "Las Vegas",
+   "n": 197,
+   "country": "Q30"
+  },
+  {
+   "q": "Q384",
+   "name": "Skopje",
+   "n": 197,
+   "country": "Q221"
+  },
+  {
+   "q": "Q1362",
+   "name": "Islamabad",
+   "n": 196,
+   "country": "Q843"
+  },
+  {
+   "q": "Q21197",
+   "name": "Chișinău",
+   "n": 195,
+   "country": "Q217"
+  },
+  {
+   "q": "Q269",
+   "name": "Tashkent",
+   "n": 195,
+   "country": "Q265"
+  },
+  {
+   "q": "Q340",
+   "name": "Montreal",
+   "n": 195,
+   "country": "Q16"
+  },
+  {
+   "q": "Q3805",
+   "name": "Amman",
+   "n": 194,
+   "country": "Q810"
+  },
+  {
+   "q": "Q1863",
+   "name": "Andorra la Vella",
+   "n": 194,
+   "country": "Q228"
+  },
+  {
+   "q": "Q3926",
+   "name": "Pretoria",
+   "n": 194,
+   "country": "Q258"
+  },
+  {
+   "q": "Q6602",
+   "name": "Strasbourg",
+   "n": 194,
+   "country": "Q142"
+  },
+  {
+   "q": "Q23564",
+   "name": "Podgorica",
+   "n": 192,
+   "country": "Q236"
+  },
+  {
+   "q": "Q33935",
+   "name": "Tel Aviv",
+   "n": 192,
+   "country": "Q801"
+  },
+  {
+   "q": "Q16555",
+   "name": "Houston",
+   "n": 192,
+   "country": "Q30"
+  },
+  {
+   "q": "Q23436",
+   "name": "Edinburgh",
+   "n": 192,
+   "country": "Q145"
+  },
+  {
+   "q": "Q18094",
+   "name": "Honolulu",
+   "n": 192,
+   "country": "Q30"
+  },
+  {
+   "q": "Q8673",
+   "name": "Lagos",
+   "n": 191,
+   "country": "Q1033"
+  },
+  {
+   "q": "Q3551",
+   "name": "Rabat",
+   "n": 191,
+   "country": "Q1028"
+  },
+  {
+   "q": "Q365",
+   "name": "Cologne",
+   "n": 191,
+   "country": "Q183"
+  },
+  {
+   "q": "Q23430",
+   "name": "Ulaanbaatar",
+   "n": 191,
+   "country": "Q711"
+  },
+  {
+   "q": "Q5083",
+   "name": "Seattle",
+   "n": 190,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3579",
+   "name": "Tripoli",
+   "n": 189,
+   "country": "Q3433694"
+  },
+  {
+   "q": "Q3861",
+   "name": "Doha",
+   "n": 189,
+   "country": "Q846"
+  },
+  {
+   "q": "Q34647",
+   "name": "Johannesburg",
+   "n": 188,
+   "country": "Q258"
+  },
+  {
+   "q": "Q1519",
+   "name": "Abu Dhabi",
+   "n": 188,
+   "country": "Q878"
+  },
+  {
+   "q": "Q1844",
+   "name": "Vaduz",
+   "n": 188,
+   "country": "Q347"
+  },
+  {
+   "q": "Q34001",
+   "name": "Roubaix",
+   "n": 187,
+   "country": "Q142"
+  },
+  {
+   "q": "Q3897",
+   "name": "Luanda",
+   "n": 187,
+   "country": "Q916"
+  },
+  {
+   "q": "Q23661",
+   "name": "Wellington",
+   "n": 187,
+   "country": "Q664"
+  },
+  {
+   "q": "Q9361",
+   "name": "Bishkek",
+   "n": 187,
+   "country": "Q813"
+  },
+  {
+   "q": "Q23438",
+   "name": "Ashgabat",
+   "n": 187,
+   "country": "Q874"
+  },
+  {
+   "q": "Q1963",
+   "name": "Khartoum",
+   "n": 186,
+   "country": "Q1049"
+  },
+  {
+   "q": "Q16554",
+   "name": "Denver",
+   "n": 186,
+   "country": "Q30"
+  },
+  {
+   "q": "Q31487",
+   "name": "Kraków",
+   "n": 185,
+   "country": "Q36"
+  },
+  {
+   "q": "Q24826",
+   "name": "Liverpool",
+   "n": 184,
+   "country": "Q145"
+  },
+  {
+   "q": "Q3894",
+   "name": "Kampala",
+   "n": 184,
+   "country": "Q1036"
+  },
+  {
+   "q": "Q1479",
+   "name": "Bordeaux",
+   "n": 184,
+   "country": "Q142"
+  },
+  {
+   "q": "Q3572",
+   "name": "Tunis",
+   "n": 184,
+   "country": "Q948"
+  },
+  {
+   "q": "Q36600",
+   "name": "The Hague",
+   "n": 183,
+   "country": "Q55"
+  },
+  {
+   "q": "Q1022",
+   "name": "Stuttgart",
+   "n": 183,
+   "country": "Q183"
+  },
+  {
+   "q": "Q9022",
+   "name": "Guadalajara",
+   "n": 183,
+   "country": "Q96"
+  },
+  {
+   "q": "Q24639",
+   "name": "Vancouver",
+   "n": 183,
+   "country": "Q16"
+  },
+  {
+   "q": "Q1731",
+   "name": "Dresden",
+   "n": 183,
+   "country": "Q183"
+  },
+  {
+   "q": "Q2900",
+   "name": "Quito",
+   "n": 181,
+   "country": "Q736"
+  },
+  {
+   "q": "Q23800",
+   "name": "Valletta",
+   "n": 181,
+   "country": "Q233"
+  },
+  {
+   "q": "Q1850",
+   "name": "Phnom Penh",
+   "n": 181,
+   "country": "Q424"
+  },
+  {
+   "q": "Q16556",
+   "name": "Phoenix",
+   "n": 181,
+   "country": "Q30"
+  },
+  {
+   "q": "Q1449",
+   "name": "Genoa",
+   "n": 180,
+   "country": "Q38"
+  },
+  {
+   "q": "Q11746",
+   "name": "Wuhan",
+   "n": 180,
+   "country": "Q148"
+  },
+  {
+   "q": "Q495",
+   "name": "Turin",
+   "n": 180,
+   "country": "Q38"
+  },
+  {
+   "q": "Q9365",
+   "name": "Dushanbe",
+   "n": 179,
+   "country": "Q863"
+  },
+  {
+   "q": "Q87",
+   "name": "Alexandria",
+   "n": 178,
+   "country": "Q79"
+  },
+  {
+   "q": "Q36036",
+   "name": "Lviv",
+   "n": 178,
+   "country": "Q104863335"
+  },
+  {
+   "q": "Q2933",
+   "name": "Asunción",
+   "n": 177,
+   "country": "Q733"
+  },
+  {
+   "q": "Q1874",
+   "name": "Odesa",
+   "n": 177,
+   "country": "Q212"
+  },
+  {
+   "q": "Q3183",
+   "name": "Perth",
+   "n": 177,
+   "country": "Q408"
+  },
+  {
+   "q": "Q3703",
+   "name": "Bamako",
+   "n": 177,
+   "country": "Q912"
+  },
+  {
+   "q": "Q3718",
+   "name": "Dakar",
+   "n": 177,
+   "country": "Q1041"
+  },
+  {
+   "q": "Q16557",
+   "name": "Dallas",
+   "n": 177,
+   "country": "Q30"
+  },
+  {
+   "q": "Q18013",
+   "name": "Sacramento",
+   "n": 177,
+   "country": "Q30"
+  },
+  {
+   "q": "Q4093",
+   "name": "Glasgow",
+   "n": 176,
+   "country": "Q145"
+  },
+  {
+   "q": "Q1842",
+   "name": "Luxembourg",
+   "n": 176,
+   "country": "Q32"
+  },
+  {
+   "q": "Q83285",
+   "name": "Durrës",
+   "n": 176,
+   "country": "Q222"
+  },
+  {
+   "q": "Q5831",
+   "name": "Melilla",
+   "n": 176,
+   "country": "Q29"
+  },
+  {
+   "q": "Q7880",
+   "name": "Toulouse",
+   "n": 176,
+   "country": "Q142"
+  },
+  {
+   "q": "Q2656",
+   "name": "Palermo",
+   "n": 175,
+   "country": "Q38"
+  },
+  {
+   "q": "Q3921",
+   "name": "Harare",
+   "n": 175,
+   "country": "Q954"
+  },
+  {
+   "q": "Q9326",
+   "name": "Vientiane",
+   "n": 175,
+   "country": "Q819"
+  },
+  {
+   "q": "Q12439",
+   "name": "Detroit",
+   "n": 175,
+   "country": "Q30"
+  },
+  {
+   "q": "Q33959",
+   "name": "Nice",
+   "n": 175,
+   "country": "Q142"
+  },
+  {
+   "q": "Q34404",
+   "name": "New Orleans",
+   "n": 175,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3935",
+   "name": "Windhoek",
+   "n": 174,
+   "country": "Q1030"
+  },
+  {
+   "q": "Q1718",
+   "name": "Düsseldorf",
+   "n": 174,
+   "country": "Q183"
+  },
+  {
+   "q": "Q3844",
+   "name": "Brazzaville",
+   "n": 173,
+   "country": "Q971"
+  },
+  {
+   "q": "Q2471",
+   "name": "Sanaa",
+   "n": 173,
+   "country": "Q805"
+  },
+  {
+   "q": "Q2449",
+   "name": "Mogadishu",
+   "n": 172,
+   "country": "Q1045"
+  },
+  {
+   "q": "Q1792",
+   "name": "Gdańsk",
+   "n": 172,
+   "country": "Q36"
+  },
+  {
+   "q": "Q1715",
+   "name": "Hanover",
+   "n": 172,
+   "country": "Q183"
+  },
+  {
+   "q": "Q40840",
+   "name": "Tampere",
+   "n": 171,
+   "country": "Q33"
+  },
+  {
+   "q": "Q42308",
+   "name": "Kharkiv",
+   "n": 171,
+   "country": "Q212"
+  },
+  {
+   "q": "Q16572",
+   "name": "Guangzhou",
+   "n": 171,
+   "country": "Q148"
+  },
+  {
+   "q": "Q3777",
+   "name": "Ouagadougou",
+   "n": 171,
+   "country": "Q965"
+  },
+  {
+   "q": "Q9270",
+   "name": "Thimphu",
+   "n": 170,
+   "country": "Q917"
+  },
+  {
+   "q": "Q34370",
+   "name": "Rotterdam",
+   "n": 170,
+   "country": "Q55"
+  },
+  {
+   "q": "Q3739",
+   "name": "Bissau",
+   "n": 170,
+   "country": "Q1007"
+  },
+  {
+   "q": "Q38283",
+   "name": "Yokohama",
+   "n": 170,
+   "country": "Q17"
+  },
+  {
+   "q": "Q35178",
+   "name": "Kuwait City",
+   "n": 169,
+   "country": "Q817"
+  },
+  {
+   "q": "Q3882",
+   "name": "Manama",
+   "n": 169,
+   "country": "Q398"
+  },
+  {
+   "q": "Q2079",
+   "name": "Leipzig",
+   "n": 169,
+   "country": "Q183"
+  },
+  {
+   "q": "Q16559",
+   "name": "Austin",
+   "n": 169,
+   "country": "Q30"
+  },
+  {
+   "q": "Q34932",
+   "name": "Brisbane",
+   "n": 168,
+   "country": "Q408"
+  },
+  {
+   "q": "Q3642",
+   "name": "Asmara",
+   "n": 167,
+   "country": "Q986"
+  },
+  {
+   "q": "Q1355",
+   "name": "Bengaluru",
+   "n": 167,
+   "country": "Q668"
+  },
+  {
+   "q": "Q5776",
+   "name": "Bethlehem",
+   "n": 166,
+   "country": "Q219060"
+  },
+  {
+   "q": "Q3659",
+   "name": "N'Djamena",
+   "n": 166,
+   "country": "Q657"
+  },
+  {
+   "q": "Q3808",
+   "name": "Yaoundé",
+   "n": 166,
+   "country": "Q1009"
+  },
+  {
+   "q": "Q3881",
+   "name": "Lusaka",
+   "n": 166,
+   "country": "Q953"
+  },
+  {
+   "q": "Q3889",
+   "name": "Maputo",
+   "n": 166,
+   "country": "Q1029"
+  },
+  {
+   "q": "Q3726",
+   "name": "Banjul",
+   "n": 165,
+   "country": "Q1005"
+  },
+  {
+   "q": "Q3792",
+   "name": "Lomé",
+   "n": 165,
+   "country": "Q945"
+  },
+  {
+   "q": "Q35997",
+   "name": "İzmir",
+   "n": 165,
+   "country": "Q43"
+  },
+  {
+   "q": "Q3859",
+   "name": "Kigali",
+   "n": 165,
+   "country": "Q1037"
+  },
+  {
+   "q": "Q6346",
+   "name": "Indianapolis",
+   "n": 165,
+   "country": "Q30"
+  },
+  {
+   "q": "Q12892",
+   "name": "Antwerp",
+   "n": 164,
+   "country": "Q31"
+  },
+  {
+   "q": "Q3674",
+   "name": "Niamey",
+   "n": 164,
+   "country": "Q1032"
+  },
+  {
+   "q": "Q3748",
+   "name": "Monrovia",
+   "n": 164,
+   "country": "Q1014"
+  },
+  {
+   "q": "Q3733",
+   "name": "Conakry",
+   "n": 164,
+   "country": "Q1006"
+  },
+  {
+   "q": "Q3919",
+   "name": "Gaborone",
+   "n": 164,
+   "country": "Q963"
+  },
+  {
+   "q": "Q900",
+   "name": "Kazan",
+   "n": 164,
+   "country": "Q159"
+  },
+  {
+   "q": "Q3915",
+   "name": "Antananarivo",
+   "n": 164,
+   "country": "Q1019"
+  },
+  {
+   "q": "Q24879",
+   "name": "Bremen",
+   "n": 164,
+   "country": "Q183"
+  },
+  {
+   "q": "Q2256",
+   "name": "Birmingham",
+   "n": 164,
+   "country": "Q145"
+  },
+  {
+   "q": "Q16552",
+   "name": "San Diego",
+   "n": 164,
+   "country": "Q30"
+  },
+  {
+   "q": "Q35484",
+   "name": "Medina",
+   "n": 164,
+   "country": "Q851"
+  },
+  {
+   "q": "Q9279",
+   "name": "Bandar Seri Begawan",
+   "n": 164,
+   "country": "Q921"
+  },
+  {
+   "q": "Q588",
+   "name": "Katowice",
+   "n": 163,
+   "country": "Q36"
+  },
+  {
+   "q": "Q586",
+   "name": "Bonn",
+   "n": 163,
+   "country": "Q183"
+  },
+  {
+   "q": "Q10690",
+   "name": "Cardiff",
+   "n": 163,
+   "country": "Q145"
+  },
+  {
+   "q": "Q10686",
+   "name": "Belfast",
+   "n": 163,
+   "country": "Q145"
+  },
+  {
+   "q": "Q1352",
+   "name": "Chennai",
+   "n": 163,
+   "country": "Q668"
+  },
+  {
+   "q": "Q19491",
+   "name": "Nha Trang",
+   "n": 163,
+   "country": "Q881"
+  },
+  {
+   "q": "Q374365",
+   "name": "Jeddah",
+   "n": 163,
+   "country": "Q851"
+  },
+  {
+   "q": "Q959",
+   "name": "Vladivostok",
+   "n": 162,
+   "country": "Q159"
+  },
+  {
+   "q": "Q3825",
+   "name": "Libreville",
+   "n": 162,
+   "country": "Q1000"
+  },
+  {
+   "q": "Q1721",
+   "name": "Wiesbaden",
+   "n": 162,
+   "country": "Q183"
+  },
+  {
+   "q": "Q648",
+   "name": "Lille",
+   "n": 162,
+   "country": "Q142"
+  },
+  {
+   "q": "Q5112",
+   "name": "Adelaide",
+   "n": 161,
+   "country": "Q408"
+  },
+  {
+   "q": "Q3001",
+   "name": "Paramaribo",
+   "n": 161,
+   "country": "Q730"
+  },
+  {
+   "q": "Q37100",
+   "name": "Auckland",
+   "n": 161,
+   "country": "Q664"
+  },
+  {
+   "q": "Q25287",
+   "name": "Gothenburg",
+   "n": 161,
+   "country": "Q34"
+  },
+  {
+   "q": "Q34713",
+   "name": "Salzburg",
+   "n": 161,
+   "country": "Q40"
+  },
+  {
+   "q": "Q37951",
+   "name": "Sapporo",
+   "n": 161,
+   "country": "Q17"
+  },
+  {
+   "q": "Q5823",
+   "name": "Ceuta",
+   "n": 161,
+   "country": "Q29"
+  },
+  {
+   "q": "Q3306",
+   "name": "Panama City",
+   "n": 160,
+   "country": "Q804"
+  },
+  {
+   "q": "Q34692",
+   "name": "Kingston",
+   "n": 160,
+   "country": "Q766"
+  },
+  {
+   "q": "Q3799",
+   "name": "Porto-Novo",
+   "n": 160,
+   "country": "Q962"
+  },
+  {
+   "q": "Q11751",
+   "name": "Nagoya",
+   "n": 160,
+   "country": "Q17"
+  },
+  {
+   "q": "Q3832",
+   "name": "Bangui",
+   "n": 159,
+   "country": "Q929"
+  },
+  {
+   "q": "Q1799",
+   "name": "Wrocław",
+   "n": 159,
+   "country": "Q36"
+  },
+  {
+   "q": "Q5092",
+   "name": "Baltimore",
+   "n": 159,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3826",
+   "name": "Muscat",
+   "n": 159,
+   "country": "Q842"
+  },
+  {
+   "q": "Q9310",
+   "name": "Dili",
+   "n": 159,
+   "country": "Q574"
+  },
+  {
+   "q": "Q17151",
+   "name": "Thessaloniki",
+   "n": 159,
+   "country": "Q41"
+  },
+  {
+   "q": "Q34664",
+   "name": "Hiroshima",
+   "n": 159,
+   "country": "Q17"
+  },
+  {
+   "q": "Q3238",
+   "name": "Tegucigalpa",
+   "n": 159,
+   "country": "Q783"
+  },
+  {
+   "q": "Q16567",
+   "name": "Columbus",
+   "n": 159,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3866",
+   "name": "Dodoma",
+   "n": 159,
+   "country": "Q924"
+  },
+  {
+   "q": "Q883",
+   "name": "Novosibirsk",
+   "n": 159,
+   "country": "Q159"
+  },
+  {
+   "q": "Q914",
+   "name": "Volgograd",
+   "n": 159,
+   "country": "Q159"
+  },
+  {
+   "q": "Q25270",
+   "name": "Pristina",
+   "n": 158,
+   "country": "Q1246"
+  },
+  {
+   "q": "Q1515",
+   "name": "Abidjan",
+   "n": 158,
+   "country": "Q1008"
+  },
+  {
+   "q": "Q37400",
+   "name": "Naypyidaw",
+   "n": 158,
+   "country": "Q836"
+  },
+  {
+   "q": "Q3751",
+   "name": "Praia",
+   "n": 158,
+   "country": "Q1011"
+  },
+  {
+   "q": "Q3818",
+   "name": "Malabo",
+   "n": 158,
+   "country": "Q983"
+  },
+  {
+   "q": "Q1491",
+   "name": "La Paz",
+   "n": 158,
+   "country": "Q750"
+  },
+  {
+   "q": "Q2090",
+   "name": "Nuremberg",
+   "n": 158,
+   "country": "Q183"
+  },
+  {
+   "q": "Q34261",
+   "name": "Port-au-Prince",
+   "n": 158,
+   "country": "Q790"
+  },
+  {
+   "q": "Q3688",
+   "name": "Nouakchott",
+   "n": 157,
+   "country": "Q1025"
+  },
+  {
+   "q": "Q3780",
+   "name": "Freetown",
+   "n": 157,
+   "country": "Q1044"
+  },
+  {
+   "q": "Q1829",
+   "name": "Kaliningrad",
+   "n": 157,
+   "country": "Q159"
+  },
+  {
+   "q": "Q13375",
+   "name": "Pisa",
+   "n": 156,
+   "country": "Q38"
+  },
+  {
+   "q": "Q11736",
+   "name": "Tianjin",
+   "n": 156,
+   "country": "Q148"
+  },
+  {
+   "q": "Q1555",
+   "name": "Guatemala City",
+   "n": 156,
+   "country": "Q774"
+  },
+  {
+   "q": "Q3876",
+   "name": "Lilongwe",
+   "n": 156,
+   "country": "Q1020"
+  },
+  {
+   "q": "Q3854",
+   "name": "Bujumbura",
+   "n": 156,
+   "country": "Q967"
+  },
+  {
+   "q": "Q34863",
+   "name": "Oklahoma City",
+   "n": 156,
+   "country": "Q30"
+  },
+  {
+   "q": "Q30974",
+   "name": "Rouen",
+   "n": 156,
+   "country": "Q142"
+  },
+  {
+   "q": "Q3768",
+   "name": "Yamoussoukro",
+   "n": 156,
+   "country": "Q1008"
+  },
+  {
+   "q": "Q9347",
+   "name": "Malé",
+   "n": 155,
+   "country": "Q826"
+  },
+  {
+   "q": "Q3929",
+   "name": "Port Louis",
+   "n": 155,
+   "country": "Q1027"
+  },
+  {
+   "q": "Q36526",
+   "name": "Port Moresby",
+   "n": 155,
+   "country": "Q691"
+  },
+  {
+   "q": "Q13298",
+   "name": "Graz",
+   "n": 155,
+   "country": "Q40"
+  },
+  {
+   "q": "Q23197",
+   "name": "Nashville",
+   "n": 155,
+   "country": "Q30"
+  },
+  {
+   "q": "Q35493",
+   "name": "Almaty",
+   "n": 154,
+   "country": "Q232"
+  },
+  {
+   "q": "Q3909",
+   "name": "Maseru",
+   "n": 154,
+   "country": "Q1013"
+  },
+  {
+   "q": "Q1295",
+   "name": "Dortmund",
+   "n": 154,
+   "country": "Q183"
+  },
+  {
+   "q": "Q7903",
+   "name": "Casablanca",
+   "n": 153,
+   "country": "Q1028"
+  },
+  {
+   "q": "Q35381",
+   "name": "Colombo",
+   "n": 153,
+   "country": "Q854"
+  },
+  {
+   "q": "Q34820",
+   "name": "Santo Domingo",
+   "n": 153,
+   "country": "Q786"
+  },
+  {
+   "q": "Q11725",
+   "name": "Chongqing",
+   "n": 153,
+   "country": "Q148"
+  },
+  {
+   "q": "Q2907",
+   "name": "Sucre",
+   "n": 152,
+   "country": "Q750"
+  },
+  {
+   "q": "Q37995",
+   "name": "Yangon",
+   "n": 152,
+   "country": "Q2376315"
+  },
+  {
+   "q": "Q1947",
+   "name": "Juba",
+   "n": 152,
+   "country": "Q958"
+  },
+  {
+   "q": "Q1711",
+   "name": "Potsdam",
+   "n": 152,
+   "country": "Q183"
+  },
+  {
+   "q": "Q3070",
+   "name": "San José",
+   "n": 151,
+   "country": "Q800"
+  },
+  {
+   "q": "Q7525",
+   "name": "Sevastopol",
+   "n": 151,
+   "country": "Q212"
+  },
+  {
+   "q": "Q34217",
+   "name": "Oxford",
+   "n": 151,
+   "country": "Q145"
+  },
+  {
+   "q": "Q676203",
+   "name": "Machu Picchu",
+   "n": 151,
+   "country": "Q419"
+  },
+  {
+   "q": "Q48278",
+   "name": "Medellín",
+   "n": 151,
+   "country": "Q739"
+  },
+  {
+   "q": "Q16553",
+   "name": "San Jose",
+   "n": 151,
+   "country": "Q30"
+  },
+  {
+   "q": "Q3110",
+   "name": "San Salvador",
+   "n": 151,
+   "country": "Q792"
+  },
+  {
+   "q": "Q26793",
+   "name": "Bergen",
+   "n": 150,
+   "country": "Q20"
+  },
+  {
+   "q": "Q3604",
+   "name": "Djibouti",
+   "n": 150,
+   "country": "Q977"
+  },
+  {
+   "q": "Q41183",
+   "name": "Aleppo",
+   "n": 150,
+   "country": "Q858"
+  },
+  {
+   "q": "Q38511",
+   "name": "Turku",
+   "n": 150,
+   "country": "Q33"
+  },
+  {
+   "q": "Q1735",
+   "name": "Innsbruck",
+   "n": 150,
+   "country": "Q40"
+  },
+  {
+   "q": "Q78",
+   "name": "Basel",
+   "n": 150,
+   "country": "Q39"
+  },
+  {
+   "q": "Q1720",
+   "name": "Mainz",
+   "n": 150,
+   "country": "Q183"
+  },
+  {
+   "q": "Q887",
+   "name": "Yekaterinburg",
+   "n": 150,
+   "country": "Q159"
+  },
+  {
+   "q": "Q1342",
+   "name": "Pittsburgh",
+   "n": 150,
+   "country": "Q30"
+  }
+ ]
+}

@@ -2,6 +2,7 @@
 // The Stripe key lives only in the Cloudflare dashboard as STRIPE_SECRET_KEY.
 import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin } from "./accounts.js";
 import { checkPendingCar } from "./premium.js";
+import { checkPendingMode } from "./modes.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -47,6 +48,7 @@ export async function handleMe(request, env) {
     }
   }
   await checkPendingCar(env, user); // a premium car paid for in a tab that was closed
+  await checkPendingMode(env, user); // a game mode paid for in a tab that was closed
   // last seen, for the admin screen's active-player counts (at most once an hour)
   if (!(user.last_seen > now - 3600000)) await env.DB.prepare("UPDATE users SET last_seen = ? WHERE id = ?").bind(now, user.id).run();
   return json(publicUser(user, env));

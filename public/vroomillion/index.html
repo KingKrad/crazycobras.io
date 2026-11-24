@@ -79,6 +79,7 @@
             <button class="mode-link" id="btn-online" type="button">RACE A FRIEND</button>
           </div>
           <div class="daily" id="daily"></div>
+          <button class="wt-promo" id="wt-promo" type="button" data-go="worldtour"><span class="wt-new">NEW MODE</span> WORLD TOUR · name places, drive the world ▶</button>
           <div class="whats-new" id="whats-new"></div>
         </div>
         <!-- the slide-out menu: every screen, with clear labels -->
@@ -90,6 +91,7 @@
           <div class="drawer-list">
             <button class="drawer-item hot" id="dr-daily" type="button">▶ TODAY'S DAILY RACE</button>
             <button class="drawer-item" data-go="leagues" type="button">SOLO RACES<span>Any topic, any time</span></button>
+            <button class="drawer-item" data-go="worldtour" type="button">WORLD TOUR<span>New! Name places, drive the world</span></button>
             <button class="drawer-item" data-go="versus" type="button">2 PLAYERS<span>Take turns on this screen</span></button>
             <button class="drawer-item" data-go="online" type="button">RACE A FRIEND ONLINE<span>Send them a link</span></button>
             <button class="drawer-item" data-go="board" type="button">TODAY'S LEADERBOARD</button>
@@ -141,6 +143,8 @@
         <p class="note" id="daily-note"></p>
         <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
         <h3 class="sub-title">UNLIMITED RACES</h3>
+        <h3 class="sub-title">THEMED MODES</h3>
+        <div class="themed-modes" id="themed-modes"></div>
         <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-solo" role="status"></p>
         <div id="rules-solo"></div>
@@ -148,6 +152,44 @@
         <div class="menu row">
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
           <button class="btn" data-go="title" type="button">BACK</button>
+        </div>
+      </section>
+
+      <section class="screen mode-lobby" id="s-worldtour">
+        <!-- WORLD TOUR's home: the world map fills the screen behind this (js/world.js) -->
+        <div class="ml-head">
+          <h2 class="ml-name">WORLD TOUR</h2>
+          <p class="ml-tag">Name a place. Your car drives there.</p>
+          <p class="ml-sub">Rarer places, bigger trips: road trip, ferry, plane… or a rocket round the planet.</p>
+        </div>
+        <div class="ml-bottom">
+          <p class="ml-status" id="wt-status"></p>
+          <label class="ml-agree hidden" id="wt-agree"><input type="checkbox" id="wt-agree-box"> I understand this is a one-time, non-refundable purchase.</label>
+          <button class="btn big ml-go" id="wt-go" type="button">▶ HIT THE ROAD</button>
+          <div class="ml-links">
+            <button class="btn small" data-go="title" type="button">BACK</button>
+            <button class="btn small hidden" id="wt-2p" type="button">2 PLAYERS</button>
+            <span class="ml-info" id="wt-info"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen mode-lobby" id="s-boxoffice">
+        <!-- BOX OFFICE's home: the drive-in fills the screen behind this (js/drivein.js) -->
+        <div class="ml-head">
+          <h2 class="ml-name bo">BOX OFFICE</h2>
+          <p class="ml-tag">Movies &amp; TV. Your answer plays on the big screen.</p>
+          <p class="ml-sub">Rarer picks get bigger premieres: spotlights, warp speed, explosions… or a gold blockbuster.</p>
+        </div>
+        <div class="ml-bottom">
+          <p class="ml-status" id="bo-status"></p>
+          <label class="ml-agree hidden" id="bo-agree"><input type="checkbox" id="bo-agree-box"> I understand this is a one-time, non-refundable purchase.</label>
+          <button class="btn big ml-go" id="bo-go" type="button">▶ ROLL THE TRAILER</button>
+          <div class="ml-links">
+            <button class="btn small" data-go="title" type="button">BACK</button>
+            <button class="btn small hidden" id="bo-2p" type="button">2 PLAYERS</button>
+            <span class="ml-info" id="bo-info"></span>
+          </div>
         </div>
       </section>
 
@@ -171,6 +213,7 @@
       <section class="screen" id="s-versus">
         <h2>2P VERSUS — SAME SCREEN</h2>
         <p class="note">Answers are hidden while you type. No peeking.</p>
+        <p class="vs-themed hidden" id="vs-themed"></p>
         <div class="modes" id="mode-2p" role="group" aria-label="Question mode"></div>
         <p class="prompts-left" id="left-2p" role="status"></p>
         <div id="rules-2p"></div>
