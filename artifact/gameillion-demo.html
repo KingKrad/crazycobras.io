@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gameillion demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: playful, encouraging, game-like; the user's approved Gameillion brand.
+   IDEA: a lesson card from the course that drives a real arcade cabinet beside it.
+   PICTURE: the live daily game itself, large, reacting to every edit.
+   COLOUR and TYPE: Galaxy gold (deep indigo, gold coin, teal), Nunito 900/600; one palette in both themes (night mood).
+   LAYOUT: title strip, lesson + game side by side (stacked on phones), then the 12-lesson path. */
+:root{color-scheme:dark;--bg:#140f3a;--s1:#241b63;--s2:#2f2580;--line:#3c3196;--ink:#f7f3ff;--mut:#c3bae9;--gold:#ffc83d;--goldd:#d9961a;--teal:#2fe0c8;--teald:#17a893;--pink:#ff6fb5;--ok:#56e39f;--bad:#ff8a8a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1000px 520px at 85% -10%,#3a2a9a,transparent 60%),var(--bg);color:var(--ink);font:16px/1.55 Nunito,ui-rounded,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3.5vw,48px) max(5vw,16px);max-width:1240px;margin:0 auto}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:10px}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top svg{width:54px;height:60px;flex:none}
+h1{font-size:clamp(28px,4.4vw,46px);line-height:1.05;margin:0;font-weight:900;text-wrap:balance}
+.sub{color:var(--mut);margin:6px 0 0;max-width:62ch}
+.chips{margin-left:auto;display:flex;gap:8px}
+.chip{background:var(--s1);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:900;white-space:nowrap}
+.bar{height:14px;background:#0f0b2e;border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:18px 0 14px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),#b4fff4);transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start}
+.card{background:linear-gradient(180deg,var(--s2),var(--s1));border:2px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 6px 0 #0b0726}
+.step{min-height:330px;display:flex;flex-direction:column}
+.step h2{margin:0 0 8px;font-size:24px;line-height:1.15}
+.step p{margin:0 0 10px}
+.k{font-size:13px;color:var(--teal);font-weight:900}
+label{display:block;font-weight:800;margin:10px 0 6px}
+input[type=text]{width:100%;font:inherit;font-size:17px;font-weight:700;color:var(--ink);background:#120d36;border:2px solid var(--line);border-radius:14px;padding:12px 14px;min-height:48px}
+input[type=text]:focus{border-color:var(--gold);outline:none}
+input[type=range]{width:100%;accent-color:var(--gold);height:34px}
+.val{color:var(--gold);font-size:28px;font-weight:900;margin-left:6px}
+.goal{color:var(--mut);font-weight:800;margin-top:6px}.goal.met{color:var(--ok)}
+.opts{display:grid;gap:10px;margin:8px 0}
+.opt{font:inherit;font-weight:800;text-align:left;color:var(--ink);background:var(--s1);border:2px solid var(--line);border-radius:16px;padding:13px 15px;min-height:50px;cursor:pointer;box-shadow:0 4px 0 #0b0726}
+.opt.right{border-color:var(--ok);background:#164a3a}.opt.wrong{border-color:var(--bad);background:#4a1a2a}
+.fb{border-radius:14px;padding:11px 13px;font-weight:800;margin-top:6px}.fb.g{background:#164a3a;color:#c4ffe0}.fb.b{background:#4a1a2a;color:#ffd6d6}
+.acts{margin-top:auto;padding-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:900;font-size:17px;border:0;border-radius:16px;padding:12px 22px;min-height:50px;cursor:pointer;background:var(--gold);color:#241600;box-shadow:0 5px 0 var(--goldd);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--goldd)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.t{background:var(--teal);color:#03221e;box-shadow:0 5px 0 var(--teald)}
+.btn.g{background:var(--s2);color:var(--ink);box-shadow:0 5px 0 #0b0726;border:2px solid var(--line)}
+/* the game cabinet */
+.cab{position:relative;border-radius:22px;padding:22px 18px 18px;text-align:center;min-height:470px;color:#fff;
+  background:radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--ga) 24%,var(--gb)),var(--gb) 62%);box-shadow:0 0 0 3px var(--line),0 8px 0 #0b0726;--ga:#ffc83d;--gb:#1b1446;transition:background .3s}
+.cab .lbl{position:absolute;top:10px;left:14px;font-size:13px;font-weight:900;color:var(--mut)}
+.gem{font-size:54px;line-height:1;margin-top:14px}
+.gname{font-size:clamp(28px,4vw,38px);font-weight:900;color:var(--ga);margin:6px 0 0;line-height:1.05;overflow-wrap:anywhere;text-shadow:0 3px 0 #0006}
+.gtag{opacity:.85;margin:4px 0}.meta{font-size:13px;opacity:.75;margin:0 0 12px}
+.row{display:flex;gap:8px;max-width:380px;margin:0 auto}
+.row input{flex:1;font:inherit;font-size:22px;font-weight:900;text-align:center;border-radius:14px;border:3px solid #ffffff33;background:#0005;color:#fff;padding:10px;min-height:52px}
+.row input:focus{outline:none;border-color:var(--ga)}
+.row .btn{background:var(--ga);box-shadow:0 4px 0 #0007}
+.dots{display:flex;justify-content:center;gap:6px;margin:12px 0}.dots i{width:12px;height:12px;border-radius:50%;background:var(--ga)}.dots i.u{background:#ffffff33}
+.msg{min-height:1.4em;color:#ffc2c2;font-weight:800;margin:4px 0}
+ol{list-style:none;padding:0;margin:0 auto;max-width:380px;display:flex;flex-direction:column-reverse;gap:7px}
+ol li{display:flex;gap:10px;align-items:center;text-align:left;padding:9px 12px;border-radius:12px;font-weight:800;background:linear-gradient(90deg,color-mix(in srgb,var(--ga) calc(var(--h)*70%),#ffffff14),#ffffff10)}
+ol li b{min-width:2.6em;font-size:19px}ol li.w{background:#2fbf71}
+.end{background:#0004;border-radius:16px;padding:12px;max-width:380px;margin:0 auto 12px}.end h3{margin:0;color:var(--ga)}
+.pop{animation:pop .35s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.7);opacity:0}}
+.bump{animation:bump .35s}@keyframes bump{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* path */
+.path{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:14px}
+.unit h3{margin:0 0 8px;font-size:17px;border-radius:14px;padding:8px 12px;color:#12083a}
+.u1 h3{background:var(--teal)}.u2 h3{background:var(--gold)}.u3 h3{background:var(--pink)}.u4 h3{background:#b39dff}
+.unit ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.unit li{display:flex;gap:10px;align-items:center;background:var(--s1);border:2px solid var(--line);border-radius:14px;padding:8px 10px;font-weight:800;font-size:15px}
+.nd{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;background:#3a3274;color:#a79fd8}
+.nd.o{background:var(--gold);color:#241600}.nd.d{background:var(--teal);color:#03221e}
+.price{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}.price b{font-size:40px;color:var(--gold);line-height:1}
+.note{font-size:13px;color:var(--mut)}
+/* overlay */
+.ov{position:fixed;inset:0;display:grid;place-items:center;background:#0b0726cc;z-index:20;padding:16px}.ov[hidden]{display:none}
+.ov .card{max-width:420px;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}.ov svg{width:120px;height:132px;flex:none;animation:cheer .8s ease-in-out infinite alternate}
+@keyframes cheer{to{transform:translateY(-8px) rotate(6deg)}}
+.stats{display:flex;justify-content:center;gap:10px;margin:12px 0;flex-wrap:wrap}.stats div{background:#0f0b2e;border-radius:14px;padding:8px 14px}.stats b{display:block;font-size:24px;color:var(--gold)}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:900;z-index:40}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.path{grid-template-columns:repeat(2,minmax(0,1fr))}.cab{min-height:420px}}
+@media(max-width:600px){.chips{margin-left:0}.path{grid-template-columns:1fr}.step{min-height:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<radialGradient id="cg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fff1a8"/><stop offset=".55" stop-color="#ffc83d"/><stop offset="1" stop-color="#e09a12"/></radialGradient>
+<symbol id="milli" viewBox="0 0 200 220"><path d="M100 6l9 20 22 3-16 15 4 22-19-11-19 11 4-22-16-15 22-3z" fill="#2fe0c8" stroke="#17a893" stroke-width="4" stroke-linejoin="round"/><ellipse cx="100" cy="208" rx="56" ry="9" fill="#0006"/><path d="M28 150q-22-6-18-30M172 150q22-6 18-30" fill="none" stroke="#d9961a" stroke-width="12" stroke-linecap="round"/><circle cx="100" cy="132" r="74" fill="#b8740a"/><circle cx="100" cy="126" r="74" fill="url(#cg)"/><circle cx="100" cy="126" r="58" fill="none" stroke="#e8a51f" stroke-width="6"/><ellipse cx="76" cy="118" rx="11" ry="15" fill="#2a1a00"/><ellipse cx="124" cy="118" rx="11" ry="15" fill="#2a1a00"/><circle cx="80" cy="111" r="4.5" fill="#fff"/><circle cx="128" cy="111" r="4.5" fill="#fff"/><ellipse cx="62" cy="142" rx="10" ry="6" fill="#ff6fb5" opacity=".55"/><ellipse cx="138" cy="142" rx="10" ry="6" fill="#ff6fb5" opacity=".55"/><path d="M84 146q16 16 32 0" fill="#7a2a1a" stroke="#2a1a00" stroke-width="4" stroke-linecap="round"/><path d="M58 86q12-18 34-22" fill="none" stroke="#fff8" stroke-width="7" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<header class="band" style="padding-bottom:0">
+  <div class="top">
+    <svg viewBox="0 0 200 220" role="img" aria-label="Milli, the Gameillion coin mascot"><use href="#milli"/></svg>
+    <div><h1>Gameillion: try lesson 1</h1><p class="sub">Change a real daily game and watch it react. This is a demo of the course's first free lesson.</p></div>
+    <div class="chips" aria-label="Your stats"><span class="chip" id="cStreak">&#128293; 0</span><span class="chip" id="cXp">&#129689; 0 XP</span></div>
+  </div>
+  <div class="bar" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><i id="bar"></i></div>
+</header>
+
+<main class="band" style="padding-top:0">
+  <div class="grid">
+    <section class="card step" aria-live="polite">
+      <div id="step"></div>
+      <div class="acts"><button class="btn" id="next" type="button" disabled>Continue</button></div>
+    </section>
+    <section class="cab" id="cab" aria-label="Your game, live preview">
+      <span class="lbl">YOUR GAME (LIVE)</span>
+      <div class="gem" id="gEmoji" aria-hidden="true"></div>
+      <p class="gname" id="gName"></p>
+      <p class="gtag" id="gTag"></p>
+      <p class="meta" id="gMeta"></p>
+      <div class="end" id="gEnd" hidden><h3 id="gEndT"></h3><p id="gEndP" style="margin:4px 0 10px"></p>
+        <button class="btn t" id="gShare" type="button">Copy result</button> <button class="btn g" id="gAgain" type="button">Play again</button></div>
+      <div class="row" id="gForm"><input id="gNum" type="number" inputmode="numeric" min="1" aria-label="Your guess"><button class="btn" id="gGo" type="button">Guess</button></div>
+      <div class="dots" id="gDots" role="img"></div>
+      <p class="msg" id="gMsg" role="alert"></p>
+      <ol id="gList" aria-label="Your guesses"></ol>
+    </section>
+  </div>
+
+  <section style="margin-top:34px" aria-labelledby="ph">
+    <h2 id="ph" style="font-size:28px;margin:0">The full path: 12 lessons, idea to launch</h2>
+    <p class="sub">Unit 1 is free. The rest builds, polishes and launches your own game.</p>
+    <div class="path" id="path"></div>
+    <div class="price"><b>$19</b><span>one payment, yours for life. Includes the prompt library, code lessons, a downloadable game file and the showcase.</span></div>
+    <p class="note">Demo page: progress here isn't saved. Krillion appears in the course only as a linked case study.</p>
+  </section>
+</main>
+
+<div class="ov" id="ov" hidden></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let cfg={name:'Mysterillion',tag:'Guess today’s secret number.',emoji:'\u{1F52E}',max:100,tries:7,accent:'#ffc83d',bg:'#1b1446'};
+let xp=0,streak=0,mistakes=0,si=0,done=false;
+
+/* ---- sound ---- */
+let ac=null;
+function tone(f,t,d,type='triangle',v=.12){try{ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime+t;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+.01);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g).connect(ac.destination);o.start(t0);o.stop(t0+d+.05)}catch(e){}}
+const sfx={tap:()=>tone(660,0,.06,'triangle',.06),good:()=>{tone(784,0,.12);tone(1175,.08,.18)},bad:()=>tone(220,0,.18,'square',.05),win:n=>{[523,659,784,1047,1319,1568].slice(0,3+n).forEach((f,i)=>tone(f,i*.09,.3))}};
+
+/* ---- particles ---- */
+const cv=$('fx'),cx=cv.getContext('2d');let ps=[],run=false;
+const lowPower=(navigator.hardwareConcurrency||4)<=2;
+function size(){const r=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*r;cv.height=innerHeight*r;cx.setTransform(r,0,0,r,0,0)}size();addEventListener('resize',size);
+function burst(x,y,tier){if(reduce)return;const n=[10,28,60,120][tier]/(lowPower?3:1);const cols=['#ffc83d','#ffe27a','#2fe0c8','#ff6fb5','#b39dff','#fff'];
+ for(let i=0;i<n;i++){const a=Math.random()*6.28,v=(2+Math.random()*6)*(.7+tier*.25);ps.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,l:1,s:4+Math.random()*6,c:cols[i%6],r:Math.random()*6,coin:i%2})}
+ if(!run){run=true;requestAnimationFrame(tick)}}
+function tick(){cx.clearRect(0,0,innerWidth,innerHeight);ps=ps.filter(p=>p.l>0);for(const p of ps){p.vy+=.18;p.x+=p.vx;p.y+=p.vy;p.r+=.08;p.l-=.012;cx.globalAlpha=Math.max(0,p.l);cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);
+ if(p.coin){cx.scale(Math.abs(Math.cos(p.r))*.8+.2,1);cx.beginPath();cx.arc(0,0,p.s,0,6.28);cx.fill()}else cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore()}
+ if(ps.length)requestAnimationFrame(tick);else run=false}
+const from=(el,t)=>{const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,t)};
+const bump=el=>{if(reduce||!el)return;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')};
+
+/* ---- the daily game ---- */
+function hash(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return h>>>0}
+const today=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+const num=Math.max(1,Math.round((Date.parse(today)-Date.parse('2026-01-01'))/864e5)+1);
+let g={answer:0,guesses:[],practice:false};
+function newRound(practice){g={answer:practice?1+Math.floor(Math.random()*cfg.max):hash(cfg.name.toLowerCase()+'|'+today)%cfg.max+1,guesses:[],practice};drawGame()}
+function judge(x){if(x===g.answer)return{r:'win',h:1};return{r:x<g.answer?'higher':'lower',h:Math.max(0,1-Math.abs(x-g.answer)/(cfg.max/2))}}
+const sq=j=>j.r==='win'?'\u{1F7E9}':j.h>=.9?'\u{1F7E7}':j.h>=.6?'\u{1F7E8}':'\u{1F7E6}';
+function drawGame(){
+ const c=$('cab');c.style.setProperty('--ga',cfg.accent);c.style.setProperty('--gb',cfg.bg);
+ $('gEmoji').textContent=cfg.emoji;$('gName').textContent=cfg.name;$('gTag').textContent=cfg.tag;
+ $('gMeta').textContent=(g.practice?'Practice round':'#'+num)+' · 1 to '+cfg.max+' · '+cfg.tries+' tries';
+ $('gNum').placeholder='1 – '+cfg.max;
+ $('gList').innerHTML=g.guesses.map(x=>{const j=judge(x);const t=j.r==='win'?'You found it!':(j.r==='higher'?'Go higher ↑':'Go lower ↓')+(j.h>=.9?' · Scorching!':j.h<.4?' · Ice cold.':'');return `<li class="${j.r==='win'?'w':''}" style="--h:${j.h.toFixed(2)}"><b>${x}</b><span>${t}</span></li>`}).join('');
+ const won=g.guesses.includes(g.answer),left=cfg.tries-g.guesses.length,over=won||left<=0;
+ $('gDots').innerHTML=Array.from({length:cfg.tries},(_,i)=>`<i class="${i<g.guesses.length?'u':''}"></i>`).join('');
+ $('gDots').setAttribute('aria-label',left+' tries left');
+ $('gForm').hidden=over;$('gEnd').hidden=!over;
+ if(over){$('gEndT').textContent=won?cfg.emoji+' You found it!':'The number was '+g.answer;$('gEndP').textContent=won?'Solved in '+g.guesses.length+'/'+cfg.tries+'.':'So close. Try again tomorrow!'}
+}
+function guess(){const x=Math.round(+$('gNum').value);
+ if(!(x>=1&&x<=cfg.max)){$('gMsg').textContent='Pick a whole number from 1 to '+cfg.max+'.';bump($('gForm'));sfx.bad();return}
+ if(g.guesses.includes(x)){$('gMsg').textContent='You already tried '+x+'.';bump($('gForm'));return}
+ $('gMsg').textContent='';g.guesses.push(x);$('gNum').value='';drawGame();
+ const li=$('gList').lastElementChild;if(li&&!reduce)li.classList.add('pop');
+ const j=judge(x);
+ if(j.r==='win'){sfx.win(g.guesses.length<=4?3:2);from($('cab'),g.guesses.length<=4?3:2)}
+ else if(g.guesses.length>=cfg.tries){sfx.bad();bump($('cab'))}
+ else{j.h>=.9?sfx.good():sfx.tap();if(j.h<.4)bump(li);$('gNum').focus()}}
+$('gGo').addEventListener('click',guess);
+$('gNum').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();guess()}});
+$('gAgain').addEventListener('click',()=>{newRound(true);$('gNum').focus()});
+$('gShare').addEventListener('click',async()=>{const won=g.guesses.includes(g.answer);
+ const t=`${cfg.emoji} ${cfg.name} #${num} ${won?g.guesses.length:'X'}/${cfg.tries}\n`+g.guesses.map(x=>sq(judge(x))).join('');
+ try{await navigator.clipboard.writeText(t);toast('Copied! Spoiler-free, ready for the group chat.')}catch(e){toast(t.replace('\n','  '))}});
+
+/* ---- lesson ---- */
+const steps=[
+ {t:'read',h:'Meet your game',k:'STEP 1',p:['Beside this card (below it, on a phone) is a real daily puzzle. Everyone gets the same secret number each day and tries to find it in as few guesses as possible.','Have a guess or two, then come back. In the next step you make it yours.']},
+ {t:'text',h:'Rename it',k:'STEP 2',key:'name',label:'Game name',p:['Give the game a new name. Anything you like.'],big:true},
+ {t:'range',h:'Make it harder or easier',k:'STEP 3',key:'max',label:'Highest number',min:10,max:500,step:10,p:['The secret number is somewhere between 1 and this. Bigger means harder.']},
+ {t:'quiz',h:'Why is ONE puzzle per day a good idea?',k:'QUICK CHECK',o:['Everyone gets the same challenge, so they compare and come back tomorrow','It’s less work for the developer','Players prefer fewer choices in general'],a:0,x:'A shared puzzle plus scarcity means conversation and a reason to return. That’s the engine behind daily hits.'}
+];
+const setDone=v=>{done=v;$('next').disabled=!v};
+function showStep(){const s=steps[si],box=$('step');$('bar').style.width=si/steps.length*100+'%';$('bar').parentElement.setAttribute('aria-valuenow',si);
+ $('next').textContent=si===steps.length-1?'Finish lesson':'Continue';
+ const head=`<span class="k">${s.k}</span><h2 tabindex="-1">${esc(s.h)}</h2>`+(s.p||[]).map(x=>`<p>${esc(x)}</p>`).join('');
+ if(s.t==='read'){box.innerHTML=head;setDone(true)}
+ if(s.t==='text'||s.t==='range'){const base=cfg[s.key];
+  box.innerHTML=head+(s.t==='text'?`<label for="ctl">${s.label}</label><input type="text" id="ctl" maxlength="30" autocomplete="off" spellcheck="false">`
+   :`<label for="ctl">${s.label}<span class="val" id="val">${cfg.max}</span></label><input type="range" id="ctl" min="${s.min}" max="${s.max}" step="${s.step}">`)+`<p class="goal" id="goal">○ Goal: change it</p>`;
+  const c=$('ctl');c.value=cfg[s.key];setDone(false);
+  c.addEventListener('input',()=>{const v=s.t==='range'?+c.value:c.value.trim();if(s.t==='range')$('val').textContent=c.value;if(v==='')return;
+   cfg[s.key]=v;const keep=s.key!=='max'&&g.guesses.length;if(keep)drawGame();else newRound(false);bump($('cab'));
+   if(v!==base&&!done){setDone(true);$('goal').textContent='✓ Goal: change it';$('goal').classList.add('met');
+    if(s.big)alive();else{sfx.good();from(c,1)}}});}
+ if(s.t==='quiz'){box.innerHTML=head+`<div class="opts">${s.o.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb" role="status"></div>`;setDone(false);
+  box.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{if(done)return;if(+b.dataset.i===s.a){b.classList.add('right');$('fb').innerHTML=`<div class="fb g">✓ ${esc(s.x)}</div>`;sfx.good();from(b,mistakes?1:2);setDone(true);$('next').focus()}
+   else{mistakes++;b.classList.add('wrong');b.disabled=true;$('fb').innerHTML='<div class="fb b">Not quite. Try another one.</div>';sfx.bad();bump(b)}}))}
+ box.querySelector('h2').focus({preventScroll:true})}
+$('next').addEventListener('click',()=>{if(!done)return;sfx.tap();if(si<steps.length-1){si++;showStep()}else finish()});
+
+/* ---- big moments ---- */
+let back=null;
+function overlay(title,text,stats,actions){back=document.activeElement;$('ov').innerHTML=`<div class="card" role="dialog" aria-modal="true" aria-labelledby="ovt"><svg viewBox="0 0 200 220" aria-hidden="true"><use href="#milli"/></svg><h2 id="ovt" style="margin:6px 0">${esc(title)}</h2><p>${esc(text)}</p>${stats?`<div class="stats">${stats.map(([b,l])=>`<div><b>${esc(b)}</b>${esc(l)}</div>`).join('')}</div>`:''}<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${actions}</div></div>`;
+ $('ov').hidden=false;$('ov').querySelector('button').focus()}
+function closeOv(){$('ov').hidden=true;if(back)back.focus()}
+$('ov').addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a)return;if(a.dataset.a==='close')closeOv();if(a.dataset.a==='again'){closeOv();restart()}});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('ov').hidden)closeOv()});
+function alive(){sfx.win(3);burst(innerWidth/2,innerHeight*.45,3);setTimeout(()=>burst(innerWidth*.2,innerHeight*.6,2),180);setTimeout(()=>burst(innerWidth*.8,innerHeight*.6,2),320);bump($('cab'));
+ overlay('IT’S ALIVE!',`You just changed a real game. ${cfg.name} is yours now, and everyone who plays it will see that name.`,null,'<button class="btn" type="button" data-a="close">Keep going</button>')}
+function finish(){const gained=50+(mistakes?0:20);xp+=gained;streak=1;$('bar').style.width='100%';$('cXp').textContent='\u{1FA99} '+xp+' XP';$('cStreak').textContent='\u{1F525} '+streak;
+ const tier=mistakes?1:2;sfx.win(tier);burst(innerWidth/2,innerHeight*.45,tier+1);markPath();
+ overlay(mistakes?'Nice work!':'Perfect lesson!',mistakes?'Every lesson gets your game closer to launch.':'No mistakes. Bonus XP!',[['+'+gained,'XP'],['\u{1F525} 1','day streak'],['Lv 1','level']],'<button class="btn" type="button" data-a="close">See the path</button><button class="btn g" type="button" data-a="again">Replay lesson</button>');
+ setTimeout(()=>document.getElementById('ph').scrollIntoView({behavior:reduce?'auto':'smooth'}),50)}
+function restart(){si=0;mistakes=0;showStep()}
+function toast(m){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.append(t)}t.textContent=m;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>t.hidden=true,2600)}
+
+/* ---- path ---- */
+const units=[['Idea & hook','u1',['It’s alive!','Why daily games spread','Name & theme your game']],['Build your daily puzzle','u2',['One puzzle for everyone','Tuning difficulty','Make AI your teammate']],['Habit & sharing','u3',['The share card','Streaks that feel good','Give your game a voice']],['Polish & launch','u4',['Juice: make it feel amazing','Test on real phones','Launch day']]];
+let lesson1Done=false;
+function markPath(){lesson1Done=true;drawPath()}
+function drawPath(){let n=0;$('path').innerHTML=units.map(([t,c,ls],u)=>`<div class="unit ${c}"><h3>Unit ${u+1}: ${t}</h3><ul>${ls.map(l=>{n++;const st=n===1?(lesson1Done?'d':'o'):n<=3?'':'';const ic=n===1&&lesson1Done?'✓':n<=3?n:'\u{1F512}';
+ return `<li><span class="nd ${n===1?(lesson1Done?'d':'o'):n===2&&lesson1Done?'o':st}" aria-hidden="true">${n===2&&lesson1Done?2:ic}</span><span>${l}<span class="note" style="display:block">${n<=3?'Free':'Full course'}</span></span></li>`}).join('')}</ul></div>`).join('')}
+
+document.addEventListener('click',e=>{if(e.target.closest('.btn,.opt'))sfx.tap()},true);
+drawPath();newRound(false);showStep();
+}
+</script>
+</body>
+</html>
