@@ -11,12 +11,13 @@ for (const f of fs.readdirSync(DIR)) {
   const d = JSON.parse(fs.readFileSync(new URL(f, DIR), "utf8"));
   if (!d.at || !KEEP.test(d.fam || "")) continue;
   // the best-known tiers only (TRAFFIC to FAST LANE): rarer places stay in their own prompt's file
-  const tiers = /^(gcountry|gborder|glang|gcapital)\//.test(d.fam) ? d.a : d.a.slice(0, /^g(city|cityus|cityr|region|county|hood|museum|tower|airport)\//.test(d.fam) ? 3 : 4);
+  // the best-known only: every tier for countries and capitals; TRAFFIC and CRUISING for the rest
+  const tiers = /^(gcountry|gborder|glang|gcapital)\//.test(d.fam) ? d.a : d.a.slice(0, 2);
   for (const e of tiers.flat()) {
     const forms = e.split("|");
     const at = d.at[normalize(forms[0])];
     if (!at) continue;
-    for (const fm of forms.slice(0, 3)) { const k = normalize(fm); if (k && !out[k]) out[k] = at; }
+    for (const fm of forms.slice(0, 2)) { const k = normalize(fm); if (k && !out[k]) out[k] = at.map((v) => Math.round(v * 10) / 10); }
   }
 }
 const OUT = new URL("../../public/vroomillion/geo/places.json", import.meta.url);

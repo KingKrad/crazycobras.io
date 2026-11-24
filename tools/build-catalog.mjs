@@ -135,6 +135,8 @@ async function main() {
     }
     let items;
     try { items = await fetchPrompt(q, src); } catch (e) { console.log("!! failed", f.id, e.message); continue; }
+    // part of the rule timed out: don't write a list that's missing half its answers (try again later)
+    if (items.partial) { thin.push(`${f.id} (part of the query failed)`); console.log("!! partial, not written:", f.id); continue; }
     // (a short list keeps rarity in it: TRAFFIC is at most its best-known 30%)
     const top = f.top || (src.autotop ? items.slice(0, Math.min(src.autotop, Math.max(5, Math.round(items.length * 0.3)))).map((it) => it.forms[0]) : []);
     const { a, tiers } = tiersFor(top, items, src);

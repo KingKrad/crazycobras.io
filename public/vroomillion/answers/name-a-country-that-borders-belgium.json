@@ -1,1 +1,0 @@
-{"q":"Name a country that borders Belgium","a":[["france|francia|république française","germany|de"],["luxembourg"],[],[],[]],"tiers":[70,25],"fam":"gborder/belgium","live":{"where":"{ wd:Q31 wdt:P47 ?i. ?i wdt:P31 wd:Q3624078. FILTER NOT EXISTS { ?i wdt:P576 [] } }","tiers":[70,25],"exclude":null,"taxa":false},"at":{"france":[47,2],"germany":[51,10],"luxembourg":[49.77,6.13]}}

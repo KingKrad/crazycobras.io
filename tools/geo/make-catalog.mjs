@@ -45,7 +45,8 @@ function fam(topic, id, lvl, prompt, where0, opts = "") {
   lines[topic].push(`${id} | ${lvl} | geo | g:${topic} | ${prompt} | geo autotop=12 max=800 ${opts}${extra} w:${where} FILTER NOT EXISTS { ?i wdt:P576 [] } |`);
 }
 const SOV = "?i wdt:P31 wd:Q3624078. FILTER NOT EXISTS { ?i wdt:P576 [] }";
-const inCont = (cq) => cq === "Q538" ? "{ ?c wdt:P30 wd:Q538. } UNION { ?c wdt:P30 wd:Q55643. }" : `?c wdt:P30 wd:${cq}.`;
+// the countries of a continent, listed (much faster for Wikidata than working them out per item)
+const inCont = (cq) => `VALUES ?c { ${countries.filter((c) => c.cont.includes(cq) || (cq === "Q538" && c.cont.includes("Q55643"))).map((c) => "wd:" + c.q).join(" ")} }`;
 
 // ---- countries ----
 fam("countries", "gcountry/world", 1, "Name a country", SOV, "min=1 minans=40");

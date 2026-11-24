@@ -133,12 +133,14 @@ export async function fetchPrompt(prompt, src) {
   // step 1: the items and their sitelink counts (cheap); step 2: English labels and aliases in batches
   // "{ A } UNION { B } rest" runs as separate small queries "A rest" and "B rest": far less likely to time out
   const found = new Map();
+  let skipped = false; // a part of the rule that failed: the list would be missing things
   for (const branch of branches(src.where)) {
     let rows;
     try {
       rows = await sparql(`SELECT ?i ?n WHERE { ${branch} ?i wikibase:sitelinks ?n. FILTER(?n >= ${src.min ?? 1})${notKinds(src) ? ` FILTER NOT EXISTS { ${notKinds(src)} }` : ""} }`);
     } catch (e) {
       console.log("   (part skipped: " + e.message + ")  " + branch.slice(0, 80));
+      skipped = true;
       continue;
     }
     for (const r of rows) found.set(r.i.value.split("/").pop(), Number(r.n.value));
@@ -162,7 +164,7 @@ export async function fetchPrompt(prompt, src) {
     }
     await sleep(400);
   }
-  return top.filter((x) => names.has(x.id)).map((x) => {
+  const out = top.filter((x) => names.has(x.id)).map((x) => {
     const e = names.get(x.id);
     // aliases are messy on Wikidata: keep short, plain ones only
     const alts = e.alts.filter((x) => x.split(" ").length <= 3 && !/\b(by|for|from|with|in|of the)\b/i.test(x) && !/^[A-Z0-9]{1,3}$/.test(x));
@@ -173,5 +175,7 @@ export async function fetchPrompt(prompt, src) {
     if (src.surnames && forms[0]) { const last = forms[0].split(" ").pop(); if (last.length >= 4 && last !== forms[0]) forms.push(last); }
     return { n: x.n, forms: [...new Set(forms)], ...(e.at ? { at: e.at } : {}) };
   }).filter((x) => x.forms.length);
+  out.partial = skipped;
+  return out;
 }
 
