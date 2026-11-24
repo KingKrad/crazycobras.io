@@ -18,15 +18,13 @@ async function list(name, q) {
   return [];
 }
 const L = {};
-// people who directed at least a handful of films, by fame
-L.directors = await list("directors", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?f) AS ?c) WHERE { ?f wdt:P31 wd:Q11424; wdt:P57 ?i. } GROUP BY ?i HAVING(?c >= 6) } ?i wikibase:sitelinks ?n. FILTER(?n >= 60) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
-L.actors = await list("actors", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?f) AS ?c) WHERE { ?f wdt:P31 wd:Q11424; wdt:P161 ?i. } GROUP BY ?i HAVING(?c >= 15) } ?i wikibase:sitelinks ?n. FILTER(?n >= 70) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
-// TV series with lots of characters on Wikidata
-L.shows = await list("shows", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?ch) AS ?c) WHERE { ?ch wdt:P1441 ?i. ?i wdt:P31/wdt:P279? wd:Q5398426. } GROUP BY ?i HAVING(?c >= 10) } ?i wikibase:sitelinks ?n. FILTER(?n >= 30) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
-// film franchises / series with lots of characters
-L.franchises = await list("franchises", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?ch) AS ?c) WHERE { ?ch wdt:P1441 ?i. ?i wdt:P31/wdt:P279? ?k. VALUES ?k { wd:Q196600 wd:Q24856 wd:Q1257444 wd:Q11424 } } GROUP BY ?i HAVING(?c >= 10) } ?i wikibase:sitelinks ?n. FILTER(?n >= 40) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
-// networks and streaming services with many shows
-L.networks = await list("networks", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?s) AS ?c) WHERE { ?s wdt:P31 wd:Q5398426; wdt:P449 ?i. } GROUP BY ?i HAVING(?c >= 40) } ?i wikibase:sitelinks ?n. FILTER(?n >= 20) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
-// studios with many films
-L.studios = await list("studios", `SELECT ?i ?l ?n WHERE { { SELECT ?i (COUNT(?f) AS ?c) WHERE { ?f wdt:P31 wd:Q11424; wdt:P272 ?i. } GROUP BY ?i HAVING(?c >= 40) } ?i wikibase:sitelinks ?n. FILTER(?n >= 25) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`);
+// ranked by fame (how many Wikipedias cover them); prompts that come out thin are dropped at build time
+const top = (cls, min, extra = "") => `SELECT ?i ?l ?n WHERE { ?i wdt:P106 wd:${cls}; wikibase:sitelinks ?n. FILTER(?n >= ${min}) ${extra} ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`;
+const kind = (cls, min) => `SELECT ?i ?l ?n WHERE { ?i wdt:P31 wd:${cls}; wikibase:sitelinks ?n. FILTER(?n >= ${min}) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`;
+L.directors = await list("directors", top("Q2526255", 70));
+L.actors = await list("actors", top("Q10800557", 90));
+L.shows = await list("shows", kind("Q5398426", 55));
+L.franchises = await list("franchises", kind("Q196600", 45));
+L.networks = [...await list("channels", kind("Q2001305", 45)), ...await list("streaming", kind("Q15590336", 30))].sort((a, b) => b.n - a.n);
+L.studios = await list("studios", kind("Q1762059", 35));
 fs.writeFileSync(new URL("./lists.json", import.meta.url), JSON.stringify(L, null, 1));
