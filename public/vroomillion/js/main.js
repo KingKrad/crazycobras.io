@@ -182,6 +182,7 @@ function frame(now) {
   last = now;
   const place = PLACE_OF[current];
   if (place) {
+    chaseScene.clearHi();
     places.update(dt);
     places.draw(place, tuned(carById(save.car)));
   } else {
@@ -204,6 +205,14 @@ function crispCanvas(cssW, cssH) {
   const cv = $("scene");
   cv.style.width = (w * k) / dpr + "px";
   cv.style.height = (hgt * k) / dpr + "px";
+  // the full-resolution layer on top, for text drawn into the scene (the answer cards)
+  const hi = $("scene-hi");
+  if (hi) {
+    if (hi.width !== w * k || hi.height !== hgt * k) { hi.width = w * k; hi.height = hgt * k; }
+    hi.style.width = cv.style.width;
+    hi.style.height = cv.style.height;
+    chaseScene.setHi(hi, k);
+  }
   return { w, h: hgt, css: k / dpr }; // css: screen (CSS) pixels per canvas pixel
 }
 function fitScene() {

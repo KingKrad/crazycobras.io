@@ -110,6 +110,7 @@ button { cursor: pointer; touch-action: manipulation; }
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+#scene-hi { position: absolute; left: 0; top: 0; pointer-events: none; }
 .scanlines {
   position: absolute;
   inset: 0;

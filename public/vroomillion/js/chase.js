@@ -12,7 +12,6 @@
 import { rearSprite } from "./cars.js";
 import { drawClouds, drawSkyLife, skyShow, drawSkyShow, drawFireworks, MOUNTAINS, drawLandmark, bits, GROUND, updateTraffic, trafficSprite } from "./scenery.js";
 import { pixelText } from "./scene.js";
-import { fontLine, textWidth } from "./pixelfont.js";
 
 const SEG = 200; // length of one road segment (world units)
 const ROAD = 2000; // road width (world units)
@@ -519,50 +518,78 @@ function gantryText(name) {
 // ---- the answer card the car smashes through ----
 // rarity colours (style.css --t0..--t5): gray, gray-white, green, blue, purple, gold
 const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
-// card: { who, answer, tierName, gain, tier, color }; maxW in canvas pixels. The text is the
-// hand-drawn pixel font (pixelfont.js), scaled so it reads at the same size on every screen.
-function buildCard(card, maxW, cssPx = 1) {
+const CARD_FONT = '"Bungee", "Space Grotesk", sans-serif';
+if (typeof document !== "undefined" && document.fonts) document.fonts.load('20px "Bungee"').catch(() => {});
+
+// card: { who, answer, tierName, gain, tier, color }; maxW in canvas pixels; cssPx: screen pixels per
+// canvas pixel; R: device pixels per canvas pixel. Returns { lo, hi }: the card at the scene's pixel
+// size (for the shards it breaks into) and at full screen resolution, so the lettering is smooth.
+function buildCard(card, maxW, cssPx = 1, R = 1) {
   const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7e]/g, "").toUpperCase();
-  // the small rows are about 11 screen pixels tall, the answer twice that when it fits
-  const small = Math.max(1, Math.round(11 / (7 * cssPx)));
-  const room = (s) => Math.floor((maxW - 16) / s) - 1;
-  const fit = (text, s) => {
+  const m = document.createElement("canvas").getContext("2d");
+  const measure = (t, size) => { m.font = `${size}px ${CARD_FONT}`; return m.measureText(t).width; };
+  // sizes in canvas pixels: the small rows read at about 13 screen pixels, the answer at about 30
+  const small = 13 / cssPx;
+  const room = maxW - 16;
+  const fit = (text, size) => {
     let t = plain(text);
-    while (textWidth(t) > room(s) && t.length > 3) t = t.slice(0, -2).trimEnd() + ".";
+    while (measure(t, size) > room && t.length > 3) t = t.slice(0, -2).trimEnd() + ".";
     return t;
   };
   const ans = plain(card.answer);
-  let big = small * 2;
-  while (big > small && textWidth(ans) > room(big)) big--;
+  let big = 30 / cssPx;
+  while (big > small * 1.2 && measure(ans, big) > room) big *= 0.92;
   const rows = [];
-  if (card.who) rows.push(fontLine(plain(card.who), small, card.color));
-  rows.push(fontLine(fit(ans, big), big, "#ffffff"));
-  rows.push(fontLine(fit(card.tierName, small), small, TIER_COL[card.tier]));
-  rows.push(fontLine(plain(card.gain), small, card.tier ? "#ffd23a" : "#8a8499"));
-  const pad = 4 + small * 3;
-  const gap = small * 3;
-  const w = Math.max(...rows.map((r) => r.width)) + pad * 2;
-  const h = rows.reduce((a, r) => a + r.height, 0) + gap * (rows.length - 1) + pad * 2;
-  const cv = document.createElement("canvas");
-  cv.width = w;
-  cv.height = h;
-  const g = cv.getContext("2d");
-  g.fillStyle = "#0b0618";
-  g.fillRect(0, 0, w, h);
-  // tinted with the tier colour, so the shards are colourful when it breaks
-  g.fillStyle = card.tier === 5 ? "#3a1068" : css(mixC(rgb(TIER_COL[card.tier]), [16, 9, 36], 0.72));
-  g.fillRect(2, 2, w - 4, h - 4);
-  if (card.tier === 5) {
-    const hues = ["#ff4fd8", "#ffd23a", "#5dff8f", "#4fd1ff", "#b388ff"];
-    for (let x = 0; x < w; x += 4) { g.fillStyle = hues[(x / 4) % hues.length]; g.fillRect(x, 0, 4, 2); g.fillRect(x, h - 2, 4, 2); }
-    for (let y = 0; y < h; y += 4) { g.fillStyle = hues[(y / 4) % hues.length]; g.fillRect(0, y, 2, 4); g.fillRect(w - 2, y, 2, 4); }
-  } else {
-    g.fillStyle = TIER_COL[card.tier];
-    g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h);
-  }
-  let y = pad;
-  for (const r of rows) { g.drawImage(r, Math.round((w - r.width) / 2), y); y += r.height + gap; }
-  return cv;
+  if (card.who) rows.push({ t: plain(card.who), size: small, col: card.color });
+  rows.push({ t: fit(ans, big), size: big, col: "#ffffff" });
+  rows.push({ t: fit(card.tierName, small), size: small, col: TIER_COL[card.tier] });
+  rows.push({ t: plain(card.gain), size: small, col: card.tier ? "#ffd23a" : "#a9a4ba" });
+  for (const r of rows) { r.w = measure(r.t, r.size); r.h = r.size * 1.05; }
+  const pad = Math.round(5 + small * 0.5);
+  const gap = Math.round(small * 0.45);
+  const w = Math.ceil(Math.max(...rows.map((r) => r.w)) + pad * 2);
+  const h = Math.ceil(rows.reduce((a, r) => a + r.h, 0) + gap * (rows.length - 1) + pad * 2);
+  const paint = (scale) => {
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(w * scale);
+    cv.height = Math.round(h * scale);
+    const g = cv.getContext("2d");
+    g.scale(scale, scale);
+    g.fillStyle = "#0b0618";
+    g.fillRect(0, 0, w, h);
+    // tinted with the tier colour, so the shards are colourful when it breaks
+    g.fillStyle = card.tier === 5 ? "#3a1068" : css(mixC(rgb(TIER_COL[card.tier]), [16, 9, 36], 0.72));
+    g.fillRect(2, 2, w - 4, h - 4);
+    if (card.tier === 5) {
+      const hues = ["#ff4fd8", "#ffd23a", "#5dff8f", "#4fd1ff", "#b388ff"];
+      for (let x = 0; x < w; x += 4) { g.fillStyle = hues[(x / 4) % hues.length]; g.fillRect(x, 0, 4, 2); g.fillRect(x, h - 2, 4, 2); }
+      for (let y = 0; y < h; y += 4) { g.fillStyle = hues[(y / 4) % hues.length]; g.fillRect(0, y, 2, 4); g.fillRect(w - 2, y, 2, 4); }
+    } else {
+      g.fillStyle = TIER_COL[card.tier];
+      g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h);
+    }
+    g.textBaseline = "top";
+    g.textAlign = "center";
+    let y = pad;
+    for (const r of rows) {
+      g.font = `${r.size}px ${CARD_FONT}`;
+      const off = Math.max(1, r.size * 0.07);
+      g.fillStyle = "#05020c";
+      g.fillText(r.t, w / 2 + off, y + off);
+      g.fillStyle = r.col;
+      g.fillText(r.t, w / 2, y);
+      y += r.h + gap;
+    }
+    return cv;
+  };
+  const hi = paint(Math.max(1, R));
+  const lo = document.createElement("canvas");
+  lo.width = w;
+  lo.height = h;
+  const lg = lo.getContext("2d");
+  lg.imageSmoothingEnabled = true;
+  lg.drawImage(hi, 0, 0, w, h);
+  return { lo, hi };
 }
 
 // how hard each tier hits: shard size, launch speed, how much shards fly at the camera
@@ -844,15 +871,17 @@ export class ChaseScene {
       const maxW = Math.round(this.W * (n > 1 ? 0.46 : 0.88));
       const top = this.horizon + (this.carBottom - this.horizon) * 0.08;
       this.smashes = cards.map((c, i) => {
-        const img = buildCard(c, maxW, this.cssPx);
+        const card = buildCard(c, maxW, this.cssPx, this.hiScale || 1);
+        const img = card.lo;
         const cx = n > 1 ? this.W * (i ? 0.74 : 0.26) : this.W / 2;
         // sit above the car (and its name tag) so it's clear the car has to drive into it
         const cy = Math.round(Math.min(top + img.height / 2, this.coverTop() - 10 - img.height / 2));
         const fx = c.fx ?? c.tier;
         const build = BUILD[fx] || 0;
         // the hidden face: the answer, but no tier yet
-        const hidden = build ? buildCard({ ...c, tier: 1, tierName: "...", gain: "???" }, maxW, this.cssPx) : null;
-        return { ...c, fx, build, i, img, hidden, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0, revealed: !build, pop: 0 };
+        const hiddenCard = build ? buildCard({ ...c, tier: 1, tierName: ". . .", gain: "? ? ?" }, maxW, this.cssPx, this.hiScale || 1) : null;
+        const hidden = hiddenCard?.lo || null;
+        return { ...c, fx, build, i, img, hidden, hiImg: card.hi, hiHidden: hiddenCard?.hi || null, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0, revealed: !build, pop: 0 };
       });
       this.smashDone = resolve;
     });
@@ -980,7 +1009,7 @@ export class ChaseScene {
     this.onEvent?.("impact", s);
   }
 
-  drawSmash(g) {
+  drawSmash(g, hi = false) {
     const u = this.u;
     for (const s of this.smashes) {
       if (s.phase === "broken" || s.alpha <= 0) continue;
@@ -1016,7 +1045,7 @@ export class ChaseScene {
         }
         g.globalAlpha = 1;
       }
-      g.drawImage(s.revealed ? s.img : s.hidden, x, y, w, h);
+      g.drawImage(hi ? (s.revealed ? s.hiImg : s.hiHidden) : s.revealed ? s.img : s.hidden, x, y, w, h);
       if (s.tier === 5 && s.phase !== "slam") {
         g.strokeStyle = `hsl(${Math.floor(this.time * 600) % 360},100%,65%)`;
         g.lineWidth = 2;
@@ -1635,8 +1664,33 @@ export class ChaseScene {
     const camera = g.getTransform();
     g.restore();
     this.post(g);
-    // the answer cards go on top of the glow and blur, so their lettering stays sharp
-    if (this.smashes.length) { g.save(); g.setTransform(camera); this.drawSmash(g); g.restore(); }
+    // the answer cards go on top of the glow and blur, on the full-resolution layer when there is one,
+    // so their lettering is smooth and sharp
+    const hg = this.hiG;
+    this.clearHi();
+    if (this.smashes.length || this.shards.length) {
+      const R = this.hiScale || 1;
+      const tg = hg || g;
+      tg.save();
+      tg.setTransform(hg ? new DOMMatrix([R, 0, 0, R, 0, 0]).multiply(camera) : camera);
+      this.drawSmash(tg, !!hg);
+      tg.restore();
+      if (hg) this.hiUsed = true;
+    }
+  }
+
+  // the full-resolution layer over the scene canvas (main.js sizes it): R device pixels per scene pixel
+  setHi(canvas, R) {
+    this.hiG = canvas ? canvas.getContext("2d") : null;
+    this.hiScale = R;
+    if (this.hiG) this.hiG.imageSmoothingEnabled = false;
+    this.hiUsed = true;
+  }
+  clearHi() {
+    if (!this.hiG || !this.hiUsed) return;
+    this.hiG.setTransform(1, 0, 0, 1, 0, 0);
+    this.hiG.clearRect(0, 0, this.hiG.canvas.width, this.hiG.canvas.height);
+    this.hiUsed = false;
   }
 
   // ---- the look on top: a glossy road, haze, glow, speed blur and a vignette ----
