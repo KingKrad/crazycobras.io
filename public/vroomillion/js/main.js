@@ -238,6 +238,7 @@ function fitScene() {
   document.body.classList.toggle("kb", kb);
   const { w: iw, h: ih, css: k } = crispCanvas(vw, vh);
   chaseScene.clearTop = 0;
+  chaseScene.cssPx = k; // so in-scene text can be sized for the screen
   // room for the answer bar (one compact row on the keyboard), and the car a little further up the road
   const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
   scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05), !!chaseScene.glideNext); // nearest car sits above the answer bar

@@ -12,6 +12,7 @@
 import { rearSprite } from "./cars.js";
 import { drawClouds, drawSkyLife, skyShow, drawSkyShow, drawFireworks, MOUNTAINS, drawLandmark, bits, GROUND, updateTraffic, trafficSprite } from "./scenery.js";
 import { pixelText } from "./scene.js";
+import { fontLine, textWidth } from "./pixelfont.js";
 
 const SEG = 200; // length of one road segment (world units)
 const ROAD = 2000; // road width (world units)
@@ -518,46 +519,28 @@ function gantryText(name) {
 // ---- the answer card the car smashes through ----
 // rarity colours (style.css --t0..--t5): gray, gray-white, green, blue, purple, gold
 const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
-const FONT_NAME = '"Bungee", "Space Grotesk", sans-serif';
-if (typeof document !== "undefined" && document.fonts) document.fonts.load('12px "Bungee"').catch(() => {});
-
-// Hard-edged pixel text (the font's anti-aliasing is thresholded away).
-function pixelLine(text, size0, colour) {
-  const size = Math.round(size0 * 1.1); // the sizes were picked for a different font
-  const m = document.createElement("canvas").getContext("2d");
-  m.font = `${size}px ${FONT_NAME}`;
-  const w = Math.max(1, Math.ceil(m.measureText(text).width));
-  const cv = document.createElement("canvas");
-  cv.width = w;
-  cv.height = size + 2;
-  const g = cv.getContext("2d");
-  g.font = `${size}px ${FONT_NAME}`;
-  g.textBaseline = "top";
-  g.fillStyle = colour;
-  g.fillText(text, 0, 1);
-  const img = g.getImageData(0, 0, cv.width, cv.height);
-  for (let i = 3; i < img.data.length; i += 4) img.data[i] = img.data[i] >= 110 ? 255 : 0;
-  g.putImageData(img, 0, 0);
-  return cv;
-}
-
-// card: { who, answer, tierName, gain, tier, color }; maxW in canvas pixels
-function buildCard(card, maxW) {
-  const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7e]/g, "");
-  const fit = (text, size) => {
+// card: { who, answer, tierName, gain, tier, color }; maxW in canvas pixels. The text is the
+// hand-drawn pixel font (pixelfont.js), scaled so it reads at the same size on every screen.
+function buildCard(card, maxW, cssPx = 1) {
+  const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\x20-\x7e]/g, "").toUpperCase();
+  // the small rows are about 11 screen pixels tall, the answer twice that when it fits
+  const small = Math.max(1, Math.round(11 / (7 * cssPx)));
+  const room = (s) => Math.floor((maxW - 16) / s) - 1;
+  const fit = (text, s) => {
     let t = plain(text);
-    let line = pixelLine(t, size, "#fff");
-    while (line.width > maxW - 16 && t.length > 3) { t = t.slice(0, -2) + "."; line = pixelLine(t, size, "#fff"); }
+    while (textWidth(t) > room(s) && t.length > 3) t = t.slice(0, -2).trimEnd() + ".";
     return t;
   };
-  const big = pixelLine(plain(card.answer), 16, "#fff").width <= maxW - 16 ? 16 : 8;
+  const ans = plain(card.answer);
+  let big = small * 2;
+  while (big > small && textWidth(ans) > room(big)) big--;
   const rows = [];
-  if (card.who) rows.push(pixelLine(card.who, 8, card.color));
-  rows.push(pixelLine(fit(card.answer, big), big, "#ffffff"));
-  rows.push(pixelLine(fit(card.tierName, 8), 8, TIER_COL[card.tier]));
-  rows.push(pixelLine(card.gain, 8, card.tier ? "#ffd23a" : "#8a8499"));
-  const pad = 7;
-  const gap = 5;
+  if (card.who) rows.push(fontLine(plain(card.who), small, card.color));
+  rows.push(fontLine(fit(ans, big), big, "#ffffff"));
+  rows.push(fontLine(fit(card.tierName, small), small, TIER_COL[card.tier]));
+  rows.push(fontLine(plain(card.gain), small, card.tier ? "#ffd23a" : "#8a8499"));
+  const pad = 4 + small * 3;
+  const gap = small * 3;
   const w = Math.max(...rows.map((r) => r.width)) + pad * 2;
   const h = rows.reduce((a, r) => a + r.height, 0) + gap * (rows.length - 1) + pad * 2;
   const cv = document.createElement("canvas");
@@ -861,14 +844,14 @@ export class ChaseScene {
       const maxW = Math.round(this.W * (n > 1 ? 0.46 : 0.88));
       const top = this.horizon + (this.carBottom - this.horizon) * 0.08;
       this.smashes = cards.map((c, i) => {
-        const img = buildCard(c, maxW);
+        const img = buildCard(c, maxW, this.cssPx);
         const cx = n > 1 ? this.W * (i ? 0.74 : 0.26) : this.W / 2;
         // sit above the car (and its name tag) so it's clear the car has to drive into it
         const cy = Math.round(Math.min(top + img.height / 2, this.coverTop() - 10 - img.height / 2));
         const fx = c.fx ?? c.tier;
         const build = BUILD[fx] || 0;
         // the hidden face: the answer, but no tier yet
-        const hidden = build ? buildCard({ ...c, tier: 1, tierName: ". . .", gain: "? ? ?" }, maxW) : null;
+        const hidden = build ? buildCard({ ...c, tier: 1, tierName: "...", gain: "???" }, maxW, this.cssPx) : null;
         return { ...c, fx, build, i, img, hidden, cx, cy, t: 0, phase: "slam", dy: 0, vy: 0, alpha: 1, cracks: [], hitT: 0, revealed: !build, pop: 0 };
       });
       this.smashDone = resolve;
@@ -1622,7 +1605,6 @@ export class ChaseScene {
     if (this.clearTop > 0) this.drawClearSky(g, this.clearTop);
     if (!this.calm) drawFireworks(this, g); // in front of the mountains, buildings and rarity tint
     this.drawStreaks(g);
-    this.drawSmash(g);
 
     for (const p of this.particles) {
       g.globalAlpha = Math.min(1, p.life * 3) * (p.soft ? 0.85 : 1);
@@ -1650,8 +1632,11 @@ export class ChaseScene {
       g.fillRect(-W, -H, W * 3, H * 3);
       g.globalAlpha = 1;
     }
+    const camera = g.getTransform();
     g.restore();
     this.post(g);
+    // the answer cards go on top of the glow and blur, so their lettering stays sharp
+    if (this.smashes.length) { g.save(); g.setTransform(camera); this.drawSmash(g); g.restore(); }
   }
 
   // ---- the look on top: a glossy road, haze, glow, speed blur and a vignette ----
