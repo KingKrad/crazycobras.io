@@ -8,7 +8,7 @@ const pixels = (cv) => {
   const w = Math.max(1, Math.round(cv.width / res)), h = Math.max(1, Math.round(cv.height / res));
   const t = document.createElement("canvas");
   t.width = w; t.height = h;
-  const g = t.getContext("2d");
+  const g = t.getContext("2d", { willReadFrequently: true });
   g.imageSmoothingEnabled = false;
   g.drawImage(cv, 0, 0, w, h);
   return { w, h, d: g.getImageData(0, 0, w, h).data };

@@ -1481,6 +1481,8 @@ body[data-screen="title"] .neon-sign { display: block; width: min(92vw, 900px); 
 .neon-sign .core tspan { stroke: var(--w); }
 .neon-sign .core text { fill: none; stroke-width: 2.4; }
 /* the letters buzz on one by one, then one of them flickers now and then */
+/* the letters power on one after another (set here: the page's security policy blocks inline styles) */
+.neon-sign tspan:nth-child(1) { --d: 0.12s; } .neon-sign tspan:nth-child(2) { --d: 0.21s; } .neon-sign tspan:nth-child(3) { --d: 0.30s; } .neon-sign tspan:nth-child(4) { --d: 0.39s; } .neon-sign tspan:nth-child(5) { --d: 0.48s; } .neon-sign tspan:nth-child(6) { --d: 0.57s; } .neon-sign tspan:nth-child(7) { --d: 0.66s; } .neon-sign tspan:nth-child(8) { --d: 0.75s; } .neon-sign tspan:nth-child(9) { --d: 0.84s; } .neon-sign tspan:nth-child(10) { --d: 0.93s; } .neon-sign tspan:nth-child(11) { --d: 1.02s; }
 .neon-sign tspan { animation: neon-on 0.55s steps(1) var(--d) both; }
 .neon-sign tspan.flick { animation: neon-on 0.55s steps(1) var(--d) both, neon-flick 9s steps(1) 3s infinite; }
 @keyframes neon-on {

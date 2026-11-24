@@ -11,6 +11,7 @@ export const CHANGELOG = [
       "Menu screens use about half the battery, and race timers and readouts are lighter on your phone.",
       "Phones that can't keep up turn down the two heaviest effects first, before switching to lite mode.",
       "New prompts and daily races now always reach your phone right after an update.",
+      "The neon VROOMILLION sign lights up letter by letter, as it was meant to.",
     ],
   },
   {
