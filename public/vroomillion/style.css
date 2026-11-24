@@ -1421,3 +1421,16 @@ body.launching .title-bottom, body.launching .corner-btn, body.launching .title-
 @media (max-width: 520px) {
   body:not([data-screen="race"]):not([data-screen="title"]) .screen.active { padding: 10px 10px 14px; margin: 6px auto 12px; }
 }
+
+/* ---------- places: every menu screen is somewhere on the road ----------
+   The canvas draws the place; the top of the screen is its centrepiece and the panel starts below it. */
+body:not([data-place=""]):not([data-screen="title"]):not([data-screen="race"]) .stage { filter: none; }
+body:not([data-place=""]):not([data-screen="title"]):not([data-screen="race"]) .topbar { background: none; }
+body:not([data-place=""]):not([data-screen="race"]) main { padding-top: calc(var(--place-top, 180px) - 70px); }
+/* the panel frames match the place */
+body[data-place="garage"] .screen.active { border-color: #ff4fd8; box-shadow: 0 0 0 3px #000, 0 0 26px rgba(255, 79, 216, 0.45); background: rgba(18, 10, 30, 0.92); }
+body[data-place="board"] .screen.active { border: 4px solid #14121c; background: rgba(8, 7, 14, 0.94); box-shadow: 0 0 0 3px #7a5a14, 0 0 24px rgba(255, 210, 58, 0.35); }
+body[data-place="booth"] .screen.active { border-color: #5ad8ff; background: rgba(10, 22, 36, 0.92); box-shadow: 0 0 0 3px #000, inset 0 0 0 2px rgba(90, 216, 255, 0.25), 0 0 24px rgba(90, 216, 255, 0.3); }
+body[data-place="grid"] .screen.active { border-color: #4fd1ff; background: rgba(12, 8, 30, 0.88); border-top: 8px solid; border-image: repeating-linear-gradient(90deg, #fff 0 12px, #111 12px 24px) 8; }
+body[data-place="reststop"] .screen.active { border-color: #7a5228; background: rgba(36, 24, 12, 0.92); box-shadow: 0 0 0 3px #000, 0 0 0 7px #5a3a20; }
+body[data-place="billboard"] .screen.active { border: 6px solid #e9e6d8; background: linear-gradient(180deg, rgba(42, 17, 96, 0.95), rgba(60, 14, 60, 0.95)); box-shadow: 0 0 0 3px #000, 0 0 30px rgba(255, 210, 58, 0.3); }

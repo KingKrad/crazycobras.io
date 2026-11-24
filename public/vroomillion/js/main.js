@@ -12,6 +12,7 @@ import { ChaseScene } from "./chase.js";
 import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
+import { Places, PLACE_OF } from "./places.js";
 import { pickRace, dailyRace, famKey, familyOf, answerSlug } from "./racepick.js";
 
 // The built-in answer lists (the game's original prompts, now part of the catalog) are about 2 MB, so they load in the background while the title screen is up
@@ -173,13 +174,20 @@ if (stored) persist(); // keeps the server copy and the backup up to date from t
 const sideScene = new Scene($("scene"));
 const chaseScene = new ChaseScene($("scene"));
 let scene = chaseScene;
+const places = new Places($("scene"), chaseScene); // each menu screen is a place on the road
 let last = performance.now();
 function frame(now) {
   // the first frame's timestamp can be a hair before `last`; never step time backwards
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
   last = now;
-  scene.update(dt);
-  scene.draw();
+  const place = PLACE_OF[current];
+  if (place) {
+    places.update(dt);
+    places.draw(place, tuned(carById(save.car)));
+  } else {
+    scene.update(dt);
+    scene.draw();
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -201,7 +209,10 @@ function crispCanvas(cssW, cssH) {
 function fitScene() {
   scene = chaseScene;
   if (current !== "race") {
-    const { w, h: ch } = crispCanvas(window.innerWidth, window.innerHeight);
+    const { w, h: ch, css } = crispCanvas(window.innerWidth, window.innerHeight);
+    // the place's centrepiece fills the top of the screen; menu panels start below it
+    document.documentElement.style.setProperty("--place-top", Math.round(Math.max(130, Math.min(250, ch * 0.26)) * css) + "px");
+    places.inset = Math.round((document.querySelector(".topbar")?.offsetHeight || 60) / css);
     // the car sits further up the road, with room under it for the start button
     scene.resize(w, ch, Math.round(ch * (window.innerWidth < 600 ? 0.6 : 0.66)));
     return;
@@ -1459,6 +1470,8 @@ function show(name) {
   for (const s of document.querySelectorAll(".screen")) s.classList.toggle("active", s.id === "s-" + name);
   $("title-art").classList.toggle("hidden", name !== "title");
   document.body.dataset.screen = name;
+  document.body.dataset.place = PLACE_OF[name] || "";
+  if (PLACE_OF[name] === "grid" && !chaseScene.parked) { chaseScene.parked = true; chaseScene.speed = 0; chaseScene.todBase = clockPhase(); attractCar = null; attract(); }
   if (name !== "race") {
     $("pops").textContent = "";
     document.querySelector(".stage").classList.remove("launch", ...[0, 1, 2, 3, 4, 5].map((t) => "launch-t" + t));
