@@ -30,7 +30,22 @@ const used = new Set();
 // a family: topic, id, level, prompt, Wikidata binding for ?i, rule options
 // prompts whose answer lists came out too short (tools/geo/fix-tiers.mjs) stay out
 const DROPPED = new Set(fs.existsSync(new URL("./dropped.json", import.meta.url)) ? JSON.parse(fs.readFileSync(new URL("./dropped.json", import.meta.url), "utf8")) : []);
-function fam(topic, id, lvl, prompt, where0, opts = "") {
+// EASY TRACK (level 1): what most people can answer. A WORLD TOUR race is mostly these, plus one
+// tricky prompt (any other level): see racepick.js.
+const FAMOUS = new Set(["unitedstates", "unitedkingdom", "france", "italy", "spain", "germany", "japan", "peoplesrepublicofchina", "india", "brazil", "mexico", "canada", "australia", "russia", "egypt", "greece", "turkey", "southafrica", "argentina", "ireland", "kingdomofthenetherlands", "portugal"]);
+const BIG_STATES = new Set(["california", "texas", "florida", "newyork", "pennsylvania", "illinois", "ohio", "georgia", "northcarolina", "michigan", "newjersey", "virginia", "washington", "arizona", "massachusetts", "nevada", "hawaii", "colorado", "louisiana", "tennessee"]);
+const FAMOUS_CITIES = new Set(["paris", "london", "rome", "newyorkcity", "tokyo", "barcelona", "berlin", "moscow", "beijing", "istanbul", "dubai", "sydney", "losangeles", "venice", "amsterdam", "prague", "vienna", "madrid", "sanfrancisco", "cairo", "athens", "lasvegas", "riodejaneiro", "florence"]);
+const WORLDWIDE = /^(gcountry|gcapital|gpeak|gwater\/(lake|river|falls)|gisland\/world|gnat\/(desert|beach)|gsight\/world|glang\/(spanish|french|english)|griver|gmount)\b/;
+function easy(id) {
+  const [kind, what] = id.split("/");
+  if (WORLDWIDE.test(id)) return true;
+  if (["gcity", "grivc", "gislc", "gmountc", "gpark", "gunesco"].includes(kind)) return FAMOUS.has(what) && (kind === "gcity" || ["unitedstates", "unitedkingdom", "france", "italy", "japan", "greece", "canada", "australia", "spain"].includes(what));
+  if (kind === "gcityus") return BIG_STATES.has(what);
+  if (kind === "gsight") return FAMOUS_CITIES.has(what);
+  return false;
+}
+function fam(topic, id, lvl0, prompt, where0, opts = "") {
+  const lvl = easy(id) ? 1 : Math.max(2, lvl0);
   let where = where0;
   if (DROPPED.has(id)) return;
   const key = prompt.toLowerCase();

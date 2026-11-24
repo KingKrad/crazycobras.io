@@ -282,6 +282,13 @@ function fitScene() {
     if (current === "title") requestAnimationFrame(() => {
       const tag = document.querySelector("#title-art .tagline");
       if (current === "title" && tag) chaseScene.clearTop = Math.round((tag.getBoundingClientRect().bottom + 22) / css);
+      // your car parks just above the buttons, wherever they end up on this screen
+      const stack = document.querySelector("#s-title .title-bottom");
+      if (current === "title" && stack) {
+        const top = stack.getBoundingClientRect().top / css;
+        const want = Math.round(Math.max(ch * 0.42, Math.min(ch * (window.innerWidth < 600 ? 0.6 : 0.66), top - 4)));
+        if (Math.abs(want - chaseScene.carBottom) > 2) chaseScene.resize(w, ch, want);
+      }
     });
     // the car sits further up the road, with room under it for the start button
     scene.resize(w, ch, Math.round(ch * (window.innerWidth < 600 ? 0.6 : 0.66)));
@@ -1524,7 +1531,7 @@ function renderUpdates() {
 // reloads itself to pick it up: right away on menu screens, or as soon as the player is back on one
 // (never mid-race, in an online room, or while filling in a form). Progress is saved first.
 const BUILD = "dev";
-const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues", "worldtour"]);
+const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues", "worldtour", "modes"]);
 let updateReady = null;
 function reloadForUpdate() {
   if (!updateReady || !SAFE_TO_RELOAD.has(current) || online) return;
@@ -1583,6 +1590,12 @@ function show(name) {
   if (name === "board") renderBoardScreen();
   if (name === "online") renderOnline();
   for (const t of THEMED_IDS) if (name === THEMED[t].screen) renderModeLobby(t);
+  if (name === "modes") renderModes();
+  if (name === "account") renderMe();
+  // the tab bar lights up the section you're in
+  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes",
+    garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
+  for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
   window.scrollTo({ top: 0 });
 }
@@ -1721,7 +1734,7 @@ function loadAnswers(prompts) {
 }
 function v2Questions(picks) {
   // a prompt whose answers didn't load: the live check alone judges it
-  return picks.map(({ family, prompt }) => ({ ...(getQ(prompt) || { q: prompt, a: [[], [], [], [], []], cat: "everyday" }), fam: famKey(family) }));
+  return picks.map(({ family, prompt, tricky }) => ({ ...(getQ(prompt) || { q: prompt, a: [[], [], [], [], []], cat: "everyday" }), fam: famKey(family), ...(tricky ? { tricky: true } : {}) }));
 }
 // pick the race's prompts, load any answer files, then start it
 async function startRaceV2(setup) {
@@ -2163,6 +2176,39 @@ function revealCar(car, milestones = [], kicker = "NEW CAR!") {
   }, 950);
 }
 
+// ---------- the GAME MODES screen: the themed modes, and the ones on the way ----------
+const COMING = [
+  { id: "film", name: "BOX OFFICE", line: "Movies & TV · your answer plays at the drive-in", view: "v-film" },
+  { id: "music", name: "ON TOUR", line: "Music · a tour bus from gig to gig", view: "v-music" },
+  { id: "sport", name: "STADIUM RUN", line: "Sports · laps of the big stadium", view: "v-sport" },
+];
+function renderModes() {
+  const box = $("mode-cards");
+  box.textContent = "";
+  for (const id of THEMED_IDS) {
+    const m = THEMED[id];
+    box.append(h("button", { class: "mode-card mc-" + id, type: "button", onclick: () => { audio.sfx.click(); show(m.screen); } },
+      h("div", { class: "mc-view", "aria-hidden": "true" }),
+      h("div", { class: "mc-body" },
+        h("span", { class: "mc-name", text: m.name }),
+        h("span", { class: "mc-line", text: m.card }),
+        h("span", { class: "mc-tag", text: ownsMode(id) ? "YOURS ▶" : modeTrialLeft(id) ? "1 FREE RACE ▶" : "$5 ▶" }))));
+  }
+  for (const c of COMING.filter((c) => !THEMED[c.id])) {
+    box.append(h("div", { class: "mode-card soon", "aria-label": c.name + ", coming soon" },
+      h("div", { class: "mc-view " + c.view, "aria-hidden": "true" }),
+      h("div", { class: "mc-body" },
+        h("span", { class: "mc-name", text: c.name }),
+        h("span", { class: "mc-line", text: c.line }),
+        h("span", { class: "mc-tag", text: "COMING SOON" }))));
+  }
+}
+// ME: your account, plus how to play, updates, sound and (admins) the admin panel
+function renderMe() {
+  $("me-sound").textContent = save.muted ? "SOUND: OFF" : "SOUND: ON";
+  $("me-admin").classList.toggle("hidden", !account?.admin);
+}
+
 // ---------- themed game modes ($5 each, one-time, on the account; admins get them all) ----------
 const ownsMode = (id) => !!account && (!!account.admin || (account.modes || []).includes(id));
 const modeTrialLeft = (id) => !save.trials?.[id];
@@ -2439,7 +2485,7 @@ async function runRace(token) {
     Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     // the new prompt system shows no topic label (it would give the answer space away)
-    $("q-kicker").textContent = `PROMPT ${round + 1}/${rounds}`;
+    $("q-kicker").textContent = `PROMPT ${round + 1}/${rounds}` + (q.tricky ? " · TRICKY ONE!" : "");
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
     markSeen(q.fam || famKeyOf(q.q)); // the whole family, in every race type
     $("q-hint").classList.remove("hidden");
@@ -3412,6 +3458,8 @@ function toggleSound() {
   renderSound();
 }
 $("btn-sound").addEventListener("click", toggleSound);
+$("me-sound").addEventListener("click", () => { toggleSound(); renderMe(); });
+for (const b of document.querySelectorAll("#tabbar .tab")) b.addEventListener("click", () => { audio.sfx.click(); overlay(""); show(b.dataset.tab); });
 $("btn-sound-race").addEventListener("click", toggleSound);
 // refresh the "next free run" countdown on the title screen
 setInterval(() => {

@@ -515,8 +515,12 @@ body[data-screen="race"] .stage::after {
   transition: box-shadow 0.25s;
 }
 body[data-screen="race"] .stage.launch { box-shadow: none; animation: none; }
-body[data-screen="race"] .stage.launch::after { box-shadow: inset 0 0 110px var(--flare); }
-body[data-screen="race"] .stage.launch-t5::after { animation: inner-rainbow 0.6s linear 4; }
+/* the edge glow on a big answer: a gradient that only fades in and out (a blurred inset shadow
+   repainted every frame was very slow on phones) */
+body[data-screen="race"] .stage.launch::after { background: radial-gradient(ellipse at center, transparent 55%, var(--flare) 135%); opacity: 0.85; animation: glow-in 0.25s ease-out both; will-change: opacity; }
+body[data-screen="race"] .stage.launch-t5::after { animation: glow-in 0.25s ease-out both, glow-pulse 0.3s steps(2) 6 0.25s; }
+@keyframes glow-in { from { opacity: 0; } to { opacity: 0.85; } }
+@keyframes glow-pulse { 50% { opacity: 0.4; } }
 
 #s-race.active {
   position: fixed;
@@ -1073,14 +1077,15 @@ ol.board li .link { padding: 0 4px; font-size: 7px; }
 .rare-slam { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; pointer-events: none; --rc: var(--t3); }
 .rare-slam.rs4 { --rc: var(--t4); }
 .rare-slam.rs5 { --rc: var(--t5); }
-.rare-word { font-size: clamp(28px, 9vw, 72px); color: #fff; text-shadow: 0 0 0 var(--rc), 4px 4px 0 #000, 0 0 24px var(--rc), 0 0 48px var(--rc); -webkit-text-stroke: 3px var(--rc); paint-order: stroke fill; font-size-adjust: none; letter-spacing: 0.03em; animation: rare-in 1.8s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+/* (one soft glow, and its own compositing layer: big blurred text re-painted while it scales was slow on phones) */
+.rare-word { will-change: transform, opacity; font-size: clamp(28px, 9vw, 72px); color: #fff; text-shadow: 4px 4px 0 #000, 0 0 16px var(--rc); -webkit-text-stroke: 3px var(--rc); paint-order: stroke fill; font-size-adjust: none; letter-spacing: 0.03em; animation: rare-in 1.8s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
 .rare-sub { font-size: clamp(9px, 2.4vw, 16px); color: var(--rc); text-shadow: 2px 2px 0 #000; letter-spacing: 0.3em; animation: rare-sub 1.8s ease-out both; }
-.rare-ring { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 6px solid var(--rc); box-shadow: 0 0 30px var(--rc); animation: rare-ring 0.9s ease-out both; }
-.rare-slam.rs5 .rare-word { animation: rare-in 2.4s cubic-bezier(0.2, 1.6, 0.4, 1) both, rainbow-text 0.3s steps(4) infinite; }
+.rare-ring { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 6px solid var(--rc); animation: rare-ring 0.9s ease-out both; will-change: transform, opacity; }
+.rare-slam.rs5 .rare-word { animation: rare-in 2.4s cubic-bezier(0.2, 1.6, 0.4, 1) both, rainbow-text 0.8s steps(4) infinite; }
 .rare-slam.rs5 .rare-ring { animation: rare-ring 1.1s ease-out both, rare-ring 1.1s 0.35s ease-out both; }
 /* TURBO and up stay longer, and the letters drop in one at a time */
 .rare-slam.rs4 .rare-word { animation: rare-hold 2.8s ease-out both; }
-.rare-slam.rs5 .rare-word { animation: rare-hold 3.7s ease-out both, rainbow-text 0.3s steps(4) infinite; }
+.rare-slam.rs5 .rare-word { animation: rare-hold 3.7s ease-out both, rainbow-text 0.8s steps(4) infinite; }
 .rare-slam.rs4 .rare-sub { animation: rare-sub 2.8s ease-out both; }
 .rare-slam.rs5 .rare-sub { animation: rare-sub 3.7s ease-out both; }
 .rare-word .ltr { display: inline-block; animation: ltr-drop 0.45s cubic-bezier(0.2, 1.8, 0.4, 1) var(--d, 0s) both; }
@@ -1541,3 +1546,65 @@ body[data-screen="boxoffice"] .stage { filter: none; }
 body[data-screen="boxoffice"] .screen.active#s-boxoffice { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px 18px; animation: none; }
 .ml-name.bo { color: #fff1c8; text-shadow: 0 0 6px #ff4f4f, 0 0 20px #d81b3b, 4px 4px 0 #2a0f3a; -webkit-text-stroke: 2px #2a0008; }
 body[data-screen="boxoffice"] .ml-head { margin-top: 0; }
+
+/* ---------- the tab bar: one tap to anywhere, on every screen but the race ---------- */
+:root { --tabbar-h: calc(62px + env(safe-area-inset-bottom)); }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
+  height: var(--tabbar-h); padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+  background: #0b0618; border-top: 3px solid #2a1f4a; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.5); }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: inherit; cursor: pointer;
+  background: none; border: 0; color: #8f86b0; font-family: var(--font-title); font-size: 11px; letter-spacing: 0.04em; padding: 6px 2px; }
+.tab svg { width: 24px; height: 24px; fill: currentColor; }
+.tab.on { color: #ffd23a; background: linear-gradient(#1a1036, #0b0618); box-shadow: inset 0 3px 0 #ffd23a; }
+.tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
+body[data-screen="race"] .tabbar, body.launching .tabbar { display: none; }
+body:not([data-screen="race"]) main { padding-bottom: calc(var(--tabbar-h) + 8px); }
+body:not([data-screen="race"]) footer { padding-bottom: var(--tabbar-h); }
+/* the old menu button and corner shortcuts: the tab bar does their job now (sound stays) */
+.menu-btn, #ico-garage, #ico-account { display: none !important; }
+#s-title .title-bottom { padding-bottom: calc(var(--tabbar-h) + 12px); }
+
+/* ---------- home: one huge daily race button, then four big tiles ---------- */
+.home-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.home-tile { position: relative; display: grid; justify-items: center; gap: 4px; padding: 12px 8px 10px; cursor: pointer; font: inherit; color: #fff;
+  background: rgba(13, 7, 32, 0.9); border: 3px solid #4a3d7a; box-shadow: 0 0 0 2px #000; }
+.home-tile svg { width: 26px; height: 26px; fill: #4fd1ff; }
+.home-tile b { font-family: var(--font-title); font-size: clamp(13px, 3.6vw, 17px); font-weight: 400; letter-spacing: 0.03em; }
+.home-tile span { font-size: 11px; color: #b9b2d6; }
+.home-tile:hover, .home-tile:focus-visible { border-color: #4fd1ff; outline: none; transform: translateY(-1px); }
+.tile-modes { border-color: #ffd23a; }
+.tile-modes svg { fill: #ffd23a; }
+.tile-new { position: absolute; top: -9px; right: -6px; font-style: normal; font-family: var(--font-title); font-size: 10px; background: #ff4fd8; color: #fff; padding: 3px 6px; border: 2px solid #000; }
+
+/* ---------- the GAME MODES screen ---------- */
+.mode-cards { display: grid; gap: 12px; margin: 10px 0 14px; }
+.mode-card { position: relative; display: grid; grid-template-columns: 1fr; text-align: left; font: inherit; color: #fff; cursor: pointer; padding: 0; overflow: hidden;
+  border: 3px solid #4fd1ff; background: #0b0618; box-shadow: 0 0 0 3px #000, 0 0 20px rgba(79, 209, 255, 0.3); }
+.mode-card .mc-view { height: 120px; image-rendering: pixelated; background-size: auto 240px; background-repeat: repeat-x; }
+.mode-card.mc-geo .mc-view { background-image: url("img/world.png"); background-position: 0 -60px; animation: mc-pan 60s linear infinite; }
+@keyframes mc-pan { to { background-position: -480px -60px; } }
+@media (prefers-reduced-motion: reduce) { .mode-card .mc-view { animation: none !important; } }
+.mc-body { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; padding: 10px 12px 12px; background: linear-gradient(#120a26, #0b0618); }
+.mc-name { font-family: var(--font-title); font-size: 20px; color: #ffd23a; letter-spacing: 0.04em; text-shadow: 2px 2px 0 #000; }
+.mc-line { grid-column: 1; font-size: 12px; color: #d8d0f0; }
+.mc-tag { grid-row: 1 / span 2; grid-column: 2; font-family: var(--font-title); font-size: 12px; padding: 7px 9px; border: 2px solid #ffd23a; color: #ffd23a; background: #0b0618; }
+.mode-card.soon { cursor: default; border-color: #3a3256; box-shadow: 0 0 0 3px #000; filter: saturate(0.45) brightness(0.8); }
+.mode-card.soon .mc-name { color: #cfc8e6; }
+.mode-card.soon .mc-tag { border-color: #6a6288; color: #cfc8e6; }
+.mc-view.v-film { background: radial-gradient(ellipse at 50% 38%, #fff6d8 0 20%, transparent 21%), linear-gradient(#05030f, #2a1440 70%, #1c1626 71%); }
+.mc-view.v-music { background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 79, 216, 0.5) 18px 22px), linear-gradient(#05030f, #3a0f4a 70%, #1c1626 71%); }
+.mc-view.v-sport { background: repeating-linear-gradient(0deg, #2f8a3a 0 14px, #2a7a34 14px 28px); }
+.board-passport, .me-more .btn { width: 100%; }
+.me-more { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+/* short phones (iPhone SE, mini): a tighter home stack so the neon sign keeps its space */
+@media (max-height: 760px) {
+  .home-tile span { display: none; }
+  .home-tile { padding: 8px 6px; gap: 2px; }
+  .home-tile svg { width: 20px; height: 20px; }
+  .home-tile b { font-size: clamp(11px, 3.3vw, 15px); }
+  #s-title .btn.daily-hero { padding: 13px 10px; }
+  #s-title .title-bottom { gap: 7px; }
+}
+@media (max-height: 640px) { #s-title .signed-in, #s-title .whats-new { display: none; } }
+/* wide screens: the four tiles in one row, so the road and your car stay in view */
+@media (min-width: 900px) { .home-tiles { grid-template-columns: repeat(4, 1fr); } #s-title .title-bottom { width: min(760px, 100%); } }

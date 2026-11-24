@@ -13,7 +13,7 @@ import { voxelModel, drawVoxel } from "./voxel.js";
 // which place each screen is
 export const PLACE_OF = {
   garage: "garage", board: "board", account: "booth", paywall: "booth", admin: "booth",
-  leagues: "grid", versus: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard",
+  leagues: "grid", versus: "grid", modes: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard",
   worldtour: "world", // WORLD TOUR's home: the world map (js/world.js)
   boxoffice: "drivein", // BOX OFFICE's home: the drive-in (js/drivein.js)
 };

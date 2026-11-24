@@ -784,7 +784,7 @@ export class ChaseScene {
     const dur = [0, 0, 0, 2.6, 3.4, 4.6][tier];
     this.rareFx = { tier, t: 0, dur, amt: 0 };
     if (this.calm) return;
-    this.slowmo = Math.max(this.slowmo, [0, 0, 0, 0.35, 0.55, 0.9][tier]);
+    this.slowmo = Math.max(this.slowmo, [0, 0, 0, 0.2, 0.3, 0.45][tier]); // short: a long slow-motion reads as lag
     this.zoom = Math.max(this.zoom, [0, 0, 0, 0.5, 0.75, 1][tier]);
     this.shake = Math.max(this.shake, [0, 0, 0, 0.35, 0.55, 0.8][tier]);
     this.flash = Math.max(this.flash, tier === 5 ? 0.8 : 0.35);
@@ -978,7 +978,10 @@ export class ChaseScene {
     // shatter into tiles that fly away from where the car hit
     s.phase = "broken";
     const P = SMASH[s.tier];
-    const tile = P.tile;
+    // tiles sized so a card never breaks into more than a few hundred pieces (a big card in 4px tiles
+    // was thousands of shards, each drawn every frame: the lag on phones after a rare answer)
+    const MAX_SHARDS = [50, 70, 100, 130, 170, 220][s.tier] || 100;
+    const tile = Math.max(P.tile, Math.ceil(Math.sqrt((s.img.width * s.img.height) / MAX_SHARDS)));
     for (let y = 0; y < s.img.height; y += tile) {
       for (let x = 0; x < s.img.width; x += tile) {
         const sw = Math.min(tile, s.img.width - x);
@@ -1005,7 +1008,7 @@ export class ChaseScene {
       this.particles.push({ x: hx, y: hy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.5 + Math.random() * (0.3 + fx * 0.12), size: Math.max(1, u * (fx >= 4 ? 1.5 : 1)), color: fx === 5 ? rainbow[q % 5] : q % 4 ? TIER_COL[fx] : "#ffffff", g: 300 * u, hot: true });
     }
     if (s.tier >= 4) { this.flash = Math.max(this.flash, s.tier === 5 ? 0.6 : 0.3); this.flashColor = s.tier === 5 ? "rainbow" : "#ffb02e"; this.glow = Math.max(this.glow, 2); }
-    if (s.tier === 5) { this.slowmo = 0.7; this.warp = Math.max(this.warp, 1.6); this.tunnel = Math.max(this.tunnel, 2.4); }
+    if (s.tier === 5) { this.slowmo = 0.45; this.warp = Math.max(this.warp, 1.6); this.tunnel = Math.max(this.tunnel, 2.4); }
     this.onEvent?.("impact", s);
   }
 
@@ -1069,6 +1072,10 @@ export class ChaseScene {
       }
       g.globalAlpha = 1;
     }
+    g.globalAlpha = 1;
+  }
+  // the pieces of a smashed card fly on the scene canvas (cheap), not the full-resolution layer
+  drawShards(g) {
     for (const p of this.shards) {
       g.globalAlpha = Math.min(1, p.life * 2);
       g.save();
@@ -1094,7 +1101,7 @@ export class ChaseScene {
       this.horizon = Math.round(Math.min(this.H * 0.42, this.carBottom - this.H * 0.3));
     }
     // a One in a Vroomillion smash plays in slow motion for a moment
-    if (this.slowmo > 0) { this.slowmo -= dt; dt *= this.calm ? 1 : 0.3; }
+    if (this.slowmo > 0) { this.slowmo -= dt; dt *= this.calm ? 1 : 0.6; }
     this.updateSmash(dt);
     for (const p of this.shards) {
       p.x += p.vx * dt;
@@ -1643,6 +1650,7 @@ export class ChaseScene {
     if (this.clearTop > 0) this.drawClearSky(g, this.clearTop);
     if (!this.calm) drawFireworks(this, g); // in front of the mountains, buildings and rarity tint
     this.drawStreaks(g);
+    this.drawShards(g);
 
     for (const p of this.particles) {
       g.globalAlpha = Math.min(1, p.life * 3) * (p.soft ? 0.85 : 1);
@@ -1677,14 +1685,26 @@ export class ChaseScene {
     // so their lettering is smooth and sharp
     const hg = this.hiG;
     this.clearHi();
-    if (this.smashes.length || this.shards.length) {
+    if (this.smashes.length) {
       const R = this.hiScale || 1;
       const tg = hg || g;
       tg.save();
       tg.setTransform(hg ? new DOMMatrix([R, 0, 0, R, 0, 0]).multiply(camera) : camera);
       this.drawSmash(tg, !!hg);
       tg.restore();
-      if (hg) this.hiUsed = true;
+      if (hg) {
+        this.hiUsed = true;
+        // next frame clears just the cards' area (in device pixels), not the whole layer
+        const m = new DOMMatrix([R, 0, 0, R, 0, 0]).multiply(camera);
+        let box = null;
+        for (const sm of this.smashes) {
+          const w = sm.img.width * 3, h = sm.img.height * 3; // room for the slam-in and the build-up glow
+          const p0 = m.transformPoint({ x: sm.cx - w / 2, y: sm.cy + (sm.dy || 0) - h / 2 }), p1 = m.transformPoint({ x: sm.cx + w / 2, y: sm.cy + (sm.dy || 0) + h / 2 });
+          const b = [Math.min(p0.x, p1.x), Math.min(p0.y, p1.y), Math.max(p0.x, p1.x), Math.max(p0.y, p1.y)];
+          box = box ? [Math.min(box[0], b[0]), Math.min(box[1], b[1]), Math.max(box[2], b[2]), Math.max(box[3], b[3])] : b;
+        }
+        this.hiDirty = box;
+      }
     }
   }
 
@@ -1698,7 +1718,10 @@ export class ChaseScene {
   clearHi() {
     if (!this.hiG || !this.hiUsed) return;
     this.hiG.setTransform(1, 0, 0, 1, 0, 0);
-    this.hiG.clearRect(0, 0, this.hiG.canvas.width, this.hiG.canvas.height);
+    const d = this.hiDirty;
+    if (d) this.hiG.clearRect(Math.floor(d[0]) - 4, Math.floor(d[1]) - 4, Math.ceil(d[2] - d[0]) + 8, Math.ceil(d[3] - d[1]) + 8);
+    else this.hiG.clearRect(0, 0, this.hiG.canvas.width, this.hiG.canvas.height);
+    this.hiDirty = null;
     this.hiUsed = false;
   }
 

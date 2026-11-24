@@ -30,6 +30,17 @@ export const poolFamilies = (mode, fams = FAMILIES) => fams.filter((f) => f.pool
 // seen: the history list; returns families in play order, each with the prompt text to ask
 export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   const pool = POOL[mode] || "main";
+  // WORLD TOUR: an easy track and a hard one. Mostly well-known prompts (level 1), plus one tricky
+  // one somewhere in the second half.
+  if (pool === "geo" && !opts.oneTrack && n > 1) {
+    const all = poolFamilies(mode, opts.families);
+    const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level === 1) });
+    const taken = new Set(easy.map((x) => x.family.group));
+    const hard = pickRace(mode, [...(seen || []), ...easy.map((x) => famKey(x.family))], 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level > 1 && !taken.has(f.group)) });
+    const out = [...easy];
+    if (hard.length) out.splice(Math.max(Math.floor(n / 2), out.length - Math.floor(rng() * 3)), 0, { ...hard[0], tricky: true });
+    return out.slice(0, n);
+  }
   // only families with answers on this copy of the game (opts.has: prompt -> bool)
   const fams = poolFamilies(mode, opts.families).filter((f) => !opts.has || f.prompts.some(opts.has));
   const order = new Map(); // family key -> position in the history (higher = more recent)

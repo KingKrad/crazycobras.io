@@ -73,13 +73,13 @@
         <div class="title-bottom">
           <p class="daily-status" id="daily-status"></p>
           <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
-          <div class="mode-links">
-            <button class="mode-link" id="btn-1p" type="button">SOLO RACES</button>
-            <button class="mode-link" id="btn-2p" type="button">2 PLAYERS</button>
-            <button class="mode-link" id="btn-online" type="button">RACE A FRIEND</button>
+          <div class="home-tiles">
+            <button class="home-tile" id="btn-1p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg><b>SOLO RACE</b><span>Any topic, any time</span></button>
+            <button class="home-tile tile-modes" type="button" data-go="modes"><i class="tile-new">NEW</i><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg><b>GAME MODES</b><span>World Tour &amp; more</span></button>
+            <button class="home-tile" id="btn-2p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3v1h1v3H6v1H3V6H2V3h1zM10 2h3v1h1v3h-1v1h-3V6H9V3h1zM1 9h7v1h1v4H0v-4h1zM8 9h7v1h1v4H8z"/></svg><b>2 PLAYERS</b><span>On this screen</span></button>
+            <button class="home-tile" id="btn-online" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H9l-3 3v-3H2zM4 5v1h8V5zM4 7v1h6V7z"/></svg><b>RACE A FRIEND</b><span>Send them a link</span></button>
           </div>
           <div class="daily" id="daily"></div>
-          <button class="wt-promo" id="wt-promo" type="button" data-go="worldtour"><span class="wt-new">NEW MODE</span> WORLD TOUR · name places, drive the world ▶</button>
           <div class="whats-new" id="whats-new"></div>
         </div>
         <!-- the slide-out menu: every screen, with clear labels -->
@@ -153,6 +153,13 @@
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
           <button class="btn" data-go="title" type="button">BACK</button>
         </div>
+      </section>
+
+      <section class="screen" id="s-modes">
+        <h2>GAME MODES</h2>
+        <p class="note">Each mode is its own world, with its own prompts. Tap one to see it.</p>
+        <div class="mode-cards" id="mode-cards"></div>
+        <button class="btn" data-go="title" type="button">BACK</button>
       </section>
 
       <section class="screen mode-lobby" id="s-worldtour">
@@ -250,6 +257,7 @@
       <section class="screen" id="s-board">
         <h2>TODAY'S LEADERBOARD</h2>
         <p class="note">Everyone races the same daily race. Scores reset at midnight UTC.</p>
+        <button class="btn small board-passport" type="button" data-go="passport">YOUR PASSPORT: PLACES YOU'VE DRIVEN TO ▶</button>
         <div class="board-lists" id="board-lists"></div>
         <div id="board-nick"></div>
         <button class="btn" data-go="leagues" type="button">BACK</button>
@@ -264,6 +272,12 @@
       <section class="screen" id="s-account">
         <h2>ACCOUNT</h2>
         <div class="account-box" id="account-box"></div>
+        <div class="me-more">
+          <button class="btn small" type="button" data-go="how">HOW TO PLAY</button>
+          <button class="btn small" type="button" data-go="updates">ALL UPDATES</button>
+          <button class="btn small" type="button" id="me-sound">SOUND: ON</button>
+          <button class="btn small hidden" type="button" data-go="admin" id="me-admin">ADMIN</button>
+        </div>
         <button class="btn" data-go="title" type="button">BACK</button>
       </section>
 
@@ -331,6 +345,14 @@
         </div>
       </section>
     </main>
+    <!-- the tab bar: always there (except mid-race), one tap to anywhere -->
+    <nav class="tabbar" id="tabbar" aria-label="Main">
+      <button class="tab" type="button" data-tab="title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l7 6h-2v7H9v-4H7v4H3V7H1z"/></svg><span>HOME</span></button>
+      <button class="tab" type="button" data-tab="modes"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg><span>MODES</span></button>
+      <button class="tab" type="button" data-tab="garage"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6l7-4 7 4v9h-2V8H3v7H1zM4 9h8v1H4zM4 11h8v1H4zM4 13h8v1H4z"/></svg><span>GARAGE</span></button>
+      <button class="tab" type="button" data-tab="board"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h4v12H6zM1 8h4v7H1zM11 6h4v9h-4z"/></svg><span>RANKS</span></button>
+      <button class="tab" type="button" data-tab="account"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4v1h1v4h-1v1H6V7H5V3h1zM3 10h10v1h1v3H2v-3h1z"/></svg><span>ME</span></button>
+    </nav>
 
     <footer>An 8-bit trivia racer. Not affiliated with any car maker. · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="mailto:support@vroomillion.com">Support</a></footer>
   </div>

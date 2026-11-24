@@ -3,6 +3,18 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25b",
+    date: "Nov 25, 2026",
+    title: "Easier menus, smoother races",
+    items: [
+      "New tab bar at the bottom of every screen: HOME, MODES, GARAGE, RANKS and ME. One tap to anywhere.",
+      "The home screen has big buttons for the daily race, solo races, game modes, 2 players and racing a friend.",
+      "New GAME MODES screen: WORLD TOUR is here, and BOX OFFICE, ON TOUR and STADIUM RUN are coming soon.",
+      "WORLD TOUR races are mostly well-known places now, with one tricky prompt near the end.",
+      "Big answers no longer make phones stutter: the shatter, glow and slow-motion are much lighter.",
+    ],
+  },
+  {
     id: "2026-11-25a",
     date: "Nov 25, 2026",
     title: "New mode: WORLD TOUR",
