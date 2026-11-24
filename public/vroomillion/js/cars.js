@@ -119,6 +119,9 @@ export const CARS = [
   // Everything about it is reggae: a dub bassline for an engine, air horns and dub sirens, echoing
   // rimshot backfires, and red, gold and green smoke full of music notes. Ties for the best.
   { ...C("zig", "ZIG'S WHIP", "X", 0, 9.0, 8, "pickup", "#b8bdc4", "#24262b"), giftOnly: true, rim: "#e4e8ee", glass: "#1b2430", seats: "#2e3036", hiRes: true, reggae: true },
+  // a dark grey compact sports coupe: a round bubble roof, short overhangs, a big black single-frame
+  // grille, a fixed rear wing and two big oval tips that throw insanely large flames. Ties for the best.
+  { ...C("audi5k", "AUDI 5000", "X", 0, 9.0, 8, "tt", "#45484f", "#0d0e11"), giftOnly: true, rim: "#2c2e34", glass: "#121821", seats: "#1c1d22", hiRes: true, megaFire: true },
 ];
 export const GIFT_CARS = CARS.filter((c) => c.giftOnly).map((c) => c.id);
 
@@ -386,7 +389,7 @@ const cache = new Map();
 export function carSprite(car, frame = 0) {
   const ck = car.id + ":" + car.color + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
-  if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : car.v12 ? rs3Side(car, frame) : car.reggae ? f150Side(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : car.v12 ? rs3Side(car, frame) : car.reggae ? f150Side(car, frame) : car.megaFire ? ttSide(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
   const wheelTop = tpl.rows.length - 2;
@@ -583,7 +586,7 @@ const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
   const key = car.id + ":" + car.color + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
-  if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : car.v12 ? rs3Rear(car, frame) : car.reggae ? f150Rear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
+  if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : car.v12 ? rs3Rear(car, frame) : car.reggae ? f150Rear(car, frame) : car.megaFire ? ttRear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);
   const cv = document.createElement("canvas");
   cv.width = rows[0].length;
@@ -990,6 +993,97 @@ function f150Rear(car, frame) {
   for (const ex of [17, 67]) {
     g.fillStyle = "#e8ecf4"; g.beginPath(); g.arc(ex, 48.6, 2.8, 0, Math.PI * 2); g.fill();
     g.fillStyle = "#050506"; g.beginPath(); g.arc(ex, 48.6, 1.7, 0, Math.PI * 2); g.fill();
+  }
+  return crisp(cv);
+}
+
+
+// AUDI 5000: a dark grey compact sports coupe. Low and short, a round arched roofline that runs into
+// the tail, a big black single-frame grille, a fixed rear wing, grey five-spoke wheels, red callipers.
+function ttSide(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 70; cv.height = 25;
+  const g = cv.getContext("2d");
+  const dark = shade(car.color, 0.55), deep = shade(car.color, 0.35), light = lighten(car.color, 0.38), shine = lighten(car.color, 0.7);
+  const grad = g.createLinearGradient(0, 2, 0, 19);
+  grad.addColorStop(0, light); grad.addColorStop(0.4, car.color); grad.addColorStop(1, dark);
+  // short tail, the roof as one round arch, a short sloping nose
+  const body = [[3, 12.4], [5, 9.6], [10, 8.4], [16, 5.2], [23, 2.4], [31, 1.6], [38, 2.6], [44, 6.4], [50, 8.6], [60, 10], [66, 11.4], [68.6, 13.6], [68.4, 17], [67, 18.4], [3, 18.4], [2, 15]];
+  poly(g, body, grad);
+  // the glasshouse: a small window arc with a thick rear pillar
+  poly(g, [[17.6, 8.6], [23.6, 3.4], [31, 2.6], [37.6, 3.4], [43, 7.2], [44.6, 8.8]], "#0a0a0c");
+  poly(g, [[25, 8.2], [26, 4.2], [31, 3.4], [37, 4.2], [41.8, 7.4], [42.6, 8.2]], car.glass);
+  poly(g, [[20.4, 8.2], [24, 4.6], [24.2, 8.2]], car.glass);
+  poly(g, [[31.6, 4.2], [35.6, 4.6], [33, 6.8]], "rgba(255,255,255,0.18)");
+  g.fillStyle = shine; g.fillRect(24, 2.2, 13, 0.6);
+  // shoulder line, door seam, handle, mirror, fuel cap
+  g.fillStyle = light; g.fillRect(6, 10.6, 60, 0.7);
+  g.fillStyle = deep; g.fillRect(44.4, 9.2, 0.7, 8.4); g.fillRect(24.4, 9.2, 0.6, 8.2);
+  g.fillStyle = "#8c9099"; g.fillRect(36, 11.6, 3, 0.8);
+  poly(g, [[44.6, 7.6], [48, 7.2], [48, 9], [45, 9]], "#0a0a0c");
+  g.fillStyle = "#9aa0aa"; g.beginPath(); g.arc(15, 10.2, 0.9, 0, Math.PI * 2); g.fill();
+  // the fixed rear wing on two stands
+  g.fillStyle = "#0a0a0c"; g.fillRect(2, 6.4, 11, 1.4); g.fillRect(5, 7.6, 1, 2); g.fillRect(10, 7.6, 1, 1.4);
+  // nose: a big black single-frame grille, a slim angry headlight; tail: a thin light, a diffuser
+  poly(g, [[63.6, 12.4], [68.6, 13.4], [68.4, 17.6], [64, 17.6]], "#050506");
+  g.fillStyle = "#2a2c33"; for (let y = 13.4; y < 17.4; y += 1.1) g.fillRect(64.6, y, 3.6, 0.45);
+  poly(g, [[58.6, 10.6], [66.6, 11.8], [66.2, 12.8], [59, 11.6]], "#eaf3ff");
+  poly(g, [[2.4, 11.4], [7.4, 10.4], [7.6, 11.4], [2.6, 12.6]], "#ff2020");
+  g.fillStyle = "#050506"; g.fillRect(4, 16.8, 62, 1.6); g.fillRect(1.6, 15.6, 6, 2.4);
+  // the big oval tips
+  g.fillStyle = "#d8dde6"; g.beginPath(); g.ellipse(3.2, 16.4, 2.2, 1.4, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#0a0a0c"; g.beginPath(); g.ellipse(3.2, 16.4, 1.4, 0.8, 0, 0, Math.PI * 2); g.fill();
+  // wheels that fill the arches
+  for (const wx of [15, 56]) {
+    g.fillStyle = "#050506"; g.beginPath(); g.arc(wx, 18.3, 6.6, Math.PI, 0); g.fill();
+    g.fillStyle = "#101013"; g.beginPath(); g.arc(wx, 18.5, 5.9, 0, Math.PI * 2); g.fill();
+    g.fillStyle = car.rim; g.beginPath(); g.arc(wx, 18.5, 4.3, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#e0201b"; g.fillRect(wx - 3.2, 15.4, 2, 2.6);
+    g.strokeStyle = "#5c6069"; g.lineWidth = 1;
+    for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * Math.PI * 2 + frame * 0.6;
+      g.beginPath(); g.moveTo(wx + Math.cos(a) * 1.1, 18.5 + Math.sin(a) * 1.1); g.lineTo(wx + Math.cos(a) * 3.9, 18.5 + Math.sin(a) * 3.9); g.stroke();
+    }
+    g.fillStyle = "#1a1a1e"; g.beginPath(); g.arc(wx, 18.5, 1, 0, Math.PI * 2); g.fill();
+  }
+  return crisp(cv);
+}
+
+function ttRear(car, frame) {
+  const cv = document.createElement("canvas");
+  cv.width = 82; cv.height = 52;
+  const g = cv.getContext("2d");
+  const dark = shade(car.color, 0.55), light = lighten(car.color, 0.35);
+  for (const tx of [5, 61]) {
+    g.fillStyle = "#101013"; g.fillRect(tx, 39, 16, 13);
+    g.fillStyle = "#26262e"; for (let y = 40 + frame; y < 52; y += 2) g.fillRect(tx + 1, y, 14, 1);
+  }
+  // round hips and a short, rounded tail
+  const grad = g.createLinearGradient(0, 16, 0, 46);
+  grad.addColorStop(0, light); grad.addColorStop(0.4, car.color); grad.addColorStop(1, dark);
+  poly(g, [[6, 26], [10, 21], [20, 18], [62, 18], [72, 21], [76, 26], [80, 32], [80, 43], [76, 46], [6, 46], [2, 43], [2, 32]], grad);
+  // the bubble roof and a small rear window
+  g.fillStyle = car.color; g.beginPath(); g.ellipse(41, 18, 22, 15, 0, Math.PI, 0); g.fill();
+  g.fillStyle = "#0a0a0c"; g.beginPath(); g.ellipse(41, 18, 18, 11, 0, Math.PI, 0); g.fill();
+  g.fillStyle = car.glass; g.beginPath(); g.ellipse(41, 18, 16.4, 9.6, 0, Math.PI, 0); g.fill();
+  g.fillStyle = car.seats; g.beginPath(); g.ellipse(33, 15, 3, 2.4, 0, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(49, 15, 3, 2.4, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = light; g.fillRect(28, 3.6, 26, 1);
+  // the fixed wing across the tail, on two stands
+  g.fillStyle = "#0a0a0c"; g.fillRect(8, 19, 66, 3); g.fillRect(24, 22, 2, 4); g.fillRect(56, 22, 2, 4);
+  g.fillStyle = "#2a2c33"; g.fillRect(8, 19, 66, 0.8);
+  // slim angular tail lights joined by a dark strip
+  poly(g, [[4, 27], [24, 26], [23, 30], [5, 31]], "#ff2020"); poly(g, [[78, 27], [58, 26], [59, 30], [77, 31]], "#ff2020");
+  g.fillStyle = "#ff9a9a"; g.fillRect(8, 27.6, 12, 0.9); g.fillRect(62, 27.6, 12, 0.9);
+  g.fillStyle = "#0a0a0c"; g.fillRect(24, 27, 34, 2);
+  g.fillStyle = "#e9e6d8"; g.fillRect(32, 32, 18, 6);
+  g.fillStyle = "#7d828f"; for (const x of [34, 37, 41, 44, 47]) g.fillRect(x, 34, 2, 2);
+  // a black diffuser and two huge oval tips, one each side
+  g.fillStyle = "#050506"; g.fillRect(4, 39, 74, 7);
+  g.fillStyle = "#2a2c33"; for (let x = 28; x < 56; x += 5) g.fillRect(x, 39, 1, 7);
+  for (const ex of [16.5, 65.5]) {
+    g.fillStyle = "#e8ecf4"; g.beginPath(); g.ellipse(ex, 42.5, 6.6, 3.8, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#9aa0ac"; g.beginPath(); g.ellipse(ex, 42.8, 5.4, 2.9, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#050506"; g.beginPath(); g.ellipse(ex, 43, 4.4, 2.1, 0, 0, Math.PI * 2); g.fill();
   }
   return crisp(cv);
 }

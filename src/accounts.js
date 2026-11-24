@@ -156,7 +156,7 @@ export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
 // cars only an admin can give (public/vroomillion/js/cars.js GIFT_CARS), kept on the account as a JSON list
-export const GIFT_CARS = ["mazzy", "tessy", "hondeezy", "nico", "zig"];
+export const GIFT_CARS = ["mazzy", "tessy", "hondeezy", "nico", "zig", "audi5k"];
 export function parseGifts(text) {
   try { const l = JSON.parse(text || "[]"); return Array.isArray(l) ? l.filter((c) => GIFT_CARS.includes(c)) : []; } catch { return []; }
 }

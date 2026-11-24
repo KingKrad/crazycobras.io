@@ -2087,6 +2087,7 @@ function startRace(setup) {
   const myCar = racers[setup.online?.seat ?? 0]?.car;
   audio.engineStart(myCar?.electric ? "electric" : myCar?.v12 ? "v12" : myCar?.reggae ? "reggae" : false);
   audio.engineSet(0.1);
+  if (racers.some((r) => r.car?.megaFire)) audio.loadAudiExhaust(); // AUDI 5000's recorded revs
   runRace(token);
 }
 
@@ -2214,6 +2215,7 @@ async function runRace(token) {
       if (nitro) sfx.nitro();
       if (r.car.rocket) { audio.rocket.roar(tier); if (nitro) audio.rocket.surge(); } // the Hondeezy's booster
       if (r.car.v12) audio.v12.scream(tier); // NICO'S CRAZY CAR
+      if (r.car.megaFire) { audio.audi.launch(tier); if (nitro) audio.audi.nitro(); } // AUDI 5000's recorded revs
       if (!stage.classList.contains("launch")) stage.classList.add("launch", "launch-t" + topTier);
     };
     scene.onEvent = (type, card) => {
@@ -2258,7 +2260,8 @@ async function runRace(token) {
             R.gear = g;
             (r.car.reggae ? audio.reggae : audio.sfx).shift();
             if (r.car.v12) { scene.backfire(i); audio.v12.pop(R.tier); } // NICO'S CRAZY CAR crackles on every shift
-            else if (r.car.reggae) { scene.backfire(i); audio.reggae.pop(R.tier); } // ZIG'S WHIP: an echoing rimshot on every shift
+            else if (r.car.reggae) { scene.backfire(i); audio.reggae.pop(R.tier); }
+            else if (r.car.megaFire) { scene.backfire(i); audio.audi.pop(R.tier); } // AUDI 5000: a fireball on every shift // ZIG'S WHIP: an echoing rimshot on every shift
             else if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
           }
           if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));

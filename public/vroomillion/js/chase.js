@@ -772,7 +772,8 @@ export class ChaseScene {
 
   backfire(i) {
     const r = this.racers[i];
-    if (!r?.box || (r.fireT <= 0 && !r.car?.v12 && !r.car?.reggae)) return;
+    if (!r?.box || (r.fireT <= 0 && !r.car?.v12 && !r.car?.reggae && !r.car?.megaFire)) return;
+    if (r.car?.megaFire) { r.fireTier = Math.max(4, r.fireTier || 0); if (!this.calm) this.shake = Math.max(this.shake, 0.25); } // AUDI 5000: every shift is a fireball
     if (r.car?.v12 && !r.fireTier) r.fireTier = 3; // the crazy car spits flames on every shift
     if (r.car?.reggae && !r.fireTier) r.fireTier = 2; // ZIG'S WHIP puffs red, gold and green on every shift
     const u = this.u;
@@ -784,6 +785,11 @@ export class ChaseScene {
         this.particles.push({ x: ex, y: y - h * 0.15, vx: (Math.random() - 0.5) * 90 * u, vy: (40 + Math.random() * 110) * u, life: 0.25 + Math.random() * 0.25, size: Math.max(1, u), color: elec(r) ? SPARK[k % 4] : r.car?.reggae ? RASTA[k % 3] : FIRE[r.fireTier][Math.floor(Math.random() * 3)], g: elec(r) ? 0 : 160 * u, hot: true });
       }
       if (r.car?.reggae) for (let k = 0; k < 2; k++) this.particles.push(noteParticle(ex, y - h * 0.15, u));
+      // AUDI 5000: a huge ball of fire rolls out of each pipe
+      if (r.car?.megaFire) for (let k = 0; k < 26; k++) {
+        const a = Math.random() * Math.PI, sp = (60 + Math.random() * 220) * u;
+        this.particles.push({ x: ex, y: y - h * 0.15, vx: Math.cos(a) * sp * 0.8, vy: Math.sin(a) * sp, life: 0.35 + Math.random() * 0.45, size: (2 + Math.random() * 4) * u, grow: 10 * u, color: ["#ff3b1f", "#ff8a1f", "#ffd23a", "#fff4c0"][k % 4], g: -40 * u, soft: true });
+      }
     }
   }
 
@@ -1199,6 +1205,11 @@ export class ChaseScene {
           if (r.boost > 0.05 && r.fireT <= 0 && Math.random() < r.boost * 0.8 && !elec(r)) {
             const sx = ex[Math.random() < 0.5 ? 0 : 1];
             this.particles.push({ x: sx, y: ey, vx: (Math.random() - 0.5) * 40 * u, vy: (30 + r.boost * 60) * u, life: 0.45, size: 2 * u, grow: 7 * u, color: r.car?.reggae ? RASTA[Math.floor(Math.random() * 3)] : "#cfd3e6", g: 0, soft: true });
+          }
+          // AUDI 5000: a shower of embers off the giant flames
+          if (r.car?.megaFire && (r.boost > 0.05 || r.fireT > 0)) for (let k = 0; k < 3; k++) {
+            const sx = ex[k % 2];
+            this.particles.push({ x: sx + (Math.random() - 0.5) * 14 * u, y: ey + r.box.h * (0.4 + Math.random() * 1.4), vx: (Math.random() - 0.5) * 120 * u, vy: (40 + Math.random() * 160) * u, life: 0.3 + Math.random() * 0.4, size: Math.max(1, u * (1 + Math.random())), color: ["#ff5a1f", "#ffd23a", "#fff4c0"][k], g: 80 * u, hot: true });
           }
           // ZIG'S WHIP: music notes drift up out of the pipes while it moves
           if (r.car?.reggae && Math.random() < 0.04 + Math.min(0.35, r.boost * 0.25 + (r.fireT > 0 ? 0.12 : 0))) this.particles.push(noteParticle(ex[Math.random() < 0.5 ? 0 : 1], ey, u));
@@ -2292,6 +2303,27 @@ export class ChaseScene {
       this.drawLasers(g, r, pipes, bottom - h * 0.2, h, fade);
       for (const fx of pipes) this.drawFlame(g, fx, bottom - h * 0.2, Math.max(3, s * (2.6 + r.fireTier * 0.5)), len * 0.8, PLASMA[r.fireTier], true);
       this.drawArcs(g, pipes, bottom - h * 0.2, len, r.fireTier);
+    } else if (r.car?.megaFire && !this.calm && (r.fireT > 0 || r.boost > 0.05 || r.popT > 0)) {
+      // AUDI 5000: insanely large flames out of both tips, always on while it moves, enormous on a pop
+      const tier = Math.max(3, r.fireTier || 0);
+      const fade = (r.fireT > 0 ? Math.min(1, r.fireT / 0.6) : Math.min(0.75, 0.35 + r.boost * 0.4)) * (r.popT > 0 ? 1.8 : 1);
+      const len = h * (2.9 + tier * 0.6) * fade * (0.9 + Math.random() * 0.2);
+      const fw = Math.max(12, s * (20 + tier * 4)) * (r.popT > 0 ? 1.5 : 1);
+      const rgb = (hue, l) => `rgb(${hsl(mod(hue, 360), 1, l).map(Math.round).join(",")})`;
+      const cols = tier === 5 ? [rgb(this.time * 540, 0.55), rgb(this.time * 540 + 90, 0.65), "#ffffff"] : ["#ff3b1f", "#ffa41f", "#fff6d0"];
+      // the fire lights up the road around the car
+      g.save();
+      g.globalCompositeOperation = "lighter";
+      const glow = g.createRadialGradient(cx, bottom, 0, cx, bottom, w * 1.6);
+      glow.addColorStop(0, `rgba(255,140,40,${Math.min(0.55, 0.25 + fade * 0.25)})`);
+      glow.addColorStop(1, "rgba(255,60,0,0)");
+      g.fillStyle = glow;
+      g.fillRect(cx - w * 1.6, bottom - w * 1.6, w * 3.2, w * 3.2);
+      g.restore();
+      for (const fx of [left + w * 0.2, left + w * 0.8]) {
+        this.drawFlame(g, fx, bottom - h * 0.18, fw * 1.25, len * 1.1, ["#b01a0a", "#ff5a1f", "#ffb84a"], true); // the outer roar
+        this.drawFlame(g, fx, bottom - h * 0.18, fw, len, cols, true);
+      }
     } else if (r.car?.reggae && !this.calm && (r.fireT > 0 || r.popT > 0)) {
       // ZIG'S WHIP: green, gold and white-hot flames, swelling on every rimshot
       const tier = Math.max(2, r.fireTier || 0);

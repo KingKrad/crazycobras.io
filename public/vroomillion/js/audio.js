@@ -346,6 +346,36 @@ function clip(buf, { rate = 1, vol = 0.6, at = 0, offset = 0, dur = 0, echo = 0 
   src.start(t, offset, dur || undefined);
   return true;
 }
+// AUDI 5000's exhaust: the owner's recording of three hard revs (audio/audi5k-exhaust.mp3).
+// In the file: rev one 0-1.95 s (the big one), rev two 2.0-3.25 s, rev three 3.3-4.6 s.
+let audiClip = null, audiLoading = null;
+export function loadAudiExhaust() {
+  if (!ctx || audiClip || audiLoading) return;
+  audiLoading = fetch("/vroomillion/audio/audi5k-exhaust.mp3")
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error("missing"))))
+    .then((b) => new Promise((ok, bad) => ctx.decodeAudioData(b, ok, bad)))
+    .then((buf) => { audiClip = buf; })
+    .catch(() => { audiLoading = null; });
+}
+const REVS = [[0, 1.95], [2.0, 1.25], [3.3, 1.3]];
+export const audi = {
+  // off the line: a rev from the recording, the big one for rarer answers, with a deep boom under it
+  launch: (t) => {
+    if (t <= 0) return;
+    const [off, dur] = REVS[t >= 3 ? 0 : t === 2 ? 1 : 2];
+    if (!clip(audiClip, { rate: 0.96 + t * 0.03, vol: 0.6 + t * 0.06, offset: off, dur })) v12.scream(t);
+    tone(45, 0.6 + t * 0.1, { type: "sine", vol: 0.25 + t * 0.03, slide: 0.6 });
+    if (t >= 4) noiseF(0.9, { vol: 0.12, type: "lowpass", freq: 200, sweep: 1200, attack: 0.05 }); // the flames whoosh
+  },
+  // each gear change: a short slice of a rev and a big flame bang
+  pop: (t = 3) => {
+    const [off, dur] = REVS[Math.floor(Math.random() * 3)];
+    if (!clip(audiClip, { rate: 1.05 + Math.random() * 0.1, vol: 0.5, offset: off + dur * (0.3 + Math.random() * 0.4), dur: 0.3 })) v12.pop(t);
+    noiseF(0.09, { vol: 0.22, type: "lowpass", freq: 700 });
+    tone(55, 0.14, { type: "square", vol: 0.14, slide: 0.5 });
+  },
+  nitro: () => { clip(audiClip, { rate: 1.15, vol: 0.6, offset: REVS[0][0], dur: REVS[0][1], at: 0.12 }); },
+};
 export const reggae = {
   // the air horn: "bap bap baaaa"
   horn: (at = 0, vol = 0.07) => {
