@@ -3,6 +3,18 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-24a",
+    date: "Nov 24, 2026",
+    title: "Easier to find your way",
+    items: [
+      "Today's daily race is now the big button at the top. Once you've played, it shows how far you went and opens the leaderboard.",
+      "New players get three quick steps, and hints in their first race.",
+      "Clearer names: SOLO RACES, 2 PLAYERS and RACE A FRIEND ONLINE.",
+      "Signing up is easier: pick I'M NEW or I HAVE AN ACCOUNT.",
+      "Every menu screen has a BACK button at the top, and the daily race results link to the leaderboard.",
+    ],
+  },
+  {
     id: "2026-11-23f",
     date: "Nov 23, 2026",
     title: "More answers count",

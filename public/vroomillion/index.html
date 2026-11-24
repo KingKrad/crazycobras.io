@@ -41,15 +41,16 @@
 
     <main>
       <section class="screen" id="s-title">
-        <p class="blink">— PRESS START —</p>
+        <div class="first-steps hidden" id="first-steps"></div>
+        <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
         <div class="menu">
-          <button class="btn big" id="btn-1p" type="button">1P RACE</button>
-          <button class="btn big alt" id="btn-2p" type="button">2P VERSUS</button>
-          <button class="btn big online-btn" id="btn-online" type="button">ONLINE 1V1</button>
+          <button class="btn big" id="btn-1p" type="button">SOLO RACES<span class="btn-sub">ANY TOPIC, ANY TIME</span></button>
+          <button class="btn big alt" id="btn-2p" type="button">2 PLAYERS<span class="btn-sub">TAKE TURNS ON THIS SCREEN</span></button>
+          <button class="btn big online-btn" id="btn-online" type="button">RACE A FRIEND ONLINE<span class="btn-sub">SEND THEM A LINK</span></button>
           <button class="btn" id="btn-garage" type="button">GARAGE</button>
           <button class="btn" id="btn-passport" type="button">PASSPORT</button>
           <button class="btn" id="btn-how" type="button">HOW TO PLAY</button>
-          <button class="btn" id="btn-account" type="button">ACCOUNT</button>
+          <button class="btn" id="btn-account" type="button">SIGN UP / LOG IN</button>
           <button class="btn admin-btn hidden" id="btn-admin-title" data-go="admin" type="button">ADMIN</button>
         </div>
         <div class="daily" id="daily"></div>
@@ -87,7 +88,7 @@
       </section>
 
       <section class="screen" id="s-leagues">
-        <h2>1P RACE</h2>
+        <h2>SOLO RACES</h2>
         <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
         <div class="daily-races" id="daily-solo"></div>
         <p class="note" id="daily-note"></p>
@@ -234,8 +235,9 @@
         <div class="menu row">
           <button class="btn big" id="btn-again" type="button">NEW RACE</button>
           <button class="btn big alt" id="btn-redo" type="button">REDO THIS RACE</button>
+          <button class="btn hidden" id="btn-results-board" data-go="board" type="button">TODAY'S LEADERBOARD</button>
           <button class="btn" id="btn-results-garage" type="button">GARAGE</button>
-          <button class="btn" data-go="title" type="button">MENU</button>
+          <button class="btn" data-go="title" type="button">HOME</button>
         </div>
       </section>
     </main>

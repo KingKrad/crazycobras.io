@@ -341,6 +341,7 @@ function renderDaily() {
   const nextCar = nextCarCard();
   if (nextCar) box.append(nextCar);
   const today = dday();
+  drawDailyHero(today);
   if (FREE_PLAY) {
     box.append(h("div", { class: "daily-line good", text: "★ FREE PLAY — RACE AS MUCH AS YOU LIKE" }));
   } else if (unlimitedNow() && account.trialEndsAt) {
@@ -349,14 +350,42 @@ function renderDaily() {
   } else if (unlimitedNow()) {
     box.append(h("div", { class: "daily-line good", text: `★ UNLIMITED — ${account.email.toUpperCase()}` }));
   } else if (dailyLeft(save, today) > 0) {
-    const n = dailyLeft(save, today);
-    if (streakNow()) box.append(h("div", { class: "daily-line good", text: `STREAK: ${streakNow()} DAY${streakNow() === 1 ? "" : "S"} · KEEP IT GOING TODAY` }));
-    box.append(h("div", { class: "daily-line good", text: `${n} DAILY RACE${n === 1 ? "" : "S"} LEFT TODAY · SAME PROMPTS FOR EVERYONE` }));
+    // the big daily button at the top already says it's waiting
   } else {
-    box.append(
-      h("div", { class: "daily-line", text: `TODAY'S DAILY RACE IS DONE · A NEW ONE IN ${timeLeft()}` }),
-      h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
+    box.append(h("button", { class: "btn big unlock-cta", type: "button", text: "WANT MORE? GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
   }
+}
+
+// The first and biggest button on the title screen: today's daily race, or (once it's played) how you
+// did and the leaderboard. New players also get three steps telling them exactly what to do.
+function drawDailyHero(today) {
+  const btn = $("btn-daily");
+  const n = nextDaily(save, today);
+  const done = dailyDone(save, today);
+  const st = streakNow();
+  btn.textContent = "";
+  btn.classList.toggle("done", !n);
+  if (n) {
+    btn.append("▶ PLAY TODAY'S DAILY RACE",
+      h("span", { class: "btn-sub", text: `FREE · 7 QUESTIONS · ABOUT 3 MINUTES${st ? ` · ${st}-DAY STREAK` : ""}` }));
+    btn.onclick = () => { audio.sfx.click(); startRace({ mode: "solo", daily: n }); };
+  } else {
+    const m = Object.values(done).find((v) => typeof v === "number" && v > 0);
+    btn.append("✓ DAILY RACE DONE TODAY",
+      h("span", { class: "btn-sub", text: `${m ? `YOU WENT ${m.toLocaleString("en-US")} M · ` : ""}TAP FOR THE LEADERBOARD · NEW ONE IN ${timeLeft()}` }));
+    btn.onclick = () => { audio.sfx.click(); show("board"); };
+  }
+  const steps = $("first-steps");
+  steps.textContent = "";
+  steps.classList.toggle("hidden", !!save.races);
+  if (!save.races) steps.append(
+    h("div", { class: "fs-title", text: "NEW HERE? IT'S EASY:" }),
+    h("ol", {},
+      h("li", { text: "Tap PLAY TODAY'S DAILY RACE below." }),
+      h("li", { text: "You get a question like \"Name a fruit\". Type any answer that fits and tap GO." }),
+      h("li", { text: "The rarer your answer, the further your car drives. That's it!" })),
+    h("div", { class: "note", text: "No account needed to play." }));
+  $("btn-account").textContent = account ? "MY ACCOUNT" : "SIGN UP / LOG IN";
 }
 
 // ---------- accounts ----------
@@ -634,12 +663,25 @@ function renderPaywall() {
 }
 
 let signInError = null; // why a Google or Apple sign-in didn't work, shown once on the log-in screen
+let accountTab = null; // "signup" or "login" on the logged-out account screen
 function renderAccount() {
   const box = $("account-box");
   box.textContent = "";
   if (!account) {
     if (signInError) box.append(h("p", { class: "pay-msg bad", role: "alert", text: signInError }));
-    box.append(h("p", { class: "note", text: "Bought Unlimited? Log in to use it on this device." }), authForm("login", () => show("title")));
+    // two big tabs, so it's obvious where to sign up and where to log in. New players start on sign up.
+    let had = false;
+    try { had = localStorage.getItem("vroom.hadAccount") === "1"; } catch { /* private mode */ }
+    if (!accountTab) accountTab = had ? "login" : "signup";
+    const done = () => { try { localStorage.setItem("vroom.hadAccount", "1"); } catch {} accountTab = null; show("title"); };
+    const tab = (id, label) => h("button", { class: "acct-tab" + (accountTab === id ? " on" : ""), type: "button", role: "tab", "aria-selected": String(accountTab === id), text: label,
+      onclick: () => { audio.sfx.click(); accountTab = id; renderAccount(); } });
+    box.append(
+      h("div", { class: "acct-tabs", role: "tablist" }, tab("signup", "I'M NEW: SIGN UP"), tab("login", "I HAVE AN ACCOUNT")),
+      h("p", { class: "note acct-why", text: accountTab === "signup"
+        ? `Free. Saves your cars, cash and streak, and lets you play on any phone or computer.${trialOffer ? " New accounts get 24 hours of Unlimited free!" : ""}`
+        : "Log in to get your cars, progress and Unlimited on this device." }),
+      authForm(accountTab, done));
     return;
   }
   signInError = null;
@@ -2521,7 +2563,9 @@ function askAnswer(r, i, token, index) {
     feedback.className = "feedback";
     input.type = hidden ? "password" : "text";
     input.autocomplete = hidden ? "new-password" : "off";
-    $("turn").textContent = race.solo || race.online ? "" : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
+    $("turn").textContent = race.solo || race.online
+      ? (!save.races && race.round < 2 ? "TYPE ANY ANSWER THAT FITS, THEN TAP GO! RARER ANSWERS GO FURTHER." : "")
+      : `${r.name} — TYPE IT (HIDDEN). OTHER PLAYER LOOK AWAY!`;
     r.useNitro = false;
     const drawNitro = () => {
       const narrow = window.innerWidth < 520;
@@ -3010,6 +3054,7 @@ function finish(token) {
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
+  $("btn-results-board").classList.toggle("hidden", !race.daily);
   // online: "again" goes back to the online screen; "redo" becomes REMATCH with the same friend
   if (race.online) {
     $("btn-again").textContent = "NEW ONLINE RACE"; $("btn-again").disabled = false;
@@ -3023,6 +3068,13 @@ function finish(token) {
 }
 
 // ---------- wiring ----------
+// Long screens had BACK only at the very bottom. Give every menu screen a BACK button at the top too.
+for (const sec of document.querySelectorAll(".screen")) {
+  if (["s-title", "s-race", "s-results"].includes(sec.id)) continue;
+  const bottom = [...sec.querySelectorAll("button[data-go]")].reverse().find((b) => /BACK/.test(b.textContent));
+  if (!bottom) continue;
+  sec.prepend(h("button", { class: "btn small top-back", type: "button", "data-go": bottom.dataset.go, text: "◀ BACK" }));
+}
 // Browsers only allow sound after the first tap or key press.
 const firstTouch = () => audio.unlock();
 document.addEventListener("pointerdown", firstTouch);
