@@ -1468,8 +1468,9 @@ p, li, .note, label, input, select, textarea { letter-spacing: 0.01em; }
    VROOM in hot pink, ILLION in electric cyan. The sky behind it is kept clear (see chase.js drawClearSky). */
 .neon-sign { display: none; }
 body[data-screen="title"] .logo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-body[data-screen="title"] .neon-sign { display: block; width: min(94vw, 900px); height: auto; overflow: visible; }
-.neon-sign text { font-family: var(--font-title); font-weight: 700; font-size: 168px; font-size-adjust: none; letter-spacing: 0; stroke-linejoin: round; stroke-linecap: round; paint-order: stroke; }
+body[data-screen="title"] .neon-sign { display: block; width: min(92vw, 900px); height: auto; overflow: visible; }
+/* 114px draws the word about 900 wide on its own, so it fits even if a browser ignores textLength */
+.neon-sign text { font-family: var(--font-title); font-weight: 700; font-size: 114px; font-size-adjust: none; letter-spacing: 0; stroke-linejoin: round; stroke-linecap: round; paint-order: stroke; }
 .neon-sign .na { --c: #ff3fd0; --g: rgba(255, 63, 208, 0.2); --w: #ffe3f7; }
 .neon-sign .nb { --c: #3ff0ff; --g: rgba(63, 240, 255, 0.2); --w: #e2fdff; }
 .neon-sign .glow text { fill: none; stroke-width: 22; opacity: 0.75; }
@@ -1488,7 +1489,7 @@ body[data-screen="title"] .neon-sign { display: block; width: min(94vw, 900px); 
 }
 @keyframes neon-flick { 0%, 92% { stroke-opacity: 1; } 93% { stroke-opacity: 0.2; } 94% { stroke-opacity: 1; } 96% { stroke-opacity: 0.35; } 97%, 100% { stroke-opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .neon-sign tspan, .neon-sign tspan.flick { animation: none; } }
-body[data-screen="title"] .tagline { font-family: var(--font-title); font-size: clamp(11px, 2.6vw, 17px); color: #ffffff; letter-spacing: 0.08em; margin-top: 0.2em;
+body[data-screen="title"] .tagline { font-family: var(--font-title); font-size: min(17px, 2.55vw); white-space: nowrap; color: #ffffff; letter-spacing: 0.08em; margin-top: 0.2em;
   text-shadow: 0 0 6px rgba(63, 240, 255, 0.9), 0 0 16px rgba(63, 240, 255, 0.5), 2px 2px 0 #000; }
 
 /* the race screen arrives smoothly: the HUD drops in from the top, the answer bar rises from below */
