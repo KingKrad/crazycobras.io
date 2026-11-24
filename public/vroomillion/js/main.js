@@ -222,6 +222,7 @@ function fitScene() {
     // the place's centrepiece fills the top of the screen; menu panels start below it
     document.documentElement.style.setProperty("--place-top", Math.round(Math.max(130, Math.min(250, ch * 0.26)) * css) + "px");
     places.inset = Math.round((document.querySelector(".topbar")?.offsetHeight || 60) / css);
+    chaseScene.cssPx = css;
     // the title screen keeps the sky clear behind the neon sign and tagline
     chaseScene.clearTop = 0;
     if (current === "title") requestAnimationFrame(() => {

@@ -248,7 +248,7 @@ h3 { font-weight: normal; }
 .btn.small { padding: 8px 8px; min-height: 40px; font-size: 9px; width: 100%; }
 .btn.buy { background: #0d5a2c; border-color: #b8ffd0; }
 .btn.buy.poor { background: #2a2440; border-color: #6a6190; color: #9d95bd; }
-.btn.sticky { position: sticky; bottom: 12px; margin-top: 16px; }
+.btn.sticky { margin-top: 16px; } /* every screen has a BACK button at the top too */
 .link { background: none; border: 0; color: var(--dim); font-size: 9px; padding: 10px 4px; text-decoration: underline; }
 
 /* ---------- how to play ---------- */
@@ -1320,7 +1320,8 @@ body:not([data-screen="race"]):not([data-screen="title"]) .screen.active {
   padding: 14px 14px 18px; margin: 8px auto 16px; max-width: 760px; animation: panel-up 0.28s cubic-bezier(0.2, 1.2, 0.4, 1) both;
 }
 @keyframes panel-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
-body:not([data-screen="race"]):not([data-screen="title"]) .topbar { background: rgba(11, 6, 24, 0.72); margin: 0 -12px; padding: 10px 12px; }
+/* a dark band behind the top bar that runs the full width of the window, not just the page column */
+body:not([data-screen="race"]):not([data-screen="title"]) .topbar { border-image: linear-gradient(rgba(11, 6, 24, 0.72), rgba(11, 6, 24, 0.72)) fill 0 / 0 / 0 100vmax; margin: 0 -12px; padding: 10px 12px; }
 @media (max-width: 520px) {
   body:is([data-screen="leagues"], [data-screen="versus"], [data-screen="garage"], [data-screen="passport"], [data-screen="how"], [data-screen="account"], [data-screen="paywall"], [data-screen="board"], [data-screen="admin"]) .stage { display: block; }
 }
@@ -1434,7 +1435,7 @@ body.launching .title-bottom, body.launching .corner-btn, body.launching .title-
 /* ---------- places: every menu screen is somewhere on the road ----------
    The canvas draws the place; the top of the screen is its centrepiece and the panel starts below it. */
 body:not([data-place=""]):not([data-screen="title"]):not([data-screen="race"]) .stage { filter: none; }
-body:not([data-place=""]):not([data-screen="title"]):not([data-screen="race"]) .topbar { background: none; }
+body:not([data-place=""]):not([data-screen="title"]):not([data-screen="race"]) .topbar { background: none; border-image: none; }
 body:not([data-place=""]):not([data-screen="race"]) main { padding-top: calc(var(--place-top, 180px) - 70px); }
 /* the panel frames match the place */
 body[data-place="garage"] .screen.active { border-color: #ff4fd8; box-shadow: 0 0 0 3px #000, 0 0 26px rgba(255, 79, 216, 0.45); background: rgba(18, 10, 30, 0.92); }

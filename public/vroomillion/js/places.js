@@ -66,14 +66,25 @@ export class Places {
       }
     }
   }
-  neon(text, x, y, size, color, align = "center") {
-    const g = this.g;
+  neon(text, x, y, size, color, align = "center", minCss = 13) {
+    // drawn on the full-resolution layer over the scene when there is one, so the lettering is sharp,
+    // and never smaller than about 15 screen pixels
+    const c = this.chase;
+    const hi = c?.hiG;
+    const g = hi || this.g;
     g.save();
-    size = Math.round(size * 1.05); // the sizes were picked for a different font
+    if (hi) { const R = c.hiScale || 1; g.setTransform(new DOMMatrix([R, 0, 0, R, 0, 0]).multiply(this.g.getTransform())); c.hiUsed = true; }
+    size = Math.max(size * 1.05, minCss / (c?.cssPx || 1)); // the sizes were picked for a different font
+    y = Math.max(y, size * 0.75 + 2); // never up under the top bar
     g.font = `${size}px ${FONT}`;
     g.textAlign = align;
     g.textBaseline = "middle";
-    const on = Math.sin(this.t * 13) > -0.97; // a rare flicker
+    const on = !(Math.sin(this.t * 0.37) > 0.996 && Math.sin(this.t * 31) > 0); // a rare, quick flicker
+    // a dark outline first, so the tubes read on a bright sky too
+    g.lineJoin = "round";
+    g.lineWidth = Math.max(2, size * 0.2);
+    g.strokeStyle = "rgba(10, 6, 24, 0.85)";
+    g.strokeText(text, Math.round(x), Math.round(y));
     g.shadowColor = color;
     g.shadowBlur = on ? size * 0.9 : 0;
     g.fillStyle = on ? "#ffffff" : color;
@@ -236,7 +247,7 @@ export class Places {
     g.fillStyle = "#16141f"; for (let y = by + 4; y < by + bh - 2; y += 4) for (let x = bx + 4; x < bx + bw - 2; x += 4) g.fillRect(x, y, 2, 2);
     this.bulbs(bx, by, bw, bh, 12, "#7a5a14");
     this.neon("LEADERBOARD", W / 2, by + bh * 0.36, Math.round(clamp(W / 26, 12, 22)), "#ffd23a");
-    this.neon("TODAY'S FASTEST", W / 2, by + bh * 0.72, Math.round(clamp(W / 46, 8, 12)), "#4fd1ff");
+    this.neon("TODAY'S FASTEST", W / 2, by + bh * 0.74, Math.round(clamp(W / 46, 8, 12)), "#4fd1ff", "center", 9);
     // your car parked by the road
     this.drawSprite(this.side(car), W * 0.82, Math.round(top * 0.92) + 4, Math.min(W * 0.2, 120));
   }
@@ -312,8 +323,8 @@ export class Places {
     face.addColorStop(0, "#2a1160"); face.addColorStop(1, "#c2185b");
     g.fillStyle = face; g.fillRect(bx, by, bw, bh);
     g.fillStyle = "#5a5a66"; g.fillRect(bx, by + bh + 6, bw, 4);
-    this.neon("HOW TO PLAY", W / 2, by + bh * 0.4, Math.round(clamp(W / 26, 12, 22)), "#ffd23a");
-    this.neon("RARER = FURTHER", W / 2, by + bh * 0.74, Math.round(clamp(W / 46, 8, 12)), "#7cf9ff");
+    this.neon("HOW TO PLAY", W / 2, by + bh * 0.36, Math.round(clamp(W / 26, 12, 22)), "#ffd23a");
+    this.neon("RARER = FURTHER", W / 2, by + bh * 0.76, Math.round(clamp(W / 46, 8, 12)), "#7cf9ff", "center", 9);
     this.drawSprite(this.side(car), W * 0.14, Math.round(top * 0.92) + 4, Math.min(W * 0.15, 90));
   }
 }
