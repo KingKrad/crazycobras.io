@@ -3,6 +3,8 @@
 // car makers license to games. Real brands only appear as trivia answers.
 // power = distance multiplier (set by class below), nitro = boost charges per race.
 
+import { handDrawn, handSide, handRear } from "./cars-hand.js";
+
 const C = (id, name, cls, price, power, nitro, body, color, accent) => ({ id, name, cls, price, power, nitro, body, color, accent });
 
 export const CLASSES = {
@@ -389,6 +391,7 @@ const cache = new Map();
 export function carSprite(car, frame = 0) {
   const ck = car.id + ":" + car.color + ":" + frame;
   if (cache.has(ck)) return cache.get(ck);
+  if (handDrawn(car)) { const cv = handSide(car, frame); cache.set(ck, cv); return cv; } // its own hi-res drawing
   if (car.hiRes) { const cv = car.rocket ? civicSide(car, frame) : car.v12 ? rs3Side(car, frame) : car.reggae ? f150Side(car, frame) : car.megaFire ? ttSide(car, frame) : evSide(car, frame); cache.set(ck, cv); return cv; }
   const tpl = BODIES[car.body] || BODIES.sedan;
   const w = tpl.rows[0].length;
@@ -586,6 +589,7 @@ const rearCache = new Map();
 export function rearSprite(car, frame = 0) {
   const key = car.id + ":" + car.color + ":" + frame;
   if (rearCache.has(key)) return rearCache.get(key);
+  if (handDrawn(car)) { const cv = handRear(car, frame); rearCache.set(key, cv); return cv; }
   if (car.hiRes) { const cv = car.rocket ? civicRear(car, frame) : car.v12 ? rs3Rear(car, frame) : car.reggae ? f150Rear(car, frame) : car.megaFire ? ttRear(car, frame) : evRear(car, frame); rearCache.set(key, cv); return cv; }
   const rows = rearRows(car.body, frame);
   const cv = document.createElement("canvas");

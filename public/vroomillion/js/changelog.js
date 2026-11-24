@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-24e",
+    date: "Nov 24, 2026",
+    title: "Redrawn cars, part 1",
+    items: [
+      "All 15 Class D cars are redrawn by hand with twice the detail, front and back.",
+      "Look out for the Rustbucket's primer door, the cab's roof sign, the pizza slice on the delivery hatch and the giant cone on the ice cream van.",
+      "More classes are being redrawn next.",
+    ],
+  },
+  {
     id: "2026-11-24d",
     date: "Nov 24, 2026",
     title: "Every screen is a place",
