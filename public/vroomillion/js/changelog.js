@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-24g",
+    date: "Nov 24, 2026",
+    title: "A real neon sign",
+    items: [
+      "The VROOMILLION title is now glowing glass neon tubes: hot pink and electric cyan.",
+      "The letters buzz on one by one when you arrive, with the odd flicker after.",
+      "The sky behind the sign stays clear, so it's always easy to read.",
+    ],
+  },
+  {
     id: "2026-11-24f",
     date: "Nov 24, 2026",
     title: "Cleaner text",

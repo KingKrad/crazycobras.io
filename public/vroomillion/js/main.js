@@ -213,6 +213,12 @@ function fitScene() {
     // the place's centrepiece fills the top of the screen; menu panels start below it
     document.documentElement.style.setProperty("--place-top", Math.round(Math.max(130, Math.min(250, ch * 0.26)) * css) + "px");
     places.inset = Math.round((document.querySelector(".topbar")?.offsetHeight || 60) / css);
+    // the title screen keeps the sky clear behind the neon sign and tagline
+    chaseScene.clearTop = 0;
+    if (current === "title") requestAnimationFrame(() => {
+      const tag = document.querySelector("#title-art .tagline");
+      if (current === "title" && tag) chaseScene.clearTop = Math.round((tag.getBoundingClientRect().bottom + 22) / css);
+    });
     // the car sits further up the road, with room under it for the start button
     scene.resize(w, ch, Math.round(ch * (window.innerWidth < 600 ? 0.6 : 0.66)));
     return;
@@ -231,6 +237,7 @@ function fitScene() {
   root.setProperty("--vvtop", (vv ? vv.offsetTop : 0) + "px");
   document.body.classList.toggle("kb", kb);
   const { w: iw, h: ih, css: k } = crispCanvas(vw, vh);
+  chaseScene.clearTop = 0;
   // room for the answer bar (one compact row on the keyboard), and the car a little further up the road
   const dock = Math.ceil((kb ? 74 : vw < 600 ? 150 : 128) / k);
   scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05)); // nearest car sits above the answer bar

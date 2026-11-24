@@ -1608,6 +1608,8 @@ export class ChaseScene {
     g.drawImage(this.layer, 0, 0);
 
     this.drawWeather(g);
+    // the title screen: an empty stretch of sky behind the neon sign, so nothing shows through the letters
+    if (this.clearTop > 0) this.drawClearSky(g, this.clearTop);
     if (!this.calm) drawFireworks(this, g); // in front of the mountains, buildings and rarity tint
     this.drawStreaks(g);
     this.drawSmash(g);
@@ -1675,6 +1677,23 @@ export class ChaseScene {
     }
     c = c.map((v) => v / total);
     return mixC(horizonSky, c, Math.min(1, total));
+  }
+
+  // repaint plain sky (no buildings, clouds or sun) from the top down to y, fading out at the bottom
+  drawClearSky(g, y) {
+    const stops = this.tod.sky, span = this.horizon + 4 * this.u;
+    const at = (f) => { // the sky's colour a fraction f of the way down to the horizon
+      const x = clamp(f, 0, 1) * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(x));
+      return mixC(stops[i], stops[i + 1], x - i);
+    };
+    const grad = g.createLinearGradient(0, 0, 0, y);
+    for (let k = 0; k <= 8; k++) {
+      const t = k / 8, c = at((t * y) / span).map(Math.round);
+      const a = t < 0.72 ? 1 : Math.max(0, 1 - (t - 0.72) / 0.28);
+      grad.addColorStop(t, `rgba(${c[0]},${c[1]},${c[2]},${a})`);
+    }
+    g.fillStyle = grad;
+    g.fillRect(0, 0, this.W, y);
   }
 
   drawSky(g) {
