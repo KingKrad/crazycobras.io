@@ -10,29 +10,40 @@ const L = JSON.parse(fs.readFileSync(new URL("./lists.json", import.meta.url), "
 const have = new Map(FAMILIES.filter((f) => !(f.pools.length === 1 && f.pools[0] === "film")).flatMap((f) => f.prompts.map((p) => [p.toLowerCase(), f])));
 const DROPPED = new Set(fs.existsSync(new URL("./dropped.json", import.meta.url)) ? JSON.parse(fs.readFileSync(new URL("./dropped.json", import.meta.url), "utf8")) : []);
 const slug = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "").slice(0, 24);
-const TOPICS = ["director", "star", "characters", "tv", "studio", "era", "genre", "awards", "people"];
+const TOPICS = ["director", "star", "franchise", "characters", "tv", "studio", "era", "genre", "awards", "people"];
 const lines = Object.fromEntries(TOPICS.map((t) => [t, []]));
 const join = {};
 const used = new Set();
-function fam(topic, id, lvl, prompt, where, opts = "") {
+// alts: how the game's older prompts word the same thing ("Name a Brad Pitt movie"): those join instead
+function fam(topic, id, lvl, prompt, where, opts = "", alts = []) {
   if (DROPPED.has(id)) return;
   const key = prompt.toLowerCase();
-  if (have.has(key)) { join[have.get(key).id] = topic; return; }
+  const old = [key, ...alts.map((a) => a.toLowerCase())].find((k) => have.has(k));
+  if (old) { join[have.get(old).id] = topic; return; }
   if (used.has(key) || used.has("id:" + id) || /\|/.test(prompt + where)) return;
   used.add(key); used.add("id:" + id);
   lines[topic].push(`${id} | ${lvl} | film | g:${topic} | ${prompt} | autotop=12 max=800 ${opts} w:${where} |`);
 }
-const FILM = "?i wdt:P31/wdt:P279? wd:Q11424.";
+const FILM = "?i wdt:P31/wdt:P279* wd:Q11424."; // * : animated features are a subclass of a subclass
 const SHOW = "?i wdt:P31/wdt:P279? wd:Q5398426.";
 const lvl = (i, a, b) => (i < a ? 1 : i < b ? 2 : 3);
 const clean = (n) => n.replace(/\s*\(.*?\)\s*/g, " ").trim();
 
-L.directors.slice(0, 90).forEach((d, i) => fam("director", "fdir/" + slug(d.name), lvl(i, 30, 60), `Name a film directed by ${clean(d.name)}`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6"));
-L.actors.slice(0, 140).forEach((a, i) => fam("star", "fstar/" + slug(a.name), lvl(i, 40, 90), `Name a movie starring ${clean(a.name)}`, `?i wdt:P161 wd:${a.q}. ${FILM}`, "min=1 minans=8"));
-L.shows.slice(0, 70).forEach((s, i) => fam("characters", "fchar/" + slug(s.name), lvl(i, 25, 50), `Name a character from ${clean(s.name)}`, `?i wdt:P1441 wd:${s.q}.`, "min=1 minans=8"));
-L.franchises.slice(0, 40).forEach((s, i) => fam("characters", "ffran/" + slug(s.name), lvl(i, 15, 30), `Name a character from ${clean(s.name)}`, `?i wdt:P1441 wd:${s.q}.`, "min=1 minans=8"));
-L.networks.slice(0, 30).forEach((n, i) => fam("tv", "fnet/" + slug(n.name), lvl(i, 12, 24), `Name a TV show on ${clean(n.name)}`, `?i wdt:P449 wd:${n.q}. ${SHOW}`, "min=2 minans=10"));
-L.studios.slice(0, 30).forEach((s, i) => fam("studio", "fstudio/" + slug(s.name), lvl(i, 12, 24), `Name a film made by ${clean(s.name)}`, `?i wdt:P272 wd:${s.q}. ${FILM}`, "min=2 minans=10"));
+const alsoAs = (n) => [`Name a ${clean(n)} movie`, `Name an ${clean(n)} movie`, `Name a ${clean(n)} film`, `Name an ${clean(n)} film`];
+const an = (s) => (/^[aeiou]/i.test(s) ? "an " : "a ") + s;
+const noThe = (s) => clean(s).replace(/^The /, "");
+const BY = "{ ?i wdt:P1441 wd:%s. } UNION { ?i wdt:P8345 wd:%s. } UNION { ?w wdt:P179 wd:%s; wdt:P674 ?i. }";
+const CHAR = (q) => BY.replace(/%s/g, q) + " ?i wdt:P31/wdt:P279* wd:Q95074.";
+// the lists are hand-picked, best-known first (tools/film/names.mjs)
+L.directors.forEach((d, i) => fam("director", "fdir/" + slug(d.name), lvl(i, 40, 75), `Name a film directed by ${clean(d.name)}`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6", alsoAs(d.name)));
+L.actors.forEach((a, i) => fam("star", "fstar/" + slug(a.name), lvl(i, 70, 130), `Name a movie starring ${clean(a.name)}`, `{ ?i wdt:P161 wd:${a.q}. } UNION { ?i wdt:P725 wd:${a.q}. } ${FILM}`, "min=1 minans=8", alsoAs(a.name)));
+L.shows.forEach((s, i) => fam("characters", "fchar/" + slug(s.name), lvl(i, 45, 85), `Name a character from ${clean(s.name)}`, CHAR(s.q), "min=1 minans=8"));
+L.franchises.forEach((s, i) => {
+  fam("characters", "ffran/" + slug(s.name), lvl(i, 35, 60), `Name a character from ${clean(s.name)}`, CHAR(s.q), "min=1 minans=8");
+  fam("franchise", "fmovie/" + slug(s.name), lvl(i, 40, 65), `Name ${an(noThe(s.name))} movie`, `{ ?i wdt:P179 wd:${s.q}. } UNION { ?i wdt:P8345 wd:${s.q}. } ${FILM}`, "min=1 minans=5", [...alsoAs(noThe(s.name)), ...alsoAs(clean(s.name))]);
+});
+L.networks.forEach((n, i) => fam("tv", "fnet/" + slug(n.name), lvl(i, 16, 26), `Name a TV show on ${clean(n.name)}`, `?i wdt:P449 wd:${n.q}. ${SHOW}`, "min=2 minans=10"));
+L.studios.forEach((s, i) => fam("studio", "fstudio/" + slug(s.name), lvl(i, 14, 24), `Name a film made by ${clean(s.name)}`, `?i wdt:P272 wd:${s.q}. ${FILM}`, "min=1 minans=8"));
 for (let y = 1930; y <= 2020; y += 10) fam("era", "fera/" + y, y >= 1980 ? 1 : 2, `Name a movie from the ${y}s`, `?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9})`, "min=15 minans=20");
 for (let y = 1990; y <= 2020; y += 10) fam("era", "ftv/" + y, 2, `Name a TV series that started in the ${y}s`, `?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9})`, "min=15 minans=20");
 const GENRES = [["a horror movie", "Q200092"], ["a science fiction movie", "Q471839"], ["a western", "Q172980"], ["a movie musical", "Q842256"], ["a war movie", "Q369747"], ["a romantic comedy", "Q860626"], ["a superhero movie", "Q1535153"], ["a crime movie", "Q959790"], ["a fantasy movie", "Q157394"], ["a thriller", "Q2484376"], ["a documentary film", "Q93204"], ["a disaster movie", "Q846544"], ["a heist movie", "Q496523"], ["a martial arts movie", "Q1251417"], ["a spy movie", "Q2297927"], ["a zombie movie", "Q1342372"], ["a teen movie", "Q1146335"], ["a sports movie", "Q1135802"]];

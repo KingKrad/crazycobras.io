@@ -1,0 +1,1 @@
+{"q":"Name a Monsters, Inc. movie","a":[["monsters, inc.","monsters university","mike's new car","party central","monsters, inc. 3"],[],[],[],[]],"tiers":[70,25],"fam":"fmovie/monstersinc","live":{"where":"{ ?i wdt:P179 wd:Q6902872. ?i wdt:P31/wdt:P279* wd:Q11424. } UNION { ?i wdt:P8345 wd:Q6902872. ?i wdt:P31/wdt:P279* wd:Q11424. }","tiers":[70,25],"exclude":null,"taxa":false}}

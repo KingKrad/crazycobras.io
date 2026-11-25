@@ -1,30 +1,48 @@
-// BOX OFFICE: fetches the lists the movie & TV prompts are generated from (famous directors, actors,
-// TV shows, networks, studios, franchises) into tools/film/lists.json. tools/film/make-catalog.mjs reads it.
+// BOX OFFICE: looks up the hand-picked names (tools/film/names.mjs) on Wikidata and writes their ids
+// to tools/film/lists.json; tools/film/make-catalog.mjs turns them into prompts. Each name matches its
+// exact English label; when several items share it, the right kind wins, then the best-known.
 import fs from "node:fs";
 import { sparql, sleep } from "../wd-lib.mjs";
-const id = (r, k) => r[k].value.split("/").pop();
-async function list(name, q) {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const rows = await sparql(q);
-      const m = new Map();
-      for (const r of rows) if (!m.has(id(r, "i"))) m.set(id(r, "i"), { q: id(r, "i"), name: r.l.value, n: Number(r.n.value) });
-      const out = [...m.values()].sort((a, b) => b.n - a.n);
-      console.log(name, out.length, out.slice(0, 8).map((x) => x.name).join(", "));
-      await sleep(800);
-      return out;
-    } catch (e) { console.log("retry", name, e.message); await sleep(5000); }
+import * as N from "./names.mjs";
+const esc = (s) => JSON.stringify(s);
+async function resolve(name, names, kind, loose = false) {
+  const out = [], miss = [];
+  for (let i = 0; i < names.length; i += 40) {
+    const part = [...new Set(names.slice(i, i + 40))];
+    const q = `SELECT ?i ?l ?n ?ok WHERE { VALUES ?l { ${part.map((s) => esc(s) + "@en").join(" ")} }
+      ?i rdfs:label ?l; wikibase:sitelinks ?n. FILTER NOT EXISTS { ?i wdt:P31 wd:Q4167410 }
+      BIND(EXISTS { ${kind} } AS ?ok) }`;
+    const rows = await sparql(q);
+    const best = new Map();
+    for (const r of rows) {
+      const l = r.l.value, it = { q: r.i.value.split("/").pop(), name: l, n: Number(r.n.value), ok: r.ok.value === "true" };
+      const b = best.get(l);
+      if (!b || (it.ok && !b.ok) || (it.ok === b.ok && it.n > b.n)) best.set(l, it);
+    }
+    for (const s of part) {
+      const b = best.get(s);
+      if (b && (b.ok || loose)) out.push(b);
+      else if (!b && i >= 0) miss.push(s); // a big batch can come back short: these get a lookup of their own
+      else console.log("  ✗", name, s, "(wrong kind " + b.q + ")");
+    }
+    await sleep(600);
   }
-  return [];
+  for (const s of miss) {
+    const rows = await sparql(`SELECT ?i ?n WHERE { ?i rdfs:label ${esc(s)}@en; wikibase:sitelinks ?n. ${kind} } ORDER BY DESC(?n) LIMIT 1`).catch(() => []);
+    if (rows[0]) out.push({ q: rows[0].i.value.split("/").pop(), name: s, n: Number(rows[0].n.value), ok: true }); else console.log("  ✗", name, s, "(no match)");
+    await sleep(400);
+  }
+  const order = new Map(names.map((s, k) => [s, k]));
+  out.sort((a, b) => order.get(a.name) - order.get(b.name));
+  console.log(name, out.length, "/", names.length);
+  return out; // hand-picked order: best-known first
 }
 const L = {};
-// ranked by fame (how many Wikipedias cover them); prompts that come out thin are dropped at build time
-const top = (cls, min, extra = "") => `SELECT ?i ?l ?n WHERE { ?i wdt:P106 wd:${cls}; wikibase:sitelinks ?n. FILTER(?n >= ${min}) ${extra} ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`;
-const kind = (cls, min) => `SELECT ?i ?l ?n WHERE { ?i wdt:P31 wd:${cls}; wikibase:sitelinks ?n. FILTER(?n >= ${min}) ?i rdfs:label ?l. FILTER(lang(?l) = "en") }`;
-L.directors = await list("directors", top("Q2526255", 70));
-L.actors = await list("actors", top("Q10800557", 90));
-L.shows = await list("shows", kind("Q5398426", 55));
-L.franchises = await list("franchises", kind("Q196600", 45));
-L.networks = [...await list("channels", kind("Q2001305", 45)), ...await list("streaming", kind("Q15590336", 30))].sort((a, b) => b.n - a.n);
-L.studios = await list("studios", kind("Q1762059", 35));
+L.directors = await resolve("directors", N.DIRECTORS, "?x wdt:P57 ?i");
+L.actors = await resolve("actors", N.ACTORS, "?x wdt:P161 ?i");
+L.shows = await resolve("shows", N.SHOWS, "?i wdt:P31/wdt:P279* wd:Q15416", true);
+L.franchises = await resolve("franchises", N.FRANCHISES, "VALUES ?k { wd:Q196600 wd:Q24856 wd:Q1152150 wd:Q15416 wd:Q11424 wd:Q15773347 wd:Q95074 wd:Q15711870 wd:Q1114461 } ?i wdt:P31/wdt:P279? ?k");
+L.networks = await resolve("networks", N.NETWORKS, "?i wdt:P31 ?x", true);
+L.studios = await resolve("studios", N.STUDIOS, "?i wdt:P31 ?x", true);
+for (const [k, m] of Object.entries(N.FIXED)) for (const [name, q] of Object.entries(m)) if (!L[k].some((x) => x.name === name)) L[k].push({ q, name, n: 0, ok: true });
 fs.writeFileSync(new URL("./lists.json", import.meta.url), JSON.stringify(L, null, 1));

@@ -1592,7 +1592,7 @@ body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="
 .mode-card.soon { cursor: default; border-color: #3a3256; box-shadow: 0 0 0 3px #000; filter: saturate(0.45) brightness(0.8); }
 .mode-card.soon .mc-name { color: #cfc8e6; }
 .mode-card.soon .mc-tag { border-color: #6a6288; color: #cfc8e6; }
-.mc-view.v-film { background: radial-gradient(ellipse at 50% 38%, #fff6d8 0 20%, transparent 21%), linear-gradient(#05030f, #2a1440 70%, #1c1626 71%); }
+.mode-card.mc-film .mc-view, .mc-view.v-film { background: radial-gradient(ellipse at 50% 38%, #fff6d8 0 20%, transparent 21%), linear-gradient(#05030f, #2a1440 70%, #1c1626 71%); }
 .mc-view.v-music { background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 79, 216, 0.5) 18px 22px), linear-gradient(#05030f, #3a0f4a 70%, #1c1626 71%); }
 .mc-view.v-sport { background: repeating-linear-gradient(0deg, #2f8a3a 0 14px, #2a7a34 14px 28px); }
 .board-passport, .me-more .btn { width: 100%; }

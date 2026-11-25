@@ -1,0 +1,1 @@
+{"q":"Name a film directed by Baz Luhrmann","a":[["the great gatsby","moulin rouge!","australia","elvis","romeo + juliet|romeo and juliet"],["strictly ballroom","no. 5 the film","jehanne d'arc"],[],[],[]],"tiers":[70,25],"fam":"fdir/bazluhrmann","live":{"where":"{ ?i wdt:P57 wd:Q250545. ?i wdt:P31/wdt:P279* wd:Q11424. }","tiers":[70,25],"exclude":null,"taxa":false}}

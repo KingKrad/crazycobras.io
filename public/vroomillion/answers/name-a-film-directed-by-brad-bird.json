@@ -1,0 +1,1 @@
+{"q":"Name a film directed by Brad Bird","a":[["ratatouille","the incredibles","incredibles 2","the iron giant","tomorrowland"],["jack-jack attack","ray gunn","incredibles 3","do the bartman"],[],[],[]],"tiers":[70,25],"fam":"fdir/bradbird","live":{"where":"{ ?i wdt:P57 wd:Q310960. ?i wdt:P31/wdt:P279* wd:Q11424. }","tiers":[70,25],"exclude":null,"taxa":false}}

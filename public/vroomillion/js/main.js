@@ -193,6 +193,8 @@ places.drivein = driveInScene;
 const THEMED = {
   geo: { name: "WORLD TOUR", screen: "worldtour", ids: "wt", scene: () => worldScene, go: "▶ HIT THE ROAD",
     info: "700+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
+  film: { name: "BOX OFFICE", screen: "boxoffice", ids: "bo", scene: () => driveInScene, go: "▶ ROLL THE TRAILER",
+    info: "MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
 };
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)

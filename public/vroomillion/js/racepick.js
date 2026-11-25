@@ -16,8 +16,8 @@ const byPrompt = new Map(FAMILIES.flatMap((f) => f.prompts.map((p) => [p, f])));
 export const familyOf = (prompt) => byPrompt.get(prompt) || null;
 
 // which families a mode draws from, and how the topics are counted there
-const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily", geo: "geo" };
-const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : pool === "geo" ? f.geoTopic || f.topic : f.topic);
+const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily", geo: "geo", film: "film" };
+const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : pool === "geo" ? f.geoTopic || f.topic : pool === "film" ? f.filmTopic || f.topic : f.topic);
 // word games: rhymes, letters, prefixes, synonyms. One a race is fun; three is a spelling test.
 const WORD_GAME = /\b(rhymes? with|starts? with|begins? with|ends? (in|with)|contains?|spelled|sounds like a letter|letters?|a word that means|word that)\b/i;
 const wordCache = new Map();
@@ -30,9 +30,9 @@ export const poolFamilies = (mode, fams = FAMILIES) => fams.filter((f) => f.pool
 // seen: the history list; returns families in play order, each with the prompt text to ask
 export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   const pool = POOL[mode] || "main";
-  // WORLD TOUR: an easy track and a hard one. Mostly well-known prompts (level 1), plus one tricky
+  // WORLD TOUR and BOX OFFICE: an easy track and a hard one. Mostly well-known prompts (level 1), plus one tricky
   // one somewhere in the second half.
-  if (pool === "geo" && !opts.oneTrack && n > 1) {
+  if ((pool === "geo" || pool === "film") && !opts.oneTrack && n > 1) {
     const all = poolFamilies(mode, opts.families);
     const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level === 1) });
     const taken = new Set(easy.map((x) => x.family.group));
