@@ -119,5 +119,10 @@
       "destination": "/api/proxy?route=:route"
     }
   ],
-  "framework": null
+  "framework": null,
+  "git": {
+    "deploymentEnabled": {
+      "claude/**": false
+    }
+  }
 }
