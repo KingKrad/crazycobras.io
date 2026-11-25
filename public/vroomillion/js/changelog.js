@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25c",
+    date: "Nov 25, 2026",
+    title: "Cleaner game mode screens",
+    items: [
+      "The tab bar steps aside once you open a game mode, so the mode gets the whole screen.",
+      "BACK in a game mode now takes you to GAME MODES.",
+    ],
+  },
+  {
     id: "2026-11-25b",
     date: "Nov 25, 2026",
     title: "Easier menus, smoother races",

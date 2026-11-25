@@ -1522,7 +1522,7 @@ body[data-screen="title"] .tagline { font-family: var(--font-title); font-size: 
 
 /* WORLD TOUR's home: the map fills the screen; the title at the top, the button at the bottom */
 body[data-screen="worldtour"] .stage { filter: none; }
-body[data-screen="worldtour"] .screen.active#s-worldtour { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px 18px; animation: none; }
+body[data-screen="worldtour"] .screen.active#s-worldtour { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px calc(18px + env(safe-area-inset-bottom)); animation: none; }
 .ml-head { text-align: center; margin-top: 8px; }
 .ml-name { font-family: var(--font-title); font-size: clamp(34px, 9vw, 72px); margin: 0; color: #ffd23a; letter-spacing: 0.04em;
   text-shadow: 0 0 6px #ff9a1f, 0 0 20px #ff6a00, 4px 4px 0 #3a1068; -webkit-text-stroke: 2px #2a0f00; paint-order: stroke fill; }
@@ -1543,7 +1543,7 @@ body[data-screen="worldtour"] .screen.active#s-worldtour { background: none; bor
 .vs-themed { font-family: var(--font-title); font-size: 13px; color: #ffd23a; border: 2px solid #4fd1ff; background: #12306a; padding: 8px 10px; text-align: center; }
 /* BOX OFFICE's home */
 body[data-screen="boxoffice"] .stage { filter: none; }
-body[data-screen="boxoffice"] .screen.active#s-boxoffice { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px 18px; animation: none; }
+body[data-screen="boxoffice"] .screen.active#s-boxoffice { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px calc(18px + env(safe-area-inset-bottom)); animation: none; }
 .ml-name.bo { color: #fff1c8; text-shadow: 0 0 6px #ff4f4f, 0 0 20px #d81b3b, 4px 4px 0 #2a0f3a; -webkit-text-stroke: 2px #2a0008; }
 body[data-screen="boxoffice"] .ml-head { margin-top: 0; }
 
@@ -1557,9 +1557,10 @@ body[data-screen="boxoffice"] .ml-head { margin-top: 0; }
 .tab svg { width: 24px; height: 24px; fill: currentColor; }
 .tab.on { color: #ffd23a; background: linear-gradient(#1a1036, #0b0618); box-shadow: inset 0 3px 0 #ffd23a; }
 .tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
-body[data-screen="race"] .tabbar, body.launching .tabbar { display: none; }
-body:not([data-screen="race"]) main { padding-bottom: calc(var(--tabbar-h) + 8px); }
-body:not([data-screen="race"]) footer { padding-bottom: var(--tabbar-h); }
+/* hidden mid-race and inside a game mode (its lobby has its own way back) */
+body[data-screen="race"] .tabbar, body[data-screen="worldtour"] .tabbar, body[data-screen="boxoffice"] .tabbar, body.launching .tabbar { display: none; }
+body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]) main { padding-bottom: calc(var(--tabbar-h) + 8px); }
+body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]) footer { padding-bottom: var(--tabbar-h); }
 /* the old menu button and corner shortcuts: the tab bar does their job now (sound stays) */
 .menu-btn, #ico-garage, #ico-account { display: none !important; }
 #s-title .title-bottom { padding-bottom: calc(var(--tabbar-h) + 12px); }
