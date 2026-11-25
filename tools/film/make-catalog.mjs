@@ -22,7 +22,7 @@ function fam(topic, id, lvl, prompt, where, opts = "", alts = []) {
   const key = prompt.toLowerCase();
   const old = [key, ...alts.map((a) => a.toLowerCase())].find((k) => have.has(k));
   // a joined family keeps its own level elsewhere; in BOX OFFICE it plays at this list's level ("topic:level")
-  if (old) { const f = have.get(old); join[f.id] = lvl < f.level ? `${topic}:${lvl}` : topic; return; }
+  if (old) { const f = have.get(old); join[f.id] = lvl !== f.level ? `${topic}:${lvl}` : topic; return; } // BOX OFFICE's own level for it
   if (used.has(key) || used.has("id:" + id) || /\|/.test(prompt + (typeof where === "string" ? where : ""))) return;
   used.add(key); used.add("id:" + id);
   if (where && typeof where === "object") { handFam(topic, id, lvl, prompt, where); return; }
@@ -65,15 +65,15 @@ const NICHE_FRANCHISES = new Set(["Police Academy", "American Pie", "Pokémon", 
   "Rambo", "DC Extended Universe", "Alien", "Terminator", "Barbie", "Wizarding World", "Middle-earth", "Mad Max"]);
 const NETWORKS = { Netflix: 1, "Disney+": 1, Nickelodeon: 1, "Disney Channel": 1, "Cartoon Network": 1, HBO: 1, NBC: 2, CBS: 2,
   "American Broadcasting Company": 2, "Fox Broadcasting Company": 2, "Prime Video": 2, Hulu: 2, "Apple TV+": 2, "BBC One": 2, "The CW": 2, MTV: 2, AMC: 2, "Comedy Central": 2 };
+// studios: only the family names everyone knows from the logo before the film
 const STUDIOS = { Pixar: [1, "Pixar"], "Walt Disney Animation Studios": [1, "Disney animated"], "DreamWorks Animation": [1, "DreamWorks"],
-  "Marvel Studios": [1, "Marvel Studios"], Illumination: [1, "Illumination"], "Studio Ghibli": [2, "Studio Ghibli"], Lucasfilm: [2, "Lucasfilm"],
-  "Universal Pictures": [2, "Universal"], "Paramount Pictures": [2, "Paramount"], "20th Century Studios": [2, "20th Century Fox"],
-  "Walt Disney Pictures": [2, "Disney"], A24: [2, "A24"], "Blumhouse Productions": [2, "Blumhouse"], Netflix: [2, "Netflix original"], "Aardman Animations": [2, "Aardman"] };
+  "Marvel Studios": [1, "Marvel Studios"], Illumination: [2, "Illumination"], "Studio Ghibli": [2, "Studio Ghibli"], "Walt Disney Pictures": [2, "Disney"] };
 const SHORT = { "Fox Broadcasting Company": "Fox", "American Broadcasting Company": "ABC" };
 // "Name a Breaking Bad character", but "Name a character from The Office"
 const charPrompt = (n) => (/^The /.test(clean(n)) ? `Name a character from ${clean(n)}` : `Name ${an2(clean(n))} character`);
 
-L.directors.slice(0, 50).forEach((d, i) => fam("director", "fdir/" + slug(d.name), lvl(i, 12, 40), `Name ${an2(clean(d.name))} film`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6", [...alsoAs(d.name), `Name a film directed by ${clean(d.name)}`]));
+// directors: only the household names, and only ever as the race's tricky prompt (most players don't know who made what)
+L.directors.slice(0, 12).forEach((d, i) => fam("director", "fdir/" + slug(d.name), 2, `Name ${an2(clean(d.name))} film`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6", [...alsoAs(d.name), `Name a film directed by ${clean(d.name)}`]));
 L.actors.slice(0, 120).forEach((a, i) => fam("star", "fstar/" + slug(a.name), lvl(i, 60, 120), `Name ${an2(clean(a.name))} movie`, `{ ?i wdt:P161 wd:${a.q}. } UNION { ?i wdt:P725 wd:${a.q}. } ${FILM}`, "min=1 minans=8", [...alsoAs(a.name), `Name a movie starring ${clean(a.name)}`]));
 L.shows.filter((s) => !NICHE_SHOWS.has(s.name)).forEach((s, i) => fam("characters", "fchar/" + slug(s.name), lvl(i, 40, 80), charPrompt(s.name), CHAR(s.q), "min=1 minans=8", charAs(s.name)));
 L.franchises.filter((s) => !NICHE_FRANCHISES.has(s.name)).forEach((s, i) => {

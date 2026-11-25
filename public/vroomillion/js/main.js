@@ -200,7 +200,7 @@ const THEMED = {
   geo: { name: "WORLD TOUR", screen: "worldtour", ids: "wt", scene: () => worldScene, go: "▶ HIT THE ROAD",
     info: "280+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
   film: { name: "BOX OFFICE", screen: "boxoffice", ids: "bo", scene: () => driveInScene, go: "▶ ROLL THE TRAILER",
-    info: "350+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
+    info: "300+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
   music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, go: "▶ START THE TOUR",
     info: "380+ MUSIC PROMPTS · A WORLD TOUR BY BUS", card: "Music · every answer is a gig round the world" },
   sport: { name: "STADIUM RUN", screen: "stadium", ids: "sr", scene: () => stadiumScene, go: "▶ ON YOUR MARKS",

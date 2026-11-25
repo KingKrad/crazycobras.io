@@ -3,44 +3,9 @@
 export const FILM = `
 # screen
 // director
-fdir/georgelucas | 1 | film | g:director | Name a George Lucas film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q38222. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/peterjackson | 1 | film | g:director | Name a Peter Jackson film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q4465. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/clinteastwood | 1 | film | g:director | Name a Clint Eastwood film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q43203. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/francisfordcoppola | 2 | film | g:director | Name a Francis Ford Coppola film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q56094. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/davidfincher | 2 | film | g:director | Name a David Fincher film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q184903. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/michaelbay | 2 | film | g:director | Name a Michael Bay film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q59259. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/guillermodeltoro | 2 | film | g:director | Name a Guillermo del Toro film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q219124. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/denisvilleneuve | 2 | film | g:director | Name a Denis Villeneuve film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q548823. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/hayaomiyazaki | 2 | film | g:director | Name a Hayao Miyazaki film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55400. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/sofiacoppola | 2 | film | g:director | Name a Sofia Coppola film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193628. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/spikelee | 2 | film | g:director | Name a Spike Lee film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51566. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/ronhoward | 2 | film | g:director | Name a Ron Howard film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103646. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/robertzemeckis | 2 | film | g:director | Name a Robert Zemeckis film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q187364. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/woodyallen | 2 | film | g:director | Name a Woody Allen film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25089. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/joelcoen | 2 | film | g:director | Name a Joel Coen film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q13595311. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/tonyscott | 2 | film | g:director | Name a Tony Scott film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193648. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/stevensoderbergh | 2 | film | g:director | Name a Steven Soderbergh film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103917. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/oliverstone | 2 | film | g:director | Name an Oliver Stone film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q179497. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/briandepalma | 2 | film | g:director | Name a Brian De Palma film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q189526. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johncarpenter | 2 | film | g:director | Name a John Carpenter film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q95008. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/samraimi | 2 | film | g:director | Name a Sam Raimi film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q275402. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/zacksnyder | 2 | film | g:director | Name a Zack Snyder film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q139890. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/taikawaititi | 2 | film | g:director | Name a Taika Waititi film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q2388576. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/guyritchie | 2 | film | g:director | Name a Guy Ritchie film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192990. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/dannyboyle | 2 | film | g:director | Name a Danny Boyle film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q134867. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/paulthomasanderson | 2 | film | g:director | Name a Paul Thomas Anderson film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25132. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/darrenaronofsky | 2 | film | g:director | Name a Darren Aronofsky film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192762. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/mnightshyamalan | 2 | film | g:director | Name a M. Night Shyamalan film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51489. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/wescraven | 3 | film | g:director | Name a Wes Craven film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q223992. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnhughes | 3 | film | g:director | Name a John Hughes film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q311263. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/robreiner | 3 | film | g:director | Name a Rob Reiner film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q287607. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/melbrooks | 3 | film | g:director | Name a Mel Brooks film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q104266. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnwoo | 3 | film | g:director | Name a John Woo film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55432. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/anglee | 3 | film | g:director | Name an Ang Lee film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q160726. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/akirakurosawa | 3 | film | g:director | Name an Akira Kurosawa film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q8006. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/federicofellini | 3 | film | g:director | Name a Federico Fellini film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7371. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/ingmarbergman | 3 | film | g:director | Name an Ingmar Bergman film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7546. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/pedroalmodovar | 3 | film | g:director | Name a Pedro Almodóvar film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55171. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/georgelucas | 2 | film | g:director | Name a George Lucas film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q38222. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/peterjackson | 2 | film | g:director | Name a Peter Jackson film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q4465. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/clinteastwood | 2 | film | g:director | Name a Clint Eastwood film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q43203. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // star
 fstar/robertdeniro | 1 | film | g:star | Name a Robert De Niro movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q36949. } UNION { ?i wdt:P725 wd:Q36949. } ?i wdt:P31/wdt:P279* wd:Q11424. |
@@ -246,16 +211,8 @@ ftvg/atvdrama | 1 | film | g:tv | Name a TV drama | autotop=12 max=800 min=8 min
 fstudio/dreamworksanimation | 1 | film | g:studio | Name a DreamWorks movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q500088. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/studioghibli | 2 | film | g:studio | Name a Studio Ghibli movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q182950. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/marvelstudios | 1 | film | g:studio | Name a Marvel Studios movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q367466. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/lucasfilm | 2 | film | g:studio | Name a Lucasfilm movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q242446. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/universalpictures | 2 | film | g:studio | Name an Universal movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q168383. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/paramountpictures | 2 | film | g:studio | Name a Paramount movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q159846. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/20thcenturystudios | 2 | film | g:studio | Name a 20th Century Fox movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q434841. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/a24 | 2 | film | g:studio | Name an A24 movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16248298. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/blumhouseproductions | 2 | film | g:studio | Name a Blumhouse movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16984664. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/illumination | 1 | film | g:studio | Name an Illumination movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1189512. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/aardmananimations | 2 | film | g:studio | Name an Aardman movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q301092. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/illumination | 2 | film | g:studio | Name an Illumination movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1189512. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/waltdisneypictures | 2 | film | g:studio | Name a Disney movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q191224. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/netflix | 2 | film | g:studio | Name a Netflix original movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q907311. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // era
 fera/1950 | 2 | film | g:era | Name a '50s movie | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1950 && YEAR(?d) <= 1959) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1950) } |
@@ -287,15 +244,15 @@ faward/abestanimatedfeaturewinn | 2 | film | g:awards | Name a Best Animated Fea
 
 // families the game already had that BOX OFFICE plays too: family id -> BOX OFFICE topic
 export const FILM_JOIN = {
- "director/spielberg": "director:1",
- "director/tarantino": "director:1",
- "director/scorsese": "director:1",
- "director/cameron": "director:1",
- "director/burton": "director:1",
- "director/hitchcock": "director:1",
- "director/kubrick": "director:1",
- "director/ridley": "director:1",
- "director/wes": "director:1",
+ "director/spielberg": "director",
+ "director/tarantino": "director",
+ "director/scorsese": "director:2",
+ "director/cameron": "director",
+ "director/burton": "director",
+ "director/hitchcock": "director:2",
+ "director/kubrick": "director:2",
+ "director/ridley": "director:2",
+ "director/wes": "director:2",
  "actor/hanks": "star",
  "actor/leo": "star:1",
  "actor/pitt": "star:1",
@@ -328,13 +285,13 @@ export const FILM_JOIN = {
  "scooby/chars": "characters",
  "naruto/chars": "characters:1",
  "onepiece/chars": "characters:1",
- "tmnt/chars": "characters",
- "modernfamily/chars": "characters",
- "parksrec/chars": "characters",
- "b99/chars": "characters",
- "bluey/chars": "characters",
- "peppa/chars": "characters",
- "character/sesame": "characters",
+ "tmnt/chars": "characters:2",
+ "modernfamily/chars": "characters:2",
+ "parksrec/chars": "characters:2",
+ "b99/chars": "characters:2",
+ "bluey/chars": "characters:2",
+ "peppa/chars": "characters:2",
+ "character/sesame": "characters:2",
  "character/starwars": "characters",
  "character/hp": "characters",
  "character/lotr": "characters:1",
@@ -349,9 +306,9 @@ export const FILM_JOIN = {
  "character/startrek": "characters:1",
  "despicable/chars": "characters",
  "frozen/chars": "characters",
- "character/shrek": "characters",
- "lionking/chars": "characters",
- "sonic/chars": "characters",
+ "character/shrek": "characters:2",
+ "lionking/chars": "characters:2",
+ "sonic/chars": "characters:2",
  "screensit/hbo": "tv:1",
  "tv/nick": "tv",
  "tv/disneychannel": "tv",
