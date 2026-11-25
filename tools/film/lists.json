@@ -1,0 +1,4159 @@
+{
+ "directors": [
+  {
+   "q": "Q882",
+   "name": "Charlie Chaplin",
+   "n": 265
+  },
+  {
+   "q": "Q8743",
+   "name": "Thomas Edison",
+   "n": 257
+  },
+  {
+   "q": "Q7241",
+   "name": "Rabindranath Tagore",
+   "n": 250
+  },
+  {
+   "q": "Q5577",
+   "name": "Salvador Dalí",
+   "n": 248
+  },
+  {
+   "q": "Q8704",
+   "name": "Walt Disney",
+   "n": 219
+  },
+  {
+   "q": "Q23434",
+   "name": "Ernest Hemingway",
+   "n": 210
+  },
+  {
+   "q": "Q5878",
+   "name": "Gabriel García Márquez",
+   "n": 210
+  },
+  {
+   "q": "Q1744",
+   "name": "Madonna",
+   "n": 195
+  },
+  {
+   "q": "Q926",
+   "name": "Roald Amundsen",
+   "n": 191
+  },
+  {
+   "q": "Q7374",
+   "name": "Alfred Hitchcock",
+   "n": 190
+  },
+  {
+   "q": "Q1203",
+   "name": "John Lennon",
+   "n": 186
+  },
+  {
+   "q": "Q392",
+   "name": "Bob Dylan",
+   "n": 185
+  },
+  {
+   "q": "Q5603",
+   "name": "Andy Warhol",
+   "n": 180
+  },
+  {
+   "q": "Q8006",
+   "name": "Akira Kurosawa",
+   "n": 178
+  },
+  {
+   "q": "Q8877",
+   "name": "Steven Spielberg",
+   "n": 172
+  },
+  {
+   "q": "Q16397",
+   "name": "Bruce Lee",
+   "n": 170
+  },
+  {
+   "q": "Q7546",
+   "name": "Ingmar Bergman",
+   "n": 166
+  },
+  {
+   "q": "Q7371",
+   "name": "Federico Fellini",
+   "n": 164
+  },
+  {
+   "q": "Q36970",
+   "name": "Jackie Chan",
+   "n": 163
+  },
+  {
+   "q": "Q2001",
+   "name": "Stanley Kubrick",
+   "n": 161
+  },
+  {
+   "q": "Q25089",
+   "name": "Woody Allen",
+   "n": 158
+  },
+  {
+   "q": "Q34436",
+   "name": "Scarlett Johansson",
+   "n": 158
+  },
+  {
+   "q": "Q38757",
+   "name": "Bertolt Brecht",
+   "n": 156
+  },
+  {
+   "q": "Q2685",
+   "name": "Arnold Schwarzenegger",
+   "n": 155
+  },
+  {
+   "q": "Q37175",
+   "name": "Johnny Depp",
+   "n": 149
+  },
+  {
+   "q": "Q2599",
+   "name": "Paul McCartney",
+   "n": 149
+  },
+  {
+   "q": "Q8003",
+   "name": "Sergei Eisenstein",
+   "n": 149
+  },
+  {
+   "q": "Q19526",
+   "name": "Maya Angelou",
+   "n": 148
+  },
+  {
+   "q": "Q39829",
+   "name": "Stephen King",
+   "n": 148
+  },
+  {
+   "q": "Q4573",
+   "name": "Sean Connery",
+   "n": 146
+  },
+  {
+   "q": "Q39476",
+   "name": "Emma Watson",
+   "n": 146
+  },
+  {
+   "q": "Q36233",
+   "name": "Václav Havel",
+   "n": 145
+  },
+  {
+   "q": "Q8873",
+   "name": "Satyajit Ray",
+   "n": 145
+  },
+  {
+   "q": "Q36949",
+   "name": "Robert De Niro",
+   "n": 141
+  },
+  {
+   "q": "Q37327",
+   "name": "Samuel Beckett",
+   "n": 140
+  },
+  {
+   "q": "Q106529",
+   "name": "Alain Delon",
+   "n": 140
+  },
+  {
+   "q": "Q37876",
+   "name": "Natalie Portman",
+   "n": 139
+  },
+  {
+   "q": "Q2263",
+   "name": "Tom Hanks",
+   "n": 137
+  },
+  {
+   "q": "Q40096",
+   "name": "Will Smith",
+   "n": 137
+  },
+  {
+   "q": "Q43203",
+   "name": "Clint Eastwood",
+   "n": 137
+  },
+  {
+   "q": "Q205707",
+   "name": "Bradley Cooper",
+   "n": 135
+  },
+  {
+   "q": "Q41163",
+   "name": "Al Pacino",
+   "n": 135
+  },
+  {
+   "q": "Q38222",
+   "name": "George Lucas",
+   "n": 134
+  },
+  {
+   "q": "Q202765",
+   "name": "Kate Winslet",
+   "n": 134
+  },
+  {
+   "q": "Q80966",
+   "name": "Cate Blanchett",
+   "n": 134
+  },
+  {
+   "q": "Q34460",
+   "name": "Gwyneth Paltrow",
+   "n": 132
+  },
+  {
+   "q": "Q39803",
+   "name": "Mario Vargas Llosa",
+   "n": 131
+  },
+  {
+   "q": "Q41594",
+   "name": "Christina Aguilera",
+   "n": 131
+  },
+  {
+   "q": "Q39792",
+   "name": "Jack Nicholson",
+   "n": 130
+  },
+  {
+   "q": "Q40791",
+   "name": "Sandra Bullock",
+   "n": 130
+  },
+  {
+   "q": "Q37079",
+   "name": "Tom Cruise",
+   "n": 129
+  },
+  {
+   "q": "Q23844",
+   "name": "George Clooney",
+   "n": 128
+  },
+  {
+   "q": "Q32522",
+   "name": "Jennifer Aniston",
+   "n": 128
+  },
+  {
+   "q": "Q48337",
+   "name": "Morgan Freeman",
+   "n": 128
+  },
+  {
+   "q": "Q82110",
+   "name": "Steven Seagal",
+   "n": 127
+  },
+  {
+   "q": "Q40026",
+   "name": "Sylvester Stallone",
+   "n": 126
+  },
+  {
+   "q": "Q37001",
+   "name": "Toshirō Mifune",
+   "n": 125
+  },
+  {
+   "q": "Q2643",
+   "name": "George Harrison",
+   "n": 125
+  },
+  {
+   "q": "Q129817",
+   "name": "Russell Crowe",
+   "n": 125
+  },
+  {
+   "q": "Q132964",
+   "name": "Vladimir Mayakovsky",
+   "n": 125
+  },
+  {
+   "q": "Q3772",
+   "name": "Quentin Tarantino",
+   "n": 124
+  },
+  {
+   "q": "Q43416",
+   "name": "Keanu Reeves",
+   "n": 124
+  },
+  {
+   "q": "Q189490",
+   "name": "Jennifer Lawrence",
+   "n": 123
+  },
+  {
+   "q": "Q40531",
+   "name": "John Wayne",
+   "n": 122
+  },
+  {
+   "q": "Q65932",
+   "name": "Anthony Hopkins",
+   "n": 122
+  },
+  {
+   "q": "Q83158",
+   "name": "Jean Cocteau",
+   "n": 122
+  },
+  {
+   "q": "Q1033016",
+   "name": "Halle Berry",
+   "n": 122
+  },
+  {
+   "q": "Q42869",
+   "name": "Nicolas Cage",
+   "n": 121
+  },
+  {
+   "q": "Q12003",
+   "name": "Cher",
+   "n": 121
+  },
+  {
+   "q": "Q39666",
+   "name": "Penélope Cruz",
+   "n": 120
+  },
+  {
+   "q": "Q159577",
+   "name": "Jet Li",
+   "n": 120
+  },
+  {
+   "q": "Q42574",
+   "name": "James Cameron",
+   "n": 120
+  },
+  {
+   "q": "Q42229",
+   "name": "Mel Gibson",
+   "n": 119
+  },
+  {
+   "q": "Q23466",
+   "name": "Chris Pine",
+   "n": 118
+  },
+  {
+   "q": "Q41351",
+   "name": "Jodie Foster",
+   "n": 118
+  },
+  {
+   "q": "Q19794",
+   "name": "Josh Duhamel",
+   "n": 117
+  },
+  {
+   "q": "Q24829",
+   "name": "Orson Welles",
+   "n": 114
+  },
+  {
+   "q": "Q131814",
+   "name": "Tina Turner",
+   "n": 114
+  },
+  {
+   "q": "Q41148",
+   "name": "Martin Scorsese",
+   "n": 114
+  },
+  {
+   "q": "Q41042",
+   "name": "Harold Pinter",
+   "n": 114
+  },
+  {
+   "q": "Q165219",
+   "name": "Robert Downey Jr.",
+   "n": 114
+  },
+  {
+   "q": "Q43044",
+   "name": "Demi Moore",
+   "n": 113
+  },
+  {
+   "q": "Q134456",
+   "name": "Yukio Mishima",
+   "n": 112
+  },
+  {
+   "q": "Q7542",
+   "name": "Prince",
+   "n": 112
+  },
+  {
+   "q": "Q55400",
+   "name": "Hayao Miyazaki",
+   "n": 111
+  },
+  {
+   "q": "Q51552",
+   "name": "Roman Polanski",
+   "n": 111
+  },
+  {
+   "q": "Q284636",
+   "name": "Jason Bateman",
+   "n": 110
+  },
+  {
+   "q": "Q127330",
+   "name": "Frank Zappa",
+   "n": 110
+  },
+  {
+   "q": "Q4636",
+   "name": "Barbra Streisand",
+   "n": 110
+  },
+  {
+   "q": "Q40572",
+   "name": "Heath Ledger",
+   "n": 110
+  },
+  {
+   "q": "Q42455",
+   "name": "Björk",
+   "n": 110
+  },
+  {
+   "q": "Q43874",
+   "name": "Eddie Murphy",
+   "n": 110
+  },
+  {
+   "q": "Q11930",
+   "name": "Kevin Costner",
+   "n": 110
+  },
+  {
+   "q": "Q49001",
+   "name": "Whoopi Goldberg",
+   "n": 109
+  },
+  {
+   "q": "Q41871",
+   "name": "Paul Newman",
+   "n": 109
+  },
+  {
+   "q": "Q1225",
+   "name": "Bruce Springsteen",
+   "n": 107
+  },
+  {
+   "q": "Q2071",
+   "name": "David Lynch",
+   "n": 106
+  },
+  {
+   "q": "Q125106",
+   "name": "Salma Hayek",
+   "n": 106
+  },
+  {
+   "q": "Q178166",
+   "name": "Vin Diesel",
+   "n": 106
+  },
+  {
+   "q": "Q18143",
+   "name": "Gao Xingjian",
+   "n": 106
+  },
+  {
+   "q": "Q130311",
+   "name": "George Michael",
+   "n": 105
+  },
+  {
+   "q": "Q9557",
+   "name": "Aamir Khan",
+   "n": 104
+  },
+  {
+   "q": "Q126599",
+   "name": "Kristen Stewart",
+   "n": 103
+  },
+  {
+   "q": "Q56094",
+   "name": "Francis Ford Coppola",
+   "n": 103
+  },
+  {
+   "q": "Q83492",
+   "name": "Gary Oldman",
+   "n": 103
+  },
+  {
+   "q": "Q46706",
+   "name": "Eugène Ionesco",
+   "n": 103
+  },
+  {
+   "q": "Q103876",
+   "name": "Peter O'Toole",
+   "n": 103
+  },
+  {
+   "q": "Q485298",
+   "name": "Gillian Anderson",
+   "n": 103
+  },
+  {
+   "q": "Q104109",
+   "name": "Mary Pickford",
+   "n": 102
+  },
+  {
+   "q": "Q106508",
+   "name": "Gérard Depardieu",
+   "n": 102
+  },
+  {
+   "q": "Q4465",
+   "name": "Peter Jackson",
+   "n": 101
+  },
+  {
+   "q": "Q83233",
+   "name": "Jacques Cousteau",
+   "n": 101
+  },
+  {
+   "q": "Q83184",
+   "name": "Jacinto Benavente",
+   "n": 101
+  },
+  {
+   "q": "Q104049",
+   "name": "Sidney Poitier",
+   "n": 101
+  },
+  {
+   "q": "Q104027",
+   "name": "Kirk Douglas",
+   "n": 101
+  },
+  {
+   "q": "Q191966",
+   "name": "Gene Wilder",
+   "n": 101
+  },
+  {
+   "q": "Q853",
+   "name": "Andrei Tarkovsky",
+   "n": 100
+  },
+  {
+   "q": "Q44221",
+   "name": "Sean Penn",
+   "n": 100
+  },
+  {
+   "q": "Q103949",
+   "name": "Buster Keaton",
+   "n": 100
+  },
+  {
+   "q": "Q676094",
+   "name": "Drew Barrymore",
+   "n": 100
+  },
+  {
+   "q": "Q1785",
+   "name": "Charles Aznavour",
+   "n": 99
+  },
+  {
+   "q": "Q117012",
+   "name": "Yoko Ono",
+   "n": 99
+  },
+  {
+   "q": "Q53001",
+   "name": "Jean-Luc Godard",
+   "n": 99
+  },
+  {
+   "q": "Q151164",
+   "name": "André Malraux",
+   "n": 99
+  },
+  {
+   "q": "Q178348",
+   "name": "Chris Evans",
+   "n": 99
+  },
+  {
+   "q": "Q53002",
+   "name": "François Truffaut",
+   "n": 98
+  },
+  {
+   "q": "Q2737",
+   "name": "Louis de Funès",
+   "n": 98
+  },
+  {
+   "q": "Q6096",
+   "name": "Snoop Dogg",
+   "n": 98
+  },
+  {
+   "q": "Q28054",
+   "name": "Judi Dench",
+   "n": 98
+  },
+  {
+   "q": "Q59215",
+   "name": "Robert Redford",
+   "n": 98
+  },
+  {
+   "q": "Q102462",
+   "name": "James Stewart",
+   "n": 98
+  },
+  {
+   "q": "Q131545",
+   "name": "Harry Houdini",
+   "n": 97
+  },
+  {
+   "q": "Q180099",
+   "name": "Margaret Mead",
+   "n": 97
+  },
+  {
+   "q": "Q104183",
+   "name": "Lillian Gish",
+   "n": 97
+  },
+  {
+   "q": "Q55171",
+   "name": "Pedro Almodóvar",
+   "n": 96
+  },
+  {
+   "q": "Q25120",
+   "name": "Pier Paolo Pasolini",
+   "n": 96
+  },
+  {
+   "q": "Q56008",
+   "name": "Tim Burton",
+   "n": 96
+  },
+  {
+   "q": "Q152824",
+   "name": "Susan Sontag",
+   "n": 96
+  },
+  {
+   "q": "Q95026",
+   "name": "Shirley MacLaine",
+   "n": 96
+  },
+  {
+   "q": "Q103774",
+   "name": "Ravi Shankar",
+   "n": 96
+  },
+  {
+   "q": "Q51545",
+   "name": "Luis Buñuel",
+   "n": 95
+  },
+  {
+   "q": "Q55245",
+   "name": "Laurence Olivier",
+   "n": 95
+  },
+  {
+   "q": "Q56005",
+   "name": "Ridley Scott",
+   "n": 95
+  },
+  {
+   "q": "Q55415",
+   "name": "Leni Riefenstahl",
+   "n": 94
+  },
+  {
+   "q": "Q6078",
+   "name": "Dr. Dre",
+   "n": 94
+  },
+  {
+   "q": "Q177984",
+   "name": "Peter Sellers",
+   "n": 94
+  },
+  {
+   "q": "Q80739",
+   "name": "Charlton Heston",
+   "n": 93
+  },
+  {
+   "q": "Q44107",
+   "name": "Peter Handke",
+   "n": 93
+  },
+  {
+   "q": "Q171736",
+   "name": "Robert Duvall",
+   "n": 93
+  },
+  {
+   "q": "Q16296",
+   "name": "Patrick Stewart",
+   "n": 93
+  },
+  {
+   "q": "Q106481",
+   "name": "Alan Rickman",
+   "n": 93
+  },
+  {
+   "q": "Q94041",
+   "name": "James Cagney",
+   "n": 92
+  },
+  {
+   "q": "Q185140",
+   "name": "Joaquin Phoenix",
+   "n": 92
+  },
+  {
+   "q": "Q180560",
+   "name": "Philip Seymour Hoffman",
+   "n": 92
+  },
+  {
+   "q": "Q187033",
+   "name": "Sally Field",
+   "n": 92
+  },
+  {
+   "q": "Q287793",
+   "name": "Carl Reiner",
+   "n": 91
+  },
+  {
+   "q": "Q25144",
+   "name": "Kevin Spacey",
+   "n": 91
+  },
+  {
+   "q": "Q151973",
+   "name": "Richard Burton",
+   "n": 91
+  },
+  {
+   "q": "Q5912",
+   "name": "Marcel Duchamp",
+   "n": 91
+  },
+  {
+   "q": "Q29328",
+   "name": "Brie Larson",
+   "n": 91
+  },
+  {
+   "q": "Q160318",
+   "name": "Norodom Sihanouk",
+   "n": 91
+  },
+  {
+   "q": "Q180942",
+   "name": "Shia LaBeouf",
+   "n": 91
+  },
+  {
+   "q": "Q51114",
+   "name": "John Ford",
+   "n": 90
+  },
+  {
+   "q": "Q125904",
+   "name": "Edward Norton",
+   "n": 90
+  },
+  {
+   "q": "Q160432",
+   "name": "Jude Law",
+   "n": 90
+  },
+  {
+   "q": "Q168724",
+   "name": "Emma Thompson",
+   "n": 90
+  },
+  {
+   "q": "Q484523",
+   "name": "Jared Leto",
+   "n": 90
+  },
+  {
+   "q": "Q193815",
+   "name": "Ryan Gosling",
+   "n": 90
+  },
+  {
+   "q": "Q550778",
+   "name": "John de Lancie",
+   "n": 90
+  },
+  {
+   "q": "Q55796",
+   "name": "Peter Ustinov",
+   "n": 89
+  },
+  {
+   "q": "Q133622",
+   "name": "Thor Heyerdahl",
+   "n": 89
+  },
+  {
+   "q": "Q165518",
+   "name": "Ewan McGregor",
+   "n": 89
+  },
+  {
+   "q": "Q164562",
+   "name": "Sergio Leone",
+   "n": 89
+  },
+  {
+   "q": "Q48410",
+   "name": "Richard Gere",
+   "n": 88
+  },
+  {
+   "q": "Q23301",
+   "name": "Roberto Benigni",
+   "n": 88
+  },
+  {
+   "q": "Q51525",
+   "name": "Miloš Forman",
+   "n": 88
+  },
+  {
+   "q": "Q26806",
+   "name": "Danny DeVito",
+   "n": 88
+  },
+  {
+   "q": "Q58912",
+   "name": "Courteney Cox",
+   "n": 88
+  },
+  {
+   "q": "Q41422",
+   "name": "Mark Ruffalo",
+   "n": 88
+  },
+  {
+   "q": "Q169946",
+   "name": "Kate Hudson",
+   "n": 88
+  },
+  {
+   "q": "Q185724",
+   "name": "Mike Myers",
+   "n": 88
+  },
+  {
+   "q": "Q115541",
+   "name": "Dakota Fanning",
+   "n": 87
+  },
+  {
+   "q": "Q23547",
+   "name": "Bryan Cranston",
+   "n": 87
+  },
+  {
+   "q": "Q53009",
+   "name": "Bernardo Bertolucci",
+   "n": 87
+  },
+  {
+   "q": "Q29250",
+   "name": "Bill Murray",
+   "n": 87
+  },
+  {
+   "q": "Q213512",
+   "name": "Bill Cosby",
+   "n": 87
+  },
+  {
+   "q": "Q240933",
+   "name": "Joan Rivers",
+   "n": 87
+  },
+  {
+   "q": "Q73089",
+   "name": "Gene Kelly",
+   "n": 87
+  },
+  {
+   "q": "Q180962",
+   "name": "Norman Mailer",
+   "n": 87
+  },
+  {
+   "q": "Q47100",
+   "name": "Ben Stiller",
+   "n": 87
+  },
+  {
+   "q": "Q179497",
+   "name": "Oliver Stone",
+   "n": 87
+  },
+  {
+   "q": "Q544465",
+   "name": "Kathy Bates",
+   "n": 87
+  },
+  {
+   "q": "Q49484",
+   "name": "Constantine Stanislavsky",
+   "n": 86
+  },
+  {
+   "q": "Q294927",
+   "name": "Jerry Lewis",
+   "n": 86
+  },
+  {
+   "q": "Q131326",
+   "name": "Eyvind Johnson",
+   "n": 86
+  },
+  {
+   "q": "Q172044",
+   "name": "Jennifer Garner",
+   "n": 86
+  },
+  {
+   "q": "Q342604",
+   "name": "Idris Elba",
+   "n": 86
+  },
+  {
+   "q": "Q199943",
+   "name": "Adriano Celentano",
+   "n": 86
+  },
+  {
+   "q": "Q1646",
+   "name": "Françoise Sagan",
+   "n": 85
+  },
+  {
+   "q": "Q51492",
+   "name": "Frank Capra",
+   "n": 85
+  },
+  {
+   "q": "Q23481",
+   "name": "Friedrich Dürrenmatt",
+   "n": 85
+  },
+  {
+   "q": "Q16409",
+   "name": "Tristan Tzara",
+   "n": 85
+  },
+  {
+   "q": "Q318750",
+   "name": "Stephen Hillenburg",
+   "n": 85
+  },
+  {
+   "q": "Q1374481",
+   "name": "Garry Shandling",
+   "n": 85
+  },
+  {
+   "q": "Q209662",
+   "name": "Lucille Ball",
+   "n": 84
+  },
+  {
+   "q": "Q33605",
+   "name": "Kesha",
+   "n": 84
+  },
+  {
+   "q": "Q160528",
+   "name": "Burt Lancaster",
+   "n": 84
+  },
+  {
+   "q": "Q160726",
+   "name": "Ang Lee",
+   "n": 84
+  },
+  {
+   "q": "Q45909",
+   "name": "John Cale",
+   "n": 84
+  },
+  {
+   "q": "Q83484",
+   "name": "Anthony Quinn",
+   "n": 84
+  },
+  {
+   "q": "Q171363",
+   "name": "Viggo Mortensen",
+   "n": 84
+  },
+  {
+   "q": "Q172140",
+   "name": "Michael Crichton",
+   "n": 84
+  },
+  {
+   "q": "Q183532",
+   "name": "Anne Bancroft",
+   "n": 84
+  },
+  {
+   "q": "Q183439",
+   "name": "Nina Dobrev",
+   "n": 84
+  },
+  {
+   "q": "Q49017",
+   "name": "Hugh Laurie",
+   "n": 83
+  },
+  {
+   "q": "Q306403",
+   "name": "James Franco",
+   "n": 83
+  },
+  {
+   "q": "Q53004",
+   "name": "Vittorio De Sica",
+   "n": 83
+  },
+  {
+   "q": "Q133730",
+   "name": "Lars von Trier",
+   "n": 83
+  },
+  {
+   "q": "Q211283",
+   "name": "Bob Hoskins",
+   "n": 83
+  },
+  {
+   "q": "Q76716",
+   "name": "Karl Lagerfeld",
+   "n": 83
+  },
+  {
+   "q": "Q163263",
+   "name": "Eva Longoria",
+   "n": 83
+  },
+  {
+   "q": "Q171905",
+   "name": "Jamie Foxx",
+   "n": 83
+  },
+  {
+   "q": "Q103114",
+   "name": "Michel Houellebecq",
+   "n": 83
+  },
+  {
+   "q": "Q372311",
+   "name": "Glenn Close",
+   "n": 83
+  },
+  {
+   "q": "Q187364",
+   "name": "Robert Zemeckis",
+   "n": 83
+  },
+  {
+   "q": "Q1666",
+   "name": "Jacques Brel",
+   "n": 82
+  },
+  {
+   "q": "Q51547",
+   "name": "Billy Wilder",
+   "n": 82
+  },
+  {
+   "q": "Q25078",
+   "name": "Terry Gilliam",
+   "n": 82
+  },
+  {
+   "q": "Q206922",
+   "name": "Andy Serkis",
+   "n": 82
+  },
+  {
+   "q": "Q210059",
+   "name": "Neil Gaiman",
+   "n": 82
+  },
+  {
+   "q": "Q72717",
+   "name": "Elia Kazan",
+   "n": 82
+  },
+  {
+   "q": "Q170587",
+   "name": "Tommy Lee Jones",
+   "n": 82
+  },
+  {
+   "q": "Q94882",
+   "name": "Emir Kusturica",
+   "n": 82
+  },
+  {
+   "q": "Q484779",
+   "name": "Luc Besson",
+   "n": 82
+  },
+  {
+   "q": "Q483907",
+   "name": "Jack Black",
+   "n": 82
+  },
+  {
+   "q": "Q51123",
+   "name": "D. W. Griffith",
+   "n": 81
+  },
+  {
+   "q": "Q55433",
+   "name": "Michelangelo Antonioni",
+   "n": 81
+  },
+  {
+   "q": "Q28493",
+   "name": "Ralph Fiennes",
+   "n": 81
+  },
+  {
+   "q": "Q153248",
+   "name": "Marguerite Duras",
+   "n": 81
+  },
+  {
+   "q": "Q102711",
+   "name": "Dennis Hopper",
+   "n": 81
+  },
+  {
+   "q": "Q181484",
+   "name": "Sia",
+   "n": 81
+  },
+  {
+   "q": "Q184906",
+   "name": "Nâzım Hikmet",
+   "n": 81
+  },
+  {
+   "q": "Q190162",
+   "name": "Zoe Saldaña",
+   "n": 81
+  },
+  {
+   "q": "Q182763",
+   "name": "Forest Whitaker",
+   "n": 81
+  },
+  {
+   "q": "Q484615",
+   "name": "Ethan Hawke",
+   "n": 81
+  },
+  {
+   "q": "Q633",
+   "name": "Neil Young",
+   "n": 80
+  },
+  {
+   "q": "Q55411",
+   "name": "Wim Wenders",
+   "n": 80
+  },
+  {
+   "q": "Q51522",
+   "name": "Sydney Pollack",
+   "n": 80
+  },
+  {
+   "q": "Q138005",
+   "name": "Michael Keaton",
+   "n": 80
+  },
+  {
+   "q": "Q152272",
+   "name": "Georges Méliès",
+   "n": 80
+  },
+  {
+   "q": "Q76819",
+   "name": "Christoph Waltz",
+   "n": 80
+  },
+  {
+   "q": "Q94123",
+   "name": "Jack Lemmon",
+   "n": 80
+  },
+  {
+   "q": "Q180861",
+   "name": "Roger Waters",
+   "n": 80
+  },
+  {
+   "q": "Q106099",
+   "name": "Jeanne Moreau",
+   "n": 80
+  },
+  {
+   "q": "Q103917",
+   "name": "Steven Soderbergh",
+   "n": 80
+  },
+  {
+   "q": "Q106685",
+   "name": "Andrzej Wajda",
+   "n": 80
+  },
+  {
+   "q": "Q188492",
+   "name": "Seth MacFarlane",
+   "n": 80
+  },
+  {
+   "q": "Q188375",
+   "name": "Lucy Liu",
+   "n": 80
+  },
+  {
+   "q": "Q51506",
+   "name": "Richard Attenborough",
+   "n": 79
+  },
+  {
+   "q": "Q220918",
+   "name": "Emilio Estevez",
+   "n": 79
+  },
+  {
+   "q": "Q170606",
+   "name": "Eva Mendes",
+   "n": 79
+  },
+  {
+   "q": "Q16345",
+   "name": "Leonard Nimoy",
+   "n": 79
+  },
+  {
+   "q": "Q104266",
+   "name": "Mel Brooks",
+   "n": 79
+  },
+  {
+   "q": "Q189080",
+   "name": "Lou Reed",
+   "n": 79
+  },
+  {
+   "q": "Q201279",
+   "name": "Woody Harrelson",
+   "n": 79
+  },
+  {
+   "q": "Q200355",
+   "name": "Olivia Wilde",
+   "n": 79
+  },
+  {
+   "q": "Q557",
+   "name": "Patti Smith",
+   "n": 78
+  },
+  {
+   "q": "Q55407",
+   "name": "Raj Kapoor",
+   "n": 78
+  },
+  {
+   "q": "Q134867",
+   "name": "Danny Boyle",
+   "n": 78
+  },
+  {
+   "q": "Q93188",
+   "name": "Errol Flynn",
+   "n": 78
+  },
+  {
+   "q": "Q162753",
+   "name": "Sophie Marceau",
+   "n": 78
+  },
+  {
+   "q": "Q168359",
+   "name": "Jean Marais",
+   "n": 78
+  },
+  {
+   "q": "Q44131",
+   "name": "Werner Herzog",
+   "n": 78
+  },
+  {
+   "q": "Q174311",
+   "name": "Christopher Reeve",
+   "n": 78
+  },
+  {
+   "q": "Q174346",
+   "name": "Katie Holmes",
+   "n": 78
+  },
+  {
+   "q": "Q104791",
+   "name": "Ed Harris",
+   "n": 78
+  },
+  {
+   "q": "Q484365",
+   "name": "David Duchovny",
+   "n": 78
+  },
+  {
+   "q": "Q636",
+   "name": "Kate Bush",
+   "n": 77
+  },
+  {
+   "q": "Q25014",
+   "name": "John Cleese",
+   "n": 77
+  },
+  {
+   "q": "Q154895",
+   "name": "Herbert von Karajan",
+   "n": 77
+  },
+  {
+   "q": "Q153018",
+   "name": "Maximilian Schell",
+   "n": 77
+  },
+  {
+   "q": "Q214642",
+   "name": "Paul Auster",
+   "n": 77
+  },
+  {
+   "q": "Q170574",
+   "name": "Helen Hunt",
+   "n": 77
+  },
+  {
+   "q": "Q315271",
+   "name": "Jason Momoa",
+   "n": 77
+  },
+  {
+   "q": "Q189400",
+   "name": "Brooke Shields",
+   "n": 77
+  },
+  {
+   "q": "Q191023",
+   "name": "Dylan Thomas",
+   "n": 77
+  },
+  {
+   "q": "Q19504",
+   "name": "Fritz Lang",
+   "n": 76
+  },
+  {
+   "q": "Q129092",
+   "name": "Fernandel",
+   "n": 76
+  },
+  {
+   "q": "Q208117",
+   "name": "Bella Thorne",
+   "n": 76
+  },
+  {
+   "q": "Q133600",
+   "name": "Banksy",
+   "n": 76
+  },
+  {
+   "q": "Q219124",
+   "name": "Guillermo del Toro",
+   "n": 76
+  },
+  {
+   "q": "Q67701",
+   "name": "Anna Kendrick",
+   "n": 76
+  },
+  {
+   "q": "Q168721",
+   "name": "Faye Dunaway",
+   "n": 76
+  },
+  {
+   "q": "Q95030",
+   "name": "Warren Beatty",
+   "n": 76
+  },
+  {
+   "q": "Q103946",
+   "name": "Kiefer Sutherland",
+   "n": 76
+  },
+  {
+   "q": "Q16472",
+   "name": "Robert Mitchum",
+   "n": 76
+  },
+  {
+   "q": "Q193048",
+   "name": "Laurence Fishburne",
+   "n": 76
+  },
+  {
+   "q": "Q189081",
+   "name": "Howard Hughes",
+   "n": 76
+  },
+  {
+   "q": "Q187166",
+   "name": "Antonin Artaud",
+   "n": 76
+  },
+  {
+   "q": "Q202148",
+   "name": "Burt Reynolds",
+   "n": 76
+  },
+  {
+   "q": "Q400",
+   "name": "Jenna Jameson",
+   "n": 75
+  },
+  {
+   "q": "Q55207",
+   "name": "Nikita Mikhalkov",
+   "n": 75
+  },
+  {
+   "q": "Q26372",
+   "name": "Takeshi Kitano",
+   "n": 75
+  },
+  {
+   "q": "Q205721",
+   "name": "Joni Mitchell",
+   "n": 75
+  },
+  {
+   "q": "Q220901",
+   "name": "Laura Dern",
+   "n": 75
+  },
+  {
+   "q": "Q104340",
+   "name": "Harold Lloyd",
+   "n": 75
+  },
+  {
+   "q": "Q105338",
+   "name": "Geert Wilders",
+   "n": 75
+  },
+  {
+   "q": "Q185051",
+   "name": "Christopher Walken",
+   "n": 75
+  },
+  {
+   "q": "Q174908",
+   "name": "Michael Moore",
+   "n": 75
+  },
+  {
+   "q": "Q51559",
+   "name": "Sidney Lumet",
+   "n": 74
+  },
+  {
+   "q": "Q221074",
+   "name": "Bud Spencer",
+   "n": 74
+  },
+  {
+   "q": "Q104061",
+   "name": "Steve Buscemi",
+   "n": 74
+  },
+  {
+   "q": "Q184697",
+   "name": "Gloria Estefan",
+   "n": 74
+  },
+  {
+   "q": "Q108283",
+   "name": "Alan Arkin",
+   "n": 74
+  },
+  {
+   "q": "Q190631",
+   "name": "Bette Midler",
+   "n": 74
+  },
+  {
+   "q": "Q315087",
+   "name": "Garry Marshall",
+   "n": 74
+  },
+  {
+   "q": "Q186273",
+   "name": "Kōbō Abe",
+   "n": 74
+  },
+  {
+   "q": "Q193668",
+   "name": "Benicio del Toro",
+   "n": 74
+  },
+  {
+   "q": "Q55210",
+   "name": "Abbas Kiarostami",
+   "n": 73
+  },
+  {
+   "q": "Q55215",
+   "name": "Alejandro González Iñárritu",
+   "n": 73
+  },
+  {
+   "q": "Q202381",
+   "name": "Maggie Gyllenhaal",
+   "n": 73
+  },
+  {
+   "q": "Q208582",
+   "name": "Akira Toriyama",
+   "n": 73
+  },
+  {
+   "q": "Q34816",
+   "name": "Kathryn Bigelow",
+   "n": 73
+  },
+  {
+   "q": "Q13888",
+   "name": "Luchino Visconti",
+   "n": 73
+  },
+  {
+   "q": "Q95043",
+   "name": "James Caan",
+   "n": 73
+  },
+  {
+   "q": "Q184572",
+   "name": "Martin Sheen",
+   "n": 73
+  },
+  {
+   "q": "Q347879",
+   "name": "Vanessa Redgrave",
+   "n": 73
+  },
+  {
+   "q": "Q485310",
+   "name": "Neil Patrick Harris",
+   "n": 73
+  },
+  {
+   "q": "Q50713",
+   "name": "Jean Renoir",
+   "n": 72
+  },
+  {
+   "q": "Q51495",
+   "name": "William Wyler",
+   "n": 72
+  },
+  {
+   "q": "Q260794",
+   "name": "Sunny Leone",
+   "n": 72
+  },
+  {
+   "q": "Q287607",
+   "name": "Rob Reiner",
+   "n": 72
+  },
+  {
+   "q": "Q203215",
+   "name": "Max von Sydow",
+   "n": 72
+  },
+  {
+   "q": "Q210447",
+   "name": "Mark Hamill",
+   "n": 72
+  },
+  {
+   "q": "Q210148",
+   "name": "Peter Fonda",
+   "n": 72
+  },
+  {
+   "q": "Q214309",
+   "name": "Sam Neill",
+   "n": 72
+  },
+  {
+   "q": "Q233365",
+   "name": "Catherine O'Hara",
+   "n": 72
+  },
+  {
+   "q": "Q82085",
+   "name": "Sam Worthington",
+   "n": 72
+  },
+  {
+   "q": "Q337276",
+   "name": "Sacha Guitry",
+   "n": 72
+  },
+  {
+   "q": "Q190794",
+   "name": "Famke Janssen",
+   "n": 72
+  },
+  {
+   "q": "Q200534",
+   "name": "Tilda Swinton",
+   "n": 72
+  },
+  {
+   "q": "Q55163",
+   "name": "Robert Altman",
+   "n": 71
+  },
+  {
+   "q": "Q51575",
+   "name": "John Huston",
+   "n": 71
+  },
+  {
+   "q": "Q53003",
+   "name": "Roberto Rossellini",
+   "n": 71
+  },
+  {
+   "q": "Q219373",
+   "name": "Elizabeth Banks",
+   "n": 71
+  },
+  {
+   "q": "Q216221",
+   "name": "Steve Carell",
+   "n": 71
+  },
+  {
+   "q": "Q229048",
+   "name": "Melissa McCarthy",
+   "n": 71
+  },
+  {
+   "q": "Q228943",
+   "name": "Elle Fanning",
+   "n": 71
+  },
+  {
+   "q": "Q47496",
+   "name": "Marina Abramović",
+   "n": 71
+  },
+  {
+   "q": "Q184903",
+   "name": "David Fincher",
+   "n": 71
+  },
+  {
+   "q": "Q181678",
+   "name": "Dolph Lundgren",
+   "n": 71
+  },
+  {
+   "q": "Q180710",
+   "name": "Anna Nicole Smith",
+   "n": 71
+  },
+  {
+   "q": "Q191064",
+   "name": "Liv Ullmann",
+   "n": 71
+  },
+  {
+   "q": "Q189422",
+   "name": "Jean Dujardin",
+   "n": 71
+  },
+  {
+   "q": "Q193628",
+   "name": "Sofia Coppola",
+   "n": 71
+  },
+  {
+   "q": "Q55294",
+   "name": "Kenneth Branagh",
+   "n": 70
+  },
+  {
+   "q": "Q1698",
+   "name": "Serge Gainsbourg",
+   "n": 70
+  },
+  {
+   "q": "Q49080",
+   "name": "Isaak Babel",
+   "n": 70
+  },
+  {
+   "q": "Q295233",
+   "name": "John Leguizamo",
+   "n": 70
+  },
+  {
+   "q": "Q55422",
+   "name": "David Cronenberg",
+   "n": 70
+  },
+  {
+   "q": "Q311615",
+   "name": "Thomas Haden Church",
+   "n": 70
+  },
+  {
+   "q": "Q33635",
+   "name": "Hema Malini",
+   "n": 70
+  },
+  {
+   "q": "Q28028",
+   "name": "Alfonso Cuarón",
+   "n": 70
+  },
+  {
+   "q": "Q95048",
+   "name": "Tim Robbins",
+   "n": 70
+  },
+  {
+   "q": "Q103646",
+   "name": "Ron Howard",
+   "n": 70
+  },
+  {
+   "q": "Q104081",
+   "name": "Mickey Rooney",
+   "n": 70
+  },
+  {
+   "q": "Q180852",
+   "name": "Zhang Ziyi",
+   "n": 70
+  },
+  {
+   "q": "Q177311",
+   "name": "Joseph Gordon-Levitt",
+   "n": 70
+  },
+  {
+   "q": "Q188792",
+   "name": "David Schwimmer",
+   "n": 70
+  },
+  {
+   "q": "Q333544",
+   "name": "Bob Saget",
+   "n": 70
+  }
+ ],
+ "actors": [
+  {
+   "q": "Q9960",
+   "name": "Ronald Reagan",
+   "n": 306
+  },
+  {
+   "q": "Q5593",
+   "name": "Pablo Picasso",
+   "n": 266
+  },
+  {
+   "q": "Q882",
+   "name": "Charlie Chaplin",
+   "n": 265
+  },
+  {
+   "q": "Q5577",
+   "name": "Salvador Dalí",
+   "n": 248
+  },
+  {
+   "q": "Q4616",
+   "name": "Marilyn Monroe",
+   "n": 244
+  },
+  {
+   "q": "Q450675",
+   "name": "Pope Francis",
+   "n": 240
+  },
+  {
+   "q": "Q4617",
+   "name": "Corbin Bleu",
+   "n": 225
+  },
+  {
+   "q": "Q8704",
+   "name": "Walt Disney",
+   "n": 219
+  },
+  {
+   "q": "Q11256",
+   "name": "Fidel Castro",
+   "n": 208
+  },
+  {
+   "q": "Q4612",
+   "name": "Marlene Dietrich",
+   "n": 204
+  },
+  {
+   "q": "Q30487",
+   "name": "Mikhail Gorbachev",
+   "n": 203
+  },
+  {
+   "q": "Q1744",
+   "name": "Madonna",
+   "n": 195
+  },
+  {
+   "q": "Q4605",
+   "name": "Sarah Bernhardt",
+   "n": 195
+  },
+  {
+   "q": "Q7374",
+   "name": "Alfred Hitchcock",
+   "n": 190
+  },
+  {
+   "q": "Q7197",
+   "name": "Simone de Beauvoir",
+   "n": 190
+  },
+  {
+   "q": "Q1203",
+   "name": "John Lennon",
+   "n": 186
+  },
+  {
+   "q": "Q392",
+   "name": "Bob Dylan",
+   "n": 185
+  },
+  {
+   "q": "Q12897",
+   "name": "Pelé",
+   "n": 185
+  },
+  {
+   "q": "Q1779",
+   "name": "Louis Armstrong",
+   "n": 181
+  },
+  {
+   "q": "Q5608",
+   "name": "Eminem",
+   "n": 175
+  },
+  {
+   "q": "Q8877",
+   "name": "Steven Spielberg",
+   "n": 172
+  },
+  {
+   "q": "Q16397",
+   "name": "Bruce Lee",
+   "n": 170
+  },
+  {
+   "q": "Q7546",
+   "name": "Ingmar Bergman",
+   "n": 166
+  },
+  {
+   "q": "Q36970",
+   "name": "Jackie Chan",
+   "n": 163
+  },
+  {
+   "q": "Q83338",
+   "name": "Robin Williams",
+   "n": 163
+  },
+  {
+   "q": "Q34012",
+   "name": "Marlon Brando",
+   "n": 159
+  },
+  {
+   "q": "Q25089",
+   "name": "Woody Allen",
+   "n": 158
+  },
+  {
+   "q": "Q34436",
+   "name": "Scarlett Johansson",
+   "n": 158
+  },
+  {
+   "q": "Q2685",
+   "name": "Arnold Schwarzenegger",
+   "n": 155
+  },
+  {
+   "q": "Q42786",
+   "name": "Audrey Hepburn",
+   "n": 154
+  },
+  {
+   "q": "Q11637",
+   "name": "Judy Garland",
+   "n": 153
+  },
+  {
+   "q": "Q36268",
+   "name": "Brigitte Bardot",
+   "n": 153
+  },
+  {
+   "q": "Q6105",
+   "name": "Hebe Camargo",
+   "n": 151
+  },
+  {
+   "q": "Q38111",
+   "name": "Leonardo DiCaprio",
+   "n": 150
+  },
+  {
+   "q": "Q35332",
+   "name": "Brad Pitt",
+   "n": 149
+  },
+  {
+   "q": "Q2599",
+   "name": "Paul McCartney",
+   "n": 149
+  },
+  {
+   "q": "Q37175",
+   "name": "Johnny Depp",
+   "n": 149
+  },
+  {
+   "q": "Q34851",
+   "name": "Elizabeth Taylor",
+   "n": 148
+  },
+  {
+   "q": "Q39476",
+   "name": "Emma Watson",
+   "n": 146
+  },
+  {
+   "q": "Q4573",
+   "name": "Sean Connery",
+   "n": 146
+  },
+  {
+   "q": "Q151892",
+   "name": "Ariana Grande",
+   "n": 144
+  },
+  {
+   "q": "Q4235",
+   "name": "Miley",
+   "n": 143
+  },
+  {
+   "q": "Q40912",
+   "name": "Frank Sinatra",
+   "n": 141
+  },
+  {
+   "q": "Q36949",
+   "name": "Robert De Niro",
+   "n": 141
+  },
+  {
+   "q": "Q106529",
+   "name": "Alain Delon",
+   "n": 140
+  },
+  {
+   "q": "Q765165",
+   "name": "Leonid Brezhnev",
+   "n": 140
+  },
+  {
+   "q": "Q40715",
+   "name": "Jennifer Lopez",
+   "n": 139
+  },
+  {
+   "q": "Q37876",
+   "name": "Natalie Portman",
+   "n": 139
+  },
+  {
+   "q": "Q30449",
+   "name": "Avril Lavigne",
+   "n": 138
+  },
+  {
+   "q": "Q40096",
+   "name": "Will Smith",
+   "n": 137
+  },
+  {
+   "q": "Q9535",
+   "name": "Shah Rukh Khan",
+   "n": 137
+  },
+  {
+   "q": "Q34389",
+   "name": "Whitney Houston",
+   "n": 137
+  },
+  {
+   "q": "Q2263",
+   "name": "Tom Hanks",
+   "n": 137
+  },
+  {
+   "q": "Q43203",
+   "name": "Clint Eastwood",
+   "n": 137
+  },
+  {
+   "q": "Q10665",
+   "name": "Kim Jong-il",
+   "n": 136
+  },
+  {
+   "q": "Q5383",
+   "name": "David Bowie",
+   "n": 136
+  },
+  {
+   "q": "Q6107",
+   "name": "Tupac Shakur",
+   "n": 136
+  },
+  {
+   "q": "Q44461",
+   "name": "Richard Dawkins",
+   "n": 136
+  },
+  {
+   "q": "Q41163",
+   "name": "Al Pacino",
+   "n": 135
+  },
+  {
+   "q": "Q37459",
+   "name": "Nicole Kidman",
+   "n": 135
+  },
+  {
+   "q": "Q205707",
+   "name": "Bradley Cooper",
+   "n": 135
+  },
+  {
+   "q": "Q29179",
+   "name": "Francisco Franco",
+   "n": 134
+  },
+  {
+   "q": "Q38222",
+   "name": "George Lucas",
+   "n": 134
+  },
+  {
+   "q": "Q202765",
+   "name": "Kate Winslet",
+   "n": 134
+  },
+  {
+   "q": "Q80966",
+   "name": "Cate Blanchett",
+   "n": 134
+  },
+  {
+   "q": "Q40523",
+   "name": "Julia Roberts",
+   "n": 133
+  },
+  {
+   "q": "Q43252",
+   "name": "Sophia Loren",
+   "n": 133
+  },
+  {
+   "q": "Q56016",
+   "name": "Katharine Hepburn",
+   "n": 133
+  },
+  {
+   "q": "Q34460",
+   "name": "Gwyneth Paltrow",
+   "n": 132
+  },
+  {
+   "q": "Q1276",
+   "name": "Leonard Cohen",
+   "n": 131
+  },
+  {
+   "q": "Q234679",
+   "name": "Charlotte Rampling",
+   "n": 131
+  },
+  {
+   "q": "Q39792",
+   "name": "Jack Nicholson",
+   "n": 130
+  },
+  {
+   "q": "Q40791",
+   "name": "Sandra Bullock",
+   "n": 130
+  },
+  {
+   "q": "Q37079",
+   "name": "Tom Cruise",
+   "n": 129
+  },
+  {
+   "q": "Q23844",
+   "name": "George Clooney",
+   "n": 128
+  },
+  {
+   "q": "Q32522",
+   "name": "Jennifer Aniston",
+   "n": 128
+  },
+  {
+   "q": "Q32927",
+   "name": "Valery Leontiev",
+   "n": 128
+  },
+  {
+   "q": "Q48337",
+   "name": "Morgan Freeman",
+   "n": 128
+  },
+  {
+   "q": "Q503706",
+   "name": "Chris Pratt",
+   "n": 127
+  },
+  {
+   "q": "Q82110",
+   "name": "Steven Seagal",
+   "n": 127
+  },
+  {
+   "q": "Q23891",
+   "name": "Andrew Garfield",
+   "n": 126
+  },
+  {
+   "q": "Q9570",
+   "name": "Amitabh Bachchan",
+   "n": 126
+  },
+  {
+   "q": "Q40504",
+   "name": "Jim Carrey",
+   "n": 126
+  },
+  {
+   "q": "Q40026",
+   "name": "Sylvester Stallone",
+   "n": 126
+  },
+  {
+   "q": "Q23365",
+   "name": "Jeremy Renner",
+   "n": 126
+  },
+  {
+   "q": "Q43247",
+   "name": "Ingrid Bergman",
+   "n": 126
+  },
+  {
+   "q": "Q2643",
+   "name": "George Harrison",
+   "n": 125
+  },
+  {
+   "q": "Q132964",
+   "name": "Vladimir Mayakovsky",
+   "n": 125
+  },
+  {
+   "q": "Q37001",
+   "name": "Toshirō Mifune",
+   "n": 125
+  },
+  {
+   "q": "Q129817",
+   "name": "Russell Crowe",
+   "n": 125
+  },
+  {
+   "q": "Q43416",
+   "name": "Keanu Reeves",
+   "n": 124
+  },
+  {
+   "q": "Q3772",
+   "name": "Quentin Tarantino",
+   "n": 124
+  },
+  {
+   "q": "Q41142",
+   "name": "Jane Fonda",
+   "n": 123
+  },
+  {
+   "q": "Q102124",
+   "name": "Sigourney Weaver",
+   "n": 123
+  },
+  {
+   "q": "Q72984",
+   "name": "Bing Crosby",
+   "n": 123
+  },
+  {
+   "q": "Q189490",
+   "name": "Jennifer Lawrence",
+   "n": 123
+  },
+  {
+   "q": "Q40531",
+   "name": "John Wayne",
+   "n": 122
+  },
+  {
+   "q": "Q1033016",
+   "name": "Halle Berry",
+   "n": 122
+  },
+  {
+   "q": "Q65932",
+   "name": "Anthony Hopkins",
+   "n": 122
+  },
+  {
+   "q": "Q12003",
+   "name": "Cher",
+   "n": 121
+  },
+  {
+   "q": "Q42869",
+   "name": "Nicolas Cage",
+   "n": 121
+  },
+  {
+   "q": "Q23760",
+   "name": "Rowan Atkinson",
+   "n": 121
+  },
+  {
+   "q": "Q3925",
+   "name": "Grace Kelly",
+   "n": 121
+  },
+  {
+   "q": "Q39666",
+   "name": "Penélope Cruz",
+   "n": 120
+  },
+  {
+   "q": "Q159577",
+   "name": "Jet Li",
+   "n": 120
+  },
+  {
+   "q": "Q2023710",
+   "name": "Tom Holland",
+   "n": 120
+  },
+  {
+   "q": "Q42229",
+   "name": "Mel Gibson",
+   "n": 119
+  },
+  {
+   "q": "Q16390",
+   "name": "Humphrey Bogart",
+   "n": 119
+  },
+  {
+   "q": "Q80046",
+   "name": "Charlize Theron",
+   "n": 119
+  },
+  {
+   "q": "Q512",
+   "name": "Vladimir Vysotsky",
+   "n": 118
+  },
+  {
+   "q": "Q41351",
+   "name": "Jodie Foster",
+   "n": 118
+  },
+  {
+   "q": "Q23466",
+   "name": "Chris Pine",
+   "n": 118
+  },
+  {
+   "q": "Q2808",
+   "name": "Elton John",
+   "n": 118
+  },
+  {
+   "q": "Q5443",
+   "name": "Greta Garbo",
+   "n": 118
+  },
+  {
+   "q": "Q19794",
+   "name": "Josh Duhamel",
+   "n": 117
+  },
+  {
+   "q": "Q188500",
+   "name": "Elisha Cuthbert",
+   "n": 117
+  },
+  {
+   "q": "Q80938",
+   "name": "John Travolta",
+   "n": 117
+  },
+  {
+   "q": "Q81328",
+   "name": "Harrison Ford",
+   "n": 117
+  },
+  {
+   "q": "Q2757",
+   "name": "Lech Kaczyński",
+   "n": 116
+  },
+  {
+   "q": "Q47059",
+   "name": "Aishwarya Rai",
+   "n": 116
+  },
+  {
+   "q": "Q175535",
+   "name": "Matt Damon",
+   "n": 115
+  },
+  {
+   "q": "Q24829",
+   "name": "Orson Welles",
+   "n": 114
+  },
+  {
+   "q": "Q10738",
+   "name": "Dwayne Johnson",
+   "n": 114
+  },
+  {
+   "q": "Q41148",
+   "name": "Martin Scorsese",
+   "n": 114
+  },
+  {
+   "q": "Q36301",
+   "name": "Anne Hathaway",
+   "n": 114
+  },
+  {
+   "q": "Q23359",
+   "name": "Taylor Lautner",
+   "n": 114
+  },
+  {
+   "q": "Q44077",
+   "name": "Jessica Alba",
+   "n": 114
+  },
+  {
+   "q": "Q43044",
+   "name": "Demi Moore",
+   "n": 113
+  },
+  {
+   "q": "Q38119",
+   "name": "Daniel Radcliffe",
+   "n": 113
+  },
+  {
+   "q": "Q180338",
+   "name": "Christopher Lee",
+   "n": 113
+  },
+  {
+   "q": "Q7542",
+   "name": "Prince",
+   "n": 112
+  },
+  {
+   "q": "Q134456",
+   "name": "Yukio Mishima",
+   "n": 112
+  },
+  {
+   "q": "Q80069",
+   "name": "Megan Fox",
+   "n": 112
+  },
+  {
+   "q": "Q202878",
+   "name": "Mae West",
+   "n": 112
+  },
+  {
+   "q": "Q83359",
+   "name": "James Dean",
+   "n": 112
+  },
+  {
+   "q": "Q51552",
+   "name": "Roman Polanski",
+   "n": 111
+  },
+  {
+   "q": "Q106255",
+   "name": "Jean-Paul Belmondo",
+   "n": 110
+  },
+  {
+   "q": "Q40572",
+   "name": "Heath Ledger",
+   "n": 110
+  },
+  {
+   "q": "Q11930",
+   "name": "Kevin Costner",
+   "n": 110
+  },
+  {
+   "q": "Q2673",
+   "name": "Chuck Norris",
+   "n": 110
+  },
+  {
+   "q": "Q1110560",
+   "name": "Umm Kulthum",
+   "n": 110
+  },
+  {
+   "q": "Q4636",
+   "name": "Barbra Streisand",
+   "n": 110
+  },
+  {
+   "q": "Q158957",
+   "name": "Priyanka Chopra",
+   "n": 110
+  },
+  {
+   "q": "Q43874",
+   "name": "Eddie Murphy",
+   "n": 110
+  },
+  {
+   "q": "Q71206",
+   "name": "Bette Davis",
+   "n": 110
+  },
+  {
+   "q": "Q284636",
+   "name": "Jason Bateman",
+   "n": 110
+  },
+  {
+   "q": "Q765",
+   "name": "Dario Fo",
+   "n": 109
+  },
+  {
+   "q": "Q41871",
+   "name": "Paul Newman",
+   "n": 109
+  },
+  {
+   "q": "Q108941",
+   "name": "Carrie Fisher",
+   "n": 109
+  },
+  {
+   "q": "Q123351",
+   "name": "Michael Caine",
+   "n": 109
+  },
+  {
+   "q": "Q129429",
+   "name": "Vivien Leigh",
+   "n": 109
+  },
+  {
+   "q": "Q49001",
+   "name": "Whoopi Goldberg",
+   "n": 109
+  },
+  {
+   "q": "Q44380",
+   "name": "Cameron Diaz",
+   "n": 109
+  },
+  {
+   "q": "Q83325",
+   "name": "Pamela Anderson",
+   "n": 109
+  },
+  {
+   "q": "Q81819",
+   "name": "Monica Bellucci",
+   "n": 109
+  },
+  {
+   "q": "Q40933",
+   "name": "Eva Perón",
+   "n": 108
+  },
+  {
+   "q": "Q42581",
+   "name": "Keira Knightley",
+   "n": 108
+  },
+  {
+   "q": "Q71243",
+   "name": "Clark Gable",
+   "n": 108
+  },
+  {
+   "q": "Q1225",
+   "name": "Bruce Springsteen",
+   "n": 107
+  },
+  {
+   "q": "Q80405",
+   "name": "Julianne Moore",
+   "n": 107
+  },
+  {
+   "q": "Q193426",
+   "name": "Nancy Reagan",
+   "n": 107
+  },
+  {
+   "q": "Q2071",
+   "name": "David Lynch",
+   "n": 106
+  },
+  {
+   "q": "Q42745",
+   "name": "Rita Hayworth",
+   "n": 106
+  },
+  {
+   "q": "Q125106",
+   "name": "Salma Hayek",
+   "n": 106
+  },
+  {
+   "q": "Q131324",
+   "name": "Janet Jackson",
+   "n": 106
+  },
+  {
+   "q": "Q178166",
+   "name": "Vin Diesel",
+   "n": 106
+  },
+  {
+   "q": "Q129591",
+   "name": "Hugh Jackman",
+   "n": 106
+  },
+  {
+   "q": "Q9543",
+   "name": "Salman Khan",
+   "n": 105
+  },
+  {
+   "q": "Q150651",
+   "name": "George Carlin",
+   "n": 105
+  },
+  {
+   "q": "Q4547",
+   "name": "Daniel Craig",
+   "n": 105
+  },
+  {
+   "q": "Q189489",
+   "name": "Zendaya",
+   "n": 105
+  },
+  {
+   "q": "Q81520",
+   "name": "Pierce Brosnan",
+   "n": 105
+  },
+  {
+   "q": "Q9557",
+   "name": "Aamir Khan",
+   "n": 104
+  },
+  {
+   "q": "Q40475",
+   "name": "Joan Crawford",
+   "n": 104
+  },
+  {
+   "q": "Q133050",
+   "name": "Susan Sarandon",
+   "n": 104
+  },
+  {
+   "q": "Q166389",
+   "name": "Daniel Day-Lewis",
+   "n": 104
+  },
+  {
+   "q": "Q44063",
+   "name": "Reese Witherspoon",
+   "n": 104
+  },
+  {
+   "q": "Q76478",
+   "name": "Kirsten Dunst",
+   "n": 104
+  },
+  {
+   "q": "Q190523",
+   "name": "Christopher Plummer",
+   "n": 104
+  },
+  {
+   "q": "Q100937",
+   "name": "Fred Astaire",
+   "n": 103
+  },
+  {
+   "q": "Q103876",
+   "name": "Peter O'Toole",
+   "n": 103
+  },
+  {
+   "q": "Q485298",
+   "name": "Gillian Anderson",
+   "n": 103
+  },
+  {
+   "q": "Q104000",
+   "name": "Lauren Bacall",
+   "n": 103
+  },
+  {
+   "q": "Q104372",
+   "name": "Doris Day",
+   "n": 103
+  },
+  {
+   "q": "Q49034",
+   "name": "Hedy Lamarr",
+   "n": 103
+  },
+  {
+   "q": "Q46706",
+   "name": "Eugène Ionesco",
+   "n": 103
+  },
+  {
+   "q": "Q125017",
+   "name": "Uma Thurman",
+   "n": 103
+  },
+  {
+   "q": "Q47664",
+   "name": "Catherine Zeta-Jones",
+   "n": 103
+  },
+  {
+   "q": "Q126599",
+   "name": "Kristen Stewart",
+   "n": 103
+  },
+  {
+   "q": "Q56094",
+   "name": "Francis Ford Coppola",
+   "n": 103
+  },
+  {
+   "q": "Q83492",
+   "name": "Gary Oldman",
+   "n": 103
+  },
+  {
+   "q": "Q349391",
+   "name": "Helen Mirren",
+   "n": 103
+  },
+  {
+   "q": "Q288933",
+   "name": "Marjorie Estiano",
+   "n": 103
+  },
+  {
+   "q": "Q106508",
+   "name": "Gérard Depardieu",
+   "n": 102
+  },
+  {
+   "q": "Q1768",
+   "name": "Ella Fitzgerald",
+   "n": 102
+  },
+  {
+   "q": "Q104109",
+   "name": "Mary Pickford",
+   "n": 102
+  },
+  {
+   "q": "Q159778",
+   "name": "Michelle Pfeiffer",
+   "n": 102
+  },
+  {
+   "q": "Q101797",
+   "name": "Winona Ryder",
+   "n": 101
+  },
+  {
+   "q": "Q104027",
+   "name": "Kirk Douglas",
+   "n": 101
+  },
+  {
+   "q": "Q104049",
+   "name": "Sidney Poitier",
+   "n": 101
+  },
+  {
+   "q": "Q191966",
+   "name": "Gene Wilder",
+   "n": 101
+  },
+  {
+   "q": "Q853",
+   "name": "Andrei Tarkovsky",
+   "n": 100
+  },
+  {
+   "q": "Q19155",
+   "name": "Henry Fonda",
+   "n": 100
+  },
+  {
+   "q": "Q102642",
+   "name": "Diane Keaton",
+   "n": 100
+  },
+  {
+   "q": "Q103949",
+   "name": "Buster Keaton",
+   "n": 100
+  },
+  {
+   "q": "Q676094",
+   "name": "Drew Barrymore",
+   "n": 100
+  },
+  {
+   "q": "Q44221",
+   "name": "Sean Penn",
+   "n": 100
+  },
+  {
+   "q": "Q83410",
+   "name": "Cary Grant",
+   "n": 100
+  },
+  {
+   "q": "Q213864",
+   "name": "Paul Walker",
+   "n": 100
+  },
+  {
+   "q": "Q217238",
+   "name": "Jimmie Johnson",
+   "n": 100
+  },
+  {
+   "q": "Q108366",
+   "name": "Gregory Peck",
+   "n": 99
+  },
+  {
+   "q": "Q1785",
+   "name": "Charles Aznavour",
+   "n": 99
+  },
+  {
+   "q": "Q172678",
+   "name": "Samuel L. Jackson",
+   "n": 99
+  },
+  {
+   "q": "Q164119",
+   "name": "Mark Wahlberg",
+   "n": 99
+  },
+  {
+   "q": "Q181900",
+   "name": "Stan Lee",
+   "n": 99
+  },
+  {
+   "q": "Q119798",
+   "name": "Michael Douglas",
+   "n": 99
+  },
+  {
+   "q": "Q178348",
+   "name": "Chris Evans",
+   "n": 99
+  },
+  {
+   "q": "Q45772",
+   "name": "Christian Bale",
+   "n": 99
+  },
+  {
+   "q": "Q55469",
+   "name": "Marcello Mastroianni",
+   "n": 99
+  },
+  {
+   "q": "Q215072",
+   "name": "John Goodman",
+   "n": 99
+  },
+  {
+   "q": "Q28054",
+   "name": "Judi Dench",
+   "n": 98
+  },
+  {
+   "q": "Q102462",
+   "name": "James Stewart",
+   "n": 98
+  },
+  {
+   "q": "Q2737",
+   "name": "Louis de Funès",
+   "n": 98
+  },
+  {
+   "q": "Q132589",
+   "name": "Camilo José Cela",
+   "n": 98
+  },
+  {
+   "q": "Q151972",
+   "name": "Josephine Baker",
+   "n": 98
+  },
+  {
+   "q": "Q161819",
+   "name": "Julie Andrews",
+   "n": 98
+  },
+  {
+   "q": "Q182580",
+   "name": "Shirley Temple",
+   "n": 98
+  },
+  {
+   "q": "Q6096",
+   "name": "Snoop Dogg",
+   "n": 98
+  },
+  {
+   "q": "Q59215",
+   "name": "Robert Redford",
+   "n": 98
+  },
+  {
+   "q": "Q58444",
+   "name": "Liam Neeson",
+   "n": 98
+  },
+  {
+   "q": "Q53002",
+   "name": "François Truffaut",
+   "n": 98
+  },
+  {
+   "q": "Q232458",
+   "name": "Natalia Oreiro",
+   "n": 98
+  },
+  {
+   "q": "Q481832",
+   "name": "Amy Adams",
+   "n": 98
+  },
+  {
+   "q": "Q93957",
+   "name": "Gary Cooper",
+   "n": 97
+  },
+  {
+   "q": "Q35912",
+   "name": "Emmy Rossum",
+   "n": 97
+  },
+  {
+   "q": "Q36105",
+   "name": "Charles Bronson",
+   "n": 97
+  },
+  {
+   "q": "Q103784",
+   "name": "Donald Sutherland",
+   "n": 97
+  },
+  {
+   "q": "Q134333",
+   "name": "Roger Moore",
+   "n": 97
+  },
+  {
+   "q": "Q104183",
+   "name": "Lillian Gish",
+   "n": 97
+  },
+  {
+   "q": "Q169963",
+   "name": "Jason Statham",
+   "n": 97
+  },
+  {
+   "q": "Q44467",
+   "name": "Orlando Bloom",
+   "n": 97
+  },
+  {
+   "q": "Q62975",
+   "name": "Sharon Stone",
+   "n": 97
+  },
+  {
+   "q": "Q212801",
+   "name": "Arundhati Roy",
+   "n": 97
+  },
+  {
+   "q": "Q25120",
+   "name": "Pier Paolo Pasolini",
+   "n": 96
+  },
+  {
+   "q": "Q95026",
+   "name": "Shirley MacLaine",
+   "n": 96
+  },
+  {
+   "q": "Q44903",
+   "name": "Lindsay Lohan",
+   "n": 96
+  },
+  {
+   "q": "Q483203",
+   "name": "Sting",
+   "n": 96
+  },
+  {
+   "q": "Q4725343",
+   "name": "Alia Bhatt",
+   "n": 96
+  },
+  {
+   "q": "Q4740163",
+   "name": "Carles Puigdemont",
+   "n": 96
+  },
+  {
+   "q": "Q483325",
+   "name": "Ellen DeGeneres",
+   "n": 96
+  },
+  {
+   "q": "Q106418",
+   "name": "Catherine Deneuve",
+   "n": 95
+  },
+  {
+   "q": "Q34076",
+   "name": "Nathalia Dill",
+   "n": 95
+  },
+  {
+   "q": "Q103846",
+   "name": "Groucho Marx",
+   "n": 95
+  },
+  {
+   "q": "Q185654",
+   "name": "Gal Gadot",
+   "n": 95
+  },
+  {
+   "q": "Q54314",
+   "name": "Chris Hemsworth",
+   "n": 95
+  },
+  {
+   "q": "Q55245",
+   "name": "Laurence Olivier",
+   "n": 95
+  },
+  {
+   "q": "Q193517",
+   "name": "Emily Blunt",
+   "n": 95
+  },
+  {
+   "q": "Q45229",
+   "name": "Zac Efron",
+   "n": 95
+  },
+  {
+   "q": "Q190386",
+   "name": "Rachel McAdams",
+   "n": 95
+  },
+  {
+   "q": "Q93187",
+   "name": "Hilary Swank",
+   "n": 94
+  },
+  {
+   "q": "Q122614",
+   "name": "Renée Zellweger",
+   "n": 94
+  },
+  {
+   "q": "Q177984",
+   "name": "Peter Sellers",
+   "n": 94
+  },
+  {
+   "q": "Q183337",
+   "name": "David Attenborough",
+   "n": 94
+  },
+  {
+   "q": "Q6078",
+   "name": "Dr. Dre",
+   "n": 94
+  },
+  {
+   "q": "Q131380",
+   "name": "Kim Basinger",
+   "n": 94
+  },
+  {
+   "q": "Q55415",
+   "name": "Leni Riefenstahl",
+   "n": 94
+  },
+  {
+   "q": "Q106383",
+   "name": "Isabelle Adjani",
+   "n": 93
+  },
+  {
+   "q": "Q106481",
+   "name": "Alan Rickman",
+   "n": 93
+  },
+  {
+   "q": "Q16296",
+   "name": "Patrick Stewart",
+   "n": 93
+  },
+  {
+   "q": "Q132952",
+   "name": "Adam Sandler",
+   "n": 93
+  },
+  {
+   "q": "Q134077",
+   "name": "Rachel Weisz",
+   "n": 93
+  },
+  {
+   "q": "Q171736",
+   "name": "Robert Duvall",
+   "n": 93
+  },
+  {
+   "q": "Q188955",
+   "name": "Matthew McConaughey",
+   "n": 93
+  },
+  {
+   "q": "Q1924847",
+   "name": "Margot Robbie",
+   "n": 93
+  },
+  {
+   "q": "Q80739",
+   "name": "Charlton Heston",
+   "n": 93
+  },
+  {
+   "q": "Q308722",
+   "name": "James Gandolfini",
+   "n": 93
+  },
+  {
+   "q": "Q314801",
+   "name": "Hal Holbrook",
+   "n": 93
+  },
+  {
+   "q": "Q94041",
+   "name": "James Cagney",
+   "n": 92
+  },
+  {
+   "q": "Q132616",
+   "name": "Naomi Watts",
+   "n": 92
+  },
+  {
+   "q": "Q171758",
+   "name": "Matthew Perry",
+   "n": 92
+  },
+  {
+   "q": "Q185140",
+   "name": "Joaquin Phoenix",
+   "n": 92
+  },
+  {
+   "q": "Q187033",
+   "name": "Sally Field",
+   "n": 92
+  },
+  {
+   "q": "Q47875",
+   "name": "Robbie Williams",
+   "n": 92
+  },
+  {
+   "q": "Q180560",
+   "name": "Philip Seymour Hoffman",
+   "n": 92
+  },
+  {
+   "q": "Q192682",
+   "name": "Ryan Reynolds",
+   "n": 92
+  },
+  {
+   "q": "Q25144",
+   "name": "Kevin Spacey",
+   "n": 91
+  },
+  {
+   "q": "Q29328",
+   "name": "Brie Larson",
+   "n": 91
+  },
+  {
+   "q": "Q144622",
+   "name": "Phil Collins",
+   "n": 91
+  },
+  {
+   "q": "Q151973",
+   "name": "Richard Burton",
+   "n": 91
+  },
+  {
+   "q": "Q170510",
+   "name": "Ian McKellen",
+   "n": 91
+  },
+  {
+   "q": "Q180942",
+   "name": "Shia LaBeouf",
+   "n": 91
+  },
+  {
+   "q": "Q122020",
+   "name": "Hilary Duff",
+   "n": 91
+  },
+  {
+   "q": "Q483148",
+   "name": "Michael Clarke Duncan",
+   "n": 91
+  },
+  {
+   "q": "Q287793",
+   "name": "Carl Reiner",
+   "n": 91
+  },
+  {
+   "q": "Q229232",
+   "name": "Gloria Swanson",
+   "n": 91
+  },
+  {
+   "q": "Q33240",
+   "name": "Drake",
+   "n": 90
+  },
+  {
+   "q": "Q3910",
+   "name": "Albert II, Prince of Monaco",
+   "n": 90
+  },
+  {
+   "q": "Q160009",
+   "name": "Pink",
+   "n": 90
+  },
+  {
+   "q": "Q168724",
+   "name": "Emma Thompson",
+   "n": 90
+  },
+  {
+   "q": "Q170515",
+   "name": "Omar Sharif",
+   "n": 90
+  },
+  {
+   "q": "Q173585",
+   "name": "Jessica Lange",
+   "n": 90
+  },
+  {
+   "q": "Q174614",
+   "name": "Carlo Ancelotti",
+   "n": 90
+  },
+  {
+   "q": "Q160432",
+   "name": "Jude Law",
+   "n": 90
+  },
+  {
+   "q": "Q125904",
+   "name": "Edward Norton",
+   "n": 90
+  },
+  {
+   "q": "Q51101",
+   "name": "Jolin Tsai",
+   "n": 90
+  },
+  {
+   "q": "Q51114",
+   "name": "John Ford",
+   "n": 90
+  },
+  {
+   "q": "Q80424",
+   "name": "Nelly Furtado",
+   "n": 90
+  },
+  {
+   "q": "Q193815",
+   "name": "Ryan Gosling",
+   "n": 90
+  },
+  {
+   "q": "Q310937",
+   "name": "Peter Dinklage",
+   "n": 90
+  },
+  {
+   "q": "Q244674",
+   "name": "Benedict Cumberbatch",
+   "n": 90
+  },
+  {
+   "q": "Q484523",
+   "name": "Jared Leto",
+   "n": 90
+  }
+ ],
+ "shows": [
+  {
+   "q": "Q23572",
+   "name": "Game of Thrones",
+   "n": 139
+  },
+  {
+   "q": "Q8172269",
+   "name": "Liv and Maddie",
+   "n": 118
+  },
+  {
+   "q": "Q8539",
+   "name": "The Big Bang Theory",
+   "n": 113
+  },
+  {
+   "q": "Q79784",
+   "name": "Friends",
+   "n": 110
+  },
+  {
+   "q": "Q106582931",
+   "name": "Squid Game",
+   "n": 110
+  },
+  {
+   "q": "Q41403",
+   "name": "Teletubbies",
+   "n": 107
+  },
+  {
+   "q": "Q1079",
+   "name": "Breaking Bad",
+   "n": 102
+  },
+  {
+   "q": "Q34316",
+   "name": "Doctor Who",
+   "n": 100
+  },
+  {
+   "q": "Q155629",
+   "name": "Sesame Street",
+   "n": 92
+  },
+  {
+   "q": "Q23558",
+   "name": "House M.D.",
+   "n": 92
+  },
+  {
+   "q": "Q2744",
+   "name": "The X-Files",
+   "n": 90
+  },
+  {
+   "q": "Q23567",
+   "name": "Lost",
+   "n": 90
+  },
+  {
+   "q": "Q147235",
+   "name": "How I Met Your Mother",
+   "n": 89
+  },
+  {
+   "q": "Q80044",
+   "name": "Prison Break",
+   "n": 89
+  },
+  {
+   "q": "Q232737",
+   "name": "The Walking Dead",
+   "n": 86
+  },
+  {
+   "q": "Q23831",
+   "name": "The Office",
+   "n": 84
+  },
+  {
+   "q": "Q484020",
+   "name": "Mr. Bean",
+   "n": 83
+  },
+  {
+   "q": "Q38497",
+   "name": "Xena: Warrior Princess",
+   "n": 82
+  },
+  {
+   "q": "Q19798734",
+   "name": "Stranger Things",
+   "n": 78
+  },
+  {
+   "q": "Q438406",
+   "name": "Grey's Anatomy",
+   "n": 77
+  },
+  {
+   "q": "Q130585",
+   "name": "Supernatural",
+   "n": 76
+  },
+  {
+   "q": "Q192837",
+   "name": "Sherlock",
+   "n": 76
+  },
+  {
+   "q": "Q131758",
+   "name": "Desperate Housewives",
+   "n": 76
+  },
+  {
+   "q": "Q29647346",
+   "name": "Money Heist",
+   "n": 76
+  },
+  {
+   "q": "Q23628",
+   "name": "The Sopranos",
+   "n": 75
+  },
+  {
+   "q": "Q28537",
+   "name": "The Vampire Diaries",
+   "n": 72
+  },
+  {
+   "q": "Q126631",
+   "name": "Hannah Montana",
+   "n": 69
+  },
+  {
+   "q": "Q56194",
+   "name": "24",
+   "n": 69
+  },
+  {
+   "q": "Q83401",
+   "name": "Heroes",
+   "n": 69
+  },
+  {
+   "q": "Q23577",
+   "name": "Dexter",
+   "n": 68
+  },
+  {
+   "q": "Q152178",
+   "name": "Glee",
+   "n": 68
+  },
+  {
+   "q": "Q35791",
+   "name": "Sex and the City",
+   "n": 67
+  },
+  {
+   "q": "Q4533",
+   "name": "Victorious",
+   "n": 66
+  },
+  {
+   "q": "Q189267",
+   "name": "Two and a Half Men",
+   "n": 65
+  },
+  {
+   "q": "Q558112",
+   "name": "Black Mirror",
+   "n": 65
+  },
+  {
+   "q": "Q53922",
+   "name": "American Horror Story",
+   "n": 64
+  },
+  {
+   "q": "Q14944179",
+   "name": "Peaky Blinders",
+   "n": 64
+  },
+  {
+   "q": "Q180228",
+   "name": "Smallville",
+   "n": 63
+  },
+  {
+   "q": "Q16756",
+   "name": "Modern Family",
+   "n": 63
+  },
+  {
+   "q": "Q3013",
+   "name": "iCarly",
+   "n": 63
+  },
+  {
+   "q": "Q202141",
+   "name": "Criminal Minds",
+   "n": 63
+  },
+  {
+   "q": "Q87131973",
+   "name": "The Last of Us",
+   "n": 62
+  },
+  {
+   "q": "Q162371",
+   "name": "Charmed",
+   "n": 61
+  },
+  {
+   "q": "Q187462",
+   "name": "Stargate SG-1",
+   "n": 61
+  },
+  {
+   "q": "Q2085",
+   "name": "Twin Peaks",
+   "n": 61
+  },
+  {
+   "q": "Q117396",
+   "name": "CSI: Crime Scene Investigation",
+   "n": 61
+  },
+  {
+   "q": "Q105553568",
+   "name": "Wednesday",
+   "n": 61
+  },
+  {
+   "q": "Q183513",
+   "name": "Buffy the Vampire Slayer",
+   "n": 60
+  },
+  {
+   "q": "Q72930269",
+   "name": "House of the Dragon",
+   "n": 60
+  },
+  {
+   "q": "Q4525",
+   "name": "NCIS",
+   "n": 59
+  },
+  {
+   "q": "Q204228",
+   "name": "The Mentalist",
+   "n": 59
+  },
+  {
+   "q": "Q13979",
+   "name": "Saturday Night Live",
+   "n": 58
+  },
+  {
+   "q": "Q199853",
+   "name": "Gossip Girl",
+   "n": 58
+  },
+  {
+   "q": "Q14925221",
+   "name": "Better Call Saul",
+   "n": 58
+  },
+  {
+   "q": "Q65258113",
+   "name": "Crash Landing on You",
+   "n": 58
+  },
+  {
+   "q": "Q189068",
+   "name": "Monk",
+   "n": 57
+  },
+  {
+   "q": "Q23733",
+   "name": "Seinfeld",
+   "n": 57
+  },
+  {
+   "q": "Q552314",
+   "name": "Arrow",
+   "n": 57
+  },
+  {
+   "q": "Q207375",
+   "name": "ER",
+   "n": 57
+  },
+  {
+   "q": "Q3330940",
+   "name": "House of Cards",
+   "n": 57
+  },
+  {
+   "q": "Q13417244",
+   "name": "Brooklyn Nine-Nine",
+   "n": 57
+  },
+  {
+   "q": "Q20707362",
+   "name": "The Crown",
+   "n": 57
+  },
+  {
+   "q": "Q55632932",
+   "name": "Sex Education",
+   "n": 57
+  },
+  {
+   "q": "Q65272745",
+   "name": "True Beauty",
+   "n": 57
+  },
+  {
+   "q": "Q85987403",
+   "name": "The Penthouse: War in Life",
+   "n": 57
+  },
+  {
+   "q": "Q1077",
+   "name": "Star Trek: The Original Series",
+   "n": 56
+  },
+  {
+   "q": "Q16290",
+   "name": "Star Trek: The Next Generation",
+   "n": 56
+  },
+  {
+   "q": "Q370185",
+   "name": "Suits",
+   "n": 56
+  },
+  {
+   "q": "Q485668",
+   "name": "Scrubs",
+   "n": 56
+  },
+  {
+   "q": "Q17572811",
+   "name": "Westworld",
+   "n": 56
+  },
+  {
+   "q": "Q176615",
+   "name": "Magnificent Century",
+   "n": 55
+  },
+  {
+   "q": "Q193462",
+   "name": "Gilmore Girls",
+   "n": 55
+  },
+  {
+   "q": "Q24859151",
+   "name": "Guardian: The Lonely and Great God",
+   "n": 55
+  },
+  {
+   "q": "Q56876444",
+   "name": "The Mandalorian",
+   "n": 55
+  },
+  {
+   "q": "Q116957085",
+   "name": "Terra e paixão",
+   "n": 55
+  }
+ ],
+ "franchises": [
+  {
+   "q": "Q462",
+   "name": "Star Wars",
+   "n": 185
+  },
+  {
+   "q": "Q864",
+   "name": "Pokémon",
+   "n": 126
+  },
+  {
+   "q": "Q2020",
+   "name": "Dragon Ball",
+   "n": 114
+  },
+  {
+   "q": "Q131144",
+   "name": "Tom and Jerry",
+   "n": 112
+  },
+  {
+   "q": "Q1092",
+   "name": "Star Trek",
+   "n": 108
+  },
+  {
+   "q": "Q167447",
+   "name": "Barbie",
+   "n": 92
+  },
+  {
+   "q": "Q642878",
+   "name": "Marvel Cinematic Universe",
+   "n": 81
+  },
+  {
+   "q": "Q904",
+   "name": "Bleach",
+   "n": 77
+  },
+  {
+   "q": "Q11221",
+   "name": "The Smurfs",
+   "n": 76
+  },
+  {
+   "q": "Q205683",
+   "name": "Scooby-Doo",
+   "n": 72
+  },
+  {
+   "q": "Q165094",
+   "name": "Angry Birds",
+   "n": 68
+  },
+  {
+   "q": "Q152178",
+   "name": "Glee",
+   "n": 68
+  },
+  {
+   "q": "Q12391356",
+   "name": "Final Fantasy",
+   "n": 60
+  },
+  {
+   "q": "Q220260",
+   "name": "Resident Evil",
+   "n": 59
+  },
+  {
+   "q": "Q1576873",
+   "name": "Fast & Furious",
+   "n": 58
+  },
+  {
+   "q": "Q193884",
+   "name": "Digimon",
+   "n": 54
+  },
+  {
+   "q": "Q192015",
+   "name": "Yu-Gi-Oh!",
+   "n": 53
+  },
+  {
+   "q": "Q18281265",
+   "name": "DC Extended Universe",
+   "n": 50
+  },
+  {
+   "q": "Q5102879",
+   "name": "One-Punch Man",
+   "n": 48
+  },
+  {
+   "q": "Q1323565",
+   "name": "Transformers",
+   "n": 47
+  },
+  {
+   "q": "Q211035",
+   "name": "Calvin and Hobbes",
+   "n": 47
+  }
+ ],
+ "networks": [
+  {
+   "q": "Q689141",
+   "name": "Spotify",
+   "n": 104
+  },
+  {
+   "q": "Q116933",
+   "name": "VK",
+   "n": 86
+  },
+  {
+   "q": "Q568769",
+   "name": "SoundCloud",
+   "n": 66
+  },
+  {
+   "q": "Q20056642",
+   "name": "Apple Music",
+   "n": 58
+  },
+  {
+   "q": "Q744800",
+   "name": "Fuji Television",
+   "n": 50
+  },
+  {
+   "q": "Q490182",
+   "name": "Mnet",
+   "n": 48
+  },
+  {
+   "q": "Q501070",
+   "name": "Channel 4",
+   "n": 47
+  },
+  {
+   "q": "Q211511",
+   "name": "Russia-1",
+   "n": 47
+  },
+  {
+   "q": "Q28404534",
+   "name": "YouTube Music",
+   "n": 43
+  },
+  {
+   "q": "Q602243",
+   "name": "Deezer",
+   "n": 39
+  },
+  {
+   "q": "Q275141",
+   "name": "Napster",
+   "n": 38
+  },
+  {
+   "q": "Q19711013",
+   "name": "Tidal",
+   "n": 31
+  }
+ ],
+ "studios": [
+  {
+   "q": "Q7414",
+   "name": "The Walt Disney Company",
+   "n": 142
+  },
+  {
+   "q": "Q48340",
+   "name": "CNN",
+   "n": 118
+  },
+  {
+   "q": "Q126399",
+   "name": "Warner Bros. Entertainment",
+   "n": 101
+  },
+  {
+   "q": "Q169889",
+   "name": "American Broadcasting Company",
+   "n": 101
+  },
+  {
+   "q": "Q127552",
+   "name": "Pixar",
+   "n": 94
+  },
+  {
+   "q": "Q168383",
+   "name": "Universal Pictures",
+   "n": 94
+  },
+  {
+   "q": "Q434841",
+   "name": "20th Century Studios",
+   "n": 88
+  },
+  {
+   "q": "Q159846",
+   "name": "Paramount Pictures",
+   "n": 88
+  },
+  {
+   "q": "Q23633",
+   "name": "HBO",
+   "n": 87
+  },
+  {
+   "q": "Q179200",
+   "name": "Metro-Goldwyn-Mayer",
+   "n": 77
+  },
+  {
+   "q": "Q186941",
+   "name": "Columbia Pictures",
+   "n": 76
+  },
+  {
+   "q": "Q167186",
+   "name": "National Geographic Society",
+   "n": 67
+  },
+  {
+   "q": "Q191224",
+   "name": "Walt Disney Pictures",
+   "n": 65
+  },
+  {
+   "q": "Q192557",
+   "name": "DreamWorks",
+   "n": 65
+  },
+  {
+   "q": "Q367466",
+   "name": "Marvel Studios",
+   "n": 61
+  },
+  {
+   "q": "Q219400",
+   "name": "United Artists",
+   "n": 60
+  },
+  {
+   "q": "Q242446",
+   "name": "Lucasfilm",
+   "n": 60
+  },
+  {
+   "q": "Q822314",
+   "name": "Sony Pictures",
+   "n": 59
+  },
+  {
+   "q": "Q500088",
+   "name": "DreamWorks Animation",
+   "n": 58
+  },
+  {
+   "q": "Q1047410",
+   "name": "Walt Disney Animation Studios",
+   "n": 57
+  },
+  {
+   "q": "Q79202",
+   "name": "New Line Cinema",
+   "n": 55
+  },
+  {
+   "q": "Q141336",
+   "name": "Mosfilm",
+   "n": 53
+  },
+  {
+   "q": "Q23589",
+   "name": "Showtime",
+   "n": 50
+  },
+  {
+   "q": "Q465449",
+   "name": "Miramax",
+   "n": 48
+  },
+  {
+   "q": "Q1189512",
+   "name": "Illumination",
+   "n": 45
+  },
+  {
+   "q": "Q267282",
+   "name": "RKO Pictures",
+   "n": 44
+  },
+  {
+   "q": "Q885885",
+   "name": "Blue Sky Studios",
+   "n": 43
+  },
+  {
+   "q": "Q651454",
+   "name": "TriStar Pictures",
+   "n": 43
+  },
+  {
+   "q": "Q497155",
+   "name": "Touchstone Pictures",
+   "n": 43
+  },
+  {
+   "q": "Q875920",
+   "name": "Toho",
+   "n": 42
+  },
+  {
+   "q": "Q7667850",
+   "name": "T-Series",
+   "n": 42
+  },
+  {
+   "q": "Q301092",
+   "name": "Aardman Animations",
+   "n": 41
+  },
+  {
+   "q": "Q679912",
+   "name": "Soyuzmultfilm",
+   "n": 39
+  },
+  {
+   "q": "Q574625",
+   "name": "NTV",
+   "n": 38
+  },
+  {
+   "q": "Q1544011",
+   "name": "Pathé",
+   "n": 37
+  },
+  {
+   "q": "Q913462",
+   "name": "Gaumont",
+   "n": 37
+  },
+  {
+   "q": "Q16248298",
+   "name": "A24",
+   "n": 37
+  },
+  {
+   "q": "Q953040",
+   "name": "Searchlight Pictures",
+   "n": 36
+  },
+  {
+   "q": "Q775450",
+   "name": "Lightstorm Entertainment",
+   "n": 35
+  },
+  {
+   "q": "Q649649",
+   "name": "Focus Features",
+   "n": 35
+  }
+ ]
+}
