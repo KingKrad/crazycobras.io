@@ -718,14 +718,30 @@ test("AI judge: says no to answers it rejects and on errors, and is off without 
   assert.equal(AI.calls, 0);
 });
 
-test("AI judge: a daily cap keeps it inside the free allowance", async () => {
-  const { JUDGE_DAILY_CAP } = await import("../src/judge.js");
+test("AI judge: the big model first, then the small one, both capped inside the free allowance; word games only on the big one", async () => {
+  const { JUDGE_DAILY_CAP, JUDGE_SMALL_CAP, JUDGE_MODEL, JUDGE_MODEL_SMALL } = await import("../src/judge.js");
   const AI = fakeAI({ valid: true, canonical: "grass", commonness: "common" });
   const env = { AI, DB: db };
-  for (let i = 0; i < JUDGE_DAILY_CAP; i++) await (await askJudge({ prompt: "Name something green", answer: "grass" + "x".repeat(i % 5) + i }, env)).json();
-  const j = await (await askJudge({ prompt: "Name something green", answer: "one more leaf" }, env)).json();
-  assert.equal(j.found, false);
-  assert.equal(AI.calls, JUDGE_DAILY_CAP);
+  const ask = (answer, prompt = "Name something green") => askJudge({ prompt, answer }, env).then((r) => r.json());
+  for (let i = 0; i < JUDGE_DAILY_CAP; i++) await ask("grass" + "x".repeat(i % 5) + i);
+  assert.equal(AI.last.model, JUDGE_MODEL);
+  await ask("leafy thing");
+  assert.equal(AI.last.model, JUDGE_MODEL_SMALL); // the big model's share is used up
+  const before = AI.calls;
+  assert.equal((await ask("bat", 'Name a word that rhymes with "cat"')).found, false); // word games: never the small model
+  assert.equal(AI.calls, before);
+  for (let i = 1; i < JUDGE_SMALL_CAP; i++) await ask("moss" + i);
+  assert.equal((await ask("one more leaf")).found, false);
+  assert.equal(AI.calls, JUDGE_DAILY_CAP + JUDGE_SMALL_CAP);
+});
+
+test("AI judge: a verdict is remembered, so the same answer later costs nothing", async () => {
+  const AI = fakeAI({ valid: true, canonical: "kermit", commonness: "rare" });
+  const env = { AI, DB: db };
+  const first = await (await askJudge({ prompt: "Name something green", answer: "Kermit" }, env)).json();
+  const again = await (await askJudge({ prompt: "Name something green", answer: "kermit" }, env)).json();
+  assert.deepEqual([first.found, again.found, again.label, again.tier], [true, true, "kermit", 4]);
+  assert.equal(AI.calls, 1);
 });
 
 // ---------- Continue with Google / Apple ----------

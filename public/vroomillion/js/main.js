@@ -3516,7 +3516,8 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("drawe
 $("ico-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("ico-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("ico-sound").addEventListener("click", () => $("btn-sound").click());
-$("btn-1p").addEventListener("click", () => { audio.sfx.click(); show("leagues"); });
+// QUICK RACE: straight into the next race, in the mode and rules last used (settings are one link away)
+$("btn-1p").addEventListener("click", () => launchFromLine({ mode: "solo", crazy: !!save.crazy }));
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); versusDeck = null; show("versus"); });
 $("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });

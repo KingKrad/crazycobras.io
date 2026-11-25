@@ -74,11 +74,12 @@
           <p class="daily-status" id="daily-status"></p>
           <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
           <div class="home-tiles">
-            <button class="home-tile" id="btn-1p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg><b>SOLO RACE</b><span>Any topic, any time</span></button>
+            <button class="home-tile" id="btn-1p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg><b>QUICK RACE</b><span>Straight into a race</span></button>
             <button class="home-tile tile-modes" type="button" data-go="modes"><i class="tile-new">NEW</i><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg><b>GAME MODES</b><span>World Tour &amp; more</span></button>
             <button class="home-tile" id="btn-2p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3v1h1v3H6v1H3V6H2V3h1zM10 2h3v1h1v3h-1v1h-3V6H9V3h1zM1 9h7v1h1v4H0v-4h1zM8 9h7v1h1v4H8z"/></svg><b>2 PLAYERS</b><span>On this screen</span></button>
             <button class="home-tile" id="btn-online" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H9l-3 3v-3H2zM4 5v1h8V5zM4 7v1h6V7z"/></svg><b>RACE A FRIEND</b><span>Send them a link</span></button>
           </div>
+          <button class="home-settings" type="button" data-go="leagues">⚙ Race settings · mode, car and rules</button>
           <div class="daily" id="daily"></div>
           <div class="whats-new" id="whats-new"></div>
         </div>
@@ -141,22 +142,22 @@
 
       <section class="screen" id="s-leagues">
         <h2>SOLO RACES</h2>
-        <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
-        <div class="daily-races" id="daily-solo"></div>
-        <p class="note" id="daily-note"></p>
-        <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
-        <h3 class="sub-title">UNLIMITED RACES</h3>
-        <h3 class="sub-title">THEMED MODES</h3>
-        <div class="themed-modes" id="themed-modes"></div>
-        <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
-        <p class="prompts-left" id="left-solo" role="status"></p>
-        <div id="rules-solo"></div>
-        <div class="picker" id="picker-solo"></div>
+        <!-- the start button first: the settings below are for when you want them -->
         <div class="menu row">
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
           <button class="btn" data-go="title" type="button">BACK</button>
         </div>
+        <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
+        <h3 class="sub-title">RACE SETTINGS</h3>
+        <div class="modes" id="mode-solo" role="group" aria-label="Question mode"></div>
+        <p class="prompts-left" id="left-solo" role="status"></p>
+        <div id="rules-solo"></div>
+        <div class="picker" id="picker-solo"></div>
         <button class="btn small archive-btn" id="btn-archive" data-go="archive" type="button">RACE ARCHIVE</button>
+        <h3 class="sub-title">TODAY'S DAILY RACE</h3>
+        <div class="daily-races" id="daily-solo"></div>
+        <p class="note" id="daily-note"></p>
+        <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
       </section>
 
       <section class="screen" id="s-archive">

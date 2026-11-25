@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25n",
+    date: "Nov 25, 2026",
+    title: "More answers count",
+    items: [
+      "Far more right answers count now, even ones that aren't on our lists. The answer checker is more generous, and checks many more answers every day.",
+      "Every answer it accepts is remembered, so the next player who types it gets it instantly.",
+      "New QUICK RACE button on the home screen: one tap and you're racing. Race settings are one link below it.",
+    ],
+  },
+  {
     id: "2026-11-25m",
     date: "Nov 25, 2026",
     title: "WORLD TOUR: world trivia",
