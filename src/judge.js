@@ -44,8 +44,9 @@ Reply with JSON only: {"valid": true|false, "canonical": "...", "commonness": "v
 // { found, label, tier } or { found: false }
 export async function judgeAnswer(env, prompt, answer, request = null) {
   // per player first (doesn't use up the day), then the daily cap
-  if (request && !(await underLimit(env, "judge-ip", clientIp(request, env), JUDGE_PER_PLAYER_HOUR, 3600))) return { found: false };
-  if (!(await underLimit(env, "judge-day", "all", JUDGE_DAILY_CAP, 86400))) return { found: false };
+  // over a limit the answer wasn't judged at all: "skipped" keeps that "no" out of the 24-hour cache
+  if (request && !(await underLimit(env, "judge-ip", clientIp(request, env), JUDGE_PER_PLAYER_HOUR, 3600))) return { found: false, skipped: true };
+  if (!(await underLimit(env, "judge-day", "all", JUDGE_DAILY_CAP, 86400))) return { found: false, skipped: true };
   let timer;
   const late = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("judge timed out")), JUDGE_TIMEOUT_MS); });
   const out = await Promise.race([late, env.AI.run(JUDGE_MODEL, {

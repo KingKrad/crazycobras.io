@@ -20,6 +20,7 @@ export const CHANGELOG = [
     items: [
       "Fixed the game losing its connection to the server during busy times: it now quietly tries again.",
       "Answer checks that used to hang now finish quickly, so you can try another answer straight away.",
+      "A busy answer checker no longer marks a right answer as wrong for the rest of the day.",
     ],
   },
   {

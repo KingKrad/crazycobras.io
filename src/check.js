@@ -57,7 +57,10 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   if (!verdict.found && judge) {
     try { verdict = await judgeAnswer(env, prompt, answer, request); } catch { return json({ found: false, reason: "judge failed" }, 504); }
   }
+  const skipped = !!verdict.skipped; // the judge was over its limit: not a real "no", so don't remember it
+  delete verdict.skipped;
   const out = json(verdict);
+  if (skipped) return out;
   out.headers.set("Cache-Control", "public, max-age=86400");
   if (cache) await cache.put(cacheKey, out.clone());
   return out;
