@@ -147,7 +147,7 @@ export class WorldScene {
     const r0 = this.racers[0];
     this.cam = { x: r0.x, y: r0.y, z: this.fitZ(260) };
     this.camTo = { ...this.cam };
-    this.cards = []; this.particles = [];
+    this.cards = []; this.particles = []; this.fin = null;
   }
   // zoom to fit a span of the map; never so far out that the map stops filling the screen top to bottom
   fitZ(spanWorld) { return clamp(Math.min(this.W * 0.7, (this.bottom - this.playTop()) * 1.4) / Math.max(30, spanWorld), Math.max(this.W / MW, this.H / (BAND_BOT - BAND_TOP) * 1.02), 4.5); }
@@ -223,6 +223,7 @@ export class WorldScene {
 
   update(dt) {
     this.time += dt;
+    if (this.fin) this.fin.t += dt;
     if (this.shake > 0) this.shake = Math.max(0, this.shake - dt);
     if (this.flash > 0) this.flash = Math.max(0, this.flash - dt * 0.8);
     // cards
@@ -302,6 +303,7 @@ export class WorldScene {
 
   draw() {
     const { g, W, H, u } = this;
+    if (this.fin) { this.drawFinale(); this.drawHi(); return; } // the end-of-race show
     g.save();
     g.imageSmoothingEnabled = false;
     if (this.shake > 0 && !this.calm) g.translate((Math.random() - 0.5) * 6 * u * this.shake, (Math.random() - 0.5) * 6 * u * this.shake);
@@ -383,6 +385,116 @@ export class WorldScene {
     this.drawHi();
   }
 
+  // ---- the finale: the flat map wraps into a spinning globe, and your car drives your whole trip round it ----
+  finale(data) { this.fin = { t: 0, data }; }
+  globeTex() {
+    if (this.tex || !MAP) return this.tex;
+    const c = document.createElement("canvas"); c.width = 512; c.height = 256;
+    const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(MAP, 0, 0, 512, 256);
+    this.tex = g.getImageData(0, 0, 512, 256).data;
+    return this.tex;
+  }
+  // the trip as [lat, lon] points (the route's dots), and where the car is along it right now
+  globeTrip() {
+    const r = this.racers[0];
+    const pts = (r?.trail?.length ? r.trail : [[r?.x || MW / 2, r?.y || MH / 2]]).map(([wx, wy]) => [90 - (wy / MH) * 180, (((wx % MW) + MW) % MW) / MW * 360 - 180]);
+    return pts;
+  }
+  globeView() {
+    const { W, H } = this, f = this.fin, t = f.t;
+    const grow = 0.55 + 0.45 * ease(clamp(t / 0.9, 0, 1));
+    const R = Math.min(W, H * 0.6) * 0.42 * grow, cx = W / 2, cy = H * 0.5;
+    const pts = this.globeTrip();
+    const k = clamp((t - 0.5) / 4.3, 0, 1), at = Math.min(pts.length - 1, Math.floor(k * (pts.length - 1)));
+    const car = pts[at];
+    // the globe turns to keep the car in front (and spins in from the side at the start)
+    const lon0 = car[1] - (1 - ease(clamp(t / 1.2, 0, 1))) * 160, lat0 = clamp(car[0] * 0.6, -35, 35);
+    return { R, cx, cy, pts, at, car, lon0, lat0 };
+  }
+  globeProject(v, lat, lon) {
+    const d = Math.PI / 180, dl = (lon - v.lon0) * d, la = lat * d, p0 = v.lat0 * d;
+    const xg = Math.cos(la) * Math.sin(dl), yg = Math.sin(la), zg = Math.cos(la) * Math.cos(dl);
+    const yv = yg * Math.cos(p0) - zg * Math.sin(p0), z = yg * Math.sin(p0) + zg * Math.cos(p0);
+    return { x: v.cx + xg * v.R, y: v.cy - yv * v.R, z };
+  }
+  drawFinale() {
+    const { g, W, H, u } = this, t = this.fin.t, v = this.globeView();
+    g.save(); g.imageSmoothingEnabled = false;
+    // space: deep blue to black, with stars
+    const bg = g.createRadialGradient(v.cx, v.cy, v.R * 0.8, v.cx, v.cy, Math.max(W, H));
+    bg.addColorStop(0, "#0c1640"); bg.addColorStop(1, "#02010a");
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    for (let k = 0; k < 90; k++) { const x = (Math.sin(k * 127.1) * 43758.5453) % 1, y = (Math.sin(k * 311.7) * 43758.5453) % 1; g.fillStyle = k % 7 ? "rgba(255,255,255,0.55)" : "#fff"; g.fillRect(Math.round(Math.abs(x) * W), Math.round(Math.abs(y) * H), Math.max(1, Math.round(u * 0.8)), Math.max(1, Math.round(u * 0.8))); }
+    // the glow of the atmosphere
+    const atm = g.createRadialGradient(v.cx, v.cy, v.R * 0.95, v.cx, v.cy, v.R * 1.18);
+    atm.addColorStop(0, "rgba(120,190,255,0.55)"); atm.addColorStop(1, "rgba(120,190,255,0)");
+    g.fillStyle = atm; g.beginPath(); g.arc(v.cx, v.cy, v.R * 1.18, 0, Math.PI * 2); g.fill();
+    // the globe itself, a pixel at a time (at a chunky resolution, then scaled up)
+    const tex = this.globeTex();
+    const p = Math.max(2, Math.round(u * 1.4)), N = Math.max(24, Math.ceil((2 * v.R) / p));
+    if (!this.gcv || this.gcv.width !== N) { this.gcv = document.createElement("canvas"); this.gcv.width = this.gcv.height = N; this.gimg = this.gcv.getContext("2d").createImageData(N, N); }
+    const img = this.gimg, d = img.data, D = Math.PI / 180, p0 = v.lat0 * D, cp = Math.cos(p0), sp = Math.sin(p0);
+    for (let j = 0; j < N; j++) {
+      const y = ((j + 0.5) / N) * 2 - 1;
+      for (let i = 0; i < N; i++) {
+        const x = ((i + 0.5) / N) * 2 - 1, r2 = x * x + y * y, o = (j * N + i) * 4;
+        if (r2 > 1) { d[o + 3] = 0; continue; }
+        const z = Math.sqrt(1 - r2), yv = -y;
+        const yg = yv * cp + z * sp, zg = -yv * sp + z * cp;
+        const lat = Math.asin(clamp(yg, -1, 1)) / D, lon = v.lon0 + Math.atan2(x, zg) / D;
+        const tx = ((Math.floor(((lon + 180) / 360) * 512) % 512) + 512) % 512, ty = clamp(Math.floor(((90 - lat) / 180) * 256), 0, 255), q = (ty * 512 + tx) * 4;
+        const light = 0.45 + 0.55 * z;
+        if (tex) { d[o] = tex[q] * light; d[o + 1] = tex[q + 1] * light; d[o + 2] = tex[q + 2] * light; }
+        else { d[o] = 30 * light; d[o + 1] = 70 * light; d[o + 2] = 160 * light; }
+        d[o + 3] = 255;
+      }
+    }
+    this.gcv.getContext("2d").putImageData(img, 0, 0);
+    g.drawImage(this.gcv, Math.round(v.cx - v.R), Math.round(v.cy - v.R), Math.round(2 * v.R), Math.round(2 * v.R));
+    // the route so far, on the side facing us
+    const r0 = this.racers[0], dot = Math.max(1, Math.round(u * 1.3));
+    g.fillStyle = r0?.color || "#4fd1ff";
+    for (let k = 0; k <= v.at; k += 2) { const s2 = this.globeProject(v, v.pts[k][0], v.pts[k][1]); if (s2.z > 0.05) g.fillRect(Math.round(s2.x) - (dot >> 1), Math.round(s2.y) - (dot >> 1), dot, dot); }
+    // the pins
+    for (const pin of r0?.pins || []) {
+      const s2 = this.globeProject(v, 90 - (pin.y / MH) * 180, (pin.x / MW) * 360 - 180);
+      if (s2.z <= 0.05) continue;
+      const ps = Math.max(1, Math.round(u));
+      g.fillStyle = "#0b0618"; g.fillRect(s2.x - ps * 2, s2.y - ps * 7, ps * 4, ps * 4); g.fillRect(s2.x - ps * 0.5, s2.y - ps * 3, ps, ps * 3);
+      g.fillStyle = TIER_COL[pin.tier] || "#fff"; g.fillRect(s2.x - ps * 1.5, s2.y - ps * 6.5, ps * 3, ps * 3);
+    }
+    // the car, heading for the next stop
+    const here = this.globeProject(v, v.car[0], v.car[1]);
+    const next = v.pts[Math.min(v.pts.length - 1, v.at + 3)], nx = this.globeProject(v, next[0], next[1]);
+    g.save(); g.translate(Math.round(here.x), Math.round(here.y));
+    g.rotate(Math.hypot(nx.x - here.x, nx.y - here.y) > 0.5 ? Math.atan2(nx.y - here.y, nx.x - here.x) + Math.PI / 2 : 0);
+    drawCarTop(g, Math.max(1, Math.round(u * 1.4)), r0?.car?.color || "#4fd1ff", r0?.car?.accent || "#ffffff");
+    g.restore();
+    // a flash as the map folds into a globe
+    if (t < 0.35 && !this.calm) { g.globalAlpha = 1 - t / 0.35; g.fillStyle = "#fff"; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
+    g.restore();
+  }
+  drawFinaleHi(hg, px) {
+    const v = this.globeView(), r0 = this.racers[0];
+    hg.textAlign = "center"; hg.textBaseline = "middle";
+    // the names of the places on the side facing us
+    for (const pin of (r0?.pins || []).filter((q) => q.label).slice(-7)) {
+      const s2 = this.globeProject(v, 90 - (pin.y / MH) * 180, (pin.x / MW) * 360 - 180);
+      if (s2.z <= 0.15) continue;
+      hg.font = `${px(10)}px ${CARD_FONT}`;
+      const tx = pin.label.length > 18 ? pin.label.slice(0, 17) + "." : pin.label, w = hg.measureText(tx).width + px(8);
+      hg.globalAlpha = Math.min(1, s2.z * 2);
+      hg.fillStyle = "rgba(11,6,24,0.82)"; hg.fillRect(s2.x - w / 2, s2.y + px(4), w, px(14));
+      hg.fillStyle = TIER_COL[pin.tier] || "#fff"; hg.fillText(tx, s2.x, s2.y + px(11));
+      hg.globalAlpha = 1;
+    }
+    const stops = (r0?.pins || []).length;
+    hg.font = `${px(20)}px ${CARD_FONT}`; hg.fillStyle = "#000"; hg.fillText(this.finaleTitle || "YOUR WORLD TOUR", this.W / 2 + px(2), v.cy - v.R - px(28) + px(2));
+    hg.fillStyle = "#ffd23a"; hg.fillText(this.finaleTitle || "YOUR WORLD TOUR", this.W / 2, v.cy - v.R - px(28));
+    hg.font = `${px(12)}px ${CARD_FONT}`; hg.fillStyle = "#fff";
+    hg.fillText(`${stops} STOP${stops === 1 ? "" : "S"} · ${Math.round((this.fin.data?.racers?.[0]?.dist ?? this.racers[0]?.dist ?? 0)).toLocaleString("en-US")} M`, this.W / 2, v.cy + v.R + px(26));
+  }
+
   // sharp text on the full-resolution layer: pin labels, name tags and the answer cards
   drawHi() {
     const hg = this.hiG;
@@ -394,6 +506,7 @@ export class WorldScene {
     hg.textAlign = "center"; hg.textBaseline = "middle";
     const css = (this.cssPx || 1);
     const px = (n) => n / css; // a size in screen pixels, in canvas units
+    if (this.fin) { this.drawFinaleHi(hg, px); return; }
     // labels on the pins (the latest few)
     for (const r of this.racers) for (const p of r.pins.slice(-6).filter((q) => q.label)) {
       const [sx, sy] = this.toScreen(p.x, p.y);

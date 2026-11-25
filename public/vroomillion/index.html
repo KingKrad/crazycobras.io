@@ -339,6 +339,14 @@
       </section>
 
       <section class="screen" id="s-race">
+        <!-- the end-of-race finale (main.js playFinale); the road's own finish line lives here too -->
+        <div class="finale hidden" id="finale" aria-live="polite">
+          <div class="fin-flag" aria-hidden="true"></div>
+          <div class="fin-band" aria-hidden="true"></div>
+          <div class="fin-text"><b>FINISH!</b><span id="finale-dist"></span><i id="finale-who"></i></div>
+          <div class="fin-flash" aria-hidden="true"></div>
+          <p class="fin-skip">TAP TO SKIP</p>
+        </div>
         <div class="race-top">
           <div class="hud" id="hud"></div>
           <div class="round-box">

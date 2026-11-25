@@ -62,7 +62,7 @@ export class DriveInScene {
   setRacers(list) {
     if (!list.some((r) => r.label === "")) this.lobby = false;
     this.racers = list.map((r, i) => ({ ...r, dist: 0, boost: 0, nitro: false, roll: 0, lane: list.length > 1 ? (i ? 0.58 : 0.42) : 0.5, honk: 0 }));
-    this.rows = 0; this.cards = []; this.particles = []; this.show = null;
+    this.rows = 0; this.cards = []; this.particles = []; this.show = null; this.fin = null;
   }
   anchor(i) {
     const r = this.racers[i]; if (!r) return { x: 0.5, y: 0.7 };
@@ -102,6 +102,7 @@ export class DriveInScene {
 
   update(dt) {
     this.time += dt; this.dtLast = dt;
+    if (this.fin) { this.fin.t += dt; if (this.fin.t > 3.7) this.lights = 0.3; } // THE END: the whole lot flashes its lights
     if (this.shake > 0) this.shake = Math.max(0, this.shake - dt);
     if (this.flash > 0) this.flash = Math.max(0, this.flash - dt * 0.8);
     if (this.lights > 0) this.lights = Math.max(0, this.lights - dt);
@@ -310,13 +311,16 @@ export class DriveInScene {
     const s = this.show, u = this.u, t = s ? s.t : 0;
     const R = (x, y, w, h) => g.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
     // curtains: open while a trailer plays, closed between
-    const want = s ? 1 : 0;
+    const want = s || this.fin ? 1 : 0;
     this.curtain = this.curtain ?? 0;
     this.curtain += clamp(want - this.curtain, -this.dtLast * 1.6, this.dtLast * 2.4);
     g.save(); g.beginPath(); g.rect(b.x, b.y, b.w, b.h); g.clip();
     const top = s ? Math.max(...s.cards.map((c) => (c.revealed ? c.fx : 1))) : 0;
     const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
-    if (!s) { g.fillStyle = "#e8e2d0"; g.fillRect(b.x, b.y, b.w, b.h); }
+    if (this.fin) { // the end credits: a dark screen (the words roll on the sharp layer)
+      const v = g.createRadialGradient(cx, cy, b.h * 0.1, cx, cy, b.w * 0.6); v.addColorStop(0, "#1a1030"); v.addColorStop(1, "#05030c");
+      g.fillStyle = v; g.fillRect(b.x, b.y, b.w, b.h);
+    } else if (!s) { g.fillStyle = "#e8e2d0"; g.fillRect(b.x, b.y, b.w, b.h); }
     else if (top <= 1) { // an old reel: sepia, grain, a vignette
       g.fillStyle = "#3a2c1c"; g.fillRect(b.x, b.y, b.w, b.h);
       const v = g.createRadialGradient(cx, cy, b.h * 0.1, cx, cy, b.w * 0.6); v.addColorStop(0, "#a8875a"); v.addColorStop(1, "#2a1e10");
@@ -362,6 +366,32 @@ export class DriveInScene {
     g.fillStyle = "#7a0d1c"; R(b.x - 6 * u, b.y - 6 * u, b.w + 12 * u, 7 * u);
     g.fillStyle = "#d8a32a"; for (let x = b.x - 6 * u; x < b.x + b.w + 6 * u; x += 4 * u) R(x, b.y + u, 2 * u, 2 * u);
   }
+  // ---- the finale: end credits on the big screen, your answers as the cast, then THE END ----
+  finale(data) { this.fin = { t: 0, data }; this.show = null; this.cards = []; }
+  drawCredits(hg, px) {
+    const b = this.screenBox(), t = this.fin.t;
+    const log = this.fin.data?.racers?.[0]?.log || [];
+    const subject = (q) => String(q || "").replace(/^Name (an?|something|someone|any) /i, "").toUpperCase();
+    const lines = [["STARRING", 9, "#ffd23a"]];
+    for (const e of log) { if (!e.answer || e.answer === "—") continue; lines.push([e.answer.toUpperCase(), 15, "#ffffff"], ["as " + subject(e.q), 8, "#c9a35a"]); }
+    lines.push(["", 10], ["A VROOMILLION PICTURE", 9, "#ff4fd8"]);
+    const gap = (n) => px(n * 1.55);
+    const total = lines.reduce((a, l) => a + gap(l[1]), 0);
+    // roll up through the screen over about 3.6 s, then THE END
+    const k = Math.min(1, Math.max(0, (t - 0.6) / 3.1));
+    let y = b.y + b.h - k * (total + b.h);
+    hg.save(); hg.beginPath(); hg.rect(b.x, b.y, b.w, b.h); hg.clip();
+    hg.textAlign = "center"; hg.textBaseline = "middle";
+    for (const [text, size, col] of lines) { y += gap(size); if (y > b.y - px(20) && y < b.y + b.h + px(20) && text) { hg.font = `${px(size)}px ${TITLE_FONT}`; hg.fillStyle = col; hg.fillText(text, b.x + b.w / 2, y, b.w * 0.9); } }
+    if (t > 3.7) {
+      const a = Math.min(1, (t - 3.7) / 0.5);
+      hg.globalAlpha = a; hg.font = `${px(30)}px ${TITLE_FONT}`;
+      hg.fillStyle = "#000"; hg.fillText("THE END", b.x + b.w / 2 + px(2), b.y + b.h / 2 + px(2), b.w * 0.9);
+      hg.fillStyle = "#fff6e0"; hg.fillText("THE END", b.x + b.w / 2, b.y + b.h / 2, b.w * 0.9);
+      hg.globalAlpha = 1;
+    }
+    hg.restore();
+  }
   drawHi() {
     const hg = this.hiG; if (!hg) return;
     const R = this.hiScale || 1, css = this.cssPx || 1, px = (n) => n / css;
@@ -372,6 +402,7 @@ export class DriveInScene {
     const neon = (text, x, y, size, col, maxW) => { hg.font = `${size}px ${TITLE_FONT}`; hg.shadowColor = col; hg.shadowBlur = size * 0.6; hg.fillStyle = col; hg.fillText(text, x, y, maxW); hg.shadowBlur = 0; hg.fillStyle = "#fff"; hg.globalAlpha = 0.55; hg.fillText(text, x, y, maxW); hg.globalAlpha = 1; };
     if (this.signAt) neon("DRIVE-IN", this.signAt.x, this.signAt.y + this.u * 0.5, Math.max(px(8), this.u * 7.5), "#ff4f6a", this.signAt.w * 0.86);
     if (this.snackAt?.on) neon("SNACKS", this.snackAt.x, this.snackAt.y - this.u * 9.5, Math.max(px(6), this.u * 4.6), "#ff4fd8", this.u * 40);
+    if (this.fin) { this.drawCredits(hg, px); return; }
     const s = this.show; if (!s) return;
     const b = this.screenBox();
     const n = s.cards.length;

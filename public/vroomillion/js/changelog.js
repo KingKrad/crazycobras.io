@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25o",
+    date: "Nov 25, 2026",
+    title: "Big finishes",
+    items: [
+      "Every race now ends with a show: WORLD TOUR's map folds into a spinning globe and your car drives your whole trip round it.",
+      "BOX OFFICE rolls the end credits with your answers as the cast. ON TOUR plays an encore with your tour poster. STADIUM RUN takes a victory lap to the podium.",
+      "Normal races cross a chequered finish line. Tap to skip any of them.",
+    ],
+  },
+  {
     id: "2026-11-25n",
     date: "Nov 25, 2026",
     title: "More answers count",

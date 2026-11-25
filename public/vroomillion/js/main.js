@@ -2779,7 +2779,43 @@ async function runRace(token) {
     if (!alive()) return;
   }
   await arrive(token);
+  await playFinale(token);
   finish(token);
+}
+
+// The finale: a few seconds of show at the end of every race, before the results. Each themed mode's
+// scene plays its own (WORLD TOUR's globe, the drive-in's end credits, ON TOUR's encore, STADIUM RUN's
+// victory lap); the road gets a finish line. A tap skips it.
+const FINALE_MS = 5500;
+async function playFinale(token) {
+  if (token !== raceToken || !race) return;
+  $("q-card").classList.add("hidden");
+  const data = {
+    racers: race.racers.map((r, i) => ({ name: r.name, dist: r.dist, log: r.log, color: scene.racers?.[i]?.color })),
+    label: race.label,
+  };
+  const fx = $("finale");
+  const road = !scene.finale;
+  if (road) { // the road: a chequered banner, the flag, flashes and the distance
+    const lead = race.racers.reduce((a, b) => (b.dist > a.dist ? b : a));
+    $("finale-dist").textContent = Math.round(lead.dist).toLocaleString("en-US") + " M";
+    $("finale-who").textContent = race.solo ? "" : `${lead.name} WINS`;
+  } else scene.finale(data);
+  fx.classList.toggle("road", road);
+  fx.classList.remove("hidden");
+  document.body.classList.add("finale-on"); // the race's scoreboard steps aside
+  void fx.offsetWidth;
+  fx.classList.add("on");
+  audio.sfx.win?.();
+  await new Promise((resolve) => {
+    let done = false;
+    const end = () => { if (done) return; done = true; removeEventListener("pointerdown", end, true); removeEventListener("keydown", end, true); clearTimeout(t); resolve(); };
+    const t = setTimeout(end, FINALE_MS);
+    setTimeout(() => { addEventListener("pointerdown", end, true); addEventListener("keydown", end, true); }, 300); // a tap still landing from NEXT doesn't skip it
+  });
+  fx.classList.remove("on");
+  fx.classList.add("hidden");
+  document.body.classList.remove("finale-on");
 }
 
 // After the last round the road turns into wherever this race's distance has taken you.

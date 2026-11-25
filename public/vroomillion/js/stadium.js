@@ -69,7 +69,7 @@ export class StadiumScene {
   setRacers(list) {
     if (!list.some((r) => r.label === "")) this.lobby = false;
     this.racers = list.map((r, i) => ({ ...r, dist: 0, boost: 0, nitro: false, p: 0, lane: list.length > 1 ? (i ? 2.2 : 0.8) : 1.5, roll: 0, rollT: 0, rollSecs: 1, from: 0, stalled: 0 }));
-    this.cards = []; this.particles = []; this.wave = 0; this.trophy = 0;
+    this.cards = []; this.particles = []; this.wave = 0; this.trophy = 0; this.fin = null;
   }
   anchor(i) {
     const r = this.racers[i]; if (!r) return { x: 0.5, y: 0.7 };
@@ -109,6 +109,13 @@ export class StadiumScene {
 
   update(dt) {
     this.time += dt; this.dtLast = dt;
+    if (this.fin) { // the victory lap: fast laps, the wave, fireworks all round
+      const f = this.fin; f.t += dt;
+      if (f.t < 2.8) for (const r of this.racers) { r.roll = 0; r.p += dt * 0.42; }
+      this.wave = Math.max(this.wave, 0.8); this.cheer = 1;
+      const t0 = this.track();
+      if (!this.calm && Math.random() < dt * 6) this.firework(t0.cx + (Math.random() - 0.5) * t0.rx * 2.4, t0.cy - t0.ry * (0.6 + Math.random()), ["#ffd23a", "#ff4fd8", "#4fd1ff", "#5dff8f"][Math.floor(Math.random() * 4)]);
+    }
     if (this.flash > 0) this.flash = Math.max(0, this.flash - dt * 0.8);
     if (this.cheer > 0) this.cheer = Math.max(0, this.cheer - dt * 0.35);
     if (this.trophy > 0) this.trophy = Math.max(0, this.trophy - dt * 0.5);
@@ -238,9 +245,21 @@ export class StadiumScene {
       R(t.cx - k, t.cy - k, 2 * k, 3 * k); R(t.cx - 3 * k, t.cy + 2 * k, 6 * k, 2 * k);
       g.fillStyle = "#fff6c8"; R(t.cx - 3 * k, t.cy - 5 * k, k, 3 * k);
     }
+    // the finale's podium: rises in the middle of the pitch, the winner on top
+    const pod = this.fin && this.fin.t > 2.8 ? Math.min(1, (this.fin.t - 2.8) / 0.6) : 0;
+    const distOf = (i) => this.fin?.data?.racers?.[i]?.dist ?? this.racers[i]?.dist ?? 0;
+    const order = [...this.racers.keys()].sort((a, b) => distOf(b) - distOf(a));
+    if (pod) {
+      const pw = 22 * u, hs = [26, 18, 12].map((h) => h * u * ease(pod)), xs = [0, -1, 1].map((k) => t.cx + k * pw);
+      for (let k = 0; k < 3; k++) {
+        g.fillStyle = ["#ffd23a", "#c4c1d4", "#d08a4a"][k]; R(xs[k] - pw / 2, t.cy + 14 * u - hs[k], pw - u, hs[k]);
+        g.fillStyle = "rgba(0,0,0,0.25)"; R(xs[k] - pw / 2, t.cy + 14 * u - hs[k], pw - u, 2 * u);
+      }
+    }
     // the cars
-    for (const r of this.racers) {
-      const q = this.at(r.p, r.lane);
+    for (const [ri, r] of this.racers.entries()) {
+      let q = this.at(r.p, r.lane);
+      if (pod) { const place = order.indexOf(ri), xs = [0, -1, 1], hs = [26, 18, 12]; q = { x: t.cx + xs[place] * 22 * u, y: t.cy + 14 * u - hs[place] * u * ease(pod) - 7 * u, heading: 0 }; }
       g.save(); g.translate(Math.round(q.x), Math.round(q.y)); g.rotate(q.heading);
       if (r.stalled > 0 && !this.calm) g.translate((Math.random() - 0.5) * 2 * u, 0);
       drawCarTop(g, Math.max(1, Math.round(u * 1.5)), r.car?.color || "#4fd1ff", r.car?.accent || "#ffffff");
@@ -254,12 +273,36 @@ export class StadiumScene {
     this.drawHi();
   }
 
+  // ---- the finale: a victory lap, then the podium ----
+  finale(data) { this.fin = { t: 0, data }; this.cards = []; this.confetti(); }
+  drawFinaleHi(hg, px) {
+    const t = this.fin.t, tr = this.track(), u = this.u;
+    hg.textAlign = "center"; hg.textBaseline = "middle";
+    const title = t < 2.8 ? "VICTORY LAP!" : "CHAMPION!";
+    hg.font = `${px(24)}px ${FONT}`; hg.fillStyle = "#000"; hg.fillText(title, this.W / 2 + px(2), tr.cy - tr.ry - px(30) + px(2));
+    hg.fillStyle = "#ffd23a"; hg.fillText(title, this.W / 2, tr.cy - tr.ry - px(30));
+    if (t > 3.2) {
+      const rs = this.fin.data?.racers || this.racers;
+      const best = rs.reduce((a, b) => ((b.dist || 0) > (a.dist || 0) ? b : a), rs[0] || {});
+      const a = Math.min(1, (t - 3.2) / 0.4);
+      hg.globalAlpha = a;
+      // the medal
+      const mx = this.W / 2, my = tr.cy - 30 * u;
+      hg.fillStyle = "#c8102e"; hg.fillRect(mx - px(5), my - px(22), px(4), px(14)); hg.fillStyle = "#1d6bd6"; hg.fillRect(mx + px(1), my - px(22), px(4), px(14));
+      hg.fillStyle = "#ffd23a"; hg.beginPath(); hg.arc(mx, my, px(10), 0, Math.PI * 2); hg.fill();
+      hg.font = `${px(10)}px ${FONT}`; hg.fillStyle = "#7a5a10"; hg.fillText("1", mx, my + px(1));
+      hg.font = `${px(14)}px ${FONT}`; hg.fillStyle = "#fff";
+      hg.fillText(`${rs.length > 1 ? (best.name || best.label || "") + " · " : ""}${Math.round(best.dist || 0).toLocaleString("en-US")} M`, this.W / 2, tr.cy + tr.ry + px(26));
+      hg.globalAlpha = 1;
+    }
+  }
   // sharp text: name tags, laps, and the answer on the scoreboard
   drawHi() {
     const hg = this.hiG; if (!hg) return;
     const R = this.hiScale || 1, css = this.cssPx || 1, px = (n) => n / css, u = this.u;
     hg.setTransform(1, 0, 0, 1, 0, 0); hg.clearRect(0, 0, hg.canvas.width, hg.canvas.height); hg.setTransform(R, 0, 0, R, 0, 0);
     hg.textAlign = "center"; hg.textBaseline = "middle";
+    if (this.fin) { this.drawFinaleHi(hg, px); return; }
     for (const r of this.racers) {
       const q = this.at(r.p, r.lane);
       hg.font = `${px(9)}px ${FONT}`; hg.fillStyle = "#0b0618"; hg.fillText(r.label || "", q.x, q.y - 16.5 * u);
