@@ -81,7 +81,11 @@ export const FAMILIES = parseCatalog(SOURCES);
 // (with their twins: having either uses up both, so they must share pools)
 {
   const keyTopic = new Map(FAMILIES.filter((f) => GEO_JOIN[f.id]).map((f) => [f.key, GEO_JOIN[f.id]]));
-  for (const f of FAMILIES) if (keyTopic.has(f.key) && !f.pools.includes("geo")) { f.pools.push("geo"); f.geoTopic = keyTopic.get(f.key); }
+  for (const f of FAMILIES) if (keyTopic.has(f.key) && !f.pools.includes("geo")) {
+    const [topic, level] = keyTopic.get(f.key).split(":"); // "topic:level": its level in WORLD TOUR
+    f.pools.push("geo"); f.geoTopic = topic;
+    if (level) f.geoLevel = Number(level);
+  }
   // and BOX OFFICE
   // and BOX OFFICE and ON TOUR ("topic:level": its topic there, and maybe an easier level, as those races
   // are mostly well-known prompts)

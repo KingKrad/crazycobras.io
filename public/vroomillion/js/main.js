@@ -198,7 +198,7 @@ places.stadium = stadiumScene;
 // ids: the prefix of its home screen's elements (index.html), e.g. wt-go, wt-status.
 const THEMED = {
   geo: { name: "WORLD TOUR", screen: "worldtour", ids: "wt", scene: () => worldScene, go: "▶ HIT THE ROAD",
-    info: "700+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
+    info: "280+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
   film: { name: "BOX OFFICE", screen: "boxoffice", ids: "bo", scene: () => driveInScene, go: "▶ ROLL THE TRAILER",
     info: "350+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
   music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, go: "▶ START THE TOUR",
