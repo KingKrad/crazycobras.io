@@ -1,4 +1,5 @@
-// POST /api/vroomillion/seen { add?: [prompt], remove?: [prompt] } -> { seen: [prompt] }
+// POST /api/vroomillion/seen { add?: [prompt], touch?: [prompt], remove?: [prompt] } -> { seen: [prompt] }
+// touch: prompts played again, moved to the end (newest) so the oldest-seen keep rotating
 // The prompts a logged-in player has already raced, kept on their account so no prompt repeats on any
 // of their devices. Players without an account keep this list on their device only. Sending neither
 // add nor remove just reads the list.
@@ -21,10 +22,11 @@ export function parseSeen(text) {
   }
 }
 
-export function mergeSeen(list, add, remove) {
+export function mergeSeen(list, add, remove, touch = []) {
   const out = new Set(list);
   for (const p of remove) out.delete(p);
   for (const p of add) out.add(p);
+  for (const p of touch) { out.delete(p); out.add(p); }
   return [...out].slice(-MAX_SEEN); // over the cap, the oldest go first
 }
 
@@ -38,14 +40,15 @@ export async function handleSeen(request, env) {
   const body = await readForm(request, 400000);
   const add = prompts(body.add);
   const remove = prompts(body.remove);
+  const touch = prompts(body.touch);
   const before = parseSeen(user.seen_prompts);
   // Unlimited race numbers (RACE #1, #2...): race: true counts one more; racesAtLeast carries a device's count up
   let races = Number(user.unl_races) || 0;
   if (body.race === true) races += 1;
   if (Number.isInteger(body.racesAtLeast) && body.racesAtLeast > races && body.racesAtLeast < 1e6) races = body.racesAtLeast;
   const racesChanged = races !== (Number(user.unl_races) || 0);
-  if (!add.length && !remove.length && !racesChanged) return json({ seen: before, races });
-  const seen = mergeSeen(before, add, remove);
+  if (!add.length && !remove.length && !touch.length && !racesChanged) return json({ seen: before, races });
+  const seen = mergeSeen(before, add, remove, touch);
   await env.DB.prepare("UPDATE users SET seen_prompts = ?, unl_races = ? WHERE id = ?").bind(JSON.stringify(seen), races, user.id).run();
   return json({ seen, races });
 }

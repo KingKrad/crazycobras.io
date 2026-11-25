@@ -1653,3 +1653,13 @@ body[data-screen="ontour"] .screen.active#s-ontour { background: none; border: 0
 .ml-name.ot { color: #ffe6fb; text-shadow: 0 0 6px #ff4fd8, 0 0 20px #c41a9c, 4px 4px 0 #1a0a40; -webkit-text-stroke: 2px #2a0030; }
 @media (max-width: 600px) { body[data-screen="ontour"] .ml-sub { display: none; } }
 .mode-card.mc-music .mc-view { background-image: url("img/world.png"); background-position: -300px -40px; filter: brightness(0.55) saturate(1.4) hue-rotate(250deg); animation: mc-pan 70s linear infinite; }
+
+/* ---------- the RACE ARCHIVE: every CLASSIC race, in a grid ---------- */
+.archive-btn { display: block; width: 100%; margin-top: 10px; }
+.archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; margin: 10px 0 14px; max-height: 62vh; overflow-y: auto; padding: 2px; }
+.arch-race { display: grid; gap: 2px; justify-items: center; padding: 10px 4px 8px; cursor: pointer; font: inherit; color: #fff; background: rgba(13, 7, 32, 0.9); border: 2px solid #4a3d7a; }
+.arch-race b { font-family: var(--font-title); font-size: 15px; font-weight: 400; }
+.arch-race span { font-size: 10px; color: #b9b2d6; }
+.arch-race.done { border-color: #5dff8f; }
+.arch-race.done span { color: #5dff8f; }
+.arch-race:hover, .arch-race:focus-visible { border-color: #ffd23a; outline: none; }

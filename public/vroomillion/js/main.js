@@ -18,8 +18,8 @@ import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
-let pickRace, dailyRace, famKey, familyOf, answerSlug;
-const racepickLoaded = import("./racepick.js").catch(() => import("./racepick.js")).then((m) => ({ pickRace, dailyRace, famKey, familyOf, answerSlug } = m));
+let pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies;
+const racepickLoaded = import("./racepick.js").catch(() => import("./racepick.js")).then((m) => ({ pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies } = m));
 
 // The built-in answer lists (the game's original prompts, now part of the catalog) are about 2 MB, so they load in the background while the title screen is up
 // instead of holding up the first screen. Races wait for them (usually long since done).
@@ -1605,9 +1605,10 @@ function show(name) {
   if (name === "online") renderOnline();
   for (const t of THEMED_IDS) if (name === THEMED[t].screen) renderModeLobby(t);
   if (name === "modes") renderModes();
+  if (name === "archive") renderArchive();
   if (name === "account") renderMe();
   // the tab bar lights up the section you're in
-  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes",
+  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", archive: "modes",
     garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
   for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
@@ -1741,7 +1742,9 @@ function placeOf(q, res) {
 // prompts added with the new catalog keep their answers in answers/<slug>.json, loaded for the race
 const extraQ = new Map();
 const getQ = (p) => qByText().get(p) || extraQ.get(p);
-const hasQ = (p) => qByText().has(p) || extraQ.has(p) || !!familyOf(p)?.src;
+// (a family built from Wikidata, or hand-written with an answers file, has answers even before it's loaded:
+// leaving those out once shrank Unlimited to a few hundred prompts, which then came round again and again)
+const hasQ = (p) => qByText().has(p) || extraQ.has(p) || !!(familyOf(p)?.src || familyOf(p)?.top);
 function loadAnswers(prompts) {
   return Promise.all(prompts.filter((p) => !getQ(p)).map((p) =>
     fetch("answers/" + answerSlug(p) + ".json").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.a) extraQ.set(p, { cat: "everyday", ...d, q: p }); }).catch(() => {})));
@@ -1796,15 +1799,17 @@ async function syncSeen() {
   if (current === "leagues") renderLeagues();
   if (current === "versus") renderVersus();
 }
+// A prompt played again (once every prompt has been seen, the oldest come back) moves to the end of the
+// history, so the next race brings back the next-oldest, not the same ones every time.
 function markSeen(prompt) {
   if (account && accountSeen) {
-    if (accountSeen.includes(prompt)) return;
-    accountSeen = [...accountSeen, prompt];
+    const again = accountSeen.includes(prompt);
+    accountSeen = [...accountSeen.filter((p) => p !== prompt), prompt];
     save.acctSeen = { email: account.email, list: accountSeen };
     persist();
-    sendSeen({ add: [prompt] });
-  } else if (!deviceSeen().includes(prompt)) {
-    save.seen = [...deviceSeen(), prompt];
+    sendSeen(again ? { touch: [prompt] } : { add: [prompt] });
+  } else {
+    save.seen = [...deviceSeen().filter((p) => p !== prompt), prompt];
     persist();
   }
 }
@@ -1892,6 +1897,54 @@ function nicknameForm() {
 let accountRaces = null;
 const racesRun = () => (account && accountRaces != null ? accountRaces : save.unlRaces || 0);
 
+// ---------- the RACE ARCHIVE: every 1-player CLASSIC race, to race again ----------
+// It opens once a player has raced every CLASSIC prompt (admins: always). Races are kept in save.raceLog
+// (race number -> its seven prompt families) and their best distance in save.raceBest.
+let archiveJustUnlocked = false;
+const classicKeys = () => { const out = new Map(); for (const f of poolFamilies("classic")) if (f.prompts.some(hasQ) && !out.has(famKey(f))) out.set(famKey(f), f); return out; };
+function classicLeft() { const seen = new Set(seenList()); let n = 0; for (const k of classicKeys().keys()) if (!seen.has(k)) n++; return n; }
+const archiveOpen = () => !!save.archiveUnlocked || !!account?.admin;
+// races from before the archive existed: rebuilt once from the history, seven CLASSIC prompts at a time, in order
+function archiveRaces() {
+  if (!save.raceLogFilled && (!account || accountSeen)) {
+    const log = { ...(save.raceLog || {}) };
+    const keys = classicKeys(), logged = new Set(Object.values(log).flat());
+    const hist = seenList().filter((k) => keys.has(k) && !logged.has(k));
+    for (let n = 1, i = 0; n <= racesRun() && i < hist.length; n++) if (!log[n]) { log[n] = hist.slice(i, i + 7); i += 7; }
+    save.raceLog = log; save.raceLogFilled = true; persist();
+  }
+  return Object.entries(save.raceLog || {}).map(([n, keys]) => ({ n: Number(n), keys })).filter((r) => r.keys?.length).sort((a, b) => a.n - b.n);
+}
+function renderArchive() {
+  const grid = $("archive-grid"), note = $("archive-note");
+  grid.textContent = "";
+  if (!questionsReady) { note.textContent = "LOADING…"; questionsLoaded.then(() => current === "archive" && renderArchive()); return; }
+  if (!archiveOpen()) {
+    const left = Math.ceil(classicLeft() / 7);
+    note.textContent = `Race every CLASSIC prompt to open the archive: a grid of every race you've driven, to race again. About ${left.toLocaleString("en-US")} race${left === 1 ? "" : "s"} to go.`;
+    return;
+  }
+  const races = archiveRaces();
+  note.textContent = races.length ? `Every CLASSIC race you've driven: ${races.length.toLocaleString("en-US")} of them. Tap one to race it again.` : "Your races will show up here.";
+  for (const r of races) {
+    const best = save.raceBest?.[r.n];
+    grid.append(h("button", { class: "arch-race" + (best ? " done" : ""), type: "button", onclick: () => { audio.sfx.click(); replayRace(r.n); } },
+      h("b", { text: "#" + r.n.toLocaleString("en-US") }), h("span", { text: best ? best.toLocaleString("en-US") + " M" : "RACE IT" })));
+  }
+}
+async function replayRace(n) {
+  const keys = save.raceLog?.[n];
+  if (!keys?.length) return;
+  await questionsLoaded;
+  const fams = classicKeys();
+  const picks = keys.map((k) => fams.get(k)).filter(Boolean).map((f) => ({ family: f, prompt: f.prompts.find(hasQ) || f.prompts[0] }));
+  if (!picks.length) return;
+  overlay("LOADING…", "small");
+  await Promise.race([loadAnswers(picks.map((x) => x.prompt)), new Promise((r) => setTimeout(r, 6000))]);
+  overlay("");
+  startRace({ mode: "solo", deck: "classic", replay: n, v2questions: v2Questions(picks) });
+}
+
 function renderLeagues() {
   // the daily race: the same prompts for everyone today, free for every player
   const daily = $("daily-solo");
@@ -1927,6 +1980,8 @@ function renderLeagues() {
   const ok = canRace(me(), dayKey(), { mode: "solo", deck: save.deck });
   renderPromptsLeft($("left-solo"), $("btn-start-1p"), () => {
     $("btn-start-1p").textContent = ok ? `START RACE #${(racesRun() + 1).toLocaleString("en-US")}` : "UNLIMITED RACES — $5";
+    const left = Math.ceil(classicLeft() / 7);
+    $("btn-archive").textContent = archiveOpen() ? "🏁 RACE ARCHIVE · REPLAY ANY RACE" : `🔒 RACE ARCHIVE · ${left.toLocaleString("en-US")} RACE${left === 1 ? "" : "S"} TO GO`;
   });
 }
 
@@ -2376,17 +2431,24 @@ function startRace(setup) {
   prefetchDeep(questions.map((q) => q.base || q.q)); // the long-tail answer lists, in the background
   lastSetup = { ...setup, redo: false, questions };
   // a daily race counts as played once it starts; an Unlimited race gets the next number
-  let label;
+  let label, unlNo = 0;
   if (setup.online) {
     label = "ONLINE 1V1";
   } else if (daily) {
     save.daily = markDaily(save, today, daily);
     label = "DAILY RACE";
+  } else if (setup.replay) {
+    label = `RACE #${setup.replay} · REPLAY`; // from the RACE ARCHIVE: not a new race
   } else {
     const n = racesRun() + 1;
     save.unlRaces = Math.max(save.unlRaces || 0, n);
     if (account) { if (accountRaces != null) accountRaces = n; sendSeen({ race: true }); }
     label = setup.redo ? `RACE #${n} · REDO` : `RACE #${n}`;
+    // the RACE ARCHIVE keeps every 1-player CLASSIC race's prompts, to race again later
+    if (setup.mode === "solo" && (setup.deck || save.deck || "classic") === "classic" && !setup.redo) {
+      save.raceLog = { ...(save.raceLog || {}), [n]: questions.map((q) => q.fam || famKeyOf(q.q)) };
+      unlNo = n;
+    }
   }
   persist();
   // count the race for the admin stats (no personal data); fails quietly without a server
@@ -2410,7 +2472,7 @@ function startRace(setup) {
   const deck = setup.online ? setup.online.deck : setup.deck || save.deck;
   const themed = !daily && THEMED[deck] ? deck : null; // a themed mode races in its own scene
   const geo = themed === "geo"; // WORLD TOUR: the world map, and places on it
-  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy, geo, themed };
+  race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy, geo, themed, unlNo, replay: setup.replay || 0 };
 
   scene = themed ? THEMED[themed].scene() : chaseScene; // races use the behind-the-car view (themed modes: their own)
   if (geo) { loadMap(); loadGazetteer(); }
@@ -2505,7 +2567,7 @@ async function runRace(token) {
     $("q-kicker").textContent = (film ? `NOW SHOWING · REEL ${round + 1}/${rounds}` : `PROMPT ${round + 1}/${rounds}`) + (q.tricky ? " · TRICKY ONE!" : "");
     $("q-hint").textContent = film ? "RARER = BIGGER PREMIERE" : "RARER = FURTHER";
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
-    markSeen(q.fam || famKeyOf(q.q)); // the whole family, in every race type
+    if (!race.replay) markSeen(q.fam || famKeyOf(q.q)); // the whole family, in every race type (a replay is a rerun)
     $("q-hint").classList.remove("hidden");
     $("q-card").classList.remove("revealing", "hidden");
     requestAnimationFrame(fitCard);
@@ -3316,6 +3378,9 @@ function finish(token) {
     pay = soloPayout(a.dist, a.car, a.tiers);
     newBest = !race.crazy && a.dist > save.best; // a CRAZY MODE run never sets your best
     if (newBest) save.best = a.dist;
+    const archN = race.replay || race.unlNo;
+    if (archN) save.raceBest = { ...(save.raceBest || {}), [archN]: Math.max(save.raceBest?.[archN] || 0, Math.round(a.dist)) };
+    if (race.unlNo && !save.archiveUnlocked && classicLeft() === 0) { save.archiveUnlocked = true; archiveJustUnlocked = true; }
     title = newBest && save.races > 0 ? "NEW BEST!" : race.daily ? `DAILY RACE ${race.daily} DONE` : "RUN COMPLETE";
     if (race.daily && dailyDone(save, dday())[race.daily] != null) save.daily = markDaily(save, dday(), race.daily, a.dist);
     save.vrooms += a.tiers.filter((t) => t === 5).length;
@@ -3413,6 +3478,10 @@ function finish(token) {
     drawRematch();
   } else { rematch = null; $("btn-redo").disabled = false; }
   show("results");
+  if (archiveJustUnlocked) { // every CLASSIC prompt raced: the RACE ARCHIVE opens
+    archiveJustUnlocked = false;
+    setTimeout(() => { overlay("EVERY RACE DONE! RACE ARCHIVE UNLOCKED", "ok"); audio.sfx.win(); scene.confetti?.(); setTimeout(() => overlay(""), 3200); }, 900);
+  }
   if (rematch) rematchPoll(rematch);
 }
 

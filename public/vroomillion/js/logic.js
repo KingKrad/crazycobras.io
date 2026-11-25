@@ -423,6 +423,11 @@ export function mergeProgress(local, remote) {
   out.carXp = { ...(other.carXp || {}) };
   for (const [car, xp] of Object.entries(base.carXp || {})) out.carXp[car] = Math.max(out.carXp[car] || 0, Number(xp) || 0);
   out.collect = [...new Set([...(base.collect || []), ...(other.collect || [])])];
+  // the RACE ARCHIVE: every logged race from either device, the best distance on each, and the unlock
+  out.raceLog = { ...(other.raceLog || {}), ...(base.raceLog || {}) };
+  out.raceBest = { ...(other.raceBest || {}) };
+  for (const [n, m] of Object.entries(base.raceBest || {})) out.raceBest[n] = Math.max(out.raceBest[n] || 0, Number(m) || 0);
+  out.archiveUnlocked = !!(base.archiveUnlocked || other.archiveUnlocked);
   // today's daily race: done on either device counts
   if (base.daily && other.daily && base.daily.day === other.daily.day) out.daily = { ...base.daily, done: { ...(other.daily.done || {}), ...(base.daily.done || {}) } };
   return out;

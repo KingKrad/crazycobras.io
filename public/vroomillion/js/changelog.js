@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25i",
+    date: "Nov 25, 2026",
+    title: "No more repeat races",
+    items: [
+      "Fixed Unlimited races repeating the same prompts: CLASSIC now uses all 989 of its prompts before any come back, and they never come back in the same race.",
+      "New RACE ARCHIVE: race every CLASSIC prompt and you unlock a grid of every race you've driven. Tap any race to play it again and beat your best.",
+      "BOX OFFICE and ON TOUR now use hundreds more of their prompts too.",
+    ],
+  },
+  {
     id: "2026-11-25h",
     date: "Nov 25, 2026",
     title: "New mode: ON TOUR",

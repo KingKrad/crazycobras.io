@@ -6,7 +6,7 @@
 import { json, currentUser, readForm, siteOrigin, clientIp, underLimit } from "./accounts.js";
 import { validSave } from "./device.js";
 
-const MAX_BYTES = 60000; // a save without the prompt history is a few KB
+const MAX_BYTES = 120000; // a save without the prompt history is a few KB (plus the RACE ARCHIVE log, ~20 KB)
 
 export async function handleProgress(request, env) {
   if (!env.DB) return json({ error: "Accounts aren't set up yet." }, 503);
