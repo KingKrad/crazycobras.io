@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25m",
+    date: "Nov 25, 2026",
+    title: "WORLD TOUR: world trivia",
+    items: [
+      "New WORLD TOUR prompts about the wider world: capitals that aren't the biggest city, countries that drive on the left, landlocked countries, Olympic host cities and more.",
+      "Most races now have one of them.",
+    ],
+  },
+  {
     id: "2026-11-25l",
     date: "Nov 25, 2026",
     title: "An easier BOX OFFICE",
