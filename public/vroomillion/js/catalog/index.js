@@ -40,9 +40,10 @@ import { W29 } from "./w29.js";
 import { W30 } from "./w30.js";
 import { GEO, GEO_JOIN } from "./geo.js";
 import { FILM, FILM_JOIN } from "./film.js";
+import { MUSIC, MUSIC_JOIN } from "./music.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28, W29, W30, GEO, FILM];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28, W29, W30, GEO, FILM, MUSIC];
 
 export function parseCatalog(texts) {
   const fams = [];
@@ -61,12 +62,12 @@ export function parseCatalog(texts) {
       // "g:<topic>": its topic in WORLD TOUR (countries, cities, water...), where every family is a place
       // (in BOX OFFICE's "film" pool the same flag gives its topic there: directors, stars, TV...)
       const modeTopic = (fl.find((f) => f.startsWith("g:")) || "").slice(2) || null;
-      const isFilm = /(^|\s)film(\s|$)/.test(pools);
+      const modePool = (pools.match(/(^|\s)(film|music)(\s|$)/) || [])[2]; // a themed mode's own family
       // "=other/family" in flags: a twin of that family (same history key: having either uses up both)
       const twin = (fl.find((f) => f.startsWith("=")) || "").slice(1) || null;
       fams.push({
         id, key: twin || id, group: id.split("/")[0], topic, level: Number(level), pools: pools.split(/\s+/),
-        single: fl.includes("1"), carTopic, ...(modeTopic ? (isFilm ? { filmTopic: modeTopic } : { geoTopic: modeTopic }) : {}), prompts: prompts.split(";").map((s) => s.trim()).filter(Boolean),
+        single: fl.includes("1"), carTopic, ...(modeTopic ? { [(modePool || "geo") + "Topic"]: modeTopic } : {}), prompts: prompts.split(";").map((s) => s.trim()).filter(Boolean),
         ...(src ? { src } : {}), ...(top ? { top: top.split(",").map((s) => s.trim()).filter(Boolean) } : {}),
       });
     }
@@ -81,11 +82,14 @@ export const FAMILIES = parseCatalog(SOURCES);
   const keyTopic = new Map(FAMILIES.filter((f) => GEO_JOIN[f.id]).map((f) => [f.key, GEO_JOIN[f.id]]));
   for (const f of FAMILIES) if (keyTopic.has(f.key) && !f.pools.includes("geo")) { f.pools.push("geo"); f.geoTopic = keyTopic.get(f.key); }
   // and BOX OFFICE
-  // ("topic:level": an easier level in BOX OFFICE, whose races are mostly well-known prompts)
-  const filmTopic = new Map(FAMILIES.filter((f) => FILM_JOIN[f.id]).map((f) => [f.key, FILM_JOIN[f.id]]));
-  for (const f of FAMILIES) if (filmTopic.has(f.key) && !f.pools.includes("film")) {
-    const [topic, level] = filmTopic.get(f.key).split(":");
-    f.pools.push("film"); f.filmTopic = topic;
-    if (level) f.filmLevel = Number(level);
+  // and BOX OFFICE and ON TOUR ("topic:level": its topic there, and maybe an easier level, as those races
+  // are mostly well-known prompts)
+  for (const [pool, JOIN] of [["film", FILM_JOIN], ["music", MUSIC_JOIN]]) {
+    const byKey = new Map(FAMILIES.filter((f) => JOIN[f.id]).map((f) => [f.key, JOIN[f.id]]));
+    for (const f of FAMILIES) if (byKey.has(f.key) && !f.pools.includes(pool)) {
+      const [topic, level] = byKey.get(f.key).split(":");
+      f.pools.push(pool); f[pool + "Topic"] = topic;
+      if (level) f[pool + "Level"] = Number(level);
+    }
   }
 }

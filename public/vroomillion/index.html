@@ -93,6 +93,7 @@
             <button class="drawer-item" data-go="leagues" type="button">SOLO RACES<span>Any topic, any time</span></button>
             <button class="drawer-item" data-go="worldtour" type="button">WORLD TOUR<span>New! Name places, drive the world</span></button>
             <button class="drawer-item" data-go="boxoffice" type="button">BOX OFFICE<span>New! Movies &amp; TV at the drive-in</span></button>
+            <button class="drawer-item" data-go="ontour" type="button">ON TOUR<span>New! Music: every answer is a gig</span></button>
             <button class="drawer-item" data-go="versus" type="button">2 PLAYERS<span>Take turns on this screen</span></button>
             <button class="drawer-item" data-go="online" type="button">RACE A FRIEND ONLINE<span>Send them a link</span></button>
             <button class="drawer-item" data-go="board" type="button">TODAY'S LEADERBOARD</button>
@@ -197,6 +198,25 @@
             <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
             <button class="btn small hidden" id="bo-2p" type="button">2 PLAYERS</button>
             <span class="ml-info" id="bo-info"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen mode-lobby" id="s-ontour">
+        <!-- ON TOUR's home: the night map fills the screen behind this (js/tour.js) -->
+        <div class="ml-head">
+          <h2 class="ml-name ot">ON TOUR</h2>
+          <p class="ml-tag">Music. Every answer is a gig.</p>
+          <p class="ml-sub">Rarer answers, bigger venues: a bar, a club, a theatre, an arena… or headlining a festival.</p>
+        </div>
+        <div class="ml-bottom">
+          <p class="ml-status" id="ot-status"></p>
+          <label class="ml-agree hidden" id="ot-agree"><input type="checkbox" id="ot-agree-box"> I understand this is a one-time, non-refundable purchase.</label>
+          <button class="btn big ml-go" id="ot-go" type="button">▶ START THE TOUR</button>
+          <div class="ml-links">
+            <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
+            <button class="btn small hidden" id="ot-2p" type="button">2 PLAYERS</button>
+            <span class="ml-info" id="ot-info"></span>
           </div>
         </div>
       </section>

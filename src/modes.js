@@ -8,6 +8,7 @@ import { stripe } from "./premium.js";
 export const GAME_MODES = [
   { id: "geo", name: "WORLD TOUR", cents: 500 },
   { id: "film", name: "BOX OFFICE", cents: 500 },
+  { id: "music", name: "ON TOUR", cents: 500 },
 ];
 const PRODUCT = "vroomillion_mode";
 const SESSION_ID = /^cs_(test|live)_[A-Za-z0-9]{10,200}$/;

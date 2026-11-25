@@ -16,6 +16,7 @@ export const PLACE_OF = {
   leagues: "grid", versus: "grid", modes: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard",
   worldtour: "world", // WORLD TOUR's home: the world map (js/world.js)
   boxoffice: "drivein", // BOX OFFICE's home: the drive-in (js/drivein.js)
+  ontour: "tour", // ON TOUR's home: the night map (js/tour.js)
 };
 
 const FONT = '"Bungee", "Space Grotesk", sans-serif';
@@ -149,7 +150,7 @@ export class Places {
   // ---- the places ----
   draw(place, car) {
     // WORLD TOUR's home: the whole screen is the world map, with your car touring it
-    const lobbyScene = place === "world" ? this.world : place === "drivein" ? this.drivein : null;
+    const lobbyScene = place === "world" ? this.world : place === "drivein" ? this.drivein : place === "tour" ? this.tour : null;
     if (lobbyScene) {
       const w = lobbyScene;
       if (w.W !== this.cv.width || w.H !== this.cv.height) w.resize(this.cv.width, this.cv.height, this.cv.height * 0.74);

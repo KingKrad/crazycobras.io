@@ -4,9 +4,9 @@
 // IN A VROOMILLION a rocket that laps the planet. It speaks the same language as the road race
 // (chase.js) to main.js: setRacers, smash (the answer card, with slam/reveal/impact events), launch,
 // racers[i].dist driven by the race, anchor, coverTop, confetti, rare...
-const MW = 2048, MH = 1024; // the map image (img/world.png), equirectangular
-const BAND_TOP = MH * 0.07, BAND_BOT = MH * 0.86; // what the camera may show: about 77°N to 65°S
-const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
+export const MW = 2048, MH = 1024; // the map image (img/world.png), equirectangular
+const BAND_TOP = MH * 0.04, BAND_BOT = MH * 0.86; // what the camera may show below the card: about 83°N to 65°S
+export const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
 const BUILD = [0, 0, 0, 0.75, 1.1, 1.6];
 const CARD_FONT = '"Bungee", "Space Grotesk", sans-serif';
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -36,14 +36,14 @@ export function loadMap(src = "img/world.png") {
   });
   return mapLoading;
 }
-const landAt = (wx, wy) => {
+export const landAt = (wx, wy) => {
   if (!LAND) return true;
   const x = Math.floor((((wx % MW) + MW) % MW) / 4), y = clamp(Math.floor(wy / 4), 0, MH / 4 - 1);
   return LAND[y * (MW / 4) + x] === 1;
 };
 
 // little top-down sprites, drawn pixel by pixel around (0,0) facing up (scale p = pixel size)
-function drawCarTop(g, p, body, accent) {
+export function drawCarTop(g, p, body, accent) {
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
   R(-4, -6, 8, 13, "#0b0618");            // outline
   R(-5, -4, 1, 3, "#1a1a22"); R(4, -4, 1, 3, "#1a1a22"); R(-5, 2, 1, 3, "#1a1a22"); R(4, 2, 1, 3, "#1a1a22"); // wheels
@@ -55,19 +55,19 @@ function drawCarTop(g, p, body, accent) {
   R(-2, 2, 4, 1, "#6fa8d8");               // rear window
   R(-3, 5, 1, 1, "#ff3b3b"); R(2, 5, 1, 1, "#ff3b3b"); // tail lights
 }
-function drawPlane(g, p) {
+export function drawPlane(g, p) {
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
   R(-1, -7, 2, 14, "#f4f6fb"); R(-7, -1, 14, 2, "#f4f6fb"); R(-3, 5, 6, 1, "#f4f6fb");
   R(-1, -7, 2, 1, "#4fd1ff"); R(-7, -1, 1, 2, "#ff4fd8"); R(6, -1, 1, 2, "#ff4fd8"); R(-1, -4, 2, 1, "#2b3a55");
 }
-function drawBoat(g, p, t) {
+export function drawBoat(g, p, t) {
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
   R(-3, -6, 6, 12, "#0b0618"); R(-2, -7, 4, 1, "#0b0618");
   R(-2, -5, 4, 10, "#f2f2f2"); R(-1, -6, 2, 1, "#f2f2f2");
   R(-2, -1, 4, 3, "#ff4f4f"); R(-1, 1, 2, 2, "#2b3a55");
   for (let k = 0; k < 3; k++) { const o = ((t * 6 + k) % 3) * 3; R(-3 - k, 6 + o, 1, 1, "#d8f0ff"); R(2 + k, 6 + o, 1, 1, "#d8f0ff"); }
 }
-function drawRocket(g, p, t) {
+export function drawRocket(g, p, t) {
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
   const f = Math.floor(t * 20) % 2;
   R(-1, 6, 2, 3 + f * 2, "#ffd23a"); R(0, 6, 1, 2 + f, "#ffffff");
@@ -81,7 +81,7 @@ function shadeHex(hex, k) {
 }
 
 // the trip style for a rarity, given whether the way is over water
-const tripKind = (tier, wet) => (tier >= 5 ? "rocket" : tier >= 4 ? "plane" : wet ? "boat" : "car");
+export const tripKind = (tier, wet) => (tier >= 5 ? "rocket" : tier >= 4 ? "plane" : wet ? "boat" : "car");
 
 export class WorldScene {
   constructor(canvas) {
@@ -129,7 +129,7 @@ export class WorldScene {
     this.W = w; this.H = h;
     // the shared canvas follows (with the phone keyboard up the screen is much shorter): a part left
     // over from the old size would never be redrawn and smears into streaks
-    if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; } this.u = Math.max(1, w / 320);
+    if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; } this.u = Math.max(1, Math.min(w, h * 0.7) / 320); // wide screens: sized by height too
     this.bottom = carBottom || h * 0.82;
   }
   // the area the cars stay in: below the question card, above the answer bar
@@ -292,7 +292,9 @@ export class WorldScene {
     // streaks, and a short screen (a phone with the keyboard up) would otherwise scroll right down to them
     this.cam.z = Math.max(this.cam.z, (this.H / (BAND_BOT - BAND_TOP)) * 1.02);
     const cyS = (this.playTop() + this.bottom) / 2;
-    const lo = BAND_TOP + cyS / this.cam.z, hi = BAND_BOT - (this.H - cyS) / this.cam.z;
+    // (the top may go up behind the question card: what shows below it is always map, and a northern city
+    // like Paris or London can still sit in the middle of the play area)
+    const lo = BAND_TOP + (cyS - this.playTop()) / this.cam.z, hi = BAND_BOT - (this.H - cyS) / this.cam.z;
     this.cam.y = lo <= hi ? clamp(this.cam.y, lo, hi) : (BAND_TOP + BAND_BOT) / 2;
     for (const q of this.particles) { q.life -= dt; if (q.screen) { q.sx += q.vx * dt; q.sy += q.vy * dt; } else { q.wx += (q.vx * dt) / Math.max(0.5, this.cam.z); q.wy += (q.vy * dt) / Math.max(0.5, this.cam.z); } }
     this.particles = this.particles.filter((q) => q.life > 0);
@@ -315,6 +317,7 @@ export class WorldScene {
         g.drawImage(MAP, Math.round(x0), Math.round(oy), Math.round(MW * z), Math.round(MH * z));
       }
     }
+    this.drawOverlay?.(g); // a themed version's own layer over the map (ON TOUR: night and city lights)
     // drifting cloud shadows, for a bit of life
     g.globalAlpha = 0.12;
     g.fillStyle = "#0b0618";
@@ -352,6 +355,7 @@ export class WorldScene {
       if (r.kind === "plane") drawPlane(g, px);
       else if (r.kind === "boat") drawBoat(g, px, this.time);
       else if (r.kind === "rocket") drawRocket(g, px, this.time);
+      else if (this.drawVehicle) this.drawVehicle(g, px, r);
       else drawCarTop(g, px, r.car?.color || "#4fd1ff", r.car?.accent || "#ffffff");
       g.restore();
       // name tag
@@ -434,9 +438,11 @@ export class WorldScene {
       hg.translate(cx + jx, cy + jy); hg.scale(sc, sc);
       hg.fillStyle = "#0b0618"; hg.fillRect(-w / 2 - px(3), -h / 2 - px(3), w + px(6), h + px(6));
       hg.fillStyle = col; hg.fillRect(-w / 2 - px(1), -h / 2 - px(1), w + px(2), h + px(2));
-      hg.fillStyle = "#1c1236"; hg.fillRect(-w / 2 + px(2), -h / 2 + px(2), w - px(4), h - px(4));
-      // a postmark in the corner: it's a postcard from the place you named
-      hg.strokeStyle = col; hg.lineWidth = px(1.5); hg.beginPath(); hg.arc(w / 2 - px(16), -h / 2 + px(14), px(9), 0, Math.PI * 2); hg.stroke();
+      hg.fillStyle = this.cardBg || "#1c1236"; hg.fillRect(-w / 2 + px(2), -h / 2 + px(2), w - px(4), h - px(4));
+      if (this.drawCardMark) this.drawCardMark(hg, w, h, col, px);
+      else { // a postmark in the corner: it's a postcard from the place you named
+        hg.strokeStyle = col; hg.lineWidth = px(1.5); hg.beginPath(); hg.arc(w / 2 - px(16), -h / 2 + px(14), px(9), 0, Math.PI * 2); hg.stroke();
+      }
       hg.font = `${big}px ${CARD_FONT}`; hg.fillStyle = "#05020c"; hg.fillText(ans, px(1.5), -h / 2 + px(8) + big / 2 + px(1.5), w - px(16));
       hg.fillStyle = "#ffffff"; hg.fillText(ans, 0, -h / 2 + px(8) + big / 2, w - px(16));
       hg.font = `${px(12)}px ${CARD_FONT}`; hg.fillStyle = col; hg.fillText(sub, 0, h / 2 - px(26), w - px(12));

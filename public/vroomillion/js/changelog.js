@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25h",
+    date: "Nov 25, 2026",
+    title: "New mode: ON TOUR",
+    items: [
+      "ON TOUR is open! Name songs, singers, bands, albums and instruments, and take your tour bus round the world's music cities.",
+      "Every answer is a gig: rarer answers mean bigger venues, from a bar gig to headlining a festival.",
+      "Your first ON TOUR race is free. After that it's $5 one-time to keep it forever.",
+      "WORLD TOUR's map now keeps northern places like London and Paris in view, and cars are the right size on big screens.",
+    ],
+  },
+  {
     id: "2026-11-25g",
     date: "Nov 25, 2026",
     title: "A better night at the drive-in",
