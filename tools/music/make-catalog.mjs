@@ -23,7 +23,10 @@ for (const [prompt, topic, lvl, ...tiers] of LISTS) {
   const top = a[0].map((e) => e.split("|")[0]);
   if (top.some((t) => /[,|]/.test(t)) || top.length < 5) throw new Error("bad list for " + prompt);
   lines[topic].push(`${id} | ${lvl} | music | g:${topic} | ${prompt} | | ${top.join(", ")}`);
-  fs.writeFileSync(new URL(`../../public/vroomillion/answers/${answerSlug(prompt)}.json`, import.meta.url), JSON.stringify({ q: prompt, a, tiers: [999999, 999999], fam: id, hand: true }));
+  const file = new URL(`../../public/vroomillion/answers/${answerSlug(prompt)}.json`, import.meta.url);
+  // never over another family's answers (a prompt another mode already has)
+  if (fs.existsSync(file) && JSON.parse(fs.readFileSync(file, "utf8")).fam !== id) throw new Error(`${prompt}: answers/ already has this prompt for another family`);
+  fs.writeFileSync(file, JSON.stringify({ q: prompt, a, tiers: [999999, 999999], fam: id, hand: true }));
 }
 
 // the game's own music prompts

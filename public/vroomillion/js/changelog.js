@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25j",
+    date: "Nov 25, 2026",
+    title: "New mode: STADIUM RUN",
+    items: [
+      "STADIUM RUN is open! Name athletes, teams, sports, gear and stadium stuff, and lap a packed stadium.",
+      "Rarer answers mean faster laps: the crowd does the wave, cameras flash, fireworks go up… or you lift the trophy.",
+      "Your first STADIUM RUN race is free. After that it's $5 one-time to keep it forever.",
+    ],
+  },
+  {
     id: "2026-11-25i",
     date: "Nov 25, 2026",
     title: "No more repeat races",

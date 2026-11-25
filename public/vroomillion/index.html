@@ -94,6 +94,7 @@
             <button class="drawer-item" data-go="worldtour" type="button">WORLD TOUR<span>New! Name places, drive the world</span></button>
             <button class="drawer-item" data-go="boxoffice" type="button">BOX OFFICE<span>New! Movies &amp; TV at the drive-in</span></button>
             <button class="drawer-item" data-go="ontour" type="button">ON TOUR<span>New! Music: every answer is a gig</span></button>
+            <button class="drawer-item" data-go="stadium" type="button">STADIUM RUN<span>New! Sports: laps of the stadium</span></button>
             <button class="drawer-item" data-go="versus" type="button">2 PLAYERS<span>Take turns on this screen</span></button>
             <button class="drawer-item" data-go="online" type="button">RACE A FRIEND ONLINE<span>Send them a link</span></button>
             <button class="drawer-item" data-go="board" type="button">TODAY'S LEADERBOARD</button>
@@ -225,6 +226,25 @@
             <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
             <button class="btn small hidden" id="ot-2p" type="button">2 PLAYERS</button>
             <span class="ml-info" id="ot-info"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen mode-lobby" id="s-stadium">
+        <!-- STADIUM RUN's home: the stadium fills the screen behind this (js/stadium.js) -->
+        <div class="ml-head">
+          <h2 class="ml-name sr">STADIUM RUN</h2>
+          <p class="ml-tag">Sports. Every answer is a lap of the stadium.</p>
+          <p class="ml-sub">Rarer answers, faster laps: the crowd does the wave, cameras flash… or you lift the trophy.</p>
+        </div>
+        <div class="ml-bottom">
+          <p class="ml-status" id="sr-status"></p>
+          <label class="ml-agree hidden" id="sr-agree"><input type="checkbox" id="sr-agree-box"> I understand this is a one-time, non-refundable purchase.</label>
+          <button class="btn big ml-go" id="sr-go" type="button">▶ ON YOUR MARKS</button>
+          <div class="ml-links">
+            <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
+            <button class="btn small hidden" id="sr-2p" type="button">2 PLAYERS</button>
+            <span class="ml-info" id="sr-info"></span>
           </div>
         </div>
       </section>

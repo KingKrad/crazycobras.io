@@ -16,6 +16,7 @@ import { Places, PLACE_OF } from "./places.js";
 import { WorldScene, loadMap } from "./world.js";
 import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
+import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
 let pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies;
@@ -191,6 +192,8 @@ const driveInScene = new DriveInScene($("scene"));
 places.drivein = driveInScene;
 const tourScene = new TourScene($("scene"));
 places.tour = tourScene;
+const stadiumScene = new StadiumScene($("scene"));
+places.stadium = stadiumScene;
 // THEMED MODES: each has its own home screen (a "place"), its own race scene and a $5 one-time unlock.
 // ids: the prefix of its home screen's elements (index.html), e.g. wt-go, wt-status.
 const THEMED = {
@@ -200,6 +203,8 @@ const THEMED = {
     info: "350+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
   music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, go: "▶ START THE TOUR",
     info: "380+ MUSIC PROMPTS · A WORLD TOUR BY BUS", card: "Music · every answer is a gig round the world" },
+  sport: { name: "STADIUM RUN", screen: "stadium", ids: "sr", scene: () => stadiumScene, go: "▶ ON YOUR MARKS",
+    info: "170+ SPORTS PROMPTS · LAPS OF THE STADIUM", card: "Sports · every answer is a lap of the stadium" },
 };
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)
@@ -1608,7 +1613,7 @@ function show(name) {
   if (name === "archive") renderArchive();
   if (name === "account") renderMe();
   // the tab bar lights up the section you're in
-  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", archive: "modes",
+  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", archive: "modes",
     garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
   for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
