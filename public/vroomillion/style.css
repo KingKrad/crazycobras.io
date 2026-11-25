@@ -1597,6 +1597,16 @@ body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="
 .mc-view.v-sport { background: repeating-linear-gradient(0deg, #2f8a3a 0 14px, #2a7a34 14px 28px); }
 .board-passport, .me-more .btn { width: 100%; }
 .me-more { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+/* phones: smaller home buttons, so more of the road and your car shows */
+@media (max-width: 600px) {
+  #s-title .btn.daily-hero { padding: 14px 10px; font-size: clamp(13px, 3.8vw, 17px); }
+  .home-tiles { gap: 6px; }
+  .home-tile { padding: 8px 6px 7px; gap: 2px; border-width: 2px; }
+  .home-tile svg { width: 20px; height: 20px; }
+  .home-tile b { font-size: clamp(11px, 3.3vw, 14px); }
+  .home-tile span { font-size: 10px; }
+  #s-title .title-bottom { gap: 8px; }
+}
 /* short phones (iPhone SE, mini): a tighter home stack so the neon sign keeps its space */
 @media (max-height: 760px) {
   .home-tile span { display: none; }
@@ -1619,13 +1629,13 @@ body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="
 }
 .q-card.marquee::before { /* the sign board inside the bulbs */
   content: ""; position: absolute; inset: 7px; z-index: -1;
-  background: linear-gradient(#fff9e6, #f3e2b8); box-shadow: inset 0 0 0 2px #b8860b, inset 0 0 18px rgba(255, 200, 90, 0.6);
+  background: linear-gradient(#1c0a12, #0c0408); box-shadow: inset 0 0 0 2px #b8860b, inset 0 0 22px rgba(255, 170, 60, 0.18);
 }
 @keyframes marquee-chase { 50% { background-position: 6.5px 0, 0 0; } }
 .q-card.marquee .q-kicker { background: #c8102e; color: #fff6d8; box-shadow: 2px 2px 0 #3a0410; }
-.q-card.marquee .q-hint { color: #8a5a10; }
-.q-card.marquee .q-lead { color: #9b1020; text-shadow: none; }
-.q-card.marquee .question { color: #14060a; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7); letter-spacing: 0.02em; }
+.q-card.marquee .q-hint { color: #c9a35a; }
+.q-card.marquee .q-lead { color: #ffcf5a; text-shadow: 1px 1px 0 #000; }
+.q-card.marquee .question { color: #fff6e0; text-shadow: 0 0 10px rgba(255, 190, 80, 0.55), 2px 2px 0 #000; letter-spacing: 0.02em; }
 .q-card.marquee .q-twist { background: #c8102e; color: #fff; }
 .q-card.marquee .q-top { margin-bottom: 6px; }
 .q-card.marquee .q-lead { margin-bottom: 3px; }
@@ -1635,3 +1645,4 @@ body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="
 .q-card.marquee.revealing::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .q-card.marquee { animation: card-in 0.3s steps(4) both; } }
 body.kb #s-race .q-card.marquee { padding: 13px 15px 11px; background: radial-gradient(circle, #fffbe0 0 1.6px, #ffc23a 2.6px, rgba(255, 170, 30, 0) 4.2px) 0 0 / 13px 13px, linear-gradient(#7a0d1c, #3a0410); backdrop-filter: none; -webkit-backdrop-filter: none; }
+@media (max-width: 600px) { body[data-screen="boxoffice"] .ml-sub { display: none; } }

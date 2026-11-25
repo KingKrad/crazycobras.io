@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25g",
+    date: "Nov 25, 2026",
+    title: "A better night at the drive-in",
+    items: [
+      "BOX OFFICE has a whole new look: a city skyline and moon, red velvet curtains that open for every answer, a neon DRIVE-IN sign, a snack bar and strings of lights.",
+      "Every rarity plays its own trailer: an old reel, a sunset, outer space, an action movie, or a gold premiere.",
+      "Fixed WORLD TOUR's map smearing on phones while you type.",
+      "Smaller home screen buttons on phones, so you can see more of the road.",
+    ],
+  },
+  {
     id: "2026-11-25f",
     date: "Nov 25, 2026",
     title: "BOX OFFICE: movie night",

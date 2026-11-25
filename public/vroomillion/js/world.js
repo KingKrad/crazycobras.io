@@ -5,6 +5,7 @@
 // (chase.js) to main.js: setRacers, smash (the answer card, with slam/reveal/impact events), launch,
 // racers[i].dist driven by the race, anchor, coverTop, confetti, rare...
 const MW = 2048, MH = 1024; // the map image (img/world.png), equirectangular
+const BAND_TOP = MH * 0.07, BAND_BOT = MH * 0.86; // what the camera may show: about 77°N to 65°S
 const TIER_COL = ["#6f6a80", "#c4c1d4", "#5dff8f", "#4f9dff", "#c070ff", "#ffd23f"];
 const BUILD = [0, 0, 0, 0.75, 1.1, 1.6];
 const CARD_FONT = '"Bungee", "Space Grotesk", sans-serif';
@@ -125,7 +126,10 @@ export class WorldScene {
   setHi(canvas, R) { this.hiG = canvas ? canvas.getContext("2d") : null; this.hiScale = R; }
   // carBottom: where the nearest car sits on the road scene: here, the top of the answer bar
   resize(w, h, carBottom) {
-    this.W = w; this.H = h; this.u = Math.max(1, w / 320);
+    this.W = w; this.H = h;
+    // the shared canvas follows (with the phone keyboard up the screen is much shorter): a part left
+    // over from the old size would never be redrawn and smears into streaks
+    if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; } this.u = Math.max(1, w / 320);
     this.bottom = carBottom || h * 0.82;
   }
   // the area the cars stay in: below the question card, above the answer bar
@@ -146,7 +150,7 @@ export class WorldScene {
     this.cards = []; this.particles = [];
   }
   // zoom to fit a span of the map; never so far out that the map stops filling the screen top to bottom
-  fitZ(spanWorld) { return clamp(Math.min(this.W * 0.7, (this.bottom - this.playTop()) * 1.4) / Math.max(30, spanWorld), Math.max(this.W / MW, this.H / MH * 1.02), 4.5); }
+  fitZ(spanWorld) { return clamp(Math.min(this.W * 0.7, (this.bottom - this.playTop()) * 1.4) / Math.max(30, spanWorld), Math.max(this.W / MW, this.H / (BAND_BOT - BAND_TOP) * 1.02), 4.5); }
   // where racer i is on the screen, as fractions (for "+720 M" pops)
   anchor(i) {
     const r = this.racers[i];
@@ -284,11 +288,12 @@ export class WorldScene {
     this.cam.x = (((this.cam.x + dx * kz) % MW) + MW) % MW;
     this.cam.y = lerp(this.cam.y, this.camTo.y, kz);
     this.cam.z = lerp(this.cam.z, this.camTo.z, kz);
-    // keep the map's top and bottom edges off the screen
-    this.cam.z = Math.max(this.cam.z, (this.H / MH) * 1.02);
+    // keep the polar strips off the screen: an equirectangular map smears the Arctic and Antarctica into
+    // streaks, and a short screen (a phone with the keyboard up) would otherwise scroll right down to them
+    this.cam.z = Math.max(this.cam.z, (this.H / (BAND_BOT - BAND_TOP)) * 1.02);
     const cyS = (this.playTop() + this.bottom) / 2;
-    const lo = cyS / this.cam.z, hi = MH - (this.H - cyS) / this.cam.z;
-    this.cam.y = lo <= hi ? clamp(this.cam.y, lo, hi) : MH / 2;
+    const lo = BAND_TOP + cyS / this.cam.z, hi = BAND_BOT - (this.H - cyS) / this.cam.z;
+    this.cam.y = lo <= hi ? clamp(this.cam.y, lo, hi) : (BAND_TOP + BAND_BOT) / 2;
     for (const q of this.particles) { q.life -= dt; if (q.screen) { q.sx += q.vx * dt; q.sy += q.vy * dt; } else { q.wx += (q.vx * dt) / Math.max(0.5, this.cam.z); q.wy += (q.vy * dt) / Math.max(0.5, this.cam.z); } }
     this.particles = this.particles.filter((q) => q.life > 0);
   }
