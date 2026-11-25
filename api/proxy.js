@@ -5,6 +5,12 @@
 export const config = { runtime: "edge" };
 
 const PASS_UP = ["accept", "content-type", "cookie", "origin"];
+// Vercel stops a function that hasn't answered in 25s (players saw that as a disconnect): give up first
+// and say so in JSON the game can read.
+const TIMEOUT_MS = 20000;
+// a dropped connection to the Worker is retried once, except where doing it twice could matter
+const NO_RETRY = new Set(["signup", "checkout", "car-checkout", "mode-checkout", "delete-account", "reset-password", "recovery-code"]);
+const fail = (status, error) => new Response(JSON.stringify({ error }), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const PASS_DOWN = ["cache-control", "content-type", "x-content-type-options", "location"];
 
 export default async function handler(req) {
@@ -26,12 +32,30 @@ export default async function handler(req) {
   if (process.env.PROXY_SECRET) headers.set("x-proxy-secret", process.env.PROXY_SECRET);
 
   const hasBody = !["GET", "HEAD"].includes(req.method);
-  const res = await fetch(target, {
+  const body = hasBody ? await req.arrayBuffer() : undefined;
+  const t0 = Date.now();
+  const ask = () => fetch(target, {
     method: req.method,
     headers,
-    body: hasBody ? await req.arrayBuffer() : undefined,
+    body,
     redirect: "manual",
+    signal: AbortSignal.timeout(Math.max(1000, TIMEOUT_MS - (Date.now() - t0))),
   });
+  let res;
+  try {
+    res = await ask();
+  } catch (e) {
+    const timedOut = e?.name === "TimeoutError" || e?.name === "AbortError";
+    // "Network connection lost": try again once, if there's time left
+    if (timedOut || NO_RETRY.has(route) || Date.now() - t0 > TIMEOUT_MS - 3000) {
+      return fail(timedOut ? 504 : 502, timedOut ? "The server took too long. Try again." : "Connection hiccup. Try again.");
+    }
+    await new Promise((r) => setTimeout(r, 250));
+    try { res = await ask(); } catch (e2) {
+      const t = e2?.name === "TimeoutError" || e2?.name === "AbortError";
+      return fail(t ? 504 : 502, t ? "The server took too long. Try again." : "Connection hiccup. Try again.");
+    }
+  }
 
   const out = new Headers();
   for (const k of PASS_DOWN) {

@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-25d",
+    date: "Nov 25, 2026",
+    title: "Fewer disconnects",
+    items: [
+      "Fixed the game losing its connection to the server during busy times: it now quietly tries again.",
+      "Answer checks that used to hang now finish quickly, so you can try another answer straight away.",
+    ],
+  },
+  {
     id: "2026-11-25c",
     date: "Nov 25, 2026",
     title: "Cleaner game mode screens",

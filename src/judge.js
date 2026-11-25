@@ -14,6 +14,9 @@ export const JUDGE_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 // is ~9,000 of the free 10,000 neurons a day. (The smaller llama-3.1-8b is 7x cheaper but gets rhymes wrong.)
 export const JUDGE_DAILY_CAP = 700;
 const JUDGE_PER_PLAYER_HOUR = 40;
+// the race clock is running and the game stops waiting after 10s: a slow model is given up on (and the
+// answer isn't remembered as wrong, so the player can try it again)
+const JUDGE_TIMEOUT_MS = 5000;
 
 const PROMPTS = new Set(JUDGE_PROMPTS);
 export const canJudge = (env, prompt) => !!env.AI && PROMPTS.has(prompt);
@@ -43,7 +46,9 @@ export async function judgeAnswer(env, prompt, answer, request = null) {
   // per player first (doesn't use up the day), then the daily cap
   if (request && !(await underLimit(env, "judge-ip", clientIp(request, env), JUDGE_PER_PLAYER_HOUR, 3600))) return { found: false };
   if (!(await underLimit(env, "judge-day", "all", JUDGE_DAILY_CAP, 86400))) return { found: false };
-  const out = await env.AI.run(JUDGE_MODEL, {
+  let timer;
+  const late = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("judge timed out")), JUDGE_TIMEOUT_MS); });
+  const out = await Promise.race([late, env.AI.run(JUDGE_MODEL, {
     messages: [
       { role: "system", content: SYSTEM },
       { role: "user", content: `Prompt: ${prompt}\nPlayer's answer: ${JSON.stringify(answer)}` },
@@ -51,7 +56,7 @@ export async function judgeAnswer(env, prompt, answer, request = null) {
     response_format: { type: "json_schema", json_schema: SCHEMA },
     max_tokens: 120,
     temperature: 0,
-  });
+  })]).finally(() => clearTimeout(timer)); // a timeout throws: src/check.js answers 504, not cached
   let v = out?.response;
   if (typeof v === "string") { try { v = JSON.parse(v); } catch { return { found: false }; } }
   if (!v || v.valid !== true || !(v.commonness in TIER)) return { found: false };
