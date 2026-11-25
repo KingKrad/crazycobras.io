@@ -3,258 +3,151 @@
 export const FILM = `
 # screen
 // director
-fdir/georgelucas | 1 | film | g:director | Name a film directed by George Lucas | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q38222. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/peterjackson | 1 | film | g:director | Name a film directed by Peter Jackson | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q4465. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/clinteastwood | 1 | film | g:director | Name a film directed by Clint Eastwood | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q43203. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/francisfordcoppola | 1 | film | g:director | Name a film directed by Francis Ford Coppola | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q56094. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/davidfincher | 1 | film | g:director | Name a film directed by David Fincher | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q184903. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/michaelbay | 1 | film | g:director | Name a film directed by Michael Bay | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q59259. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/guillermodeltoro | 1 | film | g:director | Name a film directed by Guillermo del Toro | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q219124. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/denisvilleneuve | 1 | film | g:director | Name a film directed by Denis Villeneuve | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q548823. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/hayaomiyazaki | 1 | film | g:director | Name a film directed by Hayao Miyazaki | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55400. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/sofiacoppola | 1 | film | g:director | Name a film directed by Sofia Coppola | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193628. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/spikelee | 1 | film | g:director | Name a film directed by Spike Lee | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51566. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/ronhoward | 1 | film | g:director | Name a film directed by Ron Howard | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103646. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/robertzemeckis | 1 | film | g:director | Name a film directed by Robert Zemeckis | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q187364. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/woodyallen | 1 | film | g:director | Name a film directed by Woody Allen | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25089. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/joelcoen | 1 | film | g:director | Name a film directed by Joel Coen | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q13595311. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/tonyscott | 1 | film | g:director | Name a film directed by Tony Scott | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193648. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/stevensoderbergh | 2 | film | g:director | Name a film directed by Steven Soderbergh | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103917. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/oliverstone | 2 | film | g:director | Name a film directed by Oliver Stone | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q179497. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/briandepalma | 2 | film | g:director | Name a film directed by Brian De Palma | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q189526. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johncarpenter | 2 | film | g:director | Name a film directed by John Carpenter | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q95008. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/samraimi | 2 | film | g:director | Name a film directed by Sam Raimi | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q275402. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/zacksnyder | 2 | film | g:director | Name a film directed by Zack Snyder | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q139890. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/taikawaititi | 2 | film | g:director | Name a film directed by Taika Waititi | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q2388576. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/guyritchie | 2 | film | g:director | Name a film directed by Guy Ritchie | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192990. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/dannyboyle | 2 | film | g:director | Name a film directed by Danny Boyle | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q134867. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/paulthomasanderson | 2 | film | g:director | Name a film directed by Paul Thomas Anderson | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25132. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/darrenaronofsky | 2 | film | g:director | Name a film directed by Darren Aronofsky | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192762. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/mnightshyamalan | 2 | film | g:director | Name a film directed by M. Night Shyamalan | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51489. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/wescraven | 2 | film | g:director | Name a film directed by Wes Craven | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q223992. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnhughes | 2 | film | g:director | Name a film directed by John Hughes | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q311263. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/robreiner | 2 | film | g:director | Name a film directed by Rob Reiner | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q287607. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/melbrooks | 2 | film | g:director | Name a film directed by Mel Brooks | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q104266. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnwoo | 2 | film | g:director | Name a film directed by John Woo | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55432. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/anglee | 2 | film | g:director | Name a film directed by Ang Lee | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q160726. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/akirakurosawa | 2 | film | g:director | Name a film directed by Akira Kurosawa | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q8006. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/federicofellini | 2 | film | g:director | Name a film directed by Federico Fellini | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7371. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/ingmarbergman | 2 | film | g:director | Name a film directed by Ingmar Bergman | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7546. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/pedroalmodovar | 2 | film | g:director | Name a film directed by Pedro Almodóvar | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55171. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/bongjoonho | 2 | film | g:director | Name a film directed by Bong Joon-ho | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q495980. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/parkchanwook | 2 | film | g:director | Name a film directed by Park Chan-wook | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q315484. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/lucbesson | 2 | film | g:director | Name a film directed by Luc Besson | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q484779. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/romanpolanski | 2 | film | g:director | Name a film directed by Roman Polanski | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51552. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/davidlynch | 2 | film | g:director | Name a film directed by David Lynch | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q2071. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/terrygilliam | 2 | film | g:director | Name a film directed by Terry Gilliam | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25078. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/richardlinklater | 2 | film | g:director | Name a film directed by Richard Linklater | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q40035. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/ivanreitman | 2 | film | g:director | Name a film directed by Ivan Reitman | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q380272. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/chriscolumbus | 2 | film | g:director | Name a film directed by Chris Columbus | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q75079. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/joerusso | 2 | film | g:director | Name a film directed by Joe Russo | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q20675767. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/jameswan | 3 | film | g:director | Name a film directed by James Wan | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q108047434. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/jonfavreau | 3 | film | g:director | Name a film directed by Jon Favreau | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q295964. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/shawnlevy | 3 | film | g:director | Name a film directed by Shawn Levy | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q323076. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/edgarwright | 3 | film | g:director | Name a film directed by Edgar Wright | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q522057. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/kathrynbigelow | 3 | film | g:director | Name a film directed by Kathryn Bigelow | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q34816. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/sergioleone | 3 | film | g:director | Name a film directed by Sergio Leone | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q164562. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/billywilder | 3 | film | g:director | Name a film directed by Billy Wilder | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51547. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/frankcapra | 3 | film | g:director | Name a film directed by Frank Capra | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51492. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnford | 3 | film | g:director | Name a film directed by John Ford | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51114. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/orsonwelles | 3 | film | g:director | Name a film directed by Orson Welles | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q24829. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/charliechaplin | 3 | film | g:director | Name a film directed by Charlie Chaplin | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q882. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/davidcronenberg | 3 | film | g:director | Name a film directed by David Cronenberg | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55422. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/robzombie | 3 | film | g:director | Name a film directed by Rob Zombie | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q298255. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/adammckay | 3 | film | g:director | Name a film directed by Adam McKay | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q350405. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/juddapatow | 3 | film | g:director | Name a film directed by Judd Apatow | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q325396. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/toddphillips | 3 | film | g:director | Name a film directed by Todd Phillips | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q362824. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/sammendes | 3 | film | g:director | Name a film directed by Sam Mendes | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q223233. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/bazluhrmann | 3 | film | g:director | Name a film directed by Baz Luhrmann | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q250545. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/damienchazelle | 3 | film | g:director | Name a film directed by Damien Chazelle | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q18350026. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/alejandrogonzalezinarrit | 3 | film | g:director | Name a film directed by Alejandro González Iñárritu | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55215. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/alfonsocuaron | 3 | film | g:director | Name a film directed by Alfonso Cuarón | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q28028. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/paulverhoeven | 3 | film | g:director | Name a film directed by Paul Verhoeven | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q129079. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/rolandemmerich | 3 | film | g:director | Name a film directed by Roland Emmerich | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q60100. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/goreverbinski | 3 | film | g:director | Name a film directed by Gore Verbinski | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q295463. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/bradbird | 3 | film | g:director | Name a film directed by Brad Bird | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q310960. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/johnlasseter | 3 | film | g:director | Name a film directed by John Lasseter | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q269214. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/petedocter | 3 | film | g:director | Name a film directed by Pete Docter | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q357627. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/andrewstanton | 3 | film | g:director | Name a film directed by Andrew Stanton | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q328723. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/leeunkrich | 3 | film | g:director | Name a film directed by Lee Unkrich | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q380920. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/tylerperry | 3 | film | g:director | Name a film directed by Tyler Perry | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q686301. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/kevinsmith | 3 | film | g:director | Name a film directed by Kevin Smith | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q489831. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/mikenichols | 3 | film | g:director | Name a film directed by Mike Nichols | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51537. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/sydneypollack | 3 | film | g:director | Name a film directed by Sydney Pollack | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51522. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/pennymarshall | 3 | film | g:director | Name a film directed by Penny Marshall | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q237659. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fdir/noraephron | 3 | film | g:director | Name a film directed by Nora Ephron | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q214677. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/georgelucas | 1 | film | g:director | Name a George Lucas film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q38222. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/peterjackson | 1 | film | g:director | Name a Peter Jackson film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q4465. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/clinteastwood | 1 | film | g:director | Name a Clint Eastwood film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q43203. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/francisfordcoppola | 2 | film | g:director | Name a Francis Ford Coppola film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q56094. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/davidfincher | 2 | film | g:director | Name a David Fincher film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q184903. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/michaelbay | 2 | film | g:director | Name a Michael Bay film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q59259. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/guillermodeltoro | 2 | film | g:director | Name a Guillermo del Toro film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q219124. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/denisvilleneuve | 2 | film | g:director | Name a Denis Villeneuve film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q548823. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/hayaomiyazaki | 2 | film | g:director | Name a Hayao Miyazaki film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55400. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/sofiacoppola | 2 | film | g:director | Name a Sofia Coppola film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193628. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/spikelee | 2 | film | g:director | Name a Spike Lee film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51566. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/ronhoward | 2 | film | g:director | Name a Ron Howard film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103646. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/robertzemeckis | 2 | film | g:director | Name a Robert Zemeckis film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q187364. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/woodyallen | 2 | film | g:director | Name a Woody Allen film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25089. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/joelcoen | 2 | film | g:director | Name a Joel Coen film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q13595311. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/tonyscott | 2 | film | g:director | Name a Tony Scott film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q193648. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/stevensoderbergh | 2 | film | g:director | Name a Steven Soderbergh film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q103917. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/oliverstone | 2 | film | g:director | Name an Oliver Stone film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q179497. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/briandepalma | 2 | film | g:director | Name a Brian De Palma film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q189526. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/johncarpenter | 2 | film | g:director | Name a John Carpenter film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q95008. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/samraimi | 2 | film | g:director | Name a Sam Raimi film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q275402. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/zacksnyder | 2 | film | g:director | Name a Zack Snyder film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q139890. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/taikawaititi | 2 | film | g:director | Name a Taika Waititi film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q2388576. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/guyritchie | 2 | film | g:director | Name a Guy Ritchie film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192990. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/dannyboyle | 2 | film | g:director | Name a Danny Boyle film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q134867. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/paulthomasanderson | 2 | film | g:director | Name a Paul Thomas Anderson film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q25132. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/darrenaronofsky | 2 | film | g:director | Name a Darren Aronofsky film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q192762. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/mnightshyamalan | 2 | film | g:director | Name a M. Night Shyamalan film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q51489. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/wescraven | 3 | film | g:director | Name a Wes Craven film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q223992. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/johnhughes | 3 | film | g:director | Name a John Hughes film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q311263. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/robreiner | 3 | film | g:director | Name a Rob Reiner film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q287607. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/melbrooks | 3 | film | g:director | Name a Mel Brooks film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q104266. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/johnwoo | 3 | film | g:director | Name a John Woo film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55432. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/anglee | 3 | film | g:director | Name an Ang Lee film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q160726. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/akirakurosawa | 3 | film | g:director | Name an Akira Kurosawa film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q8006. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/federicofellini | 3 | film | g:director | Name a Federico Fellini film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7371. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/ingmarbergman | 3 | film | g:director | Name an Ingmar Bergman film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q7546. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fdir/pedroalmodovar | 3 | film | g:director | Name a Pedro Almodóvar film | autotop=12 max=800 min=1 minans=6 w:?i wdt:P57 wd:Q55171. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // star
-fstar/robertdeniro | 1 | film | g:star | Name a movie starring Robert De Niro | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q36949. } UNION { ?i wdt:P725 wd:Q36949. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/alpacino | 1 | film | g:star | Name a movie starring Al Pacino | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41163. } UNION { ?i wdt:P725 wd:Q41163. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/juliaroberts | 1 | film | g:star | Name a movie starring Julia Roberts | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40523. } UNION { ?i wdt:P725 wd:Q40523. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/scarlettjohansson | 1 | film | g:star | Name a movie starring Scarlett Johansson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34436. } UNION { ?i wdt:P725 wd:Q34436. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/robertdowneyjr | 1 | film | g:star | Name a movie starring Robert Downey Jr. | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q165219. } UNION { ?i wdt:P725 wd:Q165219. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/chrishemsworth | 1 | film | g:star | Name a movie starring Chris Hemsworth | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q54314. } UNION { ?i wdt:P725 wd:Q54314. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/chrisevans | 1 | film | g:star | Name a movie starring Chris Evans | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q178348. } UNION { ?i wdt:P725 wd:Q178348. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/chrispratt | 1 | film | g:star | Name a movie starring Chris Pratt | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q503706. } UNION { ?i wdt:P725 wd:Q503706. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/samuelljackson | 1 | film | g:star | Name a movie starring Samuel L. Jackson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q172678. } UNION { ?i wdt:P725 wd:Q172678. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jenniferlawrence | 1 | film | g:star | Name a movie starring Jennifer Lawrence | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189490. } UNION { ?i wdt:P725 wd:Q189490. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/ryangosling | 1 | film | g:star | Name a movie starring Ryan Gosling | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q193815. } UNION { ?i wdt:P725 wd:Q193815. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/ryanreynolds | 1 | film | g:star | Name a movie starring Ryan Reynolds | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q192682. } UNION { ?i wdt:P725 wd:Q192682. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/mattdamon | 1 | film | g:star | Name a movie starring Matt Damon | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q175535. } UNION { ?i wdt:P725 wd:Q175535. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/georgeclooney | 1 | film | g:star | Name a movie starring George Clooney | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23844. } UNION { ?i wdt:P725 wd:Q23844. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/nicolekidman | 1 | film | g:star | Name a movie starring Nicole Kidman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q37459. } UNION { ?i wdt:P725 wd:Q37459. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/sandrabullock | 1 | film | g:star | Name a movie starring Sandra Bullock | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40791. } UNION { ?i wdt:P725 wd:Q40791. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/camerondiaz | 1 | film | g:star | Name a movie starring Cameron Diaz | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44380. } UNION { ?i wdt:P725 wd:Q44380. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/benstiller | 1 | film | g:star | Name a movie starring Ben Stiller | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q47100. } UNION { ?i wdt:P725 wd:Q47100. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/eddiemurphy | 1 | film | g:star | Name a movie starring Eddie Murphy | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43874. } UNION { ?i wdt:P725 wd:Q43874. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/owenwilson | 1 | film | g:star | Name a movie starring Owen Wilson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q161916. } UNION { ?i wdt:P725 wd:Q161916. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/willferrell | 1 | film | g:star | Name a movie starring Will Ferrell | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q218503. } UNION { ?i wdt:P725 wd:Q218503. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jackblack | 1 | film | g:star | Name a movie starring Jack Black | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q483907. } UNION { ?i wdt:P725 wd:Q483907. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/stevecarell | 1 | film | g:star | Name a movie starring Steve Carell | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q216221. } UNION { ?i wdt:P725 wd:Q216221. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/vindiesel | 1 | film | g:star | Name a movie starring Vin Diesel | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q178166. } UNION { ?i wdt:P725 wd:Q178166. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jasonstatham | 1 | film | g:star | Name a movie starring Jason Statham | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q169963. } UNION { ?i wdt:P725 wd:Q169963. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/sylvesterstallone | 1 | film | g:star | Name a movie starring Sylvester Stallone | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40026. } UNION { ?i wdt:P725 wd:Q40026. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/melgibson | 1 | film | g:star | Name a movie starring Mel Gibson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42229. } UNION { ?i wdt:P725 wd:Q42229. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/nicolascage | 1 | film | g:star | Name a movie starring Nicolas Cage | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42869. } UNION { ?i wdt:P725 wd:Q42869. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/liamneeson | 1 | film | g:star | Name a movie starring Liam Neeson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q58444. } UNION { ?i wdt:P725 wd:Q58444. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/christianbale | 1 | film | g:star | Name a movie starring Christian Bale | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q45772. } UNION { ?i wdt:P725 wd:Q45772. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/hughjackman | 1 | film | g:star | Name a movie starring Hugh Jackman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q129591. } UNION { ?i wdt:P725 wd:Q129591. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/annehathaway | 1 | film | g:star | Name a movie starring Anne Hathaway | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q36301. } UNION { ?i wdt:P725 wd:Q36301. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/natalieportman | 1 | film | g:star | Name a movie starring Natalie Portman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q37876. } UNION { ?i wdt:P725 wd:Q37876. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/emmawatson | 1 | film | g:star | Name a movie starring Emma Watson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q39476. } UNION { ?i wdt:P725 wd:Q39476. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/danielradcliffe | 1 | film | g:star | Name a movie starring Daniel Radcliffe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q38119. } UNION { ?i wdt:P725 wd:Q38119. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/katewinslet | 1 | film | g:star | Name a movie starring Kate Winslet | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q202765. } UNION { ?i wdt:P725 wd:Q202765. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/cateblanchett | 1 | film | g:star | Name a movie starring Cate Blanchett | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q80966. } UNION { ?i wdt:P725 wd:Q80966. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/margotrobbie | 1 | film | g:star | Name a movie starring Margot Robbie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q1924847. } UNION { ?i wdt:P725 wd:Q1924847. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/zendaya | 1 | film | g:star | Name a movie starring Zendaya | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189489. } UNION { ?i wdt:P725 wd:Q189489. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/tomholland | 1 | film | g:star | Name a movie starring Tom Holland | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q2023710. } UNION { ?i wdt:P725 wd:Q2023710. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/timotheechalamet | 1 | film | g:star | Name a movie starring Timothée Chalamet | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q19877770. } UNION { ?i wdt:P725 wd:Q19877770. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/florencepugh | 1 | film | g:star | Name a movie starring Florence Pugh | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q22277803. } UNION { ?i wdt:P725 wd:Q22277803. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jakegyllenhaal | 1 | film | g:star | Name a movie starring Jake Gyllenhaal | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q133313. } UNION { ?i wdt:P725 wd:Q133313. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/markwahlberg | 1 | film | g:star | Name a movie starring Mark Wahlberg | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q164119. } UNION { ?i wdt:P725 wd:Q164119. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/kevinhart | 1 | film | g:star | Name a movie starring Kevin Hart | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q618352. } UNION { ?i wdt:P725 wd:Q618352. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jamiefoxx | 1 | film | g:star | Name a movie starring Jamie Foxx | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q171905. } UNION { ?i wdt:P725 wd:Q171905. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michaelbjordan | 1 | film | g:star | Name a movie starring Michael B. Jordan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q3308007. } UNION { ?i wdt:P725 wd:Q3308007. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/chadwickboseman | 1 | film | g:star | Name a movie starring Chadwick Boseman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q5066520. } UNION { ?i wdt:P725 wd:Q5066520. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/idriselba | 1 | film | g:star | Name a movie starring Idris Elba | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q342604. } UNION { ?i wdt:P725 wd:Q342604. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/benedictcumberbatch | 1 | film | g:star | Name a movie starring Benedict Cumberbatch | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q244674. } UNION { ?i wdt:P725 wd:Q244674. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/tomhiddleston | 1 | film | g:star | Name a movie starring Tom Hiddleston | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q295803. } UNION { ?i wdt:P725 wd:Q295803. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/ianmckellen | 1 | film | g:star | Name a movie starring Ian McKellen | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q170510. } UNION { ?i wdt:P725 wd:Q170510. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/garyoldman | 1 | film | g:star | Name a movie starring Gary Oldman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q83492. } UNION { ?i wdt:P725 wd:Q83492. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/anthonyhopkins | 1 | film | g:star | Name a movie starring Anthony Hopkins | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q65932. } UNION { ?i wdt:P725 wd:Q65932. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jacknicholson | 1 | film | g:star | Name a movie starring Jack Nicholson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q39792. } UNION { ?i wdt:P725 wd:Q39792. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/clinteastwood | 2 | film | g:star | Name a movie starring Clint Eastwood | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43203. } UNION { ?i wdt:P725 wd:Q43203. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/marlonbrando | 2 | film | g:star | Name a movie starring Marlon Brando | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34012. } UNION { ?i wdt:P725 wd:Q34012. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/paulnewman | 2 | film | g:star | Name a movie starring Paul Newman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41871. } UNION { ?i wdt:P725 wd:Q41871. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/audreyhepburn | 2 | film | g:star | Name a movie starring Audrey Hepburn | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42786. } UNION { ?i wdt:P725 wd:Q42786. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/marilynmonroe | 2 | film | g:star | Name a movie starring Marilyn Monroe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4616. } UNION { ?i wdt:P725 wd:Q4616. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/humphreybogart | 2 | film | g:star | Name a movie starring Humphrey Bogart | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16390. } UNION { ?i wdt:P725 wd:Q16390. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jamesstewart | 2 | film | g:star | Name a movie starring James Stewart | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q102462. } UNION { ?i wdt:P725 wd:Q102462. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/carygrant | 2 | film | g:star | Name a movie starring Cary Grant | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q83410. } UNION { ?i wdt:P725 wd:Q83410. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/judygarland | 2 | film | g:star | Name a movie starring Judy Garland | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q11637. } UNION { ?i wdt:P725 wd:Q11637. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/elizabethtaylor | 2 | film | g:star | Name a movie starring Elizabeth Taylor | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34851. } UNION { ?i wdt:P725 wd:Q34851. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/johnwayne | 2 | film | g:star | Name a movie starring John Wayne | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40531. } UNION { ?i wdt:P725 wd:Q40531. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/genewilder | 2 | film | g:star | Name a movie starring Gene Wilder | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q191966. } UNION { ?i wdt:P725 wd:Q191966. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/billmurray | 2 | film | g:star | Name a movie starring Bill Murray | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q29250. } UNION { ?i wdt:P725 wd:Q29250. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/stevemartin | 2 | film | g:star | Name a movie starring Steve Martin | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16473. } UNION { ?i wdt:P725 wd:Q16473. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michaelkeaton | 2 | film | g:star | Name a movie starring Michael Keaton | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q138005. } UNION { ?i wdt:P725 wd:Q138005. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jeffbridges | 2 | film | g:star | Name a movie starring Jeff Bridges | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q174843. } UNION { ?i wdt:P725 wd:Q174843. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/kevincostner | 2 | film | g:star | Name a movie starring Kevin Costner | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q11930. } UNION { ?i wdt:P725 wd:Q11930. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/russellcrowe | 2 | film | g:star | Name a movie starring Russell Crowe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q129817. } UNION { ?i wdt:P725 wd:Q129817. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/joaquinphoenix | 2 | film | g:star | Name a movie starring Joaquin Phoenix | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q185140. } UNION { ?i wdt:P725 wd:Q185140. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/heathledger | 2 | film | g:star | Name a movie starring Heath Ledger | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40572. } UNION { ?i wdt:P725 wd:Q40572. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jaredleto | 2 | film | g:star | Name a movie starring Jared Leto | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q484523. } UNION { ?i wdt:P725 wd:Q484523. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/margotkidder | 2 | film | g:star | Name a movie starring Margot Kidder | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q234471. } UNION { ?i wdt:P725 wd:Q234471. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/sigourneyweaver | 2 | film | g:star | Name a movie starring Sigourney Weaver | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q102124. } UNION { ?i wdt:P725 wd:Q102124. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jodiefoster | 2 | film | g:star | Name a movie starring Jodie Foster | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41351. } UNION { ?i wdt:P725 wd:Q41351. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michellepfeiffer | 2 | film | g:star | Name a movie starring Michelle Pfeiffer | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q159778. } UNION { ?i wdt:P725 wd:Q159778. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/halleberry | 2 | film | g:star | Name a movie starring Halle Berry | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q1033016. } UNION { ?i wdt:P725 wd:Q1033016. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/charlizetheron | 2 | film | g:star | Name a movie starring Charlize Theron | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q80046. } UNION { ?i wdt:P725 wd:Q80046. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/reesewitherspoon | 2 | film | g:star | Name a movie starring Reese Witherspoon | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44063. } UNION { ?i wdt:P725 wd:Q44063. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jenniferaniston | 2 | film | g:star | Name a movie starring Jennifer Aniston | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q32522. } UNION { ?i wdt:P725 wd:Q32522. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/drewbarrymore | 2 | film | g:star | Name a movie starring Drew Barrymore | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q676094. } UNION { ?i wdt:P725 wd:Q676094. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/whoopigoldberg | 2 | film | g:star | Name a movie starring Whoopi Goldberg | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q49001. } UNION { ?i wdt:P725 wd:Q49001. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/octaviaspencer | 2 | film | g:star | Name a movie starring Octavia Spencer | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q229254. } UNION { ?i wdt:P725 wd:Q229254. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/violadavis | 2 | film | g:star | Name a movie starring Viola Davis | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q229181. } UNION { ?i wdt:P725 wd:Q229181. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/lupitanyongo | 2 | film | g:star | Name a movie starring Lupita Nyong'o | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q3840847. } UNION { ?i wdt:P725 wd:Q3840847. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/galgadot | 2 | film | g:star | Name a movie starring Gal Gadot | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q185654. } UNION { ?i wdt:P725 wd:Q185654. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jasonmomoa | 2 | film | g:star | Name a movie starring Jason Momoa | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q315271. } UNION { ?i wdt:P725 wd:Q315271. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/henrycavill | 2 | film | g:star | Name a movie starring Henry Cavill | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q295498. } UNION { ?i wdt:P725 wd:Q295498. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/paulrudd | 2 | film | g:star | Name a movie starring Paul Rudd | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q276525. } UNION { ?i wdt:P725 wd:Q276525. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/markruffalo | 2 | film | g:star | Name a movie starring Mark Ruffalo | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41422. } UNION { ?i wdt:P725 wd:Q41422. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jeremyrenner | 2 | film | g:star | Name a movie starring Jeremy Renner | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23365. } UNION { ?i wdt:P725 wd:Q23365. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/elizabetholsen | 2 | film | g:star | Name a movie starring Elizabeth Olsen | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q234644. } UNION { ?i wdt:P725 wd:Q234644. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/chrispine | 2 | film | g:star | Name a movie starring Chris Pine | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23466. } UNION { ?i wdt:P725 wd:Q23466. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/zoesaldana | 2 | film | g:star | Name a movie starring Zoe Saldaña | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q190162. } UNION { ?i wdt:P725 wd:Q190162. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/davebautista | 2 | film | g:star | Name a movie starring Dave Bautista | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44158. } UNION { ?i wdt:P725 wd:Q44158. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/karengillan | 2 | film | g:star | Name a movie starring Karen Gillan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q231237. } UNION { ?i wdt:P725 wd:Q231237. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/pedropascal | 2 | film | g:star | Name a movie starring Pedro Pascal | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q14752155. } UNION { ?i wdt:P725 wd:Q14752155. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/oscarisaac | 2 | film | g:star | Name a movie starring Oscar Isaac | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q336788. } UNION { ?i wdt:P725 wd:Q336788. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/daisyridley | 2 | film | g:star | Name a movie starring Daisy Ridley | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16738674. } UNION { ?i wdt:P725 wd:Q16738674. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/adamdriver | 2 | film | g:star | Name a movie starring Adam Driver | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4678990. } UNION { ?i wdt:P725 wd:Q4678990. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/markhamill | 2 | film | g:star | Name a movie starring Mark Hamill | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q210447. } UNION { ?i wdt:P725 wd:Q210447. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/carriefisher | 2 | film | g:star | Name a movie starring Carrie Fisher | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q108941. } UNION { ?i wdt:P725 wd:Q108941. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/ewanmcgregor | 2 | film | g:star | Name a movie starring Ewan McGregor | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q165518. } UNION { ?i wdt:P725 wd:Q165518. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/orlandobloom | 2 | film | g:star | Name a movie starring Orlando Bloom | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44467. } UNION { ?i wdt:P725 wd:Q44467. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/keiraknightley | 2 | film | g:star | Name a movie starring Keira Knightley | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42581. } UNION { ?i wdt:P725 wd:Q42581. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/rupertgrint | 2 | film | g:star | Name a movie starring Rupert Grint | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q19190. } UNION { ?i wdt:P725 wd:Q19190. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/alanrickman | 2 | film | g:star | Name a movie starring Alan Rickman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q106481. } UNION { ?i wdt:P725 wd:Q106481. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/helenabonhamcarter | 2 | film | g:star | Name a movie starring Helena Bonham Carter | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q170428. } UNION { ?i wdt:P725 wd:Q170428. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/emmathompson | 2 | film | g:star | Name a movie starring Emma Thompson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q168724. } UNION { ?i wdt:P725 wd:Q168724. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/hughgrant | 2 | film | g:star | Name a movie starring Hugh Grant | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q163286. } UNION { ?i wdt:P725 wd:Q163286. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/colinfirth | 2 | film | g:star | Name a movie starring Colin Firth | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q162492. } UNION { ?i wdt:P725 wd:Q162492. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/judelaw | 3 | film | g:star | Name a movie starring Jude Law | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q160432. } UNION { ?i wdt:P725 wd:Q160432. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/danielcraig | 3 | film | g:star | Name a movie starring Daniel Craig | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4547. } UNION { ?i wdt:P725 wd:Q4547. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/piercebrosnan | 3 | film | g:star | Name a movie starring Pierce Brosnan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q81520. } UNION { ?i wdt:P725 wd:Q81520. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/seanconnery | 3 | film | g:star | Name a movie starring Sean Connery | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4573. } UNION { ?i wdt:P725 wd:Q4573. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michaelcaine | 3 | film | g:star | Name a movie starring Michael Caine | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q123351. } UNION { ?i wdt:P725 wd:Q123351. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/tomhardy | 3 | film | g:star | Name a movie starring Tom Hardy | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q208026. } UNION { ?i wdt:P725 wd:Q208026. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/cillianmurphy | 3 | film | g:star | Name a movie starring Cillian Murphy | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q202589. } UNION { ?i wdt:P725 wd:Q202589. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/matthewmcconaughey | 3 | film | g:star | Name a movie starring Matthew McConaughey | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q188955. } UNION { ?i wdt:P725 wd:Q188955. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/woodyharrelson | 3 | film | g:star | Name a movie starring Woody Harrelson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q201279. } UNION { ?i wdt:P725 wd:Q201279. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jonahhill | 3 | film | g:star | Name a movie starring Jonah Hill | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q313388. } UNION { ?i wdt:P725 wd:Q313388. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/sethrogen | 3 | film | g:star | Name a movie starring Seth Rogen | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q220308. } UNION { ?i wdt:P725 wd:Q220308. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michaelcera | 3 | film | g:star | Name a movie starring Michael Cera | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q309555. } UNION { ?i wdt:P725 wd:Q309555. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/lindsaylohan | 3 | film | g:star | Name a movie starring Lindsay Lohan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44903. } UNION { ?i wdt:P725 wd:Q44903. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/amandaseyfried | 3 | film | g:star | Name a movie starring Amanda Seyfried | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189226. } UNION { ?i wdt:P725 wd:Q189226. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/annakendrick | 3 | film | g:star | Name a movie starring Anna Kendrick | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q67701. } UNION { ?i wdt:P725 wd:Q67701. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/rebelwilson | 3 | film | g:star | Name a movie starring Rebel Wilson | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q442897. } UNION { ?i wdt:P725 wd:Q442897. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/melissamccarthy | 3 | film | g:star | Name a movie starring Melissa McCarthy | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q229048. } UNION { ?i wdt:P725 wd:Q229048. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/tiffanyhaddish | 3 | film | g:star | Name a movie starring Tiffany Haddish | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q11835264. } UNION { ?i wdt:P725 wd:Q11835264. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/queenlatifah | 3 | film | g:star | Name a movie starring Queen Latifah | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q1112005. } UNION { ?i wdt:P725 wd:Q1112005. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/icecube | 3 | film | g:star | Name a movie starring Ice Cube | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q173637. } UNION { ?i wdt:P725 wd:Q173637. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/martinlawrence | 3 | film | g:star | Name a movie starring Martin Lawrence | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q183542. } UNION { ?i wdt:P725 wd:Q183542. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/wesleysnipes | 3 | film | g:star | Name a movie starring Wesley Snipes | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189694. } UNION { ?i wdt:P725 wd:Q189694. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/laurencefishburne | 3 | film | g:star | Name a movie starring Laurence Fishburne | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q193048. } UNION { ?i wdt:P725 wd:Q193048. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/forestwhitaker | 3 | film | g:star | Name a movie starring Forest Whitaker | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q182763. } UNION { ?i wdt:P725 wd:Q182763. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/shahrukhkhan | 3 | film | g:star | Name a movie starring Shah Rukh Khan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q9535. } UNION { ?i wdt:P725 wd:Q9535. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/amitabhbachchan | 3 | film | g:star | Name a movie starring Amitabh Bachchan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q9570. } UNION { ?i wdt:P725 wd:Q9570. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/aamirkhan | 3 | film | g:star | Name a movie starring Aamir Khan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q9557. } UNION { ?i wdt:P725 wd:Q9557. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/salmankhan | 3 | film | g:star | Name a movie starring Salman Khan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q9543. } UNION { ?i wdt:P725 wd:Q9543. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/priyankachopra | 3 | film | g:star | Name a movie starring Priyanka Chopra | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q158957. } UNION { ?i wdt:P725 wd:Q158957. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/deepikapadukone | 3 | film | g:star | Name a movie starring Deepika Padukone | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q159178. } UNION { ?i wdt:P725 wd:Q159178. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jetli | 3 | film | g:star | Name a movie starring Jet Li | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q159577. } UNION { ?i wdt:P725 wd:Q159577. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/brucelee | 3 | film | g:star | Name a movie starring Bruce Lee | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16397. } UNION { ?i wdt:P725 wd:Q16397. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/michelleyeoh | 3 | film | g:star | Name a movie starring Michelle Yeoh | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q214289. } UNION { ?i wdt:P725 wd:Q214289. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/kenwatanabe | 3 | film | g:star | Name a movie starring Ken Watanabe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q211553. } UNION { ?i wdt:P725 wd:Q211553. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/penelopecruz | 3 | film | g:star | Name a movie starring Penélope Cruz | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q39666. } UNION { ?i wdt:P725 wd:Q39666. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/antoniobanderas | 3 | film | g:star | Name a movie starring Antonio Banderas | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41548. } UNION { ?i wdt:P725 wd:Q41548. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/javierbardem | 3 | film | g:star | Name a movie starring Javier Bardem | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q134895. } UNION { ?i wdt:P725 wd:Q134895. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/salmahayek | 3 | film | g:star | Name a movie starring Salma Hayek | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q125106. } UNION { ?i wdt:P725 wd:Q125106. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/gerarddepardieu | 3 | film | g:star | Name a movie starring Gérard Depardieu | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q106508. } UNION { ?i wdt:P725 wd:Q106508. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/marioncotillard | 3 | film | g:star | Name a movie starring Marion Cotillard | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q8927. } UNION { ?i wdt:P725 wd:Q8927. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/audreytautou | 3 | film | g:star | Name a movie starring Audrey Tautou | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q304123. } UNION { ?i wdt:P725 wd:Q304123. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/jeanreno | 3 | film | g:star | Name a movie starring Jean Reno | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43697. } UNION { ?i wdt:P725 wd:Q43697. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/sophialoren | 3 | film | g:star | Name a movie starring Sophia Loren | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43252. } UNION { ?i wdt:P725 wd:Q43252. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/denzelwashington | 3 | film | g:star | Name a movie starring Denzel Washington | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42101. } UNION { ?i wdt:P725 wd:Q42101. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/brucewillis | 3 | film | g:star | Name a movie starring Bruce Willis | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q2680. } UNION { ?i wdt:P725 wd:Q2680. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/madsmikkelsen | 3 | film | g:star | Name a movie starring Mads Mikkelsen | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q294647. } UNION { ?i wdt:P725 wd:Q294647. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/benaffleck | 3 | film | g:star | Name a movie starring Ben Affleck | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q483118. } UNION { ?i wdt:P725 wd:Q483118. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/angelinajolie | 3 | film | g:star | Name a movie starring Angelina Jolie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q13909. } UNION { ?i wdt:P725 wd:Q13909. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/dustinhoffman | 3 | film | g:star | Name a movie starring Dustin Hoffman | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42930. } UNION { ?i wdt:P725 wd:Q42930. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/emmastone | 3 | film | g:star | Name a movie starring Emma Stone | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q147077. } UNION { ?i wdt:P725 wd:Q147077. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/maggiesmith | 3 | film | g:star | Name a movie starring Maggie Smith | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q172653. } UNION { ?i wdt:P725 wd:Q172653. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstar/emmaroberts | 3 | film | g:star | Name a movie starring Emma Roberts | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q228787. } UNION { ?i wdt:P725 wd:Q228787. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/robertdeniro | 1 | film | g:star | Name a Robert De Niro movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q36949. } UNION { ?i wdt:P725 wd:Q36949. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/alpacino | 1 | film | g:star | Name an Al Pacino movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41163. } UNION { ?i wdt:P725 wd:Q41163. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/juliaroberts | 1 | film | g:star | Name a Julia Roberts movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40523. } UNION { ?i wdt:P725 wd:Q40523. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/scarlettjohansson | 1 | film | g:star | Name a Scarlett Johansson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34436. } UNION { ?i wdt:P725 wd:Q34436. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/robertdowneyjr | 1 | film | g:star | Name a Robert Downey Jr. movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q165219. } UNION { ?i wdt:P725 wd:Q165219. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/chrishemsworth | 1 | film | g:star | Name a Chris Hemsworth movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q54314. } UNION { ?i wdt:P725 wd:Q54314. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/chrisevans | 1 | film | g:star | Name a Chris Evans movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q178348. } UNION { ?i wdt:P725 wd:Q178348. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/chrispratt | 1 | film | g:star | Name a Chris Pratt movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q503706. } UNION { ?i wdt:P725 wd:Q503706. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/samuelljackson | 1 | film | g:star | Name a Samuel L. Jackson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q172678. } UNION { ?i wdt:P725 wd:Q172678. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jenniferlawrence | 1 | film | g:star | Name a Jennifer Lawrence movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189490. } UNION { ?i wdt:P725 wd:Q189490. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/ryangosling | 1 | film | g:star | Name a Ryan Gosling movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q193815. } UNION { ?i wdt:P725 wd:Q193815. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/ryanreynolds | 1 | film | g:star | Name a Ryan Reynolds movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q192682. } UNION { ?i wdt:P725 wd:Q192682. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/mattdamon | 1 | film | g:star | Name a Matt Damon movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q175535. } UNION { ?i wdt:P725 wd:Q175535. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/georgeclooney | 1 | film | g:star | Name a George Clooney movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23844. } UNION { ?i wdt:P725 wd:Q23844. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/nicolekidman | 1 | film | g:star | Name a Nicole Kidman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q37459. } UNION { ?i wdt:P725 wd:Q37459. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/sandrabullock | 1 | film | g:star | Name a Sandra Bullock movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40791. } UNION { ?i wdt:P725 wd:Q40791. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/camerondiaz | 1 | film | g:star | Name a Cameron Diaz movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44380. } UNION { ?i wdt:P725 wd:Q44380. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/benstiller | 1 | film | g:star | Name a Ben Stiller movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q47100. } UNION { ?i wdt:P725 wd:Q47100. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/eddiemurphy | 1 | film | g:star | Name an Eddie Murphy movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43874. } UNION { ?i wdt:P725 wd:Q43874. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/owenwilson | 1 | film | g:star | Name an Owen Wilson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q161916. } UNION { ?i wdt:P725 wd:Q161916. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/willferrell | 1 | film | g:star | Name a Will Ferrell movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q218503. } UNION { ?i wdt:P725 wd:Q218503. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jackblack | 1 | film | g:star | Name a Jack Black movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q483907. } UNION { ?i wdt:P725 wd:Q483907. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/stevecarell | 1 | film | g:star | Name a Steve Carell movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q216221. } UNION { ?i wdt:P725 wd:Q216221. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/vindiesel | 1 | film | g:star | Name a Vin Diesel movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q178166. } UNION { ?i wdt:P725 wd:Q178166. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jasonstatham | 1 | film | g:star | Name a Jason Statham movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q169963. } UNION { ?i wdt:P725 wd:Q169963. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/sylvesterstallone | 1 | film | g:star | Name a Sylvester Stallone movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40026. } UNION { ?i wdt:P725 wd:Q40026. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/melgibson | 1 | film | g:star | Name a Mel Gibson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42229. } UNION { ?i wdt:P725 wd:Q42229. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/nicolascage | 1 | film | g:star | Name a Nicolas Cage movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42869. } UNION { ?i wdt:P725 wd:Q42869. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/liamneeson | 1 | film | g:star | Name a Liam Neeson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q58444. } UNION { ?i wdt:P725 wd:Q58444. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/christianbale | 1 | film | g:star | Name a Christian Bale movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q45772. } UNION { ?i wdt:P725 wd:Q45772. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/hughjackman | 1 | film | g:star | Name a Hugh Jackman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q129591. } UNION { ?i wdt:P725 wd:Q129591. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/annehathaway | 1 | film | g:star | Name an Anne Hathaway movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q36301. } UNION { ?i wdt:P725 wd:Q36301. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/natalieportman | 1 | film | g:star | Name a Natalie Portman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q37876. } UNION { ?i wdt:P725 wd:Q37876. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/emmawatson | 1 | film | g:star | Name an Emma Watson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q39476. } UNION { ?i wdt:P725 wd:Q39476. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/danielradcliffe | 1 | film | g:star | Name a Daniel Radcliffe movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q38119. } UNION { ?i wdt:P725 wd:Q38119. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/katewinslet | 1 | film | g:star | Name a Kate Winslet movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q202765. } UNION { ?i wdt:P725 wd:Q202765. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/cateblanchett | 1 | film | g:star | Name a Cate Blanchett movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q80966. } UNION { ?i wdt:P725 wd:Q80966. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/margotrobbie | 1 | film | g:star | Name a Margot Robbie movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q1924847. } UNION { ?i wdt:P725 wd:Q1924847. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/zendaya | 1 | film | g:star | Name a Zendaya movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q189489. } UNION { ?i wdt:P725 wd:Q189489. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/tomholland | 1 | film | g:star | Name a Tom Holland movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q2023710. } UNION { ?i wdt:P725 wd:Q2023710. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/timotheechalamet | 1 | film | g:star | Name a Timothée Chalamet movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q19877770. } UNION { ?i wdt:P725 wd:Q19877770. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/florencepugh | 1 | film | g:star | Name a Florence Pugh movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q22277803. } UNION { ?i wdt:P725 wd:Q22277803. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jakegyllenhaal | 1 | film | g:star | Name a Jake Gyllenhaal movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q133313. } UNION { ?i wdt:P725 wd:Q133313. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/markwahlberg | 1 | film | g:star | Name a Mark Wahlberg movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q164119. } UNION { ?i wdt:P725 wd:Q164119. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/kevinhart | 1 | film | g:star | Name a Kevin Hart movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q618352. } UNION { ?i wdt:P725 wd:Q618352. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jamiefoxx | 2 | film | g:star | Name a Jamie Foxx movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q171905. } UNION { ?i wdt:P725 wd:Q171905. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/michaelbjordan | 2 | film | g:star | Name a Michael B. Jordan movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q3308007. } UNION { ?i wdt:P725 wd:Q3308007. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/chadwickboseman | 2 | film | g:star | Name a Chadwick Boseman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q5066520. } UNION { ?i wdt:P725 wd:Q5066520. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/idriselba | 2 | film | g:star | Name an Idris Elba movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q342604. } UNION { ?i wdt:P725 wd:Q342604. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/benedictcumberbatch | 2 | film | g:star | Name a Benedict Cumberbatch movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q244674. } UNION { ?i wdt:P725 wd:Q244674. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/tomhiddleston | 2 | film | g:star | Name a Tom Hiddleston movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q295803. } UNION { ?i wdt:P725 wd:Q295803. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/ianmckellen | 2 | film | g:star | Name an Ian McKellen movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q170510. } UNION { ?i wdt:P725 wd:Q170510. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/garyoldman | 2 | film | g:star | Name a Gary Oldman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q83492. } UNION { ?i wdt:P725 wd:Q83492. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/anthonyhopkins | 2 | film | g:star | Name an Anthony Hopkins movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q65932. } UNION { ?i wdt:P725 wd:Q65932. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jacknicholson | 2 | film | g:star | Name a Jack Nicholson movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q39792. } UNION { ?i wdt:P725 wd:Q39792. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/clinteastwood | 2 | film | g:star | Name a Clint Eastwood movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q43203. } UNION { ?i wdt:P725 wd:Q43203. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/marlonbrando | 2 | film | g:star | Name a Marlon Brando movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34012. } UNION { ?i wdt:P725 wd:Q34012. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/paulnewman | 2 | film | g:star | Name a Paul Newman movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41871. } UNION { ?i wdt:P725 wd:Q41871. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/audreyhepburn | 2 | film | g:star | Name an Audrey Hepburn movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q42786. } UNION { ?i wdt:P725 wd:Q42786. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/marilynmonroe | 2 | film | g:star | Name a Marilyn Monroe movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4616. } UNION { ?i wdt:P725 wd:Q4616. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/humphreybogart | 2 | film | g:star | Name a Humphrey Bogart movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16390. } UNION { ?i wdt:P725 wd:Q16390. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jamesstewart | 2 | film | g:star | Name a James Stewart movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q102462. } UNION { ?i wdt:P725 wd:Q102462. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/carygrant | 2 | film | g:star | Name a Cary Grant movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q83410. } UNION { ?i wdt:P725 wd:Q83410. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/judygarland | 2 | film | g:star | Name a Judy Garland movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q11637. } UNION { ?i wdt:P725 wd:Q11637. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/elizabethtaylor | 2 | film | g:star | Name an Elizabeth Taylor movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q34851. } UNION { ?i wdt:P725 wd:Q34851. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/johnwayne | 2 | film | g:star | Name a John Wayne movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40531. } UNION { ?i wdt:P725 wd:Q40531. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/genewilder | 2 | film | g:star | Name a Gene Wilder movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q191966. } UNION { ?i wdt:P725 wd:Q191966. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/billmurray | 2 | film | g:star | Name a Bill Murray movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q29250. } UNION { ?i wdt:P725 wd:Q29250. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/stevemartin | 2 | film | g:star | Name a Steve Martin movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16473. } UNION { ?i wdt:P725 wd:Q16473. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/michaelkeaton | 2 | film | g:star | Name a Michael Keaton movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q138005. } UNION { ?i wdt:P725 wd:Q138005. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jeffbridges | 2 | film | g:star | Name a Jeff Bridges movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q174843. } UNION { ?i wdt:P725 wd:Q174843. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/kevincostner | 2 | film | g:star | Name a Kevin Costner movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q11930. } UNION { ?i wdt:P725 wd:Q11930. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/russellcrowe | 2 | film | g:star | Name a Russell Crowe movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q129817. } UNION { ?i wdt:P725 wd:Q129817. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/joaquinphoenix | 2 | film | g:star | Name a Joaquin Phoenix movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q185140. } UNION { ?i wdt:P725 wd:Q185140. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/heathledger | 2 | film | g:star | Name a Heath Ledger movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q40572. } UNION { ?i wdt:P725 wd:Q40572. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jaredleto | 2 | film | g:star | Name a Jared Leto movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q484523. } UNION { ?i wdt:P725 wd:Q484523. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/margotkidder | 2 | film | g:star | Name a Margot Kidder movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q234471. } UNION { ?i wdt:P725 wd:Q234471. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/sigourneyweaver | 2 | film | g:star | Name a Sigourney Weaver movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q102124. } UNION { ?i wdt:P725 wd:Q102124. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jodiefoster | 2 | film | g:star | Name a Jodie Foster movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41351. } UNION { ?i wdt:P725 wd:Q41351. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/michellepfeiffer | 2 | film | g:star | Name a Michelle Pfeiffer movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q159778. } UNION { ?i wdt:P725 wd:Q159778. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/halleberry | 2 | film | g:star | Name a Halle Berry movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q1033016. } UNION { ?i wdt:P725 wd:Q1033016. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/charlizetheron | 2 | film | g:star | Name a Charlize Theron movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q80046. } UNION { ?i wdt:P725 wd:Q80046. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/reesewitherspoon | 2 | film | g:star | Name a Reese Witherspoon movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44063. } UNION { ?i wdt:P725 wd:Q44063. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jenniferaniston | 2 | film | g:star | Name a Jennifer Aniston movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q32522. } UNION { ?i wdt:P725 wd:Q32522. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/drewbarrymore | 2 | film | g:star | Name a Drew Barrymore movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q676094. } UNION { ?i wdt:P725 wd:Q676094. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/whoopigoldberg | 2 | film | g:star | Name a Whoopi Goldberg movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q49001. } UNION { ?i wdt:P725 wd:Q49001. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/octaviaspencer | 2 | film | g:star | Name an Octavia Spencer movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q229254. } UNION { ?i wdt:P725 wd:Q229254. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/violadavis | 2 | film | g:star | Name a Viola Davis movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q229181. } UNION { ?i wdt:P725 wd:Q229181. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/lupitanyongo | 2 | film | g:star | Name a Lupita Nyong'o movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q3840847. } UNION { ?i wdt:P725 wd:Q3840847. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/galgadot | 2 | film | g:star | Name a Gal Gadot movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q185654. } UNION { ?i wdt:P725 wd:Q185654. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jasonmomoa | 2 | film | g:star | Name a Jason Momoa movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q315271. } UNION { ?i wdt:P725 wd:Q315271. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/henrycavill | 2 | film | g:star | Name a Henry Cavill movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q295498. } UNION { ?i wdt:P725 wd:Q295498. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/paulrudd | 2 | film | g:star | Name a Paul Rudd movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q276525. } UNION { ?i wdt:P725 wd:Q276525. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/markruffalo | 2 | film | g:star | Name a Mark Ruffalo movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q41422. } UNION { ?i wdt:P725 wd:Q41422. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/jeremyrenner | 2 | film | g:star | Name a Jeremy Renner movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23365. } UNION { ?i wdt:P725 wd:Q23365. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/elizabetholsen | 2 | film | g:star | Name an Elizabeth Olsen movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q234644. } UNION { ?i wdt:P725 wd:Q234644. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/chrispine | 2 | film | g:star | Name a Chris Pine movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q23466. } UNION { ?i wdt:P725 wd:Q23466. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/zoesaldana | 2 | film | g:star | Name a Zoe Saldaña movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q190162. } UNION { ?i wdt:P725 wd:Q190162. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/davebautista | 2 | film | g:star | Name a Dave Bautista movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q44158. } UNION { ?i wdt:P725 wd:Q44158. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/karengillan | 2 | film | g:star | Name a Karen Gillan movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q231237. } UNION { ?i wdt:P725 wd:Q231237. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/pedropascal | 2 | film | g:star | Name a Pedro Pascal movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q14752155. } UNION { ?i wdt:P725 wd:Q14752155. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/oscarisaac | 2 | film | g:star | Name an Oscar Isaac movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q336788. } UNION { ?i wdt:P725 wd:Q336788. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/daisyridley | 2 | film | g:star | Name a Daisy Ridley movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q16738674. } UNION { ?i wdt:P725 wd:Q16738674. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/adamdriver | 2 | film | g:star | Name an Adam Driver movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q4678990. } UNION { ?i wdt:P725 wd:Q4678990. } ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstar/markhamill | 2 | film | g:star | Name a Mark Hamill movie | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P161 wd:Q210447. } UNION { ?i wdt:P725 wd:Q210447. } ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // franchise
 fmovie/starwars | 1 | film | g:franchise | Name a Star Wars movie | | star wars, the empire strikes back, return of the jedi, the phantom menace, attack of the clones, revenge of the sith, the force awakens, the last jedi, the rise of skywalker
@@ -275,182 +168,104 @@ fmovie/xmen | 1 | film | g:franchise | Name a X-Men movie | autotop=12 max=800 m
 fmovie/spiderman | 1 | film | g:franchise | Name a Spider-Man movie | | spider-man, spider-man 2, spider-man 3, the amazing spider-man, spider-man homecoming, spider-man far from home, spider-man no way home, spider-man into the spider-verse, spider-man across the spider-verse
 fmovie/batman | 1 | film | g:franchise | Name a Batman movie | | batman, batman returns, batman begins, the dark knight, the dark knight rises, the batman
 fmovie/superman | 1 | film | g:franchise | Name a Superman movie | | superman, superman ii, superman returns, man of steel, batman v superman
-fmovie/dcextendeduniverse | 1 | film | g:franchise | Name a DC Extended Universe movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q18281265. } UNION { ?i wdt:P8345 wd:Q18281265. } ?i wdt:P31/wdt:P279* wd:Q11424. |
 fmovie/startrek | 1 | film | g:franchise | Name a Star Trek movie | | star trek, the wrath of khan, first contact, star trek into darkness, star trek beyond, star trek the motion picture
-fmovie/alien | 1 | film | g:franchise | Name an Alien movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q1990792. } UNION { ?i wdt:P8345 wd:Q1990792. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fmovie/terminator | 1 | film | g:franchise | Name a Terminator movie | | the terminator, terminator 2, terminator 3, terminator salvation, terminator genisys
 fmovie/rocky | 1 | film | g:franchise | Name a Rocky movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q1078084. } UNION { ?i wdt:P8345 wd:Q1078084. } ?i wdt:P31/wdt:P279* wd:Q11424. |
 fmovie/ghostbusters | 1 | film | g:franchise | Name a Ghostbusters movie | | ghostbusters, ghostbusters ii, ghostbusters afterlife, ghostbusters frozen empire, ghostbusters answer the call
 fmovie/despicableme | 1 | film | g:franchise | Name a Despicable Me movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q5264979. } UNION { ?i wdt:P8345 wd:Q5264979. } ?i wdt:P31/wdt:P279* wd:Q11424. |
 fmovie/iceage | 1 | film | g:franchise | Name an Ice Age movie | | ice age, the meltdown, dawn of the dinosaurs, continental drift, collision course
-fmovie/godzilla | 1 | film | g:franchise | Name a Godzilla movie | | godzilla, godzilla king of the monsters, godzilla vs kong, godzilla minus one, godzilla x kong
-fmovie/kingkong | 1 | film | g:franchise | Name a King Kong movie | | king kong, kong skull island, godzilla vs kong, godzilla x kong, king kong vs godzilla
-fmovie/planetoftheapes | 1 | film | g:franchise | Name a Planet of the Apes movie | | planet of the apes, rise of the planet of the apes, dawn of the planet of the apes, war for the planet of the apes, kingdom of the planet of the apes
-fmovie/halloween | 1 | film | g:franchise | Name a Halloween movie | | halloween, halloween ii, halloween h20, halloween kills, halloween ends
-fmovie/fridaythe13th | 2 | film | g:franchise | Name a Friday the 13th movie | | friday the 13th, friday the 13th part 2, friday the 13th part iii, friday the 13th the final chapter, freddy vs jason
-fmovie/anightmareonelmstreet | 2 | film | g:franchise | Name an A Nightmare on Elm Street movie | | a nightmare on elm street, freddy's revenge, dream warriors, the dream master, freddy vs jason
-fmovie/scream | 2 | film | g:franchise | Name a Scream movie | | scream, scream 2, scream 3, scream 4, scream vi
-fmovie/saw | 2 | film | g:franchise | Name a Saw movie | | saw, saw ii, saw iii, saw iv, saw x
-fmovie/theconjuringuniverse | 2 | film | g:franchise | Name a Conjuring Universe movie | | the conjuring, the conjuring 2, annabelle, the nun, the conjuring last rites
-fmovie/johnwick | 2 | film | g:franchise | Name a John Wick movie | | john wick, john wick chapter 2, john wick chapter 3, john wick chapter 4, ballerina
+fmovie/scream | 1 | film | g:franchise | Name a Scream movie | | scream, scream 2, scream 3, scream 4, scream vi
+fmovie/johnwick | 1 | film | g:franchise | Name a John Wick movie | | john wick, john wick chapter 2, john wick chapter 3, john wick chapter 4, ballerina
 fmovie/homealone | 2 | film | g:franchise | Name a Home Alone movie | | home alone, home alone 2, home alone 3, home alone 4, home sweet home alone
 fmovie/shrek | 2 | film | g:franchise | Name a Shrek movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q1203222. } UNION { ?i wdt:P8345 wd:Q1203222. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fmovie/pokemon | 2 | film | g:franchise | Name a Pokémon movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q864. } UNION { ?i wdt:P8345 wd:Q864. } ?i wdt:P31/wdt:P279* wd:Q11424. |
 fmovie/teenagemutantninjaturtle | 2 | film | g:franchise | Name a Teenage Mutant Ninja Turtles movie | | teenage mutant ninja turtles, the secret of the ooze, out of the shadows, mutant mayhem, tmnt
 fmovie/disneyprincess | 2 | film | g:franchise | Name a Disney Princess movie | | snow white, cinderella, the little mermaid, beauty and the beast, aladdin, mulan, tangled, moana, sleeping beauty
-fmovie/winniethepooh | 2 | film | g:franchise | Name a Winnie-the-Pooh movie | | the many adventures of winnie the pooh, winnie the pooh, christopher robin, the tigger movie, piglet's big movie
-fmovie/tomandjerry | 2 | film | g:franchise | Name a Tom and Jerry movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q131144. } UNION { ?i wdt:P8345 wd:Q131144. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fmovie/scoobydoo | 2 | film | g:franchise | Name a Scooby-Doo movie | autotop=12 max=800 min=1 minans=5 w:{ ?i wdt:P179+ wd:Q205683. } UNION { ?i wdt:P8345 wd:Q205683. } ?i wdt:P31/wdt:P279* wd:Q11424. |
-fmovie/themuppets | 2 | film | g:franchise | Name a Muppets movie | | the muppet movie, the muppets, the muppet christmas carol, muppet treasure island, muppets most wanted
-fmovie/barbie | 3 | film | g:franchise | Name a Barbie movie | | barbie, barbie in the nutcracker, barbie as rapunzel, barbie of swan lake, barbie as the princess and the pauper, barbie in the 12 dancing princesses
-fmovie/rambo | 3 | film | g:franchise | Name a Rambo movie | | first blood, rambo first blood part ii, rambo iii, rambo, rambo last blood
-fmovie/policeacademy | 3 | film | g:franchise | Name a Police Academy movie | | police academy, police academy 2, police academy 3, police academy 4, police academy 5
-fmovie/americanpie | 3 | film | g:franchise | Name an American Pie movie | | american pie, american pie 2, american wedding, american reunion, band camp
-fmovie/madmax | 3 | film | g:franchise | Name a Mad Max movie | | mad max, the road warrior, beyond thunderdome, fury road, furiosa
 # screen
 // characters
 fchar/theoffice | 1 | film | g:characters | Name a character from The Office | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q23831. } UNION { ?i wdt:P8345 wd:Q23831. } UNION { ?w wdt:P179 wd:Q23831; wdt:P674 ?i. ?v wdt:P179 wd:Q23831; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/spongebobsquarepants | 1 | film | g:characters | Name a character from SpongeBob SquarePants | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q83279. } UNION { ?i wdt:P8345 wd:Q83279. } UNION { ?w wdt:P179 wd:Q83279; wdt:P674 ?i. ?v wdt:P179 wd:Q83279; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/spongebobsquarepants | 1 | film | g:characters | Name a SpongeBob SquarePants character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q83279. } UNION { ?i wdt:P8345 wd:Q83279. } UNION { ?w wdt:P179 wd:Q83279; wdt:P674 ?i. ?v wdt:P179 wd:Q83279; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/thewalkingdead | 1 | film | g:characters | Name a character from The Walking Dead | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q232737. } UNION { ?i wdt:P8345 wd:Q232737. } UNION { ?w wdt:P179 wd:Q232737; wdt:P674 ?i. ?v wdt:P179 wd:Q232737; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/lost | 1 | film | g:characters | Name a character from Lost | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q23567. } UNION { ?i wdt:P8345 wd:Q23567. } UNION { ?w wdt:P179 wd:Q23567; wdt:P674 ?i. ?v wdt:P179 wd:Q23567; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/prisonbreak | 1 | film | g:characters | Name a character from Prison Break | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q80044. } UNION { ?i wdt:P8345 wd:Q80044. } UNION { ?w wdt:P179 wd:Q80044; wdt:P674 ?i. ?v wdt:P179 wd:Q80044; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/dexter | 1 | film | g:characters | Name a character from Dexter | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q23577. } UNION { ?i wdt:P8345 wd:Q23577. } UNION { ?w wdt:P179 wd:Q23577; wdt:P674 ?i. ?v wdt:P179 wd:Q23577; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/sherlock | 1 | film | g:characters | Name a character from Sherlock | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q192837. } UNION { ?i wdt:P8345 wd:Q192837. } UNION { ?w wdt:P179 wd:Q192837; wdt:P674 ?i. ?v wdt:P179 wd:Q192837; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/sherlock | 1 | film | g:characters | Name a Sherlock character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q192837. } UNION { ?i wdt:P8345 wd:Q192837. } UNION { ?w wdt:P179 wd:Q192837; wdt:P674 ?i. ?v wdt:P179 wd:Q192837; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/thesopranos | 1 | film | g:characters | Name a character from The Sopranos | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q23628. } UNION { ?i wdt:P8345 wd:Q23628. } UNION { ?w wdt:P179 wd:Q23628; wdt:P674 ?i. ?v wdt:P179 wd:Q23628; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/thewire | 1 | film | g:characters | Name a character from The Wire | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q478360. } UNION { ?i wdt:P8345 wd:Q478360. } UNION { ?w wdt:P179 wd:Q478360; wdt:P674 ?i. ?v wdt:P179 wd:Q478360; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/bettercallsaul | 1 | film | g:characters | Name a character from Better Call Saul | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q14925221. } UNION { ?i wdt:P8345 wd:Q14925221. } UNION { ?w wdt:P179 wd:Q14925221; wdt:P674 ?i. ?v wdt:P179 wd:Q14925221; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/squidgame | 1 | film | g:characters | Name a character from Squid Game | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q106582931. } UNION { ?i wdt:P8345 wd:Q106582931. } UNION { ?w wdt:P179 wd:Q106582931; wdt:P674 ?i. ?v wdt:P179 wd:Q106582931; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/bettercallsaul | 1 | film | g:characters | Name a Better Call Saul character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q14925221. } UNION { ?i wdt:P8345 wd:Q14925221. } UNION { ?w wdt:P179 wd:Q14925221; wdt:P674 ?i. ?v wdt:P179 wd:Q14925221; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/squidgame | 1 | film | g:characters | Name a Squid Game character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q106582931. } UNION { ?i wdt:P8345 wd:Q106582931. } UNION { ?w wdt:P179 wd:Q106582931; wdt:P674 ?i. ?v wdt:P179 wd:Q106582931; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/themandalorian | 1 | film | g:characters | Name a character from The Mandalorian | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q56876444. } UNION { ?i wdt:P8345 wd:Q56876444. } UNION { ?w wdt:P179 wd:Q56876444; wdt:P674 ?i. ?v wdt:P179 wd:Q56876444; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/theboys | 1 | film | g:characters | Name a character from The Boys | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q48796994. } UNION { ?i wdt:P8345 wd:Q48796994. } UNION { ?w wdt:P179 wd:Q48796994; wdt:P674 ?i. ?v wdt:P179 wd:Q48796994; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/moneyheist | 1 | film | g:characters | Name a character from Money Heist | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q29647346. } UNION { ?i wdt:P8345 wd:Q29647346. } UNION { ?w wdt:P179 wd:Q29647346; wdt:P674 ?i. ?v wdt:P179 wd:Q29647346; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/rickandmorty | 1 | film | g:characters | Name a character from Rick and Morty | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q15659308. } UNION { ?i wdt:P8345 wd:Q15659308. } UNION { ?w wdt:P179 wd:Q15659308; wdt:P674 ?i. ?v wdt:P179 wd:Q15659308; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/adventuretime | 1 | film | g:characters | Name a character from Adventure Time | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q53093. } UNION { ?i wdt:P8345 wd:Q53093. } UNION { ?w wdt:P179 wd:Q53093; wdt:P674 ?i. ?v wdt:P179 wd:Q53093; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/gravityfalls | 1 | film | g:characters | Name a character from Gravity Falls | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q550555. } UNION { ?i wdt:P8345 wd:Q550555. } UNION { ?w wdt:P179 wd:Q550555; wdt:P674 ?i. ?v wdt:P179 wd:Q550555; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/phineasandferb | 1 | film | g:characters | Name a character from Phineas and Ferb | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q217679. } UNION { ?i wdt:P8345 wd:Q217679. } UNION { ?w wdt:P179 wd:Q217679; wdt:P674 ?i. ?v wdt:P179 wd:Q217679; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/pokemon | 1 | film | g:characters | Name a character from Pokémon | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q239937. } UNION { ?i wdt:P8345 wd:Q239937. } UNION { ?w wdt:P179 wd:Q239937; wdt:P674 ?i. ?v wdt:P179 wd:Q239937; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/dragonballz | 2 | film | g:characters | Name a character from Dragon Ball Z | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q477916. } UNION { ?i wdt:P8345 wd:Q477916. } UNION { ?w wdt:P179 wd:Q477916; wdt:P674 ?i. ?v wdt:P179 wd:Q477916; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/attackontitan | 2 | film | g:characters | Name a character from Attack on Titan | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q22126305. } UNION { ?i wdt:P8345 wd:Q22126305. } UNION { ?w wdt:P179 wd:Q22126305; wdt:P674 ?i. ?v wdt:P179 wd:Q22126305; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/sailormoon | 2 | film | g:characters | Name a character from Sailor Moon | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q704353. } UNION { ?i wdt:P8345 wd:Q704353. } UNION { ?w wdt:P179 wd:Q704353; wdt:P674 ?i. ?v wdt:P179 wd:Q704353; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/glee | 2 | film | g:characters | Name a character from Glee | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q152178. } UNION { ?i wdt:P8345 wd:Q152178. } UNION { ?w wdt:P179 wd:Q152178; wdt:P674 ?i. ?v wdt:P179 wd:Q152178; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/gossipgirl | 2 | film | g:characters | Name a character from Gossip Girl | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q199853. } UNION { ?i wdt:P8345 wd:Q199853. } UNION { ?w wdt:P179 wd:Q199853; wdt:P674 ?i. ?v wdt:P179 wd:Q199853; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/buffythevampireslayer | 2 | film | g:characters | Name a character from Buffy the Vampire Slayer | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q183513. } UNION { ?i wdt:P8345 wd:Q183513. } UNION { ?w wdt:P179 wd:Q183513; wdt:P674 ?i. ?v wdt:P179 wd:Q183513; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/thexfiles | 2 | film | g:characters | Name a character from The X-Files | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2744. } UNION { ?i wdt:P8345 wd:Q2744. } UNION { ?w wdt:P179 wd:Q2744; wdt:P674 ?i. ?v wdt:P179 wd:Q2744; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/twinpeaks | 2 | film | g:characters | Name a character from Twin Peaks | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2085. } UNION { ?i wdt:P8345 wd:Q2085. } UNION { ?w wdt:P179 wd:Q2085; wdt:P674 ?i. ?v wdt:P179 wd:Q2085; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/supernatural | 2 | film | g:characters | Name a character from Supernatural | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q130585. } UNION { ?i wdt:P8345 wd:Q130585. } UNION { ?w wdt:P179 wd:Q130585; wdt:P674 ?i. ?v wdt:P179 wd:Q130585; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/desperatehousewives | 2 | film | g:characters | Name a character from Desperate Housewives | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q131758. } UNION { ?i wdt:P8345 wd:Q131758. } UNION { ?w wdt:P179 wd:Q131758; wdt:P674 ?i. ?v wdt:P179 wd:Q131758; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/that70sshow | 2 | film | g:characters | Name a character from That '70s Show | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q208072. } UNION { ?i wdt:P8345 wd:Q208072. } UNION { ?w wdt:P179 wd:Q208072; wdt:P674 ?i. ?v wdt:P179 wd:Q208072; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/scrubs | 2 | film | g:characters | Name a character from Scrubs | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q485668. } UNION { ?i wdt:P8345 wd:Q485668. } UNION { ?w wdt:P179 wd:Q485668; wdt:P674 ?i. ?v wdt:P179 wd:Q485668; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/er | 2 | film | g:characters | Name a character from ER | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q207375. } UNION { ?i wdt:P8345 wd:Q207375. } UNION { ?w wdt:P179 wd:Q207375; wdt:P674 ?i. ?v wdt:P179 wd:Q207375; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/cheers | 2 | film | g:characters | Name a character from Cheers | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q732063. } UNION { ?i wdt:P8345 wd:Q732063. } UNION { ?w wdt:P179 wd:Q732063; wdt:P674 ?i. ?v wdt:P179 wd:Q732063; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/frasier | 2 | film | g:characters | Name a character from Frasier | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q209282. } UNION { ?i wdt:P8345 wd:Q209282. } UNION { ?w wdt:P179 wd:Q209282; wdt:P674 ?i. ?v wdt:P179 wd:Q209282; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/startrekthenextgeneratio | 2 | film | g:characters | Name a character from Star Trek: The Next Generation | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q16290. } UNION { ?i wdt:P8345 wd:Q16290. } UNION { ?w wdt:P179 wd:Q16290; wdt:P674 ?i. ?v wdt:P179 wd:Q16290; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/battlestargalactica | 2 | film | g:characters | Name a character from Battlestar Galactica | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q237072. } UNION { ?i wdt:P8345 wd:Q237072. } UNION { ?w wdt:P179 wd:Q237072; wdt:P674 ?i. ?v wdt:P179 wd:Q237072; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/moneyheist | 1 | film | g:characters | Name a Money Heist character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q29647346. } UNION { ?i wdt:P8345 wd:Q29647346. } UNION { ?w wdt:P179 wd:Q29647346; wdt:P674 ?i. ?v wdt:P179 wd:Q29647346; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/rickandmorty | 1 | film | g:characters | Name a Rick and Morty character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q15659308. } UNION { ?i wdt:P8345 wd:Q15659308. } UNION { ?w wdt:P179 wd:Q15659308; wdt:P674 ?i. ?v wdt:P179 wd:Q15659308; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/adventuretime | 1 | film | g:characters | Name an Adventure Time character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q53093. } UNION { ?i wdt:P8345 wd:Q53093. } UNION { ?w wdt:P179 wd:Q53093; wdt:P674 ?i. ?v wdt:P179 wd:Q53093; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/gravityfalls | 1 | film | g:characters | Name a Gravity Falls character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q550555. } UNION { ?i wdt:P8345 wd:Q550555. } UNION { ?w wdt:P179 wd:Q550555; wdt:P674 ?i. ?v wdt:P179 wd:Q550555; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/phineasandferb | 1 | film | g:characters | Name a Phineas and Ferb character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q217679. } UNION { ?i wdt:P8345 wd:Q217679. } UNION { ?w wdt:P179 wd:Q217679; wdt:P674 ?i. ?v wdt:P179 wd:Q217679; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/pokemon | 1 | film | g:characters | Name a Pokémon character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q239937. } UNION { ?i wdt:P8345 wd:Q239937. } UNION { ?w wdt:P179 wd:Q239937; wdt:P674 ?i. ?v wdt:P179 wd:Q239937; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/dragonballz | 1 | film | g:characters | Name a Dragon Ball Z character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q477916. } UNION { ?i wdt:P8345 wd:Q477916. } UNION { ?w wdt:P179 wd:Q477916; wdt:P674 ?i. ?v wdt:P179 wd:Q477916; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/attackontitan | 1 | film | g:characters | Name an Attack on Titan character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q22126305. } UNION { ?i wdt:P8345 wd:Q22126305. } UNION { ?w wdt:P179 wd:Q22126305; wdt:P674 ?i. ?v wdt:P179 wd:Q22126305; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/glee | 2 | film | g:characters | Name a Glee character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q152178. } UNION { ?i wdt:P8345 wd:Q152178. } UNION { ?w wdt:P179 wd:Q152178; wdt:P674 ?i. ?v wdt:P179 wd:Q152178; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/that70sshow | 2 | film | g:characters | Name a That '70s Show character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q208072. } UNION { ?i wdt:P8345 wd:Q208072. } UNION { ?w wdt:P179 wd:Q208072; wdt:P674 ?i. ?v wdt:P179 wd:Q208072; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/scrubs | 2 | film | g:characters | Name a Scrubs character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q485668. } UNION { ?i wdt:P8345 wd:Q485668. } UNION { ?w wdt:P179 wd:Q485668; wdt:P674 ?i. ?v wdt:P179 wd:Q485668; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/thelastofus | 2 | film | g:characters | Name a character from The Last of Us | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q87131973. } UNION { ?i wdt:P8345 wd:Q87131973. } UNION { ?w wdt:P179 wd:Q87131973; wdt:P674 ?i. ?v wdt:P179 wd:Q87131973; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/houseofthedragon | 2 | film | g:characters | Name a character from House of the Dragon | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q72930269. } UNION { ?i wdt:P8345 wd:Q72930269. } UNION { ?w wdt:P179 wd:Q72930269; wdt:P674 ?i. ?v wdt:P179 wd:Q72930269; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/houseofthedragon | 2 | film | g:characters | Name a House of the Dragon character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q72930269. } UNION { ?i wdt:P8345 wd:Q72930269. } UNION { ?w wdt:P179 wd:Q72930269; wdt:P674 ?i. ?v wdt:P179 wd:Q72930269; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 fchar/thefairlyoddparents | 2 | film | g:characters | Name a character from The Fairly OddParents | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q39037. } UNION { ?i wdt:P8345 wd:Q39037. } UNION { ?w wdt:P179 wd:Q39037; wdt:P674 ?i. ?v wdt:P179 wd:Q39037; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/heyarnold | 3 | film | g:characters | Name a character from Hey Arnold! | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q832054. } UNION { ?i wdt:P8345 wd:Q832054. } UNION { ?w wdt:P179 wd:Q832054; wdt:P674 ?i. ?v wdt:P179 wd:Q832054; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/rugrats | 3 | film | g:characters | Name a character from Rugrats | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q304290. } UNION { ?i wdt:P8345 wd:Q304290. } UNION { ?w wdt:P179 wd:Q304290; wdt:P674 ?i. ?v wdt:P179 wd:Q304290; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/thepowerpuffgirls | 3 | film | g:characters | Name a character from The Powerpuff Girls | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1236206. } UNION { ?i wdt:P8345 wd:Q1236206. } UNION { ?w wdt:P179 wd:Q1236206; wdt:P674 ?i. ?v wdt:P179 wd:Q1236206; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/couragethecowardlydog | 3 | film | g:characters | Name a character from Courage the Cowardly Dog | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q641486. } UNION { ?i wdt:P8345 wd:Q641486. } UNION { ?w wdt:P179 wd:Q641486; wdt:P674 ?i. ?v wdt:P179 wd:Q641486; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/thomasfriends | 3 | film | g:characters | Name a character from Thomas & Friends | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q501663. } UNION { ?i wdt:P8345 wd:Q501663. } UNION { ?w wdt:P179 wd:Q501663; wdt:P674 ?i. ?v wdt:P179 wd:Q501663; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/themuppetshow | 3 | film | g:characters | Name a character from The Muppet Show | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2120540. } UNION { ?i wdt:P8345 wd:Q2120540. } UNION { ?w wdt:P179 wd:Q2120540; wdt:P674 ?i. ?v wdt:P179 wd:Q2120540; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/powerrangers | 3 | film | g:characters | Name a character from Power Rangers | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q333156. } UNION { ?i wdt:P8345 wd:Q333156. } UNION { ?w wdt:P179 wd:Q333156; wdt:P674 ?i. ?v wdt:P179 wd:Q333156; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/cobrakai | 3 | film | g:characters | Name a character from Cobra Kai | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q48326845. } UNION { ?i wdt:P8345 wd:Q48326845. } UNION { ?w wdt:P179 wd:Q48326845; wdt:P674 ?i. ?v wdt:P179 wd:Q48326845; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/onlyfoolsandhorses | 3 | film | g:characters | Name a character from Only Fools and Horses | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1247858. } UNION { ?i wdt:P8345 wd:Q1247858. } UNION { ?w wdt:P179 wd:Q1247858; wdt:P674 ?i. ?v wdt:P179 wd:Q1247858; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/neighbours | 3 | film | g:characters | Name a character from Neighbours | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q908708. } UNION { ?i wdt:P8345 wd:Q908708. } UNION { ?w wdt:P179 wd:Q908708; wdt:P674 ?i. ?v wdt:P179 wd:Q908708; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/eastenders | 3 | film | g:characters | Name a character from EastEnders | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q607514. } UNION { ?i wdt:P8345 wd:Q607514. } UNION { ?w wdt:P179 wd:Q607514; wdt:P674 ?i. ?v wdt:P179 wd:Q607514; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-fchar/coronationstreet | 3 | film | g:characters | Name a character from Coronation Street | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q945030. } UNION { ?i wdt:P8345 wd:Q945030. } UNION { ?w wdt:P179 wd:Q945030; wdt:P674 ?i. ?v wdt:P179 wd:Q945030; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/marvelcinematicuniverse | 1 | film | g:characters | Name a character from Marvel Cinematic Universe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q642878. } UNION { ?i wdt:P8345 wd:Q642878. } UNION { ?w wdt:P179 wd:Q642878; wdt:P674 ?i. ?v wdt:P179 wd:Q642878; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/jurassicpark | 1 | film | g:characters | Name a character from Jurassic Park | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2336369. } UNION { ?i wdt:P8345 wd:Q2336369. } UNION { ?w wdt:P179 wd:Q2336369; wdt:P674 ?i. ?v wdt:P179 wd:Q2336369; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/piratesofthecaribbean | 1 | film | g:characters | Name a character from Pirates of the Caribbean | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q194318. } UNION { ?i wdt:P8345 wd:Q194318. } UNION { ?w wdt:P179 wd:Q194318; wdt:P674 ?i. ?v wdt:P179 wd:Q194318; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/indianajones | 1 | film | g:characters | Name a character from Indiana Jones | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2562640. } UNION { ?i wdt:P8345 wd:Q2562640. } UNION { ?w wdt:P179 wd:Q2562640; wdt:P674 ?i. ?v wdt:P179 wd:Q2562640; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/rugrats | 2 | film | g:characters | Name a Rugrats character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q304290. } UNION { ?i wdt:P8345 wd:Q304290. } UNION { ?w wdt:P179 wd:Q304290; wdt:P674 ?i. ?v wdt:P179 wd:Q304290; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/thepowerpuffgirls | 2 | film | g:characters | Name a character from The Powerpuff Girls | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1236206. } UNION { ?i wdt:P8345 wd:Q1236206. } UNION { ?w wdt:P179 wd:Q1236206; wdt:P674 ?i. ?v wdt:P179 wd:Q1236206; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/themuppetshow | 2 | film | g:characters | Name a character from The Muppet Show | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2120540. } UNION { ?i wdt:P8345 wd:Q2120540. } UNION { ?w wdt:P179 wd:Q2120540; wdt:P674 ?i. ?v wdt:P179 wd:Q2120540; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/powerrangers | 2 | film | g:characters | Name a Power Rangers character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q333156. } UNION { ?i wdt:P8345 wd:Q333156. } UNION { ?w wdt:P179 wd:Q333156; wdt:P674 ?i. ?v wdt:P179 wd:Q333156; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+fchar/cobrakai | 2 | film | g:characters | Name a Cobra Kai character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q48326845. } UNION { ?i wdt:P8345 wd:Q48326845. } UNION { ?w wdt:P179 wd:Q48326845; wdt:P674 ?i. ?v wdt:P179 wd:Q48326845; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/marvelcinematicuniverse | 1 | film | g:characters | Name a Marvel Cinematic Universe character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q642878. } UNION { ?i wdt:P8345 wd:Q642878. } UNION { ?w wdt:P179 wd:Q642878; wdt:P674 ?i. ?v wdt:P179 wd:Q642878; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/jurassicpark | 1 | film | g:characters | Name a Jurassic Park character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2336369. } UNION { ?i wdt:P8345 wd:Q2336369. } UNION { ?w wdt:P179 wd:Q2336369; wdt:P674 ?i. ?v wdt:P179 wd:Q2336369; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/piratesofthecaribbean | 1 | film | g:characters | Name a Pirates of the Caribbean character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q194318. } UNION { ?i wdt:P8345 wd:Q194318. } UNION { ?w wdt:P179 wd:Q194318; wdt:P674 ?i. ?v wdt:P179 wd:Q194318; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/indianajones | 1 | film | g:characters | Name an Indiana Jones character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2562640. } UNION { ?i wdt:P8345 wd:Q2562640. } UNION { ?w wdt:P179 wd:Q2562640; wdt:P674 ?i. ?v wdt:P179 wd:Q2562640; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 ffran/thematrix | 1 | film | g:characters | Name a character from The Matrix | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q13014087. } UNION { ?i wdt:P8345 wd:Q13014087. } UNION { ?w wdt:P179 wd:Q13014087; wdt:P674 ?i. ?v wdt:P179 wd:Q13014087; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/dcextendeduniverse | 1 | film | g:characters | Name a character from DC Extended Universe | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q18281265. } UNION { ?i wdt:P8345 wd:Q18281265. } UNION { ?w wdt:P179 wd:Q18281265; wdt:P674 ?i. ?v wdt:P179 wd:Q18281265; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/alien | 1 | film | g:characters | Name a character from Alien | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1990792. } UNION { ?i wdt:P8345 wd:Q1990792. } UNION { ?w wdt:P179 wd:Q1990792; wdt:P674 ?i. ?v wdt:P179 wd:Q1990792; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/madagascar | 1 | film | g:characters | Name a character from Madagascar | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2261392. } UNION { ?i wdt:P8345 wd:Q2261392. } UNION { ?w wdt:P179 wd:Q2261392; wdt:P674 ?i. ?v wdt:P179 wd:Q2261392; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/cars | 1 | film | g:characters | Name a character from Cars | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q182153. } UNION { ?i wdt:P8345 wd:Q182153. } UNION { ?w wdt:P179 wd:Q182153; wdt:P674 ?i. ?v wdt:P179 wd:Q182153; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/theincredibles | 1 | film | g:characters | Name a character from The Incredibles | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q55386504. } UNION { ?i wdt:P8345 wd:Q55386504. } UNION { ?w wdt:P179 wd:Q55386504; wdt:P674 ?i. ?v wdt:P179 wd:Q55386504; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/findingnemo | 1 | film | g:characters | Name a character from Finding Nemo | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q15885268. } UNION { ?i wdt:P8345 wd:Q15885268. } UNION { ?w wdt:P179 wd:Q15885268; wdt:P674 ?i. ?v wdt:P179 wd:Q15885268; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/madagascar | 1 | film | g:characters | Name a Madagascar character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q2261392. } UNION { ?i wdt:P8345 wd:Q2261392. } UNION { ?w wdt:P179 wd:Q2261392; wdt:P674 ?i. ?v wdt:P179 wd:Q2261392; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/cars | 1 | film | g:characters | Name a Cars character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q182153. } UNION { ?i wdt:P8345 wd:Q182153. } UNION { ?w wdt:P179 wd:Q182153; wdt:P674 ?i. ?v wdt:P179 wd:Q182153; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/theincredibles | 2 | film | g:characters | Name a character from The Incredibles | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q55386504. } UNION { ?i wdt:P8345 wd:Q55386504. } UNION { ?w wdt:P179 wd:Q55386504; wdt:P674 ?i. ?v wdt:P179 wd:Q55386504; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/findingnemo | 2 | film | g:characters | Name a Finding Nemo character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q15885268. } UNION { ?i wdt:P8345 wd:Q15885268. } UNION { ?w wdt:P179 wd:Q15885268; wdt:P674 ?i. ?v wdt:P179 wd:Q15885268; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 ffran/thegodfather | 2 | film | g:characters | Name a character from The Godfather | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q3225260. } UNION { ?i wdt:P8345 wd:Q3225260. } UNION { ?w wdt:P179 wd:Q3225260; wdt:P674 ?i. ?v wdt:P179 wd:Q3225260; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 ffran/thechroniclesofnarnia | 2 | film | g:characters | Name a character from The Chronicles of Narnia | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1211909. } UNION { ?i wdt:P8345 wd:Q1211909. } UNION { ?w wdt:P179 wd:Q1211909; wdt:P674 ?i. ?v wdt:P179 wd:Q1211909; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/disneyprincess | 3 | film | g:characters | Name a character from Disney Princess | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1140303. } UNION { ?i wdt:P8345 wd:Q1140303. } UNION { ?w wdt:P179 wd:Q1140303; wdt:P674 ?i. ?v wdt:P179 wd:Q1140303; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/tomandjerry | 3 | film | g:characters | Name a character from Tom and Jerry | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q131144. } UNION { ?i wdt:P8345 wd:Q131144. } UNION { ?w wdt:P179 wd:Q131144; wdt:P674 ?i. ?v wdt:P179 wd:Q131144; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/disneyprincess | 2 | film | g:characters | Name a Disney Princess character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1140303. } UNION { ?i wdt:P8345 wd:Q1140303. } UNION { ?w wdt:P179 wd:Q1140303; wdt:P674 ?i. ?v wdt:P179 wd:Q1140303; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 # screen
 // tv
-fnet/netflix | 1 | film | g:tv | Name a TV show on Netflix | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q907311. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/hbo | 1 | film | g:tv | Name a TV show on HBO | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q23633. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/disney | 1 | film | g:tv | Name a TV show on Disney+ | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q54958752. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/hulu | 1 | film | g:tv | Name a TV show on Hulu | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q1630304. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/nbc | 1 | film | g:tv | Name a TV show on NBC | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q13974. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/cbs | 1 | film | g:tv | Name a TV show on CBS | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q43380. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/americanbroadcastingcomp | 1 | film | g:tv | Name a TV show on ABC | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q169889. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/foxbroadcastingcompany | 1 | film | g:tv | Name a TV show on Fox | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q166419. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/thecw | 1 | film | g:tv | Name a TV show on The CW | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q212252. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/amc | 1 | film | g:tv | Name a TV show on AMC | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q294660. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/fx | 1 | film | g:tv | Name a TV show on FX | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q651228. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/showtime | 1 | film | g:tv | Name a TV show on Showtime | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q23589. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/nickelodeon | 1 | film | g:tv | Name a TV show on Nickelodeon | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q154958. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/cartoonnetwork | 1 | film | g:tv | Name a TV show on Cartoon Network | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q708290. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/disneychannel | 1 | film | g:tv | Name a TV show on Disney Channel | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q178837. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/bbcone | 1 | film | g:tv | Name a TV show on BBC One | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q191472. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/bbctwo | 2 | film | g:tv | Name a TV show on BBC Two | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q216108. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/itv | 2 | film | g:tv | Name a TV show on ITV | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q220072. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/channel4 | 2 | film | g:tv | Name a TV show on Channel 4 | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q501070. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/comedycentral | 2 | film | g:tv | Name a TV show on Comedy Central | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q131439. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/mtv | 2 | film | g:tv | Name a TV show on MTV | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q43359. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/adultswim | 2 | film | g:tv | Name a TV show on Adult Swim | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q379052. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/pbs | 2 | film | g:tv | Name a TV show on PBS | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q215616. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/paramount | 2 | film | g:tv | Name a TV show on Paramount+ | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q27903045. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/starz | 2 | film | g:tv | Name a TV show on Starz | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q2422698. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/bravo | 3 | film | g:tv | Name a TV show on Bravo | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q902771. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/primevideo | 3 | film | g:tv | Name a TV show on Prime Video | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q4740856. ?i wdt:P31/wdt:P279? wd:Q5398426. |
-fnet/appletv | 3 | film | g:tv | Name a TV show on Apple TV+ | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q62446736. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/netflix | 1 | film | g:tv | Name a Netflix show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q907311. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/disney | 1 | film | g:tv | Name a Disney+ show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q54958752. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/hulu | 2 | film | g:tv | Name a Hulu show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q1630304. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/nbc | 2 | film | g:tv | Name an NBC show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q13974. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/cbs | 2 | film | g:tv | Name a CBS show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q43380. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/americanbroadcastingcomp | 2 | film | g:tv | Name an ABC show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q169889. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/foxbroadcastingcompany | 2 | film | g:tv | Name a Fox show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q166419. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/thecw | 2 | film | g:tv | Name a The CW show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q212252. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/amc | 2 | film | g:tv | Name an AMC show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q294660. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/cartoonnetwork | 1 | film | g:tv | Name a Cartoon Network show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q708290. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/bbcone | 2 | film | g:tv | Name a BBC One show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q191472. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/comedycentral | 2 | film | g:tv | Name a Comedy Central show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q131439. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/mtv | 2 | film | g:tv | Name an MTV show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q43359. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/primevideo | 2 | film | g:tv | Name a Prime Video show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q4740856. ?i wdt:P31/wdt:P279? wd:Q5398426. |
+fnet/appletv | 2 | film | g:tv | Name an Apple TV+ show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q62446736. ?i wdt:P31/wdt:P279? wd:Q5398426. |
 ftvg/asitcom | 1 | film | g:tv | Name a sitcom | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q170238. |
 ftvg/ananimeseries | 1 | film | g:tv | Name an anime series | autotop=12 max=800 min=8 minans=15 w:?i wdt:P31 wd:Q63952888. |
+ftvg/atvdrama | 1 | film | g:tv | Name a TV drama | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q1366112. ?i wdt:P31 wd:Q5398426. |
 # screen
 // studio
-fstudio/pixar | 1 | film | g:studio | Name a film made by Pixar | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q127552. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/waltdisneyanimationstudi | 1 | film | g:studio | Name a film made by Walt Disney Animation Studios | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1047410. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/dreamworksanimation | 1 | film | g:studio | Name a film made by DreamWorks Animation | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q500088. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/studioghibli | 1 | film | g:studio | Name a film made by Studio Ghibli | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q182950. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/marvelstudios | 1 | film | g:studio | Name a film made by Marvel Studios | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q367466. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/lucasfilm | 1 | film | g:studio | Name a film made by Lucasfilm | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q242446. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/universalpictures | 1 | film | g:studio | Name a film made by Universal Pictures | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q168383. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/paramountpictures | 1 | film | g:studio | Name a film made by Paramount Pictures | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q159846. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/20thcenturystudios | 1 | film | g:studio | Name a film made by 20th Century Studios | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q434841. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/columbiapictures | 1 | film | g:studio | Name a film made by Columbia Pictures | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q186941. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/metrogoldwynmayer | 1 | film | g:studio | Name a film made by Metro-Goldwyn-Mayer | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q179200. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/lionsgatefilms | 1 | film | g:studio | Name a film made by Lionsgate Films | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q17076072. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/a24 | 1 | film | g:studio | Name a film made by A24 | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16248298. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/blumhouseproductions | 2 | film | g:studio | Name a film made by Blumhouse Productions | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16984664. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/illumination | 2 | film | g:studio | Name a film made by Illumination | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1189512. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/sonypicturesanimation | 2 | film | g:studio | Name a film made by Sony Pictures Animation | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1416835. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/blueskystudios | 2 | film | g:studio | Name a film made by Blue Sky Studios | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q885885. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/aardmananimations | 2 | film | g:studio | Name a film made by Aardman Animations | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q301092. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/waltdisneypictures | 2 | film | g:studio | Name a film made by Walt Disney Pictures | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q191224. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/newlinecinema | 2 | film | g:studio | Name a film made by New Line Cinema | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q79202. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/miramax | 2 | film | g:studio | Name a film made by Miramax | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q465449. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/amblinentertainment | 2 | film | g:studio | Name a film made by Amblin Entertainment | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q457893. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/dcstudios | 2 | film | g:studio | Name a film made by DC Studios | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q31197934. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/touchstonepictures | 3 | film | g:studio | Name a film made by Touchstone Pictures | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q497155. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/focusfeatures | 3 | film | g:studio | Name a film made by Focus Features | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q649649. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/netflix | 3 | film | g:studio | Name a film made by Netflix | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q907311. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/hammerfilmproductions | 3 | film | g:studio | Name a film made by Hammer Film Productions | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1433745. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/legendaryentertainment | 3 | film | g:studio | Name a film made by Legendary Entertainment | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q621364. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/dreamworksanimation | 1 | film | g:studio | Name a DreamWorks movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q500088. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/studioghibli | 2 | film | g:studio | Name a Studio Ghibli movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q182950. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/marvelstudios | 1 | film | g:studio | Name a Marvel Studios movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q367466. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/lucasfilm | 2 | film | g:studio | Name a Lucasfilm movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q242446. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/universalpictures | 2 | film | g:studio | Name an Universal movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q168383. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/paramountpictures | 2 | film | g:studio | Name a Paramount movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q159846. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/20thcenturystudios | 2 | film | g:studio | Name a 20th Century Fox movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q434841. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/a24 | 2 | film | g:studio | Name an A24 movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16248298. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/blumhouseproductions | 2 | film | g:studio | Name a Blumhouse movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q16984664. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/illumination | 1 | film | g:studio | Name an Illumination movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1189512. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/aardmananimations | 2 | film | g:studio | Name an Aardman movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q301092. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/waltdisneypictures | 2 | film | g:studio | Name a Disney movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q191224. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/netflix | 2 | film | g:studio | Name a Netflix original movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q907311. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // era
-fera/1930 | 2 | film | g:era | Name a movie from the 1930s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1930 && YEAR(?d) <= 1939) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1930) } |
-fera/1940 | 2 | film | g:era | Name a movie from the 1940s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1940 && YEAR(?d) <= 1949) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1940) } |
-fera/1950 | 2 | film | g:era | Name a movie from the 1950s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1950 && YEAR(?d) <= 1959) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1950) } |
-fera/1960 | 2 | film | g:era | Name a movie from the 1960s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1960 && YEAR(?d) <= 1969) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1960) } |
-fera/1970 | 2 | film | g:era | Name a movie from the 1970s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1970 && YEAR(?d) <= 1979) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1970) } |
-fera/1980 | 1 | film | g:era | Name a movie from the 1980s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1980 && YEAR(?d) <= 1989) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1980) } |
-fera/1990 | 1 | film | g:era | Name a movie from the 1990s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1990 && YEAR(?d) <= 1999) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1990) } |
-fera/2020 | 1 | film | g:era | Name a movie from the 2020s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 2020 && YEAR(?d) <= 2029) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 2020) } |
-ftv/1990 | 2 | film | g:era | Name a TV series that started in the 1990s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 1990 && YEAR(?d) <= 1999) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 1990) } |
-ftv/2000 | 2 | film | g:era | Name a TV series that started in the 2000s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2000 && YEAR(?d) <= 2009) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2000) } |
-ftv/2010 | 2 | film | g:era | Name a TV series that started in the 2010s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2010 && YEAR(?d) <= 2019) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2010) } |
-ftv/2020 | 2 | film | g:era | Name a TV series that started in the 2020s | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2020 && YEAR(?d) <= 2029) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2020) } |
+fera/1950 | 2 | film | g:era | Name a '50s movie | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1950 && YEAR(?d) <= 1959) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1950) } |
+fera/1960 | 2 | film | g:era | Name a '60s movie | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1960 && YEAR(?d) <= 1969) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1960) } |
+fera/1970 | 2 | film | g:era | Name a '70s movie | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 1970 && YEAR(?d) <= 1979) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 1970) } |
+fera/2020 | 1 | film | g:era | Name a 2020s movie | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= 2020 && YEAR(?d) <= 2029) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < 2020) } |
+ftv/1990 | 2 | film | g:era | Name a '90s TV show | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 1990 && YEAR(?d) <= 1999) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 1990) } |
+ftv/2000 | 2 | film | g:era | Name a 2000s TV show | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2000 && YEAR(?d) <= 2009) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2000) } |
+ftv/2010 | 2 | film | g:era | Name a 2010s TV show | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2010 && YEAR(?d) <= 2019) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2010) } |
+ftv/2020 | 2 | film | g:era | Name a 2020s TV show | autotop=12 max=800 min=15 minans=20 w:?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= 2020 && YEAR(?d) <= 2029) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < 2020) } |
 # screen
 // genre
 fgenre/asciencefictionmovie | 1 | film | g:genre | Name a science fiction movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q471839. ?i wdt:P31/wdt:P279* wd:Q11424. |
@@ -461,13 +276,10 @@ fgenre/adisastermovie | 2 | film | g:genre | Name a disaster movie | autotop=12 
 fgenre/aspymovie | 2 | film | g:genre | Name a spy movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q2297927. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // awards
+faward/abestpicturewinner | 2 | film | g:awards | Name a Best Picture winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q102427. ?i wdt:P31/wdt:P279* wd:Q11424. |
 faward/abestactoroscarwinner | 2 | film | g:awards | Name a Best Actor Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q103916. ?i wdt:P31 wd:Q5. |
 faward/abestactressoscarwinner | 2 | film | g:awards | Name a Best Actress Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q103618. ?i wdt:P31 wd:Q5. |
-faward/abestdirectoroscarwinner | 2 | film | g:awards | Name a Best Director Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q103360. ?i wdt:P31 wd:Q5. |
-faward/apalmedorwinningfilm | 2 | film | g:awards | Name a Palme d'Or-winning film | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q179808. ?i wdt:P31/wdt:P279* wd:Q11424. |
-faward/abestanimatedfeatureosca | 2 | film | g:awards | Name a Best Animated Feature Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q106800. ?i wdt:P31/wdt:P279* wd:Q11424. |
-faward/abestsupportingactorosca | 2 | film | g:awards | Name a Best Supporting Actor Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q106291. ?i wdt:P31 wd:Q5. |
-faward/abestsupportingactressos | 2 | film | g:awards | Name a Best Supporting Actress Oscar winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q106301. ?i wdt:P31 wd:Q5. |
+faward/abestanimatedfeaturewinn | 2 | film | g:awards | Name a Best Animated Feature winner | autotop=12 max=800 min=1 minans=10 w:?i wdt:P166 wd:Q106800. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
 // people
 
@@ -475,52 +287,48 @@ faward/abestsupportingactressos | 2 | film | g:awards | Name a Best Supporting A
 
 // families the game already had that BOX OFFICE plays too: family id -> BOX OFFICE topic
 export const FILM_JOIN = {
- "director/spielberg": "director",
- "director/tarantino": "director",
- "director/scorsese": "director",
- "director/cameron": "director",
- "director/burton": "director",
- "director/hitchcock": "director",
- "director/kubrick": "director",
- "director/ridley": "director",
- "director/wes": "director",
- "director/nolan": "director",
+ "director/spielberg": "director:1",
+ "director/tarantino": "director:1",
+ "director/scorsese": "director:1",
+ "director/cameron": "director:1",
+ "director/burton": "director:1",
+ "director/hitchcock": "director:1",
+ "director/kubrick": "director:1",
+ "director/ridley": "director:1",
+ "director/wes": "director:1",
  "actor/hanks": "star",
- "actor/leo": "star",
- "actor/pitt": "star",
+ "actor/leo": "star:1",
+ "actor/pitt": "star:1",
  "actor/cruise": "star",
  "actor/willsmith": "star",
- "actor/depp": "star",
- "actor/freeman": "star",
+ "actor/depp": "star:1",
+ "actor/freeman": "star:1",
  "actor/rock": "star",
- "actor/keanu": "star",
- "actor/harrison": "star",
+ "actor/keanu": "star:1",
+ "actor/harrison": "star:1",
  "actor/carrey": "star",
  "actor/sandler": "star",
- "actor/robin": "star",
- "actor/arnold": "star",
- "actor/jackie": "star",
- "actor/streep": "star",
+ "actor/robin": "star:1",
+ "actor/arnold": "star:1",
+ "actor/jackie": "star:1",
  "character/friends": "characters",
  "character/simpsons": "characters",
- "character/got": "characters",
- "character/breakingbad": "characters",
- "character/stranger": "characters",
- "character/familyguy": "characters",
- "character/southpark": "characters",
+ "character/got": "characters:1",
+ "character/breakingbad": "characters:1",
+ "character/stranger": "characters:1",
+ "character/familyguy": "characters:1",
+ "character/southpark": "characters:1",
  "seinfeld/chars": "characters",
  "bigbang/chars": "characters",
  "himym/chars": "characters",
- "greys/chars": "characters",
- "character/doctorwho": "characters",
- "futurama/chars": "characters",
- "bobs/chars": "characters",
+ "greys/chars": "characters:1",
+ "futurama/chars": "characters:1",
+ "bobs/chars": "characters:1",
  "avatar/chars": "characters",
  "scooby/chars": "characters",
- "naruto/chars": "characters",
- "onepiece/chars": "characters",
+ "naruto/chars": "characters:1",
+ "onepiece/chars": "characters:1",
  "tmnt/chars": "characters",
- "gilmore/chars": "characters",
  "modernfamily/chars": "characters",
  "parksrec/chars": "characters",
  "b99/chars": "characters",
@@ -529,33 +337,36 @@ export const FILM_JOIN = {
  "character/sesame": "characters",
  "character/starwars": "characters",
  "character/hp": "characters",
- "character/lotr": "characters",
- "movie/bond": "franchise",
+ "character/lotr": "characters:1",
+ "movie/bond": "franchise:1",
  "character/pixar": "characters",
- "hungergames/chars": "characters",
- "twilight/chars": "characters",
- "transformers/chars": "characters",
- "xmen/chars": "characters",
- "spidey/chars": "characters",
- "character/dc": "characters",
- "character/startrek": "characters",
+ "hungergames/chars": "characters:1",
+ "twilight/chars": "characters:1",
+ "transformers/chars": "characters:1",
+ "xmen/chars": "characters:1",
+ "spidey/chars": "characters:1",
+ "character/dc": "characters:1",
+ "character/startrek": "characters:1",
  "despicable/chars": "characters",
  "frozen/chars": "characters",
  "character/shrek": "characters",
  "lionking/chars": "characters",
  "sonic/chars": "characters",
- "decade/movie2000s": "era",
- "decade/movie2010s": "era",
+ "screensit/hbo": "tv:1",
+ "tv/nick": "tv",
+ "tv/disneychannel": "tv",
+ "movie/animated": "studio",
+ "movie/eighties": "era:1",
+ "movie/nineties": "era:1",
+ "decade/movie2000s": "era:1",
+ "decade/movie2010s": "era:1",
  "movie/horror": "genre",
- "movie/musical": "genre",
- "movie/war": "genre",
+ "movie/musical": "genre:1",
+ "movie/war": "genre:1",
  "movie/romcom": "genre",
  "movie/superhero": "genre",
  "movie/fantasy": "genre",
  "moviewith/heist": "genre",
  "movie/sports": "genre",
- "tv/kids": "tv",
- "tv/reality": "tv",
- "tv/drama": "tv",
- "movie/oscar": "awards"
+ "tv/reality": "tv"
 };

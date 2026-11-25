@@ -21,7 +21,8 @@ function fam(topic, id, lvl, prompt, where, opts = "", alts = []) {
   if (DROPPED.has(id)) return;
   const key = prompt.toLowerCase();
   const old = [key, ...alts.map((a) => a.toLowerCase())].find((k) => have.has(k));
-  if (old) { join[have.get(old).id] = topic; return; }
+  // a joined family keeps its own level elsewhere; in BOX OFFICE it plays at this list's level ("topic:level")
+  if (old) { const f = have.get(old); join[f.id] = lvl < f.level ? `${topic}:${lvl}` : topic; return; }
   if (used.has(key) || used.has("id:" + id) || /\|/.test(prompt + (typeof where === "string" ? where : ""))) return;
   used.add(key); used.add("id:" + id);
   if (where && typeof where === "object") { handFam(topic, id, lvl, prompt, where); return; }
@@ -51,31 +52,47 @@ const noThe = (s) => clean(s).replace(/^The /, "");
 // Scooby-Doo in Supernatural, the Simpsons in Family Guy)
 const BY = "{ ?i wdt:P1441 wd:%s. } UNION { ?i wdt:P8345 wd:%s. } UNION { ?w wdt:P179 wd:%s; wdt:P674 ?i. ?v wdt:P179 wd:%s; wdt:P674 ?i. FILTER(?w != ?v) }";
 const CHAR = (q) => BY.replace(/%s/g, q) + " ?i wdt:P31/wdt:P279* wd:Q95074.";
-// the lists are hand-picked, best-known first (tools/film/names.mjs)
-L.directors.forEach((d, i) => fam("director", "fdir/" + slug(d.name), lvl(i, 25, 60), `Name a film directed by ${clean(d.name)}`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6", alsoAs(d.name)));
-L.actors.forEach((a, i) => fam("star", "fstar/" + slug(a.name), lvl(i, 70, 130), `Name a movie starring ${clean(a.name)}`, `{ ?i wdt:P161 wd:${a.q}. } UNION { ?i wdt:P725 wd:${a.q}. } ${FILM}`, "min=1 minans=8", alsoAs(a.name)));
-L.shows.forEach((s, i) => fam("characters", "fchar/" + slug(s.name), lvl(i, 45, 85), `Name a character from ${clean(s.name)}`, CHAR(s.q), "min=1 minans=8", charAs(s.name)));
-L.franchises.forEach((s, i) => {
-  fam("characters", "ffran/" + slug(s.name), lvl(i, 35, 60), `Name a character from ${clean(s.name)}`, CHAR(s.q), "min=1 minans=8", charAs(s.name));
+// Everyday names only: BOX OFFICE is for everyone, so the lists are cut to the best-known (hand-picked,
+// best-known first in tools/film/names.mjs) and the wording is what people say ("a Christopher Nolan film").
+// a/an by sound: "an HBO show", "an MTV show", "an '80s movie"
+const an2 = (s) => (/^([aeiou]|'8|8|(HBO|FX|MTV|NBC|AMC|ABC|A24)\b)/i.test(s) ? "an " : "a ") + s;
+const NICHE_SHOWS = new Set(["Neighbours", "EastEnders", "Coronation Street", "Only Fools and Horses", "Fawlty Towers", "Twin Peaks",
+  "Battlestar Galactica", "ER", "Cheers", "Frasier", "The Wire", "Dark", "Thomas & Friends", "Hey Arnold!", "Courage the Cowardly Dog",
+  "Sailor Moon", "Death Note", "Star Trek: The Next Generation", "Doctor Who", "Prison Break", "Lost", "Desperate Housewives", "The X-Files",
+  "Buffy the Vampire Slayer", "Supernatural", "Gilmore Girls", "Gossip Girl", "Dexter", "Mad Men", "Succession", "Westworld", "Arrested Development"]);
+const NICHE_FRANCHISES = new Set(["Police Academy", "American Pie", "Pokémon", "Tom and Jerry", "Scooby-Doo", "The Conjuring Universe", "Saw",
+  "Friday the 13th", "A Nightmare on Elm Street", "Halloween", "Winnie-the-Pooh", "The Muppets", "Planet of the Apes", "King Kong", "Godzilla",
+  "Rambo", "DC Extended Universe", "Alien", "Terminator", "Barbie", "Wizarding World", "Middle-earth", "Mad Max"]);
+const NETWORKS = { Netflix: 1, "Disney+": 1, Nickelodeon: 1, "Disney Channel": 1, "Cartoon Network": 1, HBO: 1, NBC: 2, CBS: 2,
+  "American Broadcasting Company": 2, "Fox Broadcasting Company": 2, "Prime Video": 2, Hulu: 2, "Apple TV+": 2, "BBC One": 2, "The CW": 2, MTV: 2, AMC: 2, "Comedy Central": 2 };
+const STUDIOS = { Pixar: [1, "Pixar"], "Walt Disney Animation Studios": [1, "Disney animated"], "DreamWorks Animation": [1, "DreamWorks"],
+  "Marvel Studios": [1, "Marvel Studios"], Illumination: [1, "Illumination"], "Studio Ghibli": [2, "Studio Ghibli"], Lucasfilm: [2, "Lucasfilm"],
+  "Universal Pictures": [2, "Universal"], "Paramount Pictures": [2, "Paramount"], "20th Century Studios": [2, "20th Century Fox"],
+  "Walt Disney Pictures": [2, "Disney"], A24: [2, "A24"], "Blumhouse Productions": [2, "Blumhouse"], Netflix: [2, "Netflix original"], "Aardman Animations": [2, "Aardman"] };
+const SHORT = { "Fox Broadcasting Company": "Fox", "American Broadcasting Company": "ABC" };
+// "Name a Breaking Bad character", but "Name a character from The Office"
+const charPrompt = (n) => (/^The /.test(clean(n)) ? `Name a character from ${clean(n)}` : `Name ${an2(clean(n))} character`);
+
+L.directors.slice(0, 50).forEach((d, i) => fam("director", "fdir/" + slug(d.name), lvl(i, 12, 40), `Name ${an2(clean(d.name))} film`, `?i wdt:P57 wd:${d.q}. ${FILM}`, "min=1 minans=6", [...alsoAs(d.name), `Name a film directed by ${clean(d.name)}`]));
+L.actors.slice(0, 120).forEach((a, i) => fam("star", "fstar/" + slug(a.name), lvl(i, 60, 120), `Name ${an2(clean(a.name))} movie`, `{ ?i wdt:P161 wd:${a.q}. } UNION { ?i wdt:P725 wd:${a.q}. } ${FILM}`, "min=1 minans=8", [...alsoAs(a.name), `Name a movie starring ${clean(a.name)}`]));
+L.shows.filter((s) => !NICHE_SHOWS.has(s.name)).forEach((s, i) => fam("characters", "fchar/" + slug(s.name), lvl(i, 40, 80), charPrompt(s.name), CHAR(s.q), "min=1 minans=8", charAs(s.name)));
+L.franchises.filter((s) => !NICHE_FRANCHISES.has(s.name)).forEach((s, i) => {
+  fam("characters", "ffran/" + slug(s.name), lvl(i, 30, 60), charPrompt(s.name), CHAR(s.q), "min=1 minans=8", charAs(s.name));
   if (SMALL.includes(s.name)) return; // too few films for a prompt
-  fam("franchise", "fmovie/" + slug(s.name), lvl(i, 40, 65), `Name ${an(noThe(s.name))} movie`,
+  fam("franchise", "fmovie/" + slug(s.name), lvl(i, 35, 60), `Name ${an(noThe(s.name))} movie`,
     MOVIES[s.name] || `{ ?i wdt:P179+ wd:${s.q}. } UNION { ?i wdt:P8345 wd:${s.q}. } ${FILM}`, "min=1 minans=5", [...alsoAs(noThe(s.name)), ...alsoAs(clean(s.name))]);
 });
-const SHORT = { "Fox Broadcasting Company": "Fox", "American Broadcasting Company": "ABC" }; // what players call them
-L.networks.forEach((n, i) => fam("tv", "fnet/" + slug(n.name), lvl(i, 16, 26), `Name a TV show on ${SHORT[n.name] || clean(n.name)}`, `?i wdt:P449 wd:${n.q}. ${SHOW}`, "min=2 minans=10"));
-L.studios.forEach((s, i) => fam("studio", "fstudio/" + slug(s.name), lvl(i, 14, 24), `Name a film made by ${clean(s.name)}`, `?i wdt:P272 wd:${s.q}. ${FILM}`, "min=1 minans=8"));
-for (let y = 1930; y <= 2020; y += 10) fam("era", "fera/" + y, y >= 1980 ? 1 : 2, `Name a movie from the ${y}s`, `?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9}) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < ${y}) }`, "min=15 minans=20");
-for (let y = 1990; y <= 2020; y += 10) fam("era", "ftv/" + y, 2, `Name a TV series that started in the ${y}s`, `?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9}) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < ${y}) }`, "min=15 minans=20");
-const GENRES = [["a horror movie", "Q200092"], ["a science fiction movie", "Q471839"], ["a western", "Q172980"], ["a movie musical", "Q842256"], ["a war movie", "Q369747"], ["a romantic comedy", "Q860626"], ["a superhero movie", "Q1535153"], ["a crime movie", "Q959790"], ["a fantasy movie", "Q157394"], ["a thriller", "Q2484376"], ["a documentary film", "Q93204"], ["a disaster movie", "Q846544"], ["a heist movie", "Q496523"], ["a martial arts movie", "Q1251417"], ["a spy movie", "Q2297927"], ["a zombie movie", "Q1342372"], ["a teen movie", "Q1146335"], ["a sports movie", "Q1135802"]];
+L.networks.filter((n) => NETWORKS[n.name]).forEach((n) => fam("tv", "fnet/" + slug(n.name), NETWORKS[n.name], `Name ${an2(SHORT[n.name] || clean(n.name))} show`, `?i wdt:P449 wd:${n.q}. ${SHOW}`, "min=2 minans=10"));
+L.studios.filter((s) => STUDIOS[s.name]).forEach((s) => fam("studio", "fstudio/" + slug(s.name), STUDIOS[s.name][0], `Name ${an2(STUDIOS[s.name][1])} movie`, `?i wdt:P272 wd:${s.q}. ${FILM}`, "min=1 minans=8"));
+const decade = (y) => (y >= 2000 ? `${y}s` : `'${String(y).slice(2)}s`);
+for (let y = 1950; y <= 2020; y += 10) fam("era", "fera/" + y, y >= 1980 ? 1 : 2, `Name ${an2(decade(y))} movie`, `?i wdt:P31 wd:Q11424; wdt:P577 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9}) FILTER NOT EXISTS { ?i wdt:P577 ?e. FILTER(YEAR(?e) < ${y}) }`, "min=15 minans=20", [`Name a movie from the ${y}s`]);
+for (let y = 1990; y <= 2020; y += 10) fam("era", "ftv/" + y, 2, `Name ${an2(decade(y))} TV show`, `?i wdt:P31 wd:Q5398426; wdt:P580 ?d. FILTER(YEAR(?d) >= ${y} && YEAR(?d) <= ${y + 9}) FILTER NOT EXISTS { ?i wdt:P580 ?e. FILTER(YEAR(?e) < ${y}) }`, "min=15 minans=20");
+const GENRES = [["a horror movie", "Q200092"], ["a science fiction movie", "Q471839"], ["a western", "Q172980"], ["a movie musical", "Q842256"], ["a war movie", "Q369747"], ["a romantic comedy", "Q860626"], ["a superhero movie", "Q1535153"], ["a crime movie", "Q959790"], ["a fantasy movie", "Q157394"], ["a thriller", "Q2484376"], ["a disaster movie", "Q846544"], ["a heist movie", "Q496523"], ["a spy movie", "Q2297927"], ["a sports movie", "Q1135802"]];
 GENRES.forEach(([g, q], i) => fam("genre", "fgenre/" + slug(g), i < 8 ? 1 : 2, `Name ${g}`, `?i wdt:P136 wd:${q}. ${FILM}`, "min=8 minans=15"));
-for (const [g, q, w] of [["a sitcom", "Q170238", "?i wdt:P136 wd:Q170238."], ["an animated TV series", "Q581714", "?i wdt:P31 wd:Q581714."], ["a reality TV show", "Q182415", "?i wdt:P136 wd:Q182415."], ["an anime series", "Q63952888", "?i wdt:P31 wd:Q63952888."], ["a soap opera", "Q23739", "?i wdt:P136 wd:Q23739."], ["a game show", "Q11578774", "?i wdt:P136 wd:Q11578774."], ["a TV drama series", "Q1366112", "?i wdt:P136 wd:Q1366112. ?i wdt:P31 wd:Q5398426."], ["a crime drama TV show", "Q5937792", "?i wdt:P136 wd:Q5937792."]])
+for (const [g, w] of [["a sitcom", "?i wdt:P136 wd:Q170238."], ["a cartoon TV show", "?i wdt:P31 wd:Q581714."], ["a reality TV show", "?i wdt:P136 wd:Q182415."], ["an anime series", "?i wdt:P31 wd:Q63952888."], ["a TV drama", "?i wdt:P136 wd:Q1366112. ?i wdt:P31 wd:Q5398426."]])
   fam("tv", "ftvg/" + slug(g), 1, `Name ${g}`, w, "min=8 minans=15");
-for (const [what, q] of [["a Best Picture Oscar winner", "Q102427"], ["a Best Actor Oscar winner", "Q103916"], ["a Best Actress Oscar winner", "Q103618"], ["a Best Director Oscar winner", "Q103360"], ["a Palme d'Or-winning film", "Q179808"], ["a Best Animated Feature Oscar winner", "Q106800"], ["a Best Supporting Actor Oscar winner", "Q106291"], ["a Best Supporting Actress Oscar winner", "Q106301"]])
-  fam("awards", "faward/" + slug(what), 2, `Name ${what}`, `?i wdt:P166 wd:${q}. ` + (/(Actor|Actress|Director) Oscar/.test(what) ? "?i wdt:P31 wd:Q5." : FILM), "min=1 minans=10");
-for (const [who, q] of [["the United States", "Q30"], ["the United Kingdom", "Q145"], ["France", "Q142"], ["India", "Q668"], ["Japan", "Q17"], ["South Korea", "Q884"], ["Italy", "Q38"], ["Germany", "Q183"], ["Spain", "Q29"], ["Australia", "Q408"], ["Canada", "Q16"], ["Mexico", "Q96"], ["Brazil", "Q155"], ["China", "Q148"], ["Ireland", "Q27"], ["Sweden", "Q34"]]) {
-  fam("people", "factor/" + slug(who), 2, `Name an actor or actress from ${who}`, `?i wdt:P106 wd:Q33999; wdt:P27 wd:${q}.`, "min=30 minans=20 surnames");
-  fam("people", "fdirc/" + slug(who), 3, `Name a film director from ${who}`, `?i wdt:P106 wd:Q2526255; wdt:P27 wd:${q}.`, "min=20 minans=12 surnames");
-}
+for (const [what, q] of [["a Best Picture winner", "Q102427"], ["a Best Actor Oscar winner", "Q103916"], ["a Best Actress Oscar winner", "Q103618"], ["a Best Animated Feature winner", "Q106800"]])
+  fam("awards", "faward/" + slug(what), 2, `Name ${what}`, `?i wdt:P166 wd:${q}. ` + (/(Actor|Actress) Oscar/.test(what) ? "?i wdt:P31 wd:Q5." : FILM), "min=1 minans=10");
 
 let out = `// GENERATED by tools/film/make-catalog.mjs: the BOX OFFICE movie & TV prompts (pool "film").
 // Answers: tools/build-catalog.mjs (Wikidata, ranked by how many Wikipedias cover each film, show or person).

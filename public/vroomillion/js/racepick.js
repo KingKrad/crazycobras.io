@@ -34,11 +34,12 @@ export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   // one somewhere in the second half.
   if ((pool === "geo" || pool === "film") && !opts.oneTrack && n > 1) {
     const all = poolFamilies(mode, opts.families);
-    const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level === 1) });
+    const lv = (f) => (pool === "film" && f.filmLevel) || f.level; // BOX OFFICE can play an older prompt as an easy one
+    const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => lv(f) === 1) });
     const taken = new Set(easy.map((x) => x.family.group));
     // the tricky one: a topic the race hasn't had yet, if there is one
     const topics = new Set(easy.map((x) => topicOf(x.family, pool)));
-    const harder = all.filter((f) => f.level > 1 && !taken.has(f.group));
+    const harder = all.filter((f) => lv(f) > 1 && !taken.has(f.group));
     const fresh = harder.filter((f) => !topics.has(topicOf(f, pool)));
     const hard = pickRace(mode, [...(seen || []), ...easy.map((x) => famKey(x.family))], 1, rng, { ...opts, oneTrack: true, families: fresh.length ? fresh : harder });
     const out = [...easy];

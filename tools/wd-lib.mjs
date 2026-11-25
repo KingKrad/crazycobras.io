@@ -28,7 +28,7 @@ export function sparql(query) {
 }
 
 // Words that never belong in a family trivia game, whatever Wikidata files them under.
-export const BLOCK = /\b(gokudo|godemiche|striptease|stripper|f[uü]hrer|yakuza|slave|slavery|penis|vagina|vulva|scrotum|testicle|testis|anus|anal|rectum|clitoris|labia|dildo|vibrator|sex|sexual|porn|genital|genitals|mutilation|nipple|breast|semen|sperm|masturbat\w*|erotic|fetish|bdsm|condom|brothel|prostitut\w*|rape|nazi|hitler|swastika|genocide|massacre|suicide|murder|terroris\w*|torture|lynching|slur|cocaine|heroin|meth)\b/i;
+export const BLOCK = /\b(drugs?|whores?|pussycat|gokudo|godemiche|striptease|stripper|f[uü]hrer|yakuza|slave|slavery|penis|vagina|vulva|scrotum|testicle|testis|anus|anal|rectum|clitoris|labia|dildo|vibrator|sex|sexual|porn|genital|genitals|mutilation|nipple|breast|semen|sperm|masturbat\w*|erotic|fetish|bdsm|condom|brothel|prostitut\w*|rape|nazi|hitler|swastika|genocide|massacre|suicide|murder|terroris\w*|torture|lynching|slur|cocaine|heroin|meth)\b/i;
 // Scientific names: "prunus domestica", "ribes", "bambusoideae". Players type common names.
 export const LATIN_PAIR = /^[a-z]+(us|um|a|is|ae|ii|on|es|ix|ex|os|ys)\s[a-z]+(us|um|a|is|ae|ii|i|ensis|ica|icus|ata|atus|ana|anus|ina|inus|ea|eus|osa|osus|ens|ans|ix|ex|ides|oides|alis|ale|ii|orum|arum|um|ia)$/;
 export const LATIN_GROUP = /(idae|inae|oideae|aceae|ales|iformes|opsida|ophyta|phyceae|eae|ini)$/;

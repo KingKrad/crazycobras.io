@@ -81,6 +81,11 @@ export const FAMILIES = parseCatalog(SOURCES);
   const keyTopic = new Map(FAMILIES.filter((f) => GEO_JOIN[f.id]).map((f) => [f.key, GEO_JOIN[f.id]]));
   for (const f of FAMILIES) if (keyTopic.has(f.key) && !f.pools.includes("geo")) { f.pools.push("geo"); f.geoTopic = keyTopic.get(f.key); }
   // and BOX OFFICE
+  // ("topic:level": an easier level in BOX OFFICE, whose races are mostly well-known prompts)
   const filmTopic = new Map(FAMILIES.filter((f) => FILM_JOIN[f.id]).map((f) => [f.key, FILM_JOIN[f.id]]));
-  for (const f of FAMILIES) if (filmTopic.has(f.key) && !f.pools.includes("film")) { f.pools.push("film"); f.filmTopic = filmTopic.get(f.key); }
+  for (const f of FAMILIES) if (filmTopic.has(f.key) && !f.pools.includes("film")) {
+    const [topic, level] = filmTopic.get(f.key).split(":");
+    f.pools.push("film"); f.filmTopic = topic;
+    if (level) f.filmLevel = Number(level);
+  }
 }

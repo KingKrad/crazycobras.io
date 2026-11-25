@@ -194,7 +194,7 @@ const THEMED = {
   geo: { name: "WORLD TOUR", screen: "worldtour", ids: "wt", scene: () => worldScene, go: "▶ HIT THE ROAD",
     info: "700+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
   film: { name: "BOX OFFICE", screen: "boxoffice", ids: "bo", scene: () => driveInScene, go: "▶ ROLL THE TRAILER",
-    info: "550+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
+    info: "350+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
 };
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)
@@ -331,7 +331,9 @@ function showQuestion(q) {
   let subject = m ? m[2] : q.q;
   const twist = subject.match(/^(.*) starting with "([A-Z])"$/);
   if (twist) subject = twist[1];
-  $("q-lead").textContent = m ? m[1].toUpperCase() : "";
+  // "a" or "an" by the sound of what follows (some older prompts say "a Adam Sandler movie")
+  const lead = m && /^name an?$/i.test(m[1]) ? (/^([aeiou]|'8|8|(HBO|FX|MTV|NBC|AMC|ABC|A24|LEGO)\b)/i.test(subject) ? "Name an" : "Name a") : m?.[1];
+  $("q-lead").textContent = lead ? lead.toUpperCase() : "";
   const qEl = $("question");
   qEl.textContent = subject.toUpperCase();
   $("q-twist").textContent = twist ? `STARTS WITH ${twist[2]}` : "";
@@ -2492,7 +2494,11 @@ async function runRace(token) {
     Object.defineProperty(index, "deep", { get: () => deepAnswers(index.prompt), configurable: true });
     $("round-label").textContent = `ROUND ${round + 1} OF ${rounds}`;
     // the new prompt system shows no topic label (it would give the answer space away)
-    $("q-kicker").textContent = `PROMPT ${round + 1}/${rounds}` + (q.tricky ? " · TRICKY ONE!" : "");
+    // BOX OFFICE: the prompt is a cinema marquee
+    const film = race.themed === "film";
+    $("q-card").classList.toggle("marquee", film);
+    $("q-kicker").textContent = (film ? `NOW SHOWING · REEL ${round + 1}/${rounds}` : `PROMPT ${round + 1}/${rounds}`) + (q.tricky ? " · TRICKY ONE!" : "");
+    $("q-hint").textContent = film ? "RARER = BIGGER PREMIERE" : "RARER = FURTHER";
     // a prompt counts as seen once it's shown, so quitting early doesn't use up the rest
     markSeen(q.fam || famKeyOf(q.q)); // the whole family, in every race type
     $("q-hint").classList.remove("hidden");

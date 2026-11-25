@@ -1,1 +1,0 @@
-{"q":"Name a film directed by Jon Favreau","a":[["iron man","iron man 2","the jungle book","the lion king","elf"],["chef","cowboys & aliens","the mandalorian and grogu","made"],["the jungle book 2"],[],[]],"tiers":[2,25],"fam":"fdir/jonfavreau","live":{"where":"{ ?i wdt:P57 wd:Q295964. ?i wdt:P31/wdt:P279* wd:Q11424. }","tiers":[2,25],"exclude":null,"taxa":false}}
