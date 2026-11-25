@@ -412,7 +412,7 @@ test("answer files: five tiers, the obvious answers in TRAFFIC, no 'not this' no
     const d = JSON.parse(fs.readFileSync(new URL(f, dir), "utf8"));
     assert.equal(d.a.length, 5, f);
     assert.ok(d.a[0].length >= 5, f + ": TRAFFIC");
-    for (const t of d.a) for (const e of t) assert.ok(!/ no$/.test(e) || /^(oh|uh) no$/.test(e), `${f}: ${e}`);
+    for (const t of d.a) for (const e of t) assert.ok(!/ no$/.test(e) || /^(oh|uh|dr\.?) no$/.test(e), `${f}: ${e}`);
   }
 });
 

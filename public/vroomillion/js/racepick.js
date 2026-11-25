@@ -36,7 +36,11 @@ export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
     const all = poolFamilies(mode, opts.families);
     const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level === 1) });
     const taken = new Set(easy.map((x) => x.family.group));
-    const hard = pickRace(mode, [...(seen || []), ...easy.map((x) => famKey(x.family))], 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => f.level > 1 && !taken.has(f.group)) });
+    // the tricky one: a topic the race hasn't had yet, if there is one
+    const topics = new Set(easy.map((x) => topicOf(x.family, pool)));
+    const harder = all.filter((f) => f.level > 1 && !taken.has(f.group));
+    const fresh = harder.filter((f) => !topics.has(topicOf(f, pool)));
+    const hard = pickRace(mode, [...(seen || []), ...easy.map((x) => famKey(x.family))], 1, rng, { ...opts, oneTrack: true, families: fresh.length ? fresh : harder });
     const out = [...easy];
     if (hard.length) out.splice(Math.max(Math.floor(n / 2), out.length - Math.floor(rng() * 3)), 0, { ...hard[0], tricky: true });
     return out.slice(0, n);

@@ -48,7 +48,8 @@ export class DriveInScene {
     this.reelWait = 3.5;
   }
   setHi(canvas, R) { this.hiG = canvas ? canvas.getContext("2d") : null; this.hiScale = R; }
-  resize(w, h, carBottom) { this.W = w; this.H = h; this.u = Math.max(1, w / 320); this.bottom = carBottom || h * 0.82; }
+  // u: the pixel scale. Wide screens size by height too, or the cars grow up into the big screen
+  resize(w, h, carBottom) { this.W = w; this.H = h; this.u = Math.max(1, Math.min(w, h * 0.7) / 320); this.bottom = carBottom || h * 0.82; }
   // the big screen: the top of the play area, under the question card
   screenBox() {
     const W = this.W, top = this.H * 0.44, sw = Math.min(W * 0.86, (this.bottom - top) * 1.25), sh = sw * 0.42;
