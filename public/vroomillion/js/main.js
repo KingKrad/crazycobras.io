@@ -204,7 +204,7 @@ const THEMED = {
   music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, go: "▶ START THE TOUR",
     info: "380+ MUSIC PROMPTS · A WORLD TOUR BY BUS", card: "Music · every answer is a gig round the world" },
   sport: { name: "STADIUM RUN", screen: "stadium", ids: "sr", scene: () => stadiumScene, go: "▶ ON YOUR MARKS",
-    info: "170+ SPORTS PROMPTS · LAPS OF THE STADIUM", card: "Sports · every answer is a lap of the stadium" },
+    info: "150+ SPORTS PROMPTS · LAPS OF THE STADIUM", card: "Sports · every answer is a lap of the stadium" },
 };
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)
