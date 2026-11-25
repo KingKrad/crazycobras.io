@@ -584,6 +584,11 @@ async function api(path, options = {}) {
     await new Promise((r) => setTimeout(r, 800));
     try { res = await go(); } catch { const e = new Error(NET_ERROR); e.network = true; throw e; }
   }
+  // a hiccup between the site and the server (502/503): once more, unless it's a purchase or a sign-up
+  if ((res.status === 502 || res.status === 503) && !/^(signup|checkout|car-checkout|mode-checkout|delete-account|reset-password|recovery-code)\b/.test(path)) {
+    await new Promise((r) => setTimeout(r, 600));
+    try { res = await go(); } catch { const e = new Error(NET_ERROR); e.network = true; throw e; }
+  }
   if (!(res.headers.get("content-type") || "").includes("json")) throw new Error("offline");
   return { res, body: await res.json().catch(() => ({})) };
 }
