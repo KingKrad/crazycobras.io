@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26h",
+    date: "Nov 26, 2026",
+    title: "Even more Christmas",
+    items: [
+      "Deeper Christmas colours everywhere: pine-green screens, gold and red buttons, twinkling lights over the tab bar and a candy-cane prompt card.",
+      "The title screen waits on the snowy Mountain Pass, and it snows in every zone of a race, even the desert.",
+      "Not feeling festive? ACCOUNT → CHRISTMAS LOOK switches it all off (and back on).",
+    ],
+  },
+  {
     id: "2026-11-26g",
     date: "Nov 26, 2026",
     title: "It's Christmas!",

@@ -682,7 +682,7 @@ export class ChaseScene {
 
   resetWorld() {
     this.seed = Math.random() * 1000;
-    const first = Math.floor(hash(this.seed) * BASE_ZONES);
+    const first = FESTIVE ? zoneIndex("alpine") : Math.floor(hash(this.seed) * BASE_ZONES); // at Christmas the title waits on the snowy Mountain Pass
     this.zones = [{ zone: first, start: -Infinity, weather: fest("clear", first) }]; // the first stretch is always dry (or snowy, at Christmas)
     this.progress = 0;
     this.shown = 0; // the zone entry the camera is in
@@ -1155,7 +1155,7 @@ export class ChaseScene {
       const prev = this.zones[this.zones.length - 1];
       const n = this.zones.length;
       const zone = (this.zones[0].zone + n) % BASE_ZONES;
-      const opts = ZONES[zone].weather;
+      const opts = FESTIVE ? ["snow", "snow", "clear"] : ZONES[zone].weather; // at Christmas it snows in every zone, the desert too
       // new zones appear at the horizon and you drive into them
       this.zones.push({ zone, start: Math.max(camSeg + DRAW - 4, prev.start + 40), weather: fest(opts[Math.floor(hash(this.seed + n * 3.3) * opts.length)], zone) });
     }

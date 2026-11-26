@@ -54,7 +54,7 @@ for (const page of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"))) {
   const p = path.join(ROOT, page);
   let html = fs.readFileSync(p, "utf8")
     .replace(/(src=")(js\/[\w.-]+\.js)(")/g, (m, a, u, b) => a + tag(u) + b)
-    .replace(/(href=")(style\.css)(")/g, (m, a, u, b) => a + tag(u) + b)
+    .replace(/(href=")((?:style|xmas-theme)\.css)(")/g, (m, a, u, b) => a + tag(u) + b)
     .replace(/(href=")(fonts\/[\w.-]+)(")/g, (m, a, u, b) => a + tag(u) + b);
   if (page === "index.html") {
     const preload = [...deps].map((d) => `  <link rel="modulepreload" href="js/${d}?v=${V}">`).join("\n");

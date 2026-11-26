@@ -1,0 +1,90 @@
+html[data-season="xmas"] {
+  --bg: #050f0a;
+  --panel: #0d2418;
+  --panel-2: #123a26;
+  --ink: #fbfff8;
+  --dim: #a9c9b5;
+  --line: #2e6b45;
+  --cyan: #7dffb0;
+  --pink: #ff3b4e;
+  --yellow: #ffd23a;
+  --xm-red: #e0202f;
+  --xm-red-dk: #8a0a14;
+  --xm-green: #19c45a;
+  --xm-green-dk: #0b4a24;
+  --xm-gold: #ffd23a;
+}
+
+html[data-season="xmas"] body {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 100% 32px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 32px 100%,
+    radial-gradient(ellipse at 50% 0%, #0f3a24 0%, var(--bg) 70%);
+}
+
+html[data-season="xmas"] .neon-sign .na { --c: #ff2436; --g: #e0202f; --w: #ffffff; }
+html[data-season="xmas"] .neon-sign .nb { --c: #1fe06a; --g: #12a84a; --w: #ffffff; }
+html[data-season="xmas"] .neon-sign .glow text { opacity: 0.6; }
+html[data-season="xmas"] .neon-sign .tube tspan { fill: var(--g); stroke: #ffffff; }
+html[data-season="xmas"] .neon-sign .tube text { stroke-width: 9; }
+html[data-season="xmas"] .neon-sign .core text { stroke-width: 0; }
+html[data-season="xmas"] .brand { color: #ff3b4e; text-shadow: 2px 2px 0 #4a0008; }
+html[data-season="xmas"] .brand span { color: #1fe06a; text-shadow: 2px 2px 0 #053317; }
+html[data-season="xmas"] .logo-a { color: #ff3b4e; text-shadow: 0.06em 0.06em 0 #fff, 0.12em 0.12em 0 #000; }
+html[data-season="xmas"] .logo-b { color: #1fe06a; text-shadow: 0.06em 0.06em 0 #fff, 0.12em 0.12em 0 #000; }
+
+html[data-season="xmas"] .btn.daily-hero {
+  background: linear-gradient(#ff3646, #c8101f);
+  color: #fff;
+  border-color: #fff;
+  text-shadow: 2px 2px 0 #6a0610;
+  box-shadow: 0 0 0 3px var(--xm-gold), 0 0 28px rgba(255, 210, 58, 0.45);
+}
+html[data-season="xmas"] .btn.daily-hero.done { background: #1d6b3a; box-shadow: 0 0 0 3px #5dff8f; }
+html[data-season="xmas"] .btn.big { background: var(--xm-red); border-color: #ffe3e6; }
+html[data-season="xmas"] .btn.big:hover:not(:disabled) { background: #ff3646; }
+html[data-season="xmas"] .btn.big.alt { background: #13843f; border-color: #d8ffe4; }
+html[data-season="xmas"] .btn:hover:not(:disabled) { background: #1b5236; }
+
+html[data-season="xmas"] .home-tile { background: rgba(6, 26, 15, 0.92); border-color: #2e6b45; }
+html[data-season="xmas"] .home-tile svg { fill: var(--xm-gold); }
+html[data-season="xmas"] .home-tile span { color: #b9d8c4; }
+html[data-season="xmas"] .home-tile:hover, html[data-season="xmas"] .home-tile:focus-visible { border-color: #fff; }
+html[data-season="xmas"] .tile-new { background: var(--xm-red); color: #fff; }
+html[data-season="xmas"] #s-title .first-steps { background: rgba(6, 26, 15, 0.92); }
+html[data-season="xmas"] body:not([data-screen="race"]):not([data-screen="title"]) .screen.active { background: rgba(6, 22, 13, 0.92); border-color: #2e6b45; }
+html[data-season="xmas"] body:not([data-screen="race"]):not([data-screen="title"]) .topbar { border-image: linear-gradient(rgba(4, 16, 9, 0.8), rgba(4, 16, 9, 0.8)) fill 0 / 0 / 0 100vmax; }
+
+html[data-season="xmas"] .tabbar { background: #051109; border-top-color: #0b3a1e; }
+html[data-season="xmas"] .tabbar::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -9px; height: 12px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12px 7px, #ff3646 0 3px, rgba(255, 54, 70, 0.35) 4px 6px, transparent 7px) 0 0 / 72px 12px,
+    radial-gradient(circle at 36px 7px, #ffd23a 0 3px, rgba(255, 210, 58, 0.35) 4px 6px, transparent 7px) 0 0 / 72px 12px,
+    radial-gradient(circle at 60px 7px, #1fe06a 0 3px, rgba(31, 224, 106, 0.35) 4px 6px, transparent 7px) 0 0 / 72px 12px,
+    linear-gradient(transparent 3px, #0b3a1e 3px 4px, transparent 4px);
+  animation: xm-twinkle 2.4s steps(1) infinite;
+}
+@keyframes xm-twinkle { 0%, 100% { filter: none; } 50% { filter: hue-rotate(120deg) brightness(1.15); } }
+html[data-season="xmas"] .tab { color: #8fb39c; }
+html[data-season="xmas"] .tab.on { color: var(--xm-gold); background: linear-gradient(#0d2a18, #051109); box-shadow: inset 0 3px 0 var(--xm-gold); }
+
+html[data-season="xmas"] .xmas-banner { background: repeating-linear-gradient(135deg, #138a3f 0 14px, #0e6e31 14px 28px); box-shadow: 3px 3px 0 #000; }
+html[data-season="xmas"] .xmas-banner b { text-shadow: 2px 2px 0 #053317; }
+
+html[data-season="xmas"] .cash { background: #06120a; border-color: #2e6b45; color: #7dffb0; }
+html[data-season="xmas"] .icon-btn[aria-pressed="true"] { color: #fff; border-color: #fff; }
+
+html[data-season="xmas"] body #q-card { position: relative; background: linear-gradient(160deg, #0e2a1a, #12361f); border: 3px solid #ffd23a; box-shadow: 0 0 0 3px #4a0008, 0 0 18px rgba(255, 210, 58, 0.35); }
+html[data-season="xmas"] body #q-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: repeating-linear-gradient(90deg, #d42020 0 10px, #f4f4f4 10px 20px); }
+html[data-season="xmas"] body #q-card .q-kicker { background: #c8202a; color: #fff6e0; }
+html[data-season="xmas"] body #q-card .question { color: #fff6ec; }
+html[data-season="xmas"] body #answer { border-color: #ffd23a; background: #081a10; color: #fff6ec; }
+html[data-season="xmas"] body #answer::placeholder { color: #5a7a64; }
+html[data-season="xmas"] #s-race .btn.go, html[data-season="xmas"] body #btn-next { background: #c8202a; border-color: #ffd23a; }
+html[data-season="xmas"] body .hud, html[data-season="xmas"] body .round-box { border-color: #ffd23a; background: rgba(14, 42, 26, 0.88); }
+
+@media (prefers-reduced-motion: reduce) { html[data-season="xmas"] .tabbar::before { animation: none; } }

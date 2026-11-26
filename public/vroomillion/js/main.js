@@ -12,6 +12,7 @@ import { ChaseScene, setFestive } from "./chase.js";
 import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
+import { applySeason, toggleXmasLook, xmasLookLabel, xmasLookOn } from "./theme.js";
 import { Places, PLACE_OF } from "./places.js";
 import { WorldScene, loadMap } from "./world.js";
 import { DriveInScene } from "./drivein.js";
@@ -184,7 +185,8 @@ if (stored) persist(); // keeps the server copy and the backup up to date from t
 // ---------- scene loop ----------
 // Menus show a side-on banner; races use the behind-the-car road. Both draw on one canvas.
 const sideScene = new Scene($("scene"));
-setFestive(Date.now() < Date.parse("2027-01-02T10:00:00Z")); // CHRISTMAS: snow on the road (the same end as the event)
+applySeason(); // the CHRISTMAS LOOK (theme.js): on through the season unless the player switched it off
+setFestive(xmasLookOn()); // snow on the road while the look is on
 const chaseScene = new ChaseScene($("scene"));
 let scene = chaseScene;
 const places = new Places($("scene"), chaseScene); // each menu screen is a place on the road
@@ -221,9 +223,6 @@ const SLEIGH_RACES = 5;
 const SLEIGH = EVENT_CARS.find((c) => c.id === "sleigh26");
 // an event mode is open until it ends; the others always are
 const modeOpen = (id) => !THEMED[id]?.ends || Date.now() < THEMED[id].ends;
-// CHRISTMAS: the whole game dresses up while the event is on (style.css body.xmas; snow on the road)
-const XMAS_ON = () => modeOpen("xmas");
-document.body.classList.toggle("xmas", XMAS_ON());
 const shownModes = () => Object.keys(THEMED).filter(modeOpen).sort((a, b) => (THEMED[b].event ? 1 : 0) - (THEMED[a].event ? 1 : 0)); // an event first
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)
@@ -2335,6 +2334,7 @@ function renderModes() {
 // ME: your account, plus how to play, updates, sound and (admins) the admin panel
 function renderMe() {
   $("me-sound").textContent = save.muted ? "SOUND: OFF" : "SOUND: ON";
+  $("me-xmas").textContent = xmasLookLabel();
   $("me-admin").classList.toggle("hidden", !account?.admin);
 }
 
@@ -3713,6 +3713,13 @@ function toggleSound() {
 }
 $("btn-sound").addEventListener("click", toggleSound);
 $("me-sound").addEventListener("click", () => { toggleSound(); renderMe(); });
+$("me-xmas").addEventListener("click", () => { audio.sfx.click(); toggleXmasLook(); renderMe(); });
+// the CHRISTMAS LOOK switched: a fresh road (snowy or not) and the title car parked on it again
+window.addEventListener("seasonchange", () => {
+  setFestive(xmasLookOn());
+  chaseScene.resetWorld();
+  if (current === "title") attract();
+});
 for (const b of document.querySelectorAll("#tabbar .tab")) b.addEventListener("click", () => { audio.sfx.click(); overlay(""); show(b.dataset.tab); });
 $("btn-sound-race").addEventListener("click", toggleSound);
 // refresh the "next free run" countdown on the title screen
