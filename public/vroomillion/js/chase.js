@@ -663,6 +663,8 @@ export class ChaseScene {
     w = Math.max(160, Math.round(w));
     h = Math.max(110, Math.round(h));
     if (glide && w === this.W && h === this.H && this.carBottom) { this.glideTo = Math.round(carBottom); return; }
+    const same = w === this.W && h === this.H;
+    if (same && Math.round(carBottom) === this.carBottom) return;
     this.glideTo = null;
     this.W = w;
     this.H = h;
@@ -672,6 +674,7 @@ export class ChaseScene {
     // canvas px per sprite px for the nearest car: about 15% of the width, a quarter to two fifths
     // smaller than before, so you see more road around it
     this.carPx = Math.max(1, (w * 0.15) / 40);
+    if (same) return;
     this.canvas.width = w;
     this.canvas.height = h;
     this.layer.width = w;

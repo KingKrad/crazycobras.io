@@ -754,6 +754,19 @@ test("AI judge: a verdict is remembered, so the same answer later costs nothing"
   assert.equal(AI.calls, 1);
 });
 
+test("AI judge: a lookup while typing never asks it (only verdicts it already gave), and its no isn't remembered", async () => {
+  const AI = fakeAI({ valid: true, canonical: "kenny bania", commonness: "rare" });
+  const env = { AI, DB: db };
+  const half = await (await askJudge({ prompt: "Name a Seinfeld character", answer: "kenny b", typing: 1 }, env)).json();
+  assert.deepEqual([half.found, half.typing], [false, true]);
+  assert.equal(AI.calls, 0);
+  const go = await (await askJudge({ prompt: "Name a Seinfeld character", answer: "Kenny Bania" }, env)).json();
+  assert.deepEqual([go.found, go.tier], [true, 4]);
+  const typedAgain = await (await askJudge({ prompt: "Name a Seinfeld character", answer: "kenny bania", typing: 1 }, env)).json();
+  assert.equal(typedAgain.found, true);
+  assert.equal(AI.calls, 1);
+});
+
 // ---------- Continue with Google / Apple ----------
 const b64u = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const idToken = (claims) => `${b64u({ alg: "RS256" })}.${b64u(claims)}.sig`;

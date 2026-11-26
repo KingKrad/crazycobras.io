@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26j",
+    date: "Nov 26, 2026",
+    title: "Fairer answer checks, smoother menus",
+    items: [
+      "More right answers count: the game gives the answer checker longer to decide (CHECKING… for up to 8 seconds) instead of giving up after 3.",
+      "No more black flashes or a jumpy background when you scroll on a phone.",
+      "Santa never drops a present onto a race: one that's on its way waits for you until the race is over.",
+      "Christmas colours on the last purple bits (quests, the daily race button, CRAZY MODE), and race tips are easier to read over the road.",
+    ],
+  },
+  {
     id: "2026-11-26i",
     date: "Nov 26, 2026",
     title: "The neon sign is back",

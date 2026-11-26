@@ -610,6 +610,8 @@ body[data-screen="race"] .stage.launch-t5::after { animation: glow-in 0.25s ease
 #s-race .turn:empty { display: none; }
 #s-race .feedback { text-align: center; margin: 0 0 6px; text-shadow: 1px 1px 0 #000; min-height: 0; }
 #s-race .feedback:empty { display: none; }
+/* the first-race tip and "ISN'T ON THE LIST" sit over the road: on a dark strip so they read on any scenery */
+#s-race :is(.turn, .feedback) { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; padding: 4px 10px; background: rgba(0, 0, 0, 0.72); border-radius: 4px; }
 #s-race .answer-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
 #s-race #answer { background: rgba(0, 0, 0, 0.82); text-transform: none; color: #e9fff1; }
 #s-race #answer::placeholder { color: #5f6f86; text-transform: none; font-size: 11px; }
@@ -1672,7 +1674,7 @@ body[data-screen="stadium"] .screen.active#s-stadium { background: none; border:
 .mode-card.mc-sport .mc-view { background: radial-gradient(ellipse 34% 30% at 50% 55%, #2f9a44 0 60%, #c8433a 61% 80%, #1d6bd6 81% 86%, transparent 87%), repeating-linear-gradient(90deg, #e04848 0 3px, #f0c040 3px 6px, #3a7bd5 6px 9px, #1a1630 9px 12px); }
 
 /* the home screen's link to the race settings, under the tiles */
-.home-settings { display: block; margin: 2px auto 0; padding: 6px 10px; font: inherit; font-size: 12px; color: #b9b2d6; background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.home-settings { display: block; margin: 2px auto 0; padding: 6px 10px; font: inherit; font-size: 12px; color: #d4cef0; background: rgba(8, 4, 20, 0.72); border-radius: 4px; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .home-settings:hover, .home-settings:focus-visible { color: #fff; outline: none; }
 
 /* ---------- the end-of-race finale ---------- */
@@ -1849,15 +1851,19 @@ body.xmas .btn.daily-hero:not(.done):not(.unlock-cta) { background: #e0202a; col
 body.xmas .tabbar { background: #0a1a12; border-top-color: #1f5a3a; }
 body.xmas .tab.on { color: #ffd23a; background: linear-gradient(#163a28, #0a1a12); box-shadow: inset 0 3px 0 #e0202a; }
 body.xmas .home-tile { border-color: #1f5a3a; }
-/* snow over the menus (the race road has its own) */
-body.xmas::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+/* snow over the road behind the menus (the race road and the title screen's road have their own). It sits
+   under the panels and tab bar, and falls by moving the layer (transform, cheap on phones) rather than
+   repainting the whole screen every frame: one tile taller than the screen, so the loop is seamless */
+body.xmas::after { content: ""; position: fixed; inset: -240px 0 0 0; z-index: 0; pointer-events: none; will-change: transform;
   background-image: radial-gradient(2px 2px at 20px 30px, #fff, transparent 60%), radial-gradient(2px 2px at 120px 80px, #fff, transparent 60%), radial-gradient(3px 3px at 60px 150px, rgba(255,255,255,0.9), transparent 60%), radial-gradient(2px 2px at 170px 190px, #fff, transparent 60%), radial-gradient(1.5px 1.5px at 90px 220px, #fff, transparent 60%);
   background-size: 200px 240px; opacity: 0.55; animation: xmas-snow 14s linear infinite; }
-body.xmas[data-screen="race"]::after, body.xmas[data-screen="christmas"]::after { display: none; }
-@keyframes xmas-snow { from { background-position: 0 0; } to { background-position: 40px 240px; } }
+body.xmas:is([data-screen="race"], [data-screen="christmas"], [data-screen="title"])::after { display: none; }
+@keyframes xmas-snow { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 240px, 0); } }
 @media (prefers-reduced-motion: reduce) { body.xmas::after { animation: none; opacity: 0.3; } }
 .mode-card.mc-xmas .mc-tag { white-space: nowrap; font-size: clamp(9px, 3.1vw, 13px); padding-left: 8px; padding-right: 8px; }
 @media (max-width: 360px) { .mode-card .mc-name { font-size: 20px; } }
 .mc-body { grid-template-columns: minmax(0, 1fr) auto; }
 .mode-card .mc-name { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 360px) { .mode-card.mc-xmas .mc-name { font-size: clamp(16px, 6.4vw, 22px); } }
+/* Santa never drops a present onto a race: the sleigh and a waiting present stay hidden until it's over */
+body[data-screen="race"] :is(.santa-sky, .santa-present) { visibility: hidden; pointer-events: none; }

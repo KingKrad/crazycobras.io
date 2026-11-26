@@ -76,7 +76,23 @@ html[data-season="xmas"] .xmas-banner { background: repeating-linear-gradient(13
 html[data-season="xmas"] .xmas-banner b { text-shadow: 2px 2px 0 #053317; }
 
 html[data-season="xmas"] .cash { background: #06120a; border-color: #2e6b45; color: #7dffb0; }
-html[data-season="xmas"] .icon-btn[aria-pressed="true"] { color: #fff; border-color: #fff; }
+html[data-season="xmas"] .icon-btn { background: #06120a; border-color: #2e6b45; color: #b9d8c4; }
+html[data-season="xmas"] .icon-btn[aria-pressed="true"] { color: #7dffb0; border-color: #2e6b45; }
+
+/* the spots still in the year-round purple and cyan: quests, the solo screen's daily race, race rules */
+html[data-season="xmas"] .quest { background: rgba(6, 26, 15, 0.92); border-color: #2e6b45; }
+html[data-season="xmas"] .quest.ready { border-color: var(--xm-gold); }
+html[data-season="xmas"] .q-text { color: #f4fff6; }
+html[data-season="xmas"] .q-bar { background: #0b3a1e; }
+html[data-season="xmas"] .q-n, html[data-season="xmas"] .quest.done .q-fill { color: #8fb39c; }
+html[data-season="xmas"] .quest.done .q-fill { background: #5a7a64; }
+html[data-season="xmas"] .btn.daily-race:not(.done) { background: var(--xm-red); color: #fff; border-color: #ffe3e6; text-shadow: 2px 2px 0 #6a0610; }
+html[data-season="xmas"] .btn.daily-race.done { background: #0d2418; color: #8fb39c; }
+html[data-season="xmas"] .rule-btn { background: #06120a; border-color: #2e6b45; }
+html[data-season="xmas"] .rule-btn.on { border-color: var(--xm-red); box-shadow: 0 0 14px rgba(224, 32, 47, 0.45); }
+html[data-season="xmas"] .rule-btn.on .rule-name { color: #ff6b78; }
+/* the race settings link sits over the road's centre line: give it a dark backing so it reads */
+html[data-season="xmas"] .home-settings { color: #d8ecdf; background: rgba(4, 16, 9, 0.78); border-radius: 4px; }
 
 html[data-season="xmas"] body #q-card { position: relative; background: linear-gradient(160deg, #0e2a1a, #12361f); border: 3px solid #ffd23a; box-shadow: 0 0 0 3px #4a0008, 0 0 18px rgba(255, 210, 58, 0.35); }
 html[data-season="xmas"] body #q-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: repeating-linear-gradient(90deg, #d42020 0 10px, #f4f4f4 10px 20px); }

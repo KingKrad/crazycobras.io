@@ -16,7 +16,9 @@ export function presentCanvas(col = "#c8202a", ribbon = "#ffd23a", scale = 3) {
 }
 
 // fly Santa over once. sleigh: the sleigh's side sprite. onCatch(): the present was tapped.
-export function flyover(sleigh, { onCatch, onMiss, onDrop, reduced = false, bottom = 120 }) {
+// away(): true while the player is busy (in a race): the sleigh and present are hidden then (CSS), and the
+// present's waiting time only counts while it can be seen, so it's still there after the race.
+export function flyover(sleigh, { onCatch, onMiss, onDrop, reduced = false, bottom = 120, away = () => false }) {
   const sky = document.createElement("div");
   sky.className = "santa-sky";
   sky.setAttribute("aria-hidden", "true");
@@ -48,9 +50,9 @@ export function flyover(sleigh, { onCatch, onMiss, onDrop, reduced = false, bott
       { transform: `translateY(${y}px) rotate(-8deg)` }, { transform: `translateY(${y + (land - y) * 0.35}px) rotate(8deg)` },
       { transform: `translateY(${y + (land - y) * 0.7}px) rotate(-6deg)` }, { transform: `translateY(${land}px) rotate(0deg)` }], { duration: reduced ? 1 : FALL_MS, easing: "ease-in-out", fill: "forwards" });
     setTimeout(() => btn.classList.add("landed"), FALL_MS);
-    let gone = false;
-    const end = (caught) => { if (gone) return; gone = true; clearTimeout(t); btn.classList.add("gone"); setTimeout(() => btn.remove(), 300); caught ? onCatch?.() : onMiss?.(); };
-    const t = setTimeout(() => end(false), FALL_MS + WAIT_MS);
+    let gone = false, shown = 0;
+    const end = (caught) => { if (gone) return; gone = true; clearInterval(t); btn.classList.add("gone"); setTimeout(() => btn.remove(), 300); caught ? onCatch?.() : onMiss?.(); };
+    const t = setInterval(() => { if (!away() && (shown += 500) >= FALL_MS + WAIT_MS) end(false); }, 500);
     btn.addEventListener("click", (e) => { e.stopPropagation(); end(true); });
   }, (reduced ? 0.3 : at) * FLY_MS);
 }

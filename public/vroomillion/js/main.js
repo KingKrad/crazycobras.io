@@ -301,7 +301,9 @@ function crispCanvas(cssW, cssH) {
 function fitScene() {
   scene = themedScene() || chaseScene;
   if (current !== "race") {
-    const { w, h: ch, css } = crispCanvas(window.innerWidth, window.innerHeight);
+    if (window.innerWidth !== menuW) { menuW = window.innerWidth; menuH = largeViewportHeight(); }
+    menuH = Math.max(menuH, window.innerHeight);
+    const { w, h: ch, css } = crispCanvas(window.innerWidth, menuH);
     // the place's centrepiece fills the top of the screen; menu panels start below it
     document.documentElement.style.setProperty("--place-top", Math.round(Math.max(130, Math.min(250, ch * 0.26)) * css) + "px");
     places.inset = Math.round((document.querySelector(".topbar")?.offsetHeight || 60) / css);
@@ -312,6 +314,13 @@ function fitScene() {
     if (current === "title") requestAnimationFrame(() => {
       const tag = document.querySelector("#title-art .tagline");
       if (current === "title" && tag) chaseScene.clearTop = Math.round((tag.getBoundingClientRect().bottom + 22) / css);
+      // the new-player steps start under the tagline (on wide screens the sign is taller than their margin allows)
+      const steps = $("first-steps");
+      if (current === "title" && tag && steps && !steps.classList.contains("hidden")) {
+        steps.style.marginTop = "";
+        const gap = tag.getBoundingClientRect().bottom + 10 - steps.getBoundingClientRect().top;
+        if (gap > 0) steps.style.marginTop = parseFloat(getComputedStyle(steps).marginTop) + gap + "px";
+      }
       // your car parks just above the buttons, wherever they end up on this screen
       const stack = document.querySelector("#s-title .title-bottom");
       if (current === "title" && stack) {
@@ -346,6 +355,21 @@ function fitScene() {
   scene.resize(iw, ih, ih - dock - Math.round(kb ? 6 : ih * 0.05), !!chaseScene.glideNext); // nearest car sits above the answer bar
   chaseScene.glideNext = false;
   requestAnimationFrame(fitCard);
+}
+let menuW = 0, menuH = 0;
+function largeViewportHeight() {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none";
+  document.body.append(probe);
+  const h = probe.offsetHeight || window.innerHeight;
+  probe.remove();
+  return h;
+}
+let fitQueued = false;
+function queueFit() {
+  if (fitQueued) return;
+  fitQueued = true;
+  requestAnimationFrame(() => { fitQueued = false; fitScene(); lastPlace = 0; });
 }
 let fullH = 0, fullW = 0; // the tallest the visible area has been at this width (no keyboard)
 window.addEventListener("orientationchange", () => setTimeout(fitScene, 300));
@@ -409,10 +433,10 @@ function fitCard() {
   // still too tall at the smallest readable size: let it overlap the car rather than cut it off
   if (card.scrollHeight > room) card.style.maxHeight = "none";
 }
-window.addEventListener("resize", fitScene);
+window.addEventListener("resize", queueFit);
 let wasLite = false;
 setInterval(() => { if (chaseScene.lite !== wasLite) { wasLite = chaseScene.lite; fitScene(); } }, 2000);
-window.visualViewport?.addEventListener("resize", fitScene);
+window.visualViewport?.addEventListener("resize", queueFit);
 window.visualViewport?.addEventListener("scroll", () => {
   if (current !== "race") return;
   unscroll();
@@ -3045,32 +3069,39 @@ function rarityRoad(r, res, opts = {}) {
 
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated
 // guess doesn't ask again. Offline (or in the preview) it just finds nothing.
+// typing: the lookup while they're still typing, which only asks Wikidata and verdicts already given
+// (never the AI judge, which would spend the day's allowance on half-typed words). Its "no" isn't final:
+// the GO press asks again in full.
 const onlineSeen = new Map();
 const onlinePending = new Map(); // lookups still in flight, shared by the typing prefetch and the GO press
-function checkOnline(index, value) {
+function checkOnline(index, value, typing = false) {
   const k = index.prompt + "|" + normalize(value);
   if (onlineSeen.has(k)) return Promise.resolve(onlineSeen.get(k));
-  if (onlinePending.has(k)) return onlinePending.get(k);
-  const p = lookupOnline(index, value, k).finally(() => onlinePending.delete(k));
-  onlinePending.set(k, p);
+  const pk = (typing ? "t|" : "f|") + k;
+  if (onlinePending.has(pk)) return onlinePending.get(pk);
+  const quick = !typing && onlinePending.get("t|" + k); // a typing lookup already on its way: a yes from it will do
+  const p = (quick ? quick.then((hit) => hit || lookupOnline(index, value, k, false)) : lookupOnline(index, value, k, typing))
+    .finally(() => onlinePending.delete(pk));
+  onlinePending.set(pk, p);
   return p;
 }
 // The answer as typed so far, already answered? (no network, no waiting)
 const onlineKnown = (index, value) => onlineSeen.has(index.prompt + "|" + normalize(value));
-async function lookupOnline(index, value, k) {
+async function lookupOnline(index, value, k, typing) {
   let hit = null;
   let settled = false; // a real yes/no from the server; a failed lookup is not remembered, so a retry can pass
   try {
     const res = await fetch("/api/vroomillion/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: index.prompt, answer: value }),
+      body: JSON.stringify(typing ? { prompt: index.prompt, answer: value, typing: 1 } : { prompt: index.prompt, answer: value }),
       signal: AbortSignal.timeout(10000), // Wikidata, then the AI judge for catalog prompts
     });
     if (res.ok) {
-      settled = true;
       const j = await res.json();
       if (j.found && typeof j.label === "string") hit = j;
+      // a typing "no" only means Wikidata didn't know it, and "judge busy" isn't a real no either
+      settled = !!hit || (!j.typing && !j.reason);
     }
   } catch { /* offline: nothing found */ }
   // "starting with" twists: the real answer must still start with the letter
@@ -3078,6 +3109,7 @@ async function lookupOnline(index, value, k) {
   if (settled) onlineSeen.set(k, hit);
   return hit;
 }
+const CHECK_WAIT_MS = 8000; // the longest GO waits on the live check (the race clock still ends it sooner)
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
 function onlineTier(hit) {
   if (Number.isInteger(hit.tier) && hit.tier >= 1 && hit.tier <= 4) return hit.tier; // the AI judge's verdict
@@ -3171,8 +3203,9 @@ function askAnswer(r, i, token, index) {
         return resolve(stalled);
       }
       // Not on our list: ask the online check (usually already started while they typed) and give one
-      // verdict. CHECKING… shows meanwhile; after 3 s with no answer it's a no, so there's never a
-      // wrong-then-right flip. A late "yes" is still remembered for the next time someone tries it.
+      // verdict. CHECKING… shows meanwhile; it waits up to 8 s (Wikidata, then the AI judge), or until the
+      // clock runs out, so there's never a wrong-then-right flip. A late "yes" is still remembered for the
+      // next time someone tries it.
       if (index.prompt && value.trim().length >= 3) {
         const same = (a) => normalize(a).replace(/ /g, "");
         const asFound = (hit) => ({ tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true });
@@ -3184,7 +3217,7 @@ function askAnswer(r, i, token, index) {
         if (checking) return;
         checking = true;
         say("CHECKING…", "checking");
-        Promise.race([checkOnline(index, value), new Promise((r) => setTimeout(() => r(null), 3000))]).then((hit) => {
+        Promise.race([checkOnline(index, value), new Promise((r) => setTimeout(() => r(null), CHECK_WAIT_MS))]).then((hit) => {
           checking = false;
           if (finished || token !== raceToken) return;
           // they've started typing something new meanwhile: a "no" doesn't wipe it
@@ -3230,7 +3263,7 @@ function askAnswer(r, i, token, index) {
       if (!index.prompt || value.trim().length < 3 || res.tier > 0) return; // on our list: nothing to look up
       prefetch = setTimeout(() => {
         if (finished || token !== raceToken || input.value !== value) return;
-        checkOnline(index, value).then((hit) => {
+        checkOnline(index, value, true).then((hit) => {
           const same = (a) => normalize(a).replace(/ /g, "");
           if (liveHints && hit && same(hit.label) !== same(value)) hint(value, hit.label);
         });
@@ -3870,7 +3903,8 @@ function santaFly() {
   flyover(spriteCanvas(SLEIGH, 2), {
     reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
     bottom: tabs ? (document.querySelector(".tabbar").offsetHeight || 64) + 24 : 30,
-    onDrop: () => audio.sfx.whoosh?.(2),
+    onDrop: () => { if (current !== "race") audio.sfx.whoosh?.(2); },
+    away: () => current === "race",
     onCatch: () => { audio.sfx.click(); givePresents(1, "★ A PRESENT FROM SANTA ★"); },
   });
 }
