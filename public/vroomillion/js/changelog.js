@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26a",
+    date: "Nov 26, 2026",
+    title: "Polish and more right answers",
+    items: [
+      "Actor and director prompts now accept their whole filmography, so famous films like Forrest Gump count for Tom Hanks.",
+      "Plurals like \"strawberries\", \"wolves\" and \"knives\" now match.",
+      "2-player races no longer use up an Unlimited race number, and end with PLAY AGAIN.",
+      "Fixes for small phones and sideways phones: titles fit, the home screen fits, and the answer hint fits with the keyboard up.",
+    ],
+  },
+  {
     id: "2026-11-25o",
     date: "Nov 25, 2026",
     title: "Big finishes",

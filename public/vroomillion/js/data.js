@@ -13,6 +13,7 @@ import { RARITY } from "./data-rarity.js";
 import { TOP } from "./data-top.js";
 import { classify } from "./data-cats.js";
 import { EXTRA } from "./data-extra.js";
+import { COMBINED } from "./data-combined.js";
 import { MORE, NICKNAMES } from "./data-more.js";
 import { GEN } from "./data-gen.js";
 import { normalize, FILLER } from "./logic.js";
@@ -628,7 +629,7 @@ const withNicknames = (q) => {
 
 const withExtra = (q0) => {
   const q = withNicknames(q0);
-  const add = [MORE[q.q], EXTRA[q.q]].filter(Boolean);
+  const add = [MORE[q.q], EXTRA[q.q], COMBINED[q.q]].filter(Boolean); // (COMBINED: filmographies, tools/combine.mjs)
   if (!add.length) return q;
   const seen = new Set(q.a.flat().flatMap((e) => e.split("|")).map(normalize));
   const a = q.a.map((list) => [...list]);

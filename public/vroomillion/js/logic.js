@@ -175,9 +175,12 @@ const FILLER2 = new Set(["ice cream", "national park", "video game", "tv show", 
 
 function lookup(index, key, addPlural = true) {
   const variants = [key];
+  if (key.endsWith("ies") && key.length > 4) variants.push(key.slice(0, -3) + "y"); // strawberries -> strawberry
+  if (key.endsWith("ves") && key.length > 4) variants.push(key.slice(0, -3) + "f", key.slice(0, -3) + "fe"); // wolves, knives
   if (key.endsWith("es") && key.length > 4) variants.push(key.slice(0, -2));
   if (key.endsWith("s") && key.length > 3) variants.push(key.slice(0, -1));
   if (addPlural) variants.push(key + "s");
+  if (addPlural && /[^aeiou]y$/.test(key)) variants.push(key.slice(0, -1) + "ies"); // a list that has "cherries"
   for (const v of variants) {
     const hit = index.get(v);
     if (hit) return hit;
