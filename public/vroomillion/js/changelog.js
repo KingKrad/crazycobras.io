@@ -3,6 +3,15 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26f",
+    date: "Nov 26, 2026",
+    title: "Smarter spelling, more answers",
+    items: [
+      "Autocorrect is smarter: doubled letters (brocolli), sound-alikes (sacksophone) and vowel slips (cantelope) now count, and real words don't get mistaken for rare answers.",
+      "Thousands more answers count on 40 prompts, from pastries and hot drinks to sci-fi movies and NFL quarterbacks.",
+    ],
+  },
+  {
     id: "2026-11-26e",
     date: "Nov 26, 2026",
     title: "ON TOUR & CHRISTMAS, reimagined",

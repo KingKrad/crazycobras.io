@@ -161,6 +161,39 @@ export function editDistance(a, b, max, subCost = 1) {
 // How many typos to forgive for an answer of this length.
 export const typoAllowance = (len) => (len >= 10 ? 2 : len >= 5 ? 1 : 0);
 
+// Typo distance for autocorrect, where the slips people actually make cost less: a doubled or undoubled
+// letter ("brocolli", "kiwii") or one vowel for another ("cantelope") is half a typo; a swap of two
+// neighbours one typo. Wrong letters cost subCost (2 for short words: only missing / extra letters).
+const VOWEL = /[aeiouy]/;
+export function typoDistance(a, b, max, subCost = 1, vowelCost = 0.5) {
+  if (Math.abs(a.length - b.length) > max * 2) return max + 1;
+  const n = a.length, m = b.length;
+  let prev2 = null, prev = new Array(m + 1);
+  prev[0] = 0;
+  for (let j = 1; j <= m; j++) prev[j] = prev[j - 1] + (j > 1 && b[j - 1] === b[j - 2] ? 0.5 : 1);
+  for (let i = 1; i <= n; i++) {
+    const cur = new Array(m + 1);
+    cur[0] = prev[0] + (i > 1 && a[i - 1] === a[i - 2] ? 0.5 : 1);
+    let best = cur[0];
+    for (let j = 1; j <= m; j++) {
+      const ca = a[i - 1], cb = b[j - 1];
+      const del = prev[j] + (i > 1 && ca === a[i - 2] ? 0.5 : 1);  // a letter of a's that doubles the one before
+      const ins = cur[j - 1] + (j > 1 && cb === b[j - 2] ? 0.5 : 1);
+      const sub = prev[j - 1] + (ca === cb ? 0 : (ca === "i" && cb === "y") || (ca === "y" && cb === "i") ? Math.min(1, vowelCost) // "egipt"
+        : VOWEL.test(ca) && VOWEL.test(cb) ? Math.min(vowelCost, subCost) : subCost);
+      let v = Math.min(del, ins, sub);
+      if (prev2 && i > 1 && j > 1 && ca === b[j - 2] && a[i - 2] === cb) v = Math.min(v, prev2[j - 2] + 1);
+      cur[j] = v;
+      if (v < best) best = v;
+    }
+    if (best > max) return max + 1;
+    prev2 = prev; prev = cur;
+  }
+  return prev[m];
+}
+// how a word sounds, roughly: so "sacksophone" meets saxophone and "chiuaua" meets chihuahua
+export const soundsLike = (s) => s.replace(/ph/g, "f").replace(/ck/g, "k").replace(/x/g, "ks").replace(/q(u)?/g, "kw").replace(/([aeiou])h/g, "$1").replace(/c([aou])/g, "k$1").replace(/z/g, "s");
+
 // Words that just name the category, so "nile river" means "nile".
 // The first group can always be dropped; the rest only when the prompt itself uses the word
 // ("mayochup sauce" for a condiment, "chocolate flavour" for ice cream), so "apple pie" isn't a fruit.
@@ -247,16 +280,24 @@ export function judge(index, raw) {
   }
   // Autocorrect: snap to the closest real answer. On a tie, pick the more common one.
   // People rarely fumble the first letter, so it must match; short words can't have a wrong letter.
-  const max = typoAllowance(key.length);
-  const subCost = key.length < 5 ? 2 : 1;
+  // Slips cost less than real typos (typoDistance), longer answers forgive more, and an answer that
+  // sounds the same counts ("sacksophone"). A typo only snaps to a rare answer if it's nearly exact, so a
+  // real word ("bacon", "bulls") isn't taken for an obscure one ("beacon", "bells").
+  const len = key.length;
+  const max = len >= 14 ? 2.5 : len >= 10 ? 2 : len >= 8 ? 1.5 : len >= 5 ? 1 : 0;
+  const subCost = len < 5 ? 2 : 1, vowelCost = len >= 7 ? 0.5 : 1; // short words: a vowel slip is a full typo // short words: a vowel slip is a full typo ("ball" isn't "bell")
   if (max) {
     let best = null;
+    const keyS = soundsLike(key), keyJ = key.replace(/ /g, "");
     for (const [cand, hit] of index) {
-      if (cand[0] !== key[0] || cand.length < 4) continue;
-      if (key.length < 6 && cand.length < key.length) continue; // short words: only a missing letter, never an extra one
-      const joinedD = editDistance(key.replace(/ /g, ""), cand.replace(/ /g, ""), 1, subCost);
-      const d = Math.min(editDistance(key, cand, max, subCost), joinedD <= 1 ? joinedD : Infinity);
-      if (d <= max && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
+      if (cand.length < 4) continue;
+      const candS = soundsLike(cand);
+      if (cand[0] !== key[0] && candS[0] !== keyS[0]) continue; // people rarely fumble the first letter
+      if (len < 6 && cand.length < len) continue; // short words: only a missing letter, never an extra one
+      const dj = typoDistance(keyJ, cand.replace(/ /g, ""), 1, subCost, vowelCost); // spaces in the wrong place: "pine aple"
+      const d = Math.min(typoDistance(key, cand, max, subCost, vowelCost), typoDistance(keyS, candS, max, subCost, vowelCost), dj <= 1 ? dj : Infinity);
+      const room = len < 8 && hit.tier >= 4 ? 0.5 : len < 7 && hit.tier >= 3 ? 0.5 : max; // short typos only reach rare answers when nearly exact
+      if (d <= room && (!best || d < best.d || (d === best.d && hit.tier < best.hit.tier))) best = { d, hit };
     }
     if (best) return capped({ ...best.hit, key: normalize(best.hit.display), corrected: true });
   }

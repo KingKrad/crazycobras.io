@@ -6,7 +6,7 @@ import { CATALOG_CLASSES } from "./catalog-classes.js";
 import { canJudge, judgeAnswer } from "./judge.js";
 import { json, readForm, clientIp } from "./accounts.js";
 
-const BLOCK_RE = new RegExp(BLOCK, "i");
+const BLOCK_RE = new RegExp(BLOCK + "|\\b(pussy|shit|fuck\\w*|bitch|cunt|whore|slut|nigg\\w*)\\b", "i"); // (Wikidata names a few things rudely)
 const WDQS = "https://query.wikidata.org/sparql";
 
 export const cleanAnswer = (s) => String(s ?? "")
