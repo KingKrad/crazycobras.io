@@ -361,6 +361,7 @@ export async function handleLogin(request, env) {
 
 export async function handleLogout(request, env) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403); // another site can't log a player out
   const token = readCookie(request);
   if (env.DB && token && token.length <= 100) {
     await ensureSchema(env.DB);

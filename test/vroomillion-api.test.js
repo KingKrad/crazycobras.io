@@ -783,12 +783,19 @@ test("sign in with Google: makes a password-less account, logs in, and links an 
   assert.equal((await worker.fetch(post("delete-account", { confirm: "nope" }, { cookie: session }), env(GOOGLE))).status, 401);
 
   // an existing password account with the same verified email is the same player
-  await signup("racer@example.com");
+  const squatter = await signup("racer@example.com");
   const s2 = await startSignIn("google", env(GOOGLE));
   stripeReply = { body: { id_token: idToken({ ...claims, sub: "g-456", email: "racer@example.com", nonce: s2.nonce }) } };
   const cb2 = await worker.fetch(get(`oauth-google-cb?code=abc&state=${s2.state}`, { cookie: s2.cookie }), env(GOOGLE));
   assert.equal(cb2.headers.get("location"), "https://game.test/vroomillion/#signed-in");
   assert.equal(db.sql.prepare("SELECT google_sub FROM users WHERE email = 'racer@example.com'").get().google_sub, "g-456");
+  // whoever made that password account may not own the email: the verified owner takes it over, so the old
+  // password stops working and the devices signed in with it are signed out
+  const row = db.sql.prepare("SELECT id, pw_hash, recovery_hash FROM users WHERE email = 'racer@example.com'").get();
+  assert.equal(row.pw_hash, "");
+  assert.equal(row.recovery_hash, null);
+  assert.equal((await worker.fetch(post("login", { email: "racer@example.com", password: "hunter2hunter2" }), env(GOOGLE))).status, 401);
+  assert.equal((await worker.fetch(get("me", { cookie: squatter.cookie }), env(GOOGLE))).status, 401);
   assert.equal(db.sql.prepare("SELECT COUNT(*) n FROM users").get().n, 2);
   assert.equal((await worker.fetch(post("delete-account", { confirm: "delete" }, { cookie: session }), env(GOOGLE))).status, 200);
 });

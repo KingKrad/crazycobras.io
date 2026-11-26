@@ -122,7 +122,13 @@ export async function handleOAuthCallback(request, env, name) {
   let user = await env.DB.prepare(`SELECT id, email FROM users WHERE ${col} = ?`).bind(sub).first();
   if (!user) {
     user = await env.DB.prepare("SELECT id, email FROM users WHERE email = ?").bind(email).first();
-    if (user) await env.DB.prepare(`UPDATE users SET ${col} = ? WHERE id = ?`).bind(sub, user.id).run();
+    // Sign-up never proves someone owns an email, so a password account with this email may have been made
+    // by someone else, waiting for the real owner. Google or Apple just proved who owns it: that person takes
+    // the account over. The old password and recovery code stop working and every other device signs out.
+    if (user) await env.DB.batch([
+      env.DB.prepare(`UPDATE users SET ${col} = ?, pw_hash = '', pw_salt = '', pw_iter = 0, recovery_hash = NULL WHERE id = ?`).bind(sub, user.id),
+      env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
+    ]);
   }
   if (!user) {
     const id = crypto.randomUUID();
