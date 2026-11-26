@@ -1840,18 +1840,6 @@ body[data-theme="xmas"] #s-results .final-card, body[data-theme="xmas"] #s-resul
 
 /* ---- CHRISTMAS: the whole game dressed up while the event is on (body.xmas, set by main.js) ---- */
 body.xmas { --cyan: #6ee38e; --pink: #ff4f4f; --red: #e0202a; --line: #1f5a3a; --panel: #10241c; --panel-2: #163a28; --dim: #b8d4c0; }
-/* the title: solid red VROOM and green ILLION, a chunky drop shadow, no neon */
-body.xmas .neon-sign .halo, body.xmas .neon-sign .core { display: none; }
-body.xmas .neon-sign .glow { filter: none; transform: translate(9px, 10px); }
-body.xmas .neon-sign .glow text { fill: #120808; stroke-width: 7; opacity: 1; }
-body.xmas .neon-sign .glow tspan { stroke: #120808; fill: #120808; }
-body.xmas .neon-sign .na { --c: #7a0a12; --g: #e0202a; }
-body.xmas .neon-sign .nb { --c: #0b4a24; --g: #22a04e; }
-body.xmas .neon-sign .tube tspan { fill: var(--g); stroke: var(--c); }
-body.xmas .neon-sign .tube text { stroke-width: 7; }
-body.xmas .neon-sign, body.xmas .neon-sign * { animation: none !important; }
-body.xmas .neon-sign .flick { opacity: 1 !important; }
-body.xmas .tagline { color: #fff6ec; text-shadow: 2px 2px 0 #7a0a12; }
 body.xmas .brand { color: #e0202a; text-shadow: 2px 2px 0 #2a0508; }
 body.xmas .brand span { color: #22a04e; text-shadow: 2px 2px 0 #052a14; }
 body.xmas .logo-a { color: #e0202a; text-shadow: 0.07em 0.07em 0 #2a0508; }
