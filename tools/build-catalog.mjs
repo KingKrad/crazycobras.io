@@ -26,7 +26,7 @@ import { normalize } from "../public/vroomillion/js/logic.js";
 import { fetchPrompt, branches, sleep, sparql } from "./wd-lib.mjs";
 
 // a class by English label: the one with the most members
-async function resolveLabel(label, min) {
+export async function resolveLabel(label, min) {
   const rows = await sparql(`SELECT ?k (COUNT(DISTINCT ?i) AS ?n) WHERE { ?k rdfs:label ${JSON.stringify(label)}@en.
     { ?i wdt:P31/wdt:P279* ?k. } UNION { ?i wdt:P279+ ?k. } ?i wikibase:sitelinks ?s. FILTER(?s >= ${min}) } GROUP BY ?k ORDER BY DESC(?n) LIMIT 1`);
   return rows[0] ? rows[0].k.value.split("/").pop() : null;
