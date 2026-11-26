@@ -3069,39 +3069,32 @@ function rarityRoad(r, res, opts = {}) {
 
 // Live check for answers that aren't on the list (src/check.js). Remembered per prompt, so a repeated
 // guess doesn't ask again. Offline (or in the preview) it just finds nothing.
-// typing: the lookup while they're still typing, which only asks Wikidata and verdicts already given
-// (never the AI judge, which would spend the day's allowance on half-typed words). Its "no" isn't final:
-// the GO press asks again in full.
 const onlineSeen = new Map();
 const onlinePending = new Map(); // lookups still in flight, shared by the typing prefetch and the GO press
-function checkOnline(index, value, typing = false) {
+function checkOnline(index, value) {
   const k = index.prompt + "|" + normalize(value);
   if (onlineSeen.has(k)) return Promise.resolve(onlineSeen.get(k));
-  const pk = (typing ? "t|" : "f|") + k;
-  if (onlinePending.has(pk)) return onlinePending.get(pk);
-  const quick = !typing && onlinePending.get("t|" + k); // a typing lookup already on its way: a yes from it will do
-  const p = (quick ? quick.then((hit) => hit || lookupOnline(index, value, k, false)) : lookupOnline(index, value, k, typing))
-    .finally(() => onlinePending.delete(pk));
-  onlinePending.set(pk, p);
+  if (onlinePending.has(k)) return onlinePending.get(k);
+  const p = lookupOnline(index, value, k).finally(() => onlinePending.delete(k));
+  onlinePending.set(k, p);
   return p;
 }
 // The answer as typed so far, already answered? (no network, no waiting)
 const onlineKnown = (index, value) => onlineSeen.has(index.prompt + "|" + normalize(value));
-async function lookupOnline(index, value, k, typing) {
+async function lookupOnline(index, value, k) {
   let hit = null;
   let settled = false; // a real yes/no from the server; a failed lookup is not remembered, so a retry can pass
   try {
     const res = await fetch("/api/vroomillion/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(typing ? { prompt: index.prompt, answer: value, typing: 1 } : { prompt: index.prompt, answer: value }),
-      signal: AbortSignal.timeout(10000), // Wikidata, then the AI judge for catalog prompts
+      body: JSON.stringify({ prompt: index.prompt, answer: value }),
+      signal: AbortSignal.timeout(8000), // Wikidata (the server gives up after about 5.5 s)
     });
     if (res.ok) {
+      settled = true;
       const j = await res.json();
       if (j.found && typeof j.label === "string") hit = j;
-      // a typing "no" only means Wikidata didn't know it, and "judge busy" isn't a real no either
-      settled = !!hit || (!j.typing && !j.reason);
     }
   } catch { /* offline: nothing found */ }
   // "starting with" twists: the real answer must still start with the letter
@@ -3109,10 +3102,9 @@ async function lookupOnline(index, value, k, typing) {
   if (settled) onlineSeen.set(k, hit);
   return hit;
 }
-const CHECK_WAIT_MS = 8000; // the longest GO waits on the live check (the race clock still ends it sooner)
+const CHECK_WAIT_MS = 6000; // the longest GO waits on the live Wikidata check (the race clock still ends it sooner)
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
 function onlineTier(hit) {
-  if (Number.isInteger(hit.tier) && hit.tier >= 1 && hit.tier <= 4) return hit.tier; // the AI judge's verdict
   const [t2, t3] = Array.isArray(hit.tiers) ? hit.tiers : [70, 25];
   return hit.n >= t2 ? 2 : hit.n >= t3 ? 3 : 4;
 }
@@ -3203,7 +3195,7 @@ function askAnswer(r, i, token, index) {
         return resolve(stalled);
       }
       // Not on our list: ask the online check (usually already started while they typed) and give one
-      // verdict. CHECKING… shows meanwhile; it waits up to 8 s (Wikidata, then the AI judge), or until the
+      // verdict. CHECKING… shows meanwhile; it waits up to 6 s for Wikidata, or until the
       // clock runs out, so there's never a wrong-then-right flip. A late "yes" is still remembered for the
       // next time someone tries it.
       if (index.prompt && value.trim().length >= 3) {
@@ -3263,7 +3255,7 @@ function askAnswer(r, i, token, index) {
       if (!index.prompt || value.trim().length < 3 || res.tier > 0) return; // on our list: nothing to look up
       prefetch = setTimeout(() => {
         if (finished || token !== raceToken || input.value !== value) return;
-        checkOnline(index, value, true).then((hit) => {
+        checkOnline(index, value).then((hit) => {
           const same = (a) => normalize(a).replace(/ /g, "");
           if (liveHints && hit && same(hit.label) !== same(value)) hint(value, hit.label);
         });

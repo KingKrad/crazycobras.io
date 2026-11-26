@@ -1,9 +1,9 @@
 // Live answer check: an answer that isn't on a prompt's list is looked up on Wikidata, and counts if
 // the item it finds is the right kind of thing for the prompt (src/answer-classes.js, generated from
-// the same rules as the answer lists). This is how "mayochup" counts as a condiment.
+// the same rules as the answer lists). This is how "mayochup" counts as a condiment. There is no AI judge:
+// a prompt without a Wikidata rule accepts only the answers on its lists.
 import { CLASSES, BLOCK } from "./answer-classes.js";
 import { CATALOG_CLASSES } from "./catalog-classes.js";
-import { canJudge, judgeAnswer, rememberedVerdict } from "./judge.js";
 import { json, readForm, clientIp } from "./accounts.js";
 
 const BLOCK_RE = new RegExp(BLOCK + "|\\b(pussy|shit|fuck\\w*|bitch|cunt|whore|slut|nigg\\w*)\\b", "i"); // (Wikidata names a few things rudely)
@@ -41,36 +41,17 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   const prompt = String(body?.prompt ?? "");
   const cls = CLASSES[prompt] || CATALOG_CLASSES[prompt];
   const answer = cleanAnswer(body?.answer);
-  // typing: the game looking an answer up while it's still being typed. That never asks the AI judge (it
-  // would spend the day's allowance on half-typed words like "kenny b"), only Wikidata and verdicts
-  // already given; the judge is asked when the player presses GO.
-  const typing = !!body?.typing;
-  const judge = canJudge(env, prompt);
-  if ((!cls && !judge) || answer.length < (judge ? 2 : 3) || !/\p{L}/u.test(answer) || BLOCK_RE.test(answer)) return json({ found: false });
+  if (!cls || answer.length < 3 || !/\p{L}/u.test(answer) || BLOCK_RE.test(answer)) return json({ found: false });
 
   const cacheKey = new Request(`https://answer-check.invalid/${encodeURIComponent(body.prompt)}/${encodeURIComponent(answer.toLowerCase())}`);
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const cached = cache && (await cache.match(cacheKey));
   if (cached) return cached;
 
-  // 1. Wikidata, for prompts with a rule. A failed lookup (not a "no") is reported unless the judge can step in.
-  // Its "no" is remembered for an hour, so the GO press after a typing lookup goes straight to the judge.
-  const wdNoKey = cls && judge ? new Request(`https://answer-check.invalid/wd-no/${encodeURIComponent(prompt)}/${encodeURIComponent(answer.toLowerCase())}`) : null;
-  const wdNo = wdNoKey && cache && (await cache.match(wdNoKey));
-  const wd = cls && !wdNo ? await wikidataLookup(cls, answer, fetchImpl) : { found: false };
-  if (wd.failed && !judge) return json({ found: false, reason: "lookup failed" }, wd.failed);
-  if (wdNoKey && cache && !wdNo && !wd.found && !wd.failed) await cache.put(wdNoKey, new Response("", { headers: { "Cache-Control": "public, max-age=3600" } }));
-  let verdict = wd.found ? { found: true, label: wd.label, n: wd.n, tiers: cls.tiers } : { found: false };
-  // 2. The AI judge, for catalog prompts Wikidata didn't settle (while typing: only what it has already said)
-  if (!verdict.found && judge && typing) return json((await rememberedVerdict(env, prompt, answer)) || { found: false, typing: true });
-  if (!verdict.found && judge) {
-    try { verdict = await judgeAnswer(env, prompt, answer, request); } catch { return json({ found: false, reason: "judge failed" }, 504); }
-  }
-  const skipped = !!verdict.skipped; // the judge was over its limit: not a real "no", so don't remember it
-  delete verdict.skipped;
-  if (skipped) verdict.reason = "judge busy";
-  const out = json(verdict);
-  if (skipped) return out;
+  // A failed lookup (not a "no") is reported, and not remembered, so the player can try again.
+  const wd = await wikidataLookup(cls, answer, fetchImpl);
+  if (wd.failed) return json({ found: false, reason: "lookup failed" }, wd.failed);
+  const out = json(wd.found ? { found: true, label: wd.label, n: wd.n, tiers: cls.tiers } : { found: false });
   out.headers.set("Cache-Control", "public, max-age=86400");
   if (cache) await cache.put(cacheKey, out.clone());
   return out;
