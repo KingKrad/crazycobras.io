@@ -605,3 +605,93 @@ export function engineStop() {
   e.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
   for (const x of [e.o, e.o2, e.n, e.lfo, ...(e.voices || []).map((v) => v.o)]) x?.stop(ctx.currentTime + 0.5);
 }
+
+// ---- MUSIC: chiptune tracks for the themed modes, made here like the sound effects (no files) ----
+// A track is layers that switch on as the level rises (0..4): music.play("tour"), music.level(n), music.stop().
+// The level only builds through a race; the scheduler looks a little ahead so the beat stays steady.
+const NOTE = (n) => 440 * Math.pow(2, (n - 69) / 12); // MIDI note -> Hz
+const TRACKS = {
+  // ON TOUR: a night-drive synth groove in A minor (Am F C G), 112 BPM. Bass first; then drums, then the
+  // arpeggio, then the lead hook, then everything an octave up with crashes
+  tour: {
+    bpm: 112, bars: 4,
+    chords: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],
+    play(step, bar, lvl, at, out) {
+      const ch = this.chords[bar % 4], s = step % 16;
+      if (s % 2 === 0) tone(NOTE(ch[0] - 24), 0.2, { type: "triangle", vol: 0.16, at, out }); // bass, 8ths
+      if (lvl >= 1) {
+        if (s % 4 === 0) kickTo(at, 0.32, out);
+        if (s === 4 || s === 12) noiseF(0.12, { vol: 0.12, at, type: "bandpass", freq: 1800, q: 0.7, out }); // snare
+      }
+      if (lvl >= 2) {
+        if (s % 2 === 1) noiseF(0.03, { vol: 0.05, at, type: "highpass", freq: 7000, out }); // hats
+        tone(NOTE(ch[s % 3] + 12), 0.09, { type: "square", vol: 0.035, at, out }); // the arpeggio
+      }
+      if (lvl >= 3) { // the hook
+        const HOOK = [76, null, 74, 72, null, 74, null, 76, 79, null, 76, null, 74, null, 72, null];
+        const n = HOOK[s]; if (n && bar % 2 === 0) tone(NOTE(n - (bar % 4 === 2 ? 2 : 0)), 0.22, { type: "square", vol: 0.05, at, out });
+        if (bar % 2 === 1 && s % 4 === 0) tone(NOTE(ch[1] + 24), 0.3, { type: "sawtooth", vol: 0.025, at, out });
+      }
+      if (lvl >= 4) {
+        if (s === 0 && bar % 2 === 0) noiseF(0.9, { vol: 0.07, at, type: "highpass", freq: 5000, out }); // crash
+        if (s % 2 === 0) tone(NOTE(ch[(s / 2) % 3] + 24), 0.07, { type: "square", vol: 0.025, at, out });
+      }
+    },
+  },
+  // CHRISTMAS: "Jingle Bells" (1857, public domain) in chiptune, 132 BPM, with sleigh bells all the way.
+  // Bells and bass first; then the tune, then harmony, then drums, then a sparkly descant
+  xmas: {
+    bpm: 132, bars: 8,
+    // the chorus, in 8th notes: [midi or null, length in 8ths]
+    tune: [[64, 1], [64, 1], [64, 2], [64, 1], [64, 1], [64, 2], [64, 1], [67, 1], [60, 1.5], [62, 0.5], [64, 4],
+      [65, 1], [65, 1], [65, 1.5], [65, 0.5], [65, 1], [64, 1], [64, 1], [64, 0.5], [64, 0.5], [64, 1], [62, 1], [62, 1], [64, 1], [62, 2], [67, 2],
+      [64, 1], [64, 1], [64, 2], [64, 1], [64, 1], [64, 2], [64, 1], [67, 1], [60, 1.5], [62, 0.5], [64, 4],
+      [65, 1], [65, 1], [65, 1.5], [65, 0.5], [65, 1], [64, 1], [64, 1], [64, 0.5], [64, 0.5], [67, 1], [67, 1], [65, 1], [62, 1], [60, 4]],
+    roots: [48, 48, 53, 48, 53, 48, 50, 55],
+    play(step, bar, lvl, at, out) {
+      const s = step % 16, sd = 60 / this.bpm / 4;
+      if (s % 2 === 0) noiseF(0.05, { vol: 0.045, at, type: "highpass", freq: 8000, out }); // sleigh bells
+      if (s % 4 === 0) tone(NOTE(this.roots[bar % 8] - 12 + (s === 8 ? 7 : 0)), 0.25, { type: "triangle", vol: 0.15, at, out }); // oom-pah bass
+      if (lvl >= 1 && s === 0 && bar % 2 === 0) { // the tune: a line (2 bars, 16 eighths) at a time
+        if (!this.lines) { this.lines = [[]]; let n8 = 0; for (const x of this.tune) { if (n8 >= 16) { this.lines.push([]); n8 = 0; } this.lines[this.lines.length - 1].push(x); n8 += x[1]; } }
+        let t = 0;
+        for (const [n, len] of this.lines[(bar / 2) % this.lines.length]) { if (n) tone(NOTE(n + 12), len * 2 * sd * 0.9, { type: "square", vol: 0.05, at: at + t, out }); t += len * 2 * sd; }
+      }
+      if (lvl >= 2 && (s === 4 || s === 12)) { const r = this.roots[bar % 8]; for (const k of [4, 7]) tone(NOTE(r + 12 + k), 0.12, { type: "square", vol: 0.022, at, out }); }
+      if (lvl >= 3) { if (s % 8 === 0) kickTo(at, 0.28, out); if (s === 4 || s === 12) noiseF(0.1, { vol: 0.09, at, type: "bandpass", freq: 2200, q: 0.8, out }); }
+      if (lvl >= 4 && s % 2 === 0) tone(NOTE(this.roots[bar % 8] + 36 + [0, 4, 7, 12][(s / 2) % 4]), 0.08, { type: "triangle", vol: 0.03, at, out }); // the descant
+    },
+  },
+};
+function kickTo(at, vol, out) { tone(150, 0.25, { type: "sine", vol, at, slide: 0.25, out }); }
+let song = null;
+export const music = {
+  play(name) {
+    if (!ensure() || !TRACKS[name]) return;
+    if (song?.name === name) return;
+    this.stop();
+    const tr = TRACKS[name];
+    const g = ctx.createGain(); g.gain.value = 0.0001; g.connect(master);
+    g.gain.setTargetAtTime(0.9, ctx.currentTime, 0.4); // fades in
+    song = { name, tr, g, step: 0, next: ctx.currentTime + 0.1, lvl: 0 };
+    const sd = 60 / tr.bpm / 4;
+    song.timer = setInterval(() => {
+      if (!song || ctx.state !== "running") return;
+      while (song.next < ctx.currentTime + 0.15) {
+        const at = Math.max(0, song.next - ctx.currentTime);
+        song.tr.play(song.step, Math.floor(song.step / 16), Math.floor(song.lvl), at, song.g);
+        song.step++; song.next += sd;
+      }
+    }, 30);
+  },
+  level(n) { if (song) song.lvl = Math.max(0, Math.min(4, n)); },
+  get lvl() { return song ? song.lvl : 0; },
+  stop() {
+    if (!song) return;
+    const s = song; song = null;
+    clearInterval(s.timer);
+    s.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.25);
+    setTimeout(() => s.g.disconnect(), 1500);
+  },
+  get playing() { return song?.name || null; },
+};

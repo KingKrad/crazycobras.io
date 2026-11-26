@@ -1,12 +1,14 @@
-// CHRISTMAS's race: the world map on Christmas Eve, snowing, and Santa's sleigh delivering presents to the
-// world's best-known cities. Every answer is a delivery: the rarer it is, the further the next city (and
-// the more presents: a stocking, a sackful... or the whole world in one night). The sleigh flies the
-// whole way, reindeer in front, Rudolph leading. The answer card is a gift tag.
-// It's WorldScene (world.js) with its own map layer, vehicle, trips, card and finale.
-import { WorldScene, toWorld, MW } from "./world.js";
+// CHRISTMAS's race: Christmas Eve, side-on. Santa's sleigh (reindeer, Rudolph's nose and all) flies over
+// a snowy town under the moon: rooftops, chimneys, lit windows and fairy lights scroll by below, pine
+// forests and mountains behind, the northern lights overhead and snow falling. Each answer is a flight to
+// a real city (its skyline rises behind the roofs) and a present down a chimney there, while the
+// townsfolk wave. Rarer answers fly further and higher, and light up the sky. It starts at Santa's
+// workshop, with the elves. The answer card is a gift tag; the end is the moonlit delivery list.
+// Built on the side-scrolling scene (sidescroll.js).
+import { SideScene, skyline, TIER_COL, clamp, lerp, hash } from "./sidescroll.js";
+import { carSprite, carById } from "./cars.js";
 
-// famous cities Santa calls at (and his own home)
-const HOME = (() => { const [x, y] = toWorld([66.5, 25.7]); return { name: "SANTA'S VILLAGE", x, y }; })();
+const LIGHTS = ["#ffd23a", "#ff5a4f", "#5dff8f", "#fff6e0"];
 const CITIES = [
   ["NEW YORK", 40.71, -74.0], ["LOS ANGELES", 34.05, -118.24], ["CHICAGO", 41.88, -87.63], ["MIAMI", 25.76, -80.19],
   ["TORONTO", 43.65, -79.38], ["VANCOUVER", 49.28, -123.12], ["MEXICO CITY", 19.43, -99.13], ["HAVANA", 23.11, -82.37],
@@ -17,118 +19,191 @@ const CITIES = [
   ["NAIROBI", -1.29, 36.82], ["CAPE TOWN", -33.92, 18.42], ["LAGOS", 6.52, 3.38], ["DUBAI", 25.2, 55.27], ["MUMBAI", 19.08, 72.88],
   ["BEIJING", 39.9, 116.4], ["TOKYO", 35.68, 139.7], ["SEOUL", 37.57, 126.98], ["MANILA", 14.6, 120.98], ["SINGAPORE", 1.35, 103.82],
   ["HONG KONG", 22.32, 114.17], ["SYDNEY", -33.87, 151.2], ["AUCKLAND", -36.85, 174.76], ["HONOLULU", 21.31, -157.86], ["ANCHORAGE", 61.22, -149.9],
-].map(([name, lat, lon]) => { const [x, y] = toWorld([lat, lon]); return { name, x, y }; });
-const LIGHTS = ["#ffd23a", "#ff5a4f", "#5dff8f", "#fff6e0"];
+].map(([name]) => ({ name }));
+const HOME = { name: "SANTA'S VILLAGE" };
+const bump = (x) => { const i = Math.floor(x), f = x - i, k = f * f * (3 - 2 * f); return lerp(hash(i), hash(i + 1), k); };
+const SLOT = 62; // one house per this many world units
 
-// the sleigh from above, facing up: four reindeer in pairs on the reins, Rudolph's red nose out front,
-// then the sleigh (red, gold trim) with Santa and the sack of presents
-function drawSleighTop(g, p, t, body) {
-  const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
-  const step = Math.sin(t * 14) > 0 ? 1 : 0; // the reindeer's legs, galloping
-  // reins
-  R(-3, -18, 1, 14, "#6a3a1a"); R(2, -18, 1, 14, "#6a3a1a");
-  // the reindeer: two pairs
-  for (const [y, lead] of [[-20, true], [-13, false]]) for (const x of [-5, 2]) {
-    R(x, y, 3, 5, "#8a5a32");                         // body
-    R(x + (step ? 0 : 2), y + 4, 1, 1, "#5a3a1e"); R(x + (step ? 2 : 0), y - 1, 1, 1, "#5a3a1e"); // legs
-    R(x + 1, y - 2, 1, 2, "#a8743e");                 // head
-    R(x, y - 3, 1, 1, "#d9c08a"); R(x + 2, y - 3, 1, 1, "#d9c08a"); // antlers
-    if (lead && x < 0) R(x + 1, y - 3, 1, 1, "#ff2020"); // Rudolph
-  }
-  // the sleigh
-  R(-5, -4, 1, 14, "#d8dde6"); R(4, -4, 1, 14, "#d8dde6"); // runners
-  R(-5, -5, 1, 1, "#d8dde6"); R(4, -5, 1, 1, "#d8dde6");
-  R(-4, -3, 8, 12, "#3a0a0e");
-  R(-3, -3, 6, 11, body);
-  R(-3, -3, 6, 1, "#ffd23a"); R(-3, 7, 6, 1, "#ffd23a"); // gold trim
-  R(-2, -1, 4, 3, "#c8202a"); R(-1, -1, 2, 2, "#f4f4f4"); // Santa: his red coat and white hat bobble
-  R(-2, 3, 4, 4, "#7a4a22"); R(-1, 3, 2, 1, "#a86a34");   // the sack
-  R(-2, 2, 1, 1, "#5dff8f"); R(1, 2, 1, 1, "#4fd1ff");     // presents poking out
-}
-
-export class SleighScene extends WorldScene {
+export class SleighScene extends SideScene {
   constructor(canvas) {
     super(canvas);
     this.cardBg = "#0e2a1a";
+    this.aurora = 0.2;
     this.flakes = Array.from({ length: 70 }, (_, k) => ({ x: (k * 0.6180339) % 1, y: (k * 0.4142) % 1, s: 0.6 + ((k * 7) % 5) / 5, v: 0.04 + ((k * 13) % 7) / 120 }));
+    this.gifts = [];
   }
-  setRacers(list) {
-    super.setRacers(list);
-    // every trip starts at home, in Lapland
-    this.racers.forEach((r, i) => { r.x = HOME.x + (i ? 6 : 0); r.y = HOME.y + (i ? 4 : 0); r.visited = []; });
-    if (this.racers[0]) this.cam = { x: this.racers[0].x, y: this.racers[0].y, z: this.fitZ(300) };
-    this.camTo = { ...this.cam };
-  }
+  cityList() { return CITIES; }
+  startCity() { return HOME; }
+  onSetRacers() { this.gifts = []; this.aurora = this.lobby ? 0.5 : 0.2; }
   // the home screen: the sleigh doing a round of deliveries on its own
   lobbyTick(car) {
     if (!this.lobby || !this.racers.length || this.racers[0].car?.id !== car?.id) {
       this.lobby = true;
       this.setRacers([{ car, label: "", color: "#ff3b3b" }]);
-      this.cam.z = this.fitZ(520);
       this.tourI = 0; this.tourWait = 1.2;
     }
     const r = this.racers[0];
     if (r.leg || r.pending) return;
     this.tourWait -= 1 / 30;
     if (this.tourWait > 0) return;
-    const tier = [1, 2, 3, 2, 4, 3, 4][this.tourI++ % 7];
-    this.planLeg({ i: 0, tier, color: "#ff3b3b" });
+    const tier = [1, 2, 3, 2, 4, 3, 5][this.tourI++ % 7];
+    this.planLeg({ i: 0, tier });
     this.launch(0, tier, false, 3 + tier * 0.4);
-    if (r.pins.length > 5) r.pins.shift();
-    if (r.trail.length > 600) r.trail.splice(0, r.trail.length - 600);
-    this.tourWait = 2.2;
+    if (r.pins.length > 8) r.pins.shift();
+    this.tourWait = 2.4;
   }
-  // the next delivery: a city about as far as the answer is rare, not one visited this trip
-  planLeg(c) {
-    const r = this.racers[c.i];
-    if (!r) return;
-    if (!c.tier) { r.leg = null; return; }
-    const want = [0, 90, 170, 290, 470, 700][c.tier];
-    let best = null, score = Infinity;
-    for (const city of CITIES) {
-      if ((r.visited || []).includes(city.name)) continue;
-      let dx = city.x - r.x; dx -= Math.round(dx / MW) * MW;
-      const d = Math.hypot(dx, city.y - r.y);
-      const s = Math.abs(d - want) + Math.random() * 40;
-      if (s < score) { score = s; best = { city, tx: r.x + dx, ty: city.y }; }
-    }
-    if (!best) { r.visited = []; return this.planLeg(c); }
-    r.visited = [...(r.visited || []), best.city.name].slice(-12);
-    let { tx } = best; const { ty } = best;
-    if (c.tier >= 5) tx += tx >= r.x ? MW : -MW; // round the whole world in one go
-    r.pending = { x0: r.x, y0: r.y, x1: tx, y1: ty, kind: "sleigh", tier: c.tier, label: best.city.name, color: c.color };
+  // high over the roofs; a flight arcs up (the rarer, the higher), and the sleigh bobs on the wind
+  vehicleLift(r) {
+    const u = this.u, bob = this.calm ? 0 : Math.sin(this.time * 2.2 + r.lane) * 2.5 * u;
+    const arc = r.leg ? Math.sin(Math.PI * (r.legK || 0)) * (10 + r.leg.tier * 9) * u : 0;
+    return 62 * u + r.lane * 20 * u + bob + arc;
   }
-  // Christmas Eve: the map at night, cities twinkling with coloured lights, snow falling
-  drawOverlay(g) {
-    const { W, H, u } = this;
-    g.fillStyle = "rgba(8,14,46,0.55)"; g.fillRect(-10, -10, W + 20, H + 20);
-    for (const [k, c] of CITIES.entries()) {
-      const [sx, sy] = this.toScreen(c.x, c.y);
-      if (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) continue;
-      const tw = this.calm ? 1 : 0.7 + 0.3 * Math.sin(this.time * 3 + k * 1.7);
-      const rad = 8 * u * tw, col = LIGHTS[k % LIGHTS.length];
-      const gl = g.createRadialGradient(sx, sy, 0, sx, sy, rad);
-      gl.addColorStop(0, col); gl.addColorStop(1, "rgba(0,0,0,0)");
-      g.globalAlpha = 0.5; g.fillStyle = gl; g.fillRect(sx - rad, sy - rad, rad * 2, rad * 2); g.globalAlpha = 1;
-      g.fillStyle = "#fff6e0"; g.fillRect(Math.round(sx - u / 2), Math.round(sy - u / 2), Math.max(1, Math.round(u)), Math.max(1, Math.round(u)));
-    }
-    // Santa's village: a little gold star
-    const [hx, hy] = this.toScreen(HOME.x, HOME.y);
-    g.fillStyle = "#ffd23a";
-    const s = Math.max(1, Math.round(u));
-    g.fillRect(hx - s, hy - 3 * s, 2 * s, 6 * s); g.fillRect(hx - 3 * s, hy - s, 6 * s, 2 * s);
-    // the snow
-    if (!this.calm) {
-      g.fillStyle = "rgba(255,255,255,0.8)";
-      for (const f of this.flakes) {
-        const x = ((f.x + Math.sin(this.time * 0.7 + f.y * 9) * 0.02) % 1) * W;
-        const y = ((f.y + this.time * f.v) % 1) * H;
-        const d = Math.max(1, Math.round(u * f.s * 1.3));
-        g.fillRect(Math.round(x), Math.round(y), d, d);
+  tagUp() { return 24 * this.u; }
+  onLaunch(r, tier) { if (tier >= 3) this.aurora = Math.max(this.aurora, 0.4 + tier * 0.12); }
+  // a present goes down the nearest chimney
+  onArrive(r, L) {
+    const [x, y] = this.vehicleAt(r);
+    const slot = Math.round(r.wx / SLOT);
+    this.gifts.push({ x, y: y + 4 * this.u, tx: this.sx(slot * SLOT + SLOT * 0.62), t: 0, col: TIER_COL[L.tier] });
+    if (L.tier >= 4 && !this.calm) for (let k = 0; k < 4; k++) this.firework(x + (Math.random() - 0.5) * 80 * this.u, y - 30 * this.u - Math.random() * 30 * this.u, TIER_COL[L.tier]);
+  }
+  tick(dt) {
+    this.aurora += ((this.lobby ? 0.5 : 0.2 + this.answers * 0.05) - this.aurora) * Math.min(1, dt * 0.25);
+    for (const p of this.gifts) p.t += dt;
+    this.gifts = this.gifts.filter((p) => p.t < 1.6);
+  }
+  house(i) { // the house in slot i: its size, roof, chimney and lights
+    const w = 40 + Math.floor(hash(i * 1.7) * 16), h = 24 + Math.floor(hash(i * 3.3) * 22);
+    return { w, h, roof: hash(i * 5.1) < 0.7 ? "gable" : "flat", chimney: hash(i * 7.9) < 0.75, lights: hash(i * 2.3) < 0.6, wreath: hash(i * 4.4) < 0.5, col: ["#5a2a2a", "#2a3a5a", "#3a4a3a", "#5a4a3a", "#4a2a4a"][i % 5] };
+  }
+  roofY(i) { const hs = this.house(i); return this.bottom - 2 * this.u - hs.h * this.u; }
+
+  drawWorld(g) {
+    const { W, H, u } = this, t = this.calm ? 0 : this.time, base = this.bottom - 2 * u;
+    const s = Math.max(1, u);
+    // the night sky
+    const sky = g.createLinearGradient(0, 0, 0, base);
+    sky.addColorStop(0, "#030820"); sky.addColorStop(0.7, "#0c1a48"); sky.addColorStop(1, "#1c2c60");
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 80; i++) { g.fillStyle = Math.sin(t * 2.5 + i * 1.3) > 0.5 ? "#ffffff" : "#8a9ad8"; g.fillRect(Math.round(hash(i) * W), Math.round(hash(i + 90) * base * 0.75), Math.max(1, Math.round(u * 0.8)), Math.max(1, Math.round(u * 0.8))); }
+    // the northern lights: green and violet curtains, brighter the better it's going
+    const a = clamp(this.aurora, 0, 1);
+    for (let band = 0; band < 3; band++) {
+      const col = ["94,255,170", "80,220,255", "190,120,255"][band];
+      for (let x = 0; x < W; x += Math.max(2, Math.round(3 * u))) {
+        const wave = Math.sin(x / (60 * u) + t * 0.4 + band * 1.7) * 18 * u + Math.sin(x / (23 * u) - t * 0.7) * 6 * u;
+        const y0 = base * (0.18 + band * 0.1) + wave, len = (30 + 20 * Math.sin(x / (40 * u) + band)) * u * (0.6 + a);
+        const gr = g.createLinearGradient(0, y0, 0, y0 + len); gr.addColorStop(0, `rgba(${col},0)`); gr.addColorStop(0.3, `rgba(${col},${0.26 * a})`); gr.addColorStop(1, `rgba(${col},0)`);
+        g.fillStyle = gr; g.fillRect(x, y0, Math.max(2, Math.round(3 * u)), len);
       }
     }
+    // the moon
+    const mx = W * 0.8, my = this.playTop() + 16 * u, mr = 16 * u;
+    const mg = g.createRadialGradient(mx, my, mr * 0.8, mx, my, mr * 2.4); mg.addColorStop(0, "rgba(255,246,200,0.25)"); mg.addColorStop(1, "rgba(255,246,200,0)");
+    g.fillStyle = mg; g.fillRect(mx - mr * 3, my - mr * 3, mr * 6, mr * 6);
+    g.fillStyle = "#fff3c4"; g.beginPath(); g.arc(mx, my, mr, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#efe0a4"; for (const [dx, dy, rr] of [[-0.4, -0.3, 0.16], [0.3, 0.25, 0.12], [0.1, -0.5, 0.08]]) { g.beginPath(); g.arc(mx + dx * mr, my + dy * mr, rr * mr, 0, Math.PI * 2); g.fill(); }
+    // snowy mountains far away
+    const ridge = (p, y0, amp, scale, col, cap) => {
+      g.fillStyle = col; g.beginPath(); g.moveTo(0, base);
+      const pts = [];
+      for (let x = 0; x <= W + 8; x += 6) { const wx = (x - this.anchorX) / (u * p) + this.cam; const y = y0 - bump(wx / scale) * amp - bump(wx / (scale * 0.4) + 5) * amp * 0.3; pts.push([x, y]); g.lineTo(x, y); }
+      g.lineTo(W, base); g.closePath(); g.fill();
+      if (cap) { g.fillStyle = cap; for (const [x, y] of pts) if (y < y0 - amp * 0.55) g.fillRect(x, y, 6, Math.max(1, (y0 - amp * 0.55 - y) * 0.5)); }
+    };
+    ridge(0.06, base - 40 * u, 46 * u, 240, "#2a3a6a", "#dfe8ff");
+    // the cities: each stop's skyline, iced, with warm windows
+    for (const st of this.stops) {
+      if (st.i < 0) continue;
+      const x = this.sx(st.wx, 0.3);
+      if (x < -120 * u || x > W + 120 * u) continue;
+      skyline(g, st.city.name, x, base - 26 * u, s * 0.85, { col: "#1a2650", win: "#ffd88a", lit: 0.45, snow: true, t });
+    }
+    // pine forest
+    for (let wx = Math.floor((this.cam - this.anchorX / (u * 0.5)) / 22) * 22; ; wx += 22) {
+      const x = this.sx(wx, 0.5); if (x > W + 20) break; if (x < -20) continue;
+      const th = (16 + hash(wx) * 16) * u, y0 = base - 20 * u;
+      g.fillStyle = "#0e2a26"; g.beginPath(); g.moveTo(x, y0 - th); g.lineTo(x + 7 * u, y0); g.lineTo(x - 7 * u, y0); g.fill();
+      g.fillStyle = "#e8f0ff"; g.beginPath(); g.moveTo(x, y0 - th); g.lineTo(x + 2.4 * u, y0 - th * 0.66); g.lineTo(x - 2.4 * u, y0 - th * 0.66); g.fill();
+    }
+    g.fillStyle = "#c8d4f0"; g.fillRect(0, base - 20 * u, W, 20 * u);
+    // Santa's workshop at the start: candy-striped pole, the workshop, elves waving
+    const home = this.sx(0) - 70 * u;
+    if (home > -140 * u && home < W + 20) {
+      const R = (a2, b2, w2, h2, c) => { g.fillStyle = c; g.fillRect(Math.round(home + a2 * u), Math.round(base - b2 * u - h2 * u), Math.max(1, Math.round(w2 * u)), Math.max(1, Math.round(h2 * u))); };
+      R(0, 0, 60, 34, "#7a2a20"); R(-4, 34, 68, 4, "#eef4ff"); R(22, 0, 14, 20, "#3a1a10"); R(6, 14, 10, 10, "#ffd88a"); R(44, 14, 10, 10, "#ffd88a");
+      for (let k = 0; k < 6; k++) R(70, k * 6, 3, 3, k % 2 ? "#d42020" : "#f4f4f4"); R(68.5, 36, 6, 3, "#ffd23a");
+      for (let k = 0; k < 4; k++) { const ex = 4 + k * 14, wave = Math.sin(t * 6 + k) > 0; R(ex, -1, 4, 6, "#1f8a4c"); R(ex + 0.5, 5, 3, 3, "#f2c8a0"); R(ex, 8, 4, 3, "#d42020"); R(wave ? ex + 4 : ex - 1, wave ? 4 : 2, 1, 3, "#1f8a4c"); }
+    }
+    // the rooftops
+    for (let i = Math.floor((this.cam - this.anchorX / u) / SLOT) - 1; ; i++) {
+      const x0 = this.sx(i * SLOT); if (x0 > W + 10) break;
+      if (i < 1 || x0 + SLOT * u < -10) continue; // (the workshop stands at the start)
+      const hs = this.house(i), x = x0 + (SLOT - hs.w) * u * 0.5, top = base - hs.h * u, w = hs.w * u;
+      g.fillStyle = hs.col; g.fillRect(Math.round(x), Math.round(top), Math.round(w), Math.round(hs.h * u + 4 * u));
+      if (hs.roof === "gable") { g.fillStyle = "#2a1a1a"; g.beginPath(); g.moveTo(x - 3 * u, top); g.lineTo(x + w / 2, top - 14 * u); g.lineTo(x + w + 3 * u, top); g.fill(); g.fillStyle = "#f0f6ff"; g.beginPath(); g.moveTo(x - 3 * u, top); g.lineTo(x + w / 2, top - 14 * u); g.lineTo(x + w + 3 * u, top); g.lineTo(x + w / 2, top - 10.5 * u); g.fill(); }
+      else { g.fillStyle = "#f0f6ff"; g.fillRect(Math.round(x - 2 * u), Math.round(top - 3 * u), Math.round(w + 4 * u), Math.round(3 * u)); }
+      if (hs.chimney) { const cx = x + w * 0.62; g.fillStyle = "#6a3a2a"; g.fillRect(Math.round(cx), Math.round(top - 16 * u), Math.round(6 * u), Math.round(12 * u)); g.fillStyle = "#f0f6ff"; g.fillRect(Math.round(cx - u), Math.round(top - 17 * u), Math.round(8 * u), Math.round(2 * u));
+        if (!this.calm) for (let k = 0; k < 3; k++) { const ph = (t * 0.6 + k / 3 + hash(i)) % 1; g.fillStyle = `rgba(220,220,235,${0.35 * (1 - ph)})`; g.beginPath(); g.arc(cx + 3 * u + Math.sin(ph * 6) * 3 * u, top - 18 * u - ph * 20 * u, (2 + ph * 4) * u, 0, Math.PI * 2); g.fill(); } }
+      for (let wy = 0; wy < 2; wy++) for (let wxi = 0; wxi < 3; wxi++) { if (hash(i * 9 + wy * 3 + wxi) < 0.25) continue; const wx2 = x + (6 + wxi * (hs.w - 16) / 2) * u, wy2 = top + (6 + wy * 11) * u; if (wy2 > base - 6 * u) continue; g.fillStyle = "#ffd88a"; g.fillRect(Math.round(wx2), Math.round(wy2), Math.round(6 * u), Math.round(6 * u)); g.fillStyle = hs.col; g.fillRect(Math.round(wx2 + 2.6 * u), Math.round(wy2), Math.max(1, Math.round(0.8 * u)), Math.round(6 * u)); }
+      if (hs.wreath) { g.strokeStyle = "#1f8a4c"; g.lineWidth = 1.6 * u; g.beginPath(); g.arc(x + w * 0.3, top + hs.h * u * 0.62, 3 * u, 0, Math.PI * 2); g.stroke(); g.fillStyle = "#d42020"; g.fillRect(Math.round(x + w * 0.3 - u), Math.round(top + hs.h * u * 0.62 + 2 * u), Math.round(2 * u), Math.round(2 * u)); }
+      if (hs.lights) for (let k = 0; k < hs.w / 5; k++) { g.fillStyle = (this.calm || Math.sin(t * 4 + k + i) > -0.3) ? LIGHTS[(k + i) % LIGHTS.length] : "#3a3a4a"; g.fillRect(Math.round(x + k * 5 * u), Math.round(top + 1 * u + (k % 2) * u), Math.max(1, Math.round(1.6 * u)), Math.max(1, Math.round(1.6 * u))); }
+    }
+    // townsfolk waving at the sleigh where it just delivered
+    for (const st of this.stops) {
+      if (!st.arrived || st.i < 0) continue;
+      const k = clamp(1 - (this.time - st.arrived) / 6, 0, 1); if (k <= 0) continue;
+      const x = this.sx(st.wx);
+      for (let n = 0; n < 4; n++) {
+        const px2 = x + (n * 9 - 14) * u, py = base + 1 * u, up = !this.calm && Math.sin(t * 8 + n) > 0;
+        g.fillStyle = ["#d42020", "#2a5bd6", "#1f8a4c", "#ffd23a"][n]; g.fillRect(Math.round(px2), Math.round(py - 8 * u), Math.round(4 * u), Math.round(6 * u));
+        g.fillStyle = "#f2c8a0"; g.fillRect(Math.round(px2 + 0.5 * u), Math.round(py - 11 * u), Math.round(3 * u), Math.round(3 * u));
+        g.fillStyle = ["#d42020", "#2a5bd6", "#1f8a4c", "#ffd23a"][n]; g.fillRect(Math.round(px2 + 4 * u), Math.round(py - (up ? 13 : 9) * u), Math.max(1, Math.round(u)), Math.round(4 * u));
+      }
+    }
+    // snow on the ground at the very bottom
+    g.fillStyle = "#eef4ff"; g.fillRect(0, base, W, 6 * u); // a snowy street, then the night below it (the answer bar and buttons sit there)
+    const low = g.createLinearGradient(0, base + 6 * u, 0, H); low.addColorStop(0, "#1a2a5a"); low.addColorStop(1, "#060c24");
+    g.fillStyle = low; g.fillRect(0, base + 6 * u, W, H - base);
+    // the presents going down the chimneys
+    for (const p of this.gifts) {
+      const k = clamp(p.t / 1, 0, 1), x = lerp(p.x, p.tx, k), y = lerp(p.y, base - 50 * u, k * k);
+      if (k < 1) { g.fillStyle = "#c8202a"; g.fillRect(Math.round(x - 3 * u), Math.round(y - 3 * u), Math.round(6 * u), Math.round(6 * u)); g.fillStyle = "#ffd23a"; g.fillRect(Math.round(x - 0.6 * u), Math.round(y - 3 * u), Math.max(1, Math.round(1.2 * u)), Math.round(6 * u)); }
+      else if (!this.calm) for (let q = 0; q < 6; q++) { g.fillStyle = p.col; const a2 = q + p.t * 4; g.fillRect(Math.round(x + Math.cos(a2) * (p.t - 1) * 30 * u), Math.round(y + Math.sin(a2) * (p.t - 1) * 30 * u), Math.max(1, Math.round(1.5 * u)), Math.max(1, Math.round(1.5 * u))); }
+    }
+    // the sleighs, and their sparkly trails
+    for (const r of this.racers) {
+      const [x, y] = this.vehicleAt(r);
+      if (r.leg && !this.calm && Math.random() < 0.8) this.particles.push({ x: x - 22 * u, y: y - 4 * u + (Math.random() - 0.5) * 6 * u, vx: -20 - Math.random() * 30, vy: (Math.random() - 0.5) * 10, life: 0.8, c: LIGHTS[Math.floor(Math.random() * 4)], s: 1.6, screen: true });
+      const img = carSprite(carById("sleigh26"), this.calm ? 0 : Math.floor(this.time * 8) % 2);
+      const sw = 82 * u, sh = sw * img.height / img.width;
+      g.save();
+      if (r.stalled > 0 && !this.calm) g.translate((Math.random() - 0.5) * 2 * u, 0);
+      g.drawImage(img, Math.round(x - sw * 0.6), Math.round(y - sh), Math.round(sw), Math.round(sh));
+      g.restore();
+    }
+    // falling snow
+    if (!this.calm) {
+      g.fillStyle = "rgba(255,255,255,0.85)";
+      for (const f of this.flakes) { const fx = ((f.x + Math.sin(this.time * 0.7 + f.y * 9) * 0.02 - this.time * 0.01) % 1 + 1) % 1 * W, fy = ((f.y + this.time * f.v) % 1) * H; const d = Math.max(1, Math.round(u * f.s * 1.3)); g.fillRect(Math.round(fx), Math.round(fy), d, d); }
+    }
   }
-  drawVehicle(g, px, r) { drawSleighTop(g, Math.max(1, Math.round(px * 0.8)), this.calm ? 0 : this.time, r.car?.color || "#c8202a"); }
+  // each city's name on a banner over the roofs; DELIVERED! once the present's down
+  drawStopsHi(hg, px) {
+    const u = this.u;
+    for (const st of this.stops.slice(-8)) {
+      if (st.i < 0) continue;
+      const x = this.sx(st.wx);
+      if (x < -60 || x > this.W + 60) continue;
+      const y = this.bottom - 2 * u - 22 * u; // in front of the houses, under the sleigh
+      const done = st.arrived && this.time - st.arrived < 5;
+      hg.font = `${px(10)}px "Bungee", sans-serif`;
+      const t1 = (done ? "DELIVERED! · " : "★ ") + st.city.name, w = hg.measureText(t1).width + px(12);
+      hg.fillStyle = "rgba(14,42,26,0.88)"; hg.fillRect(x - w / 2, y - px(9), w, px(18));
+      hg.strokeStyle = "#ffd23a"; hg.lineWidth = px(1.5); hg.strokeRect(x - w / 2, y - px(9), w, px(18));
+      hg.fillStyle = done ? "#ffd23a" : "#fff6e0"; hg.fillText(t1, x, y + px(1));
+    }
+  }
   // the card is a gift tag: a string hole and a red ribbon across the corner
   drawCardMark(hg, w, h, col, px) {
     hg.fillStyle = "#c8202a"; hg.fillRect(-w / 2 + px(2), -h / 2 + px(2), px(5), h - px(4));

@@ -1,92 +1,232 @@
-// ON TOUR's race: the WORLD TOUR map at night, and your tour bus playing gigs round the world's music
-// cities. Every answer is a gig: the rarer it is, the further the next city and the bigger the venue
-// (a bar, a club, a theatre, an arena, a stadium... or headlining a festival). Long hops fly the tour
-// jet; ONE IN A VROOMILLION laps the planet. The answer card is a gig ticket.
-// It's WorldScene (world.js) with its own map layer, vehicle, trips and card.
-import { WorldScene, toWorld, landAt, tripKind, MW, TIER_COL } from "./world.js";
+// ON TOUR's race: a tour bus on a night highway, side-on, city to city. Each answer is a drive to a real
+// music city (its skyline rises behind the road) and a gig there: the rarer the answer, the longer the
+// drive and the bigger the venue (a bar, a club, a theatre, an arena... or headlining a festival). The
+// crowd outside goes wild, spotlights sweep, and TURBO and up set off fireworks. The race starts at
+// sunset and drives into the night; some nights it rains, some it's foggy. The answer card is a gig
+// ticket, and the end of the race is the encore. Built on the side-scrolling scene (sidescroll.js).
+import { SideScene, skyline, TIER_COL, clamp, lerp, hash } from "./sidescroll.js";
 
-const lerp = (a, b, t) => a + (b - a) * t;
 const VENUE = ["", "BAR GIG", "CLUB SHOW", "THEATRE", "ARENA", "FESTIVAL HEADLINER"];
 const NEON = ["#ff4fd8", "#4fd1ff", "#ffd23a", "#5dff8f", "#c070ff"];
-// the world's music cities
-const CITIES = [
-  ["NASHVILLE", 36.16, -86.78], ["MEMPHIS", 35.15, -90.05], ["NEW ORLEANS", 29.95, -90.07], ["AUSTIN", 30.27, -97.74],
-  ["LOS ANGELES", 34.05, -118.24], ["LAS VEGAS", 36.17, -115.14], ["NEW YORK", 40.71, -74.0], ["CHICAGO", 41.88, -87.63],
-  ["DETROIT", 42.33, -83.05], ["SEATTLE", 47.61, -122.33], ["ATLANTA", 33.75, -84.39], ["TORONTO", 43.65, -79.38],
-  ["MEXICO CITY", 19.43, -99.13], ["HAVANA", 23.11, -82.37], ["KINGSTON", 17.97, -76.79], ["RIO DE JANEIRO", -22.9, -43.2],
-  ["BUENOS AIRES", -34.6, -58.38], ["LONDON", 51.5, -0.13], ["LIVERPOOL", 53.41, -2.98], ["DUBLIN", 53.35, -6.26],
-  ["PARIS", 48.86, 2.35], ["BERLIN", 52.52, 13.4], ["AMSTERDAM", 52.37, 4.9], ["IBIZA", 38.91, 1.43], ["VIENNA", 48.21, 16.37],
-  ["STOCKHOLM", 59.33, 18.07], ["LAGOS", 6.52, 3.38], ["JOHANNESBURG", -26.2, 28.05], ["CAIRO", 30.04, 31.24],
-  ["MUMBAI", 19.08, 72.88], ["SEOUL", 37.57, 126.98], ["TOKYO", 35.68, 139.7], ["SYDNEY", -33.87, 151.2], ["MELBOURNE", -37.81, 144.96],
-].map(([name, lat, lon], i) => { const [x, y] = toWorld([lat, lon]); return { name, x, y, col: NEON[i % NEON.length] }; });
+// the world's music cities (the ones with a landmark in sidescroll.js show it)
+const CITIES = ["NASHVILLE", "MEMPHIS", "NEW ORLEANS", "AUSTIN", "LOS ANGELES", "LAS VEGAS", "NEW YORK", "CHICAGO", "DETROIT", "SEATTLE",
+  "ATLANTA", "TORONTO", "MEXICO CITY", "RIO DE JANEIRO", "BUENOS AIRES", "LONDON", "LIVERPOOL", "DUBLIN", "PARIS", "BERLIN",
+  "AMSTERDAM", "IBIZA", "VIENNA", "STOCKHOLM", "LAGOS", "CAIRO", "MUMBAI", "SEOUL", "TOKYO", "SYDNEY"].map((name) => ({ name }));
 
-// the tour bus, from above, facing up: long, with a row of windows, a stripe and a roof unit
-function drawBusTop(g, p, body, stripe) {
-  const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x * p, y * p, w * p, h * p); };
-  R(-4, -9, 8, 19, "#0b0618");
-  R(-5, -6, 1, 3, "#1a1a22"); R(4, -6, 1, 3, "#1a1a22"); R(-5, 4, 1, 3, "#1a1a22"); R(4, 4, 1, 3, "#1a1a22");
-  R(-3, -9, 6, 18, body);
-  R(-3, -9, 6, 2, "#9fd8ff");                          // windscreen
-  R(-2, -9, 1, 1, "#fff3c0"); R(1, -9, 1, 1, "#fff3c0"); // headlights
-  R(-3, -5, 1, 11, stripe); R(2, -5, 1, 11, stripe);   // the tour's colours down each side
-  R(-2, -2, 4, 4, "#d8d4e0"); R(-1, -1, 2, 2, "#8a8698"); // the roof unit
-  R(-3, 8, 1, 1, "#ff3b3b"); R(2, 8, 1, 1, "#ff3b3b");
+// colour helpers: mix two "#rrggbb" colours
+const hx = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hx(a), B = hx(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], clamp(t, 0, 1)))).join(",")})`; };
+// a smooth bumpy line (for hills): value noise
+const bump = (x) => { const i = Math.floor(x), f = x - i, k = f * f * (3 - 2 * f); return lerp(hash(i), hash(i + 1), k); };
+
+// the tour bus, side-on, facing right: a long coach with a row of windows, the tour's colour down the
+// side, a destination board, and wheels that turn
+function drawBus(g, x, y, s, stripe, t, night) {
+  const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x + a * s), Math.round(y + b * s), Math.max(1, Math.round(w * s)), Math.max(1, Math.round(h * s))); };
+  if (night) { // headlights on the road ahead
+    g.fillStyle = "rgba(255,236,170,0.16)";
+    g.beginPath(); g.moveTo(x + 27 * s, y - 6 * s); g.lineTo(x + 95 * s, y - 1 * s); g.lineTo(x + 95 * s, y + 6 * s); g.lineTo(x + 27 * s, y - 2 * s); g.fill();
+  }
+  R(-28, -21, 56, 18, "#0b0618");
+  R(-27, -20, 54, 16, "#f1eee6");
+  R(-27, -9, 54, 3, stripe); R(-27, -6, 54, 1, "#0b0618");
+  for (let k = 0; k < 6; k++) R(-24 + k * 7.6, -18, 6, 6, night ? "#ffe9a0" : "#7fb4d8");
+  R(21, -18, 6, 8, "#7fb4d8"); R(22, -17, 4, 2, "#ffffff");       // the windscreen
+  R(-20, -21.5, 18, 1.6, "#2a2240"); R(-19, -21.4, 16, 1.2, stripe);  // the roof sign
+  R(26, -6, 2, 2, night ? "#fff6c8" : "#e8e2c8"); R(-28, -7, 1.6, 2, "#ff3b3b"); // lights
+  R(-27, -4, 54, 1.4, "#2a2c33");
+  for (const wx of [-17, 17]) {
+    g.fillStyle = "#101014"; g.beginPath(); g.arc(x + wx * s, y - 2 * s, 4.2 * s, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#b4bac4"; g.beginPath(); g.arc(x + wx * s, y - 2 * s, 2 * s, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#101014"; const a = t * 9; g.fillRect(Math.round(x + (wx + Math.cos(a) * 1.4) * s - s / 2), Math.round(y + (-2 + Math.sin(a) * 1.4) * s - s / 2), Math.max(1, Math.round(s)), Math.max(1, Math.round(s)));
+  }
 }
 
-export class TourScene extends WorldScene {
+// a venue by the road, from a little bar to a festival stage; x: its left edge, y: the ground
+function drawVenue(g, x, y, s, tier, t, k, calm) {
+  const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x + a * s), Math.round(y - b * s - h * s), Math.max(1, Math.round(w * s)), Math.max(1, Math.round(h * s))); };
+  const blink = (i) => calm || Math.sin(t * 5 + i * 1.7) > -0.6;
+  const neon = NEON[tier % NEON.length];
+  if (tier <= 1) { // a bar: brick, one lit window, a neon beer sign
+    R(0, 0, 30, 22, "#4a2420"); R(0, 22, 30, 2, "#2a1410"); R(4, 4, 8, 12, "#2a1410"); R(16, 8, 10, 8, "#ffcf5a");
+    if (blink(0)) R(17, 17, 8, 3, neon);
+  } else if (tier === 2) { // a club: a black box, a neon stripe and a queue door
+    R(0, 0, 36, 28, "#16101e"); R(0, 26, 36, 2, neon); R(13, 0, 10, 12, "#2a1a3a"); R(14, 1, 8, 10, blink(1) ? "#ff4fd8" : "#5a1a4a");
+    for (let i = 0; i < 6; i++) if (blink(i)) R(3 + i * 5.4, 18, 3, 3, NEON[i % 5]);
+  } else if (tier === 3) { // a theatre: columns and a marquee full of bulbs
+    R(0, 0, 44, 34, "#5a3a2a"); R(-2, 34, 48, 3, "#3a2418"); for (let i = 0; i < 5; i++) R(3 + i * 9, 0, 3, 24, "#7a5a44");
+    R(4, 24, 36, 8, "#1a0a10"); for (let i = 0; i < 12; i++) if (blink(i)) R(5 + i * 3, 31, 1.4, 1.4, "#fff6c8");
+  } else if (tier === 4) { // an arena: a big glowing dome
+    g.fillStyle = "#1e1630"; g.beginPath(); g.ellipse(x + 30 * s, y - 2 * s, 32 * s, 30 * s, 0, Math.PI, 0); g.fill();
+    for (let i = 0; i < 10; i++) R(2 + i * 5.8, 4, 3, 3, blink(i) ? NEON[i % 5] : "#2a2040");
+    R(0, 0, 60, 4, "#2a2240");
+  } else { // a festival: a huge stage with a lighting rig and screens
+    R(0, 0, 70, 8, "#2a2238"); R(0, 8, 3, 40, "#3a3450"); R(67, 8, 3, 40, "#3a3450"); R(0, 46, 70, 3, "#3a3450");
+    R(6, 10, 18, 22, "#3a0a5a"); R(46, 10, 18, 22, "#3a0a5a"); R(26, 10, 18, 30, "#c41a7c");
+    for (let i = 0; i < 12; i++) if (blink(i)) R(3 + i * 5.6, 44, 2, 2, NEON[i % 5]);
+  }
+}
+
+export class TourScene extends SideScene {
   constructor(canvas) {
     super(canvas);
     this.cardBg = "#1d0b2e";
+    this.night = 0.2; this.weather = "clear";
   }
-  setRacers(list) {
-    super.setRacers(list);
-    // the tour opens in a music city
-    const c = CITIES[Math.floor(Math.random() * CITIES.length)];
-    this.racers.forEach((r, i) => { r.x = c.x + (i ? 6 : 0); r.y = c.y + (i ? 4 : 0); r.visited = [c.name]; });
-    if (this.racers[0]) this.cam = { x: this.racers[0].x, y: this.racers[0].y, z: this.fitZ(260) };
-    this.camTo = { ...this.cam };
+  cityList() { return CITIES; }
+  // the encore lists the gigs as "ARENA · TOKYO"
+  planLeg(c) { super.planLeg(c); const r = this.racers[c.i]; if (r?.pending) r.pending.label = `${VENUE[c.tier]} · ${r.pending.city.name}`; }
+  onSetRacers() {
+    this.weather = this.lobby ? "clear" : ["clear", "clear", "rain", "fog"][Math.floor(Math.random() * 4)];
+    this.night = this.lobby ? 0.8 : 0.1;
+    this.drops = Array.from({ length: 90 }, (_, k) => ({ x: hash(k * 3.1), y: hash(k * 7.7), v: 0.9 + hash(k) * 0.6 }));
   }
-  // ON TOUR's home screen: the bus plays a run of shows on its own
+  // ON TOUR's home screen: the bus drives a run of shows on its own, deep into the night
   lobbyTick(car) {
     if (!this.lobby || !this.racers.length || this.racers[0].car?.id !== car?.id) {
       this.lobby = true;
       this.setRacers([{ car, label: "", color: "#ff4fd8" }]);
-      this.cam.z = this.fitZ(520);
       this.tourI = 0; this.tourWait = 1.2;
     }
     const r = this.racers[0];
     if (r.leg || r.pending) return;
     this.tourWait -= 1 / 30;
     if (this.tourWait > 0) return;
-    const tier = [1, 2, 3, 2, 4, 3, 4][this.tourI++ % 7];
-    this.planLeg({ i: 0, tier, color: "#ff4fd8" });
+    const tier = [1, 2, 3, 2, 4, 3, 5][this.tourI++ % 7];
+    this.planLeg({ i: 0, tier });
     this.launch(0, tier, false, 3 + tier * 0.4);
-    if (r.pins.length > 5) r.pins.shift();
-    if (r.trail.length > 600) r.trail.splice(0, r.trail.length - 600);
-    this.tourWait = 2.2;
+    if (r.pins.length > 8) r.pins.shift();
+    this.tourWait = 2.4;
   }
-  // the next gig: a music city about as far as the answer is rare, not one played lately
-  planLeg(c) {
-    const r = this.racers[c.i];
-    if (!r) return;
-    if (!c.tier) { r.leg = null; return; }
-    const want = [0, 90, 170, 290, 470, 700][c.tier];
-    let best = null, score = Infinity;
-    for (const city of CITIES) {
-      if ((r.visited || []).includes(city.name)) continue;
-      let dx = city.x - r.x; dx -= Math.round(dx / MW) * MW;
-      const d = Math.hypot(dx, city.y - r.y);
-      const s = Math.abs(d - want) + Math.random() * 40;
-      if (s < score) { score = s; best = { city, tx: r.x + dx, ty: city.y }; }
+  onArrive(r, L) {
+    if (L.tier >= 4 && !this.calm) { const st = this.stops[this.stops.length - 1]; this.fwAt = { wx: st.wx + 40, n: L.tier === 5 ? 9 : 4, col: TIER_COL[L.tier] }; }
+  }
+  tick(dt) {
+    // dusk into night as the tour goes on
+    const want = this.lobby ? 0.85 : clamp(0.1 + this.answers * 0.15, 0, 1);
+    this.night += (want - this.night) * Math.min(1, dt * 0.6);
+    if (this.fwAt && Math.random() < dt * 5) {
+      this.firework(this.sx(this.fwAt.wx) + (Math.random() - 0.5) * 60 * this.u, this.groundY() - (60 + Math.random() * 40) * this.u, this.fwAt.col);
+      if (--this.fwAt.n <= 0) this.fwAt = null;
     }
-    if (!best) { r.visited = []; return this.planLeg(c); }
-    r.visited = [...(r.visited || []), best.city.name].slice(-8);
-    let { tx } = best; const { ty } = best;
-    if (c.tier >= 5) tx += tx >= r.x ? MW : -MW; // a world tour in one go
-    let wet = false;
-    for (let k = 1; k < 24 && !wet; k++) if (!landAt(lerp(r.x, tx, k / 24), lerp(r.y, ty, k / 24))) wet = true;
-    const kind = c.tier >= 3 && wet ? "plane" : tripKind(c.tier, wet); // the band flies over oceans
-    r.pending = { x0: r.x, y0: r.y, x1: tx, y1: ty, kind, tier: c.tier, label: `${VENUE[c.tier]} · ${best.city.name}`, color: c.color };
+  }
+  vehicleLift(r) { return r.lane * 6 * this.u; }
+  tagUp() { return 36 * this.u; }
+
+  drawWorld(g) {
+    const { W, H, u } = this, k = this.night, gy = this.groundY(), t = this.calm ? 0 : this.time;
+    const s = Math.max(1, u);
+    // the sky: a synthwave sunset turning into night
+    const sky = g.createLinearGradient(0, 0, 0, gy);
+    sky.addColorStop(0, mix("#3a1a6a", "#04020e", k)); sky.addColorStop(0.65, mix("#ff5a6a", "#160a34", k)); sky.addColorStop(1, mix("#ffb05a", "#3a1450", k));
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    // the setting sun, striped
+    if (k < 0.85) {
+      const sy = gy - 46 * u + k * 70 * u, sr = 30 * u;
+      g.save(); g.globalAlpha = 1 - k;
+      const sg = g.createLinearGradient(0, sy - sr, 0, sy + sr); sg.addColorStop(0, "#ffe46a"); sg.addColorStop(1, "#ff3a7a");
+      g.fillStyle = sg; g.beginPath(); g.arc(W * 0.72, sy, sr, 0, Math.PI * 2); g.fill();
+      g.fillStyle = mix("#ff5a6a", "#160a34", k);
+      for (let i = 0; i < 5; i++) g.fillRect(W * 0.72 - sr, sy + i * 6 * u, sr * 2, (1 + i * 0.6) * u);
+      g.restore();
+    }
+    // stars and the moon
+    g.globalAlpha = clamp(k * 1.3 - 0.2, 0, 1);
+    for (let i = 0; i < 70; i++) { g.fillStyle = (Math.sin(t * 2 + i) > 0.6) ? "#ffffff" : "#b8b4e8"; g.fillRect(Math.round(hash(i) * W), Math.round(hash(i + 50) * gy * 0.8), Math.max(1, Math.round(u * 0.8)), Math.max(1, Math.round(u * 0.8))); }
+    g.fillStyle = "#f6f0d8"; g.beginPath(); g.arc(W * 0.2, H * 0.12, 11 * u, 0, Math.PI * 2); g.fill();
+    g.fillStyle = mix("#3a1a6a", "#04020e", k); g.beginPath(); g.arc(W * 0.2 + 4 * u, H * 0.12 - 2 * u, 10 * u, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1;
+    // far mountains
+    const layer = (p, base, amp, scale, col) => {
+      g.fillStyle = col; g.beginPath(); g.moveTo(0, gy);
+      for (let x = 0; x <= W + 8; x += 6) { const wx = (x - this.anchorX) / (u * p) + this.cam; g.lineTo(x, base - bump(wx / scale) * amp - bump(wx / (scale * 0.37) + 9) * amp * 0.35); }
+      g.lineTo(W, gy); g.closePath(); g.fill();
+    };
+    layer(0.08, gy - 26 * u, 40 * u, 260, mix("#7a2a6a", "#140a2e", k));
+    // the cities: each stop's skyline, behind the road
+    for (const st of this.stops) {
+      const x = this.sx(st.wx, 0.32);
+      if (x < -120 * u || x > W + 120 * u) continue;
+      skyline(g, st.city.name, x, gy - 14 * u, s * 0.9, { col: mix("#4a1a5a", "#120a26", k), win: "#ffcf5a", lit: 0.12 + k * 0.4, t });
+    }
+    layer(0.5, gy - 10 * u, 16 * u, 90, mix("#3a1440", "#0b0618", k));
+    // the highway: a shoulder, a crash barrier, lamp posts, the road, its dashes
+    g.fillStyle = mix("#2a1a2a", "#0e0a16", k); g.fillRect(0, gy - 10 * u, W, 10 * u);
+    for (let wx = Math.floor((this.cam - this.anchorX / u) / 150) * 150; ; wx += 150) {
+      const x = this.sx(wx); if (x > W + 20) break; if (x < -20) continue;
+      g.fillStyle = "#3a3450"; g.fillRect(Math.round(x), Math.round(gy - 52 * u), Math.max(1, Math.round(1.6 * u)), Math.round(42 * u)); g.fillRect(Math.round(x), Math.round(gy - 52 * u), Math.round(9 * u), Math.max(1, Math.round(1.4 * u)));
+      if (k > 0.35) { g.fillStyle = `rgba(255,214,140,${0.22 * k})`; g.beginPath(); g.moveTo(x + 8 * u, gy - 51 * u); g.lineTo(x + 20 * u, gy + 8 * u); g.lineTo(x - 4 * u, gy + 8 * u); g.fill(); g.fillStyle = "#fff0b0"; g.fillRect(Math.round(x + 7 * u), Math.round(gy - 51 * u), Math.round(3 * u), Math.max(1, Math.round(1.6 * u))); }
+    }
+    // the venues at the stops, and the fans outside
+    for (const st of this.stops) {
+      if (st.i < 0) continue;
+      const x = this.sx(st.wx) + 40 * u;
+      if (x < -100 * u || x > W + 20) continue;
+      drawVenue(g, x, gy - 10 * u, s * 1.25, st.tier, t, k, this.calm);
+      const recent = st.arrived ? clamp(1 - (this.time - st.arrived) / 8, 0, 1) : 0;
+      if (recent > 0 && st.tier >= 3 && !this.calm) { // spotlights sweeping the sky
+        for (let i = 0; i < 3; i++) {
+          const a = Math.sin(t * 1.3 + i * 2) * 0.5, x0 = x + (12 + i * 16) * u;
+          g.globalAlpha = 0.12 * recent; g.fillStyle = NEON[i];
+          g.beginPath(); g.moveTo(x0, gy - 20 * u); g.lineTo(x0 + Math.sin(a) * 200 * u - 14 * u, 0); g.lineTo(x0 + Math.sin(a) * 200 * u + 14 * u, 0); g.fill();
+        }
+        g.globalAlpha = 1;
+      }
+      const fans = 4 + st.tier * 3;
+      for (let i = 0; i < fans; i++) {
+        const fx = x + (i * 5.2 - 4) * u, hop = recent > 0 && !this.calm ? Math.max(0, Math.sin(t * 9 + i * 1.3)) * 3 * u * (0.4 + recent) : 0;
+        g.fillStyle = ["#2a1a3a", "#3a2040", "#1a1430"][i % 3];
+        g.fillRect(Math.round(fx), Math.round(gy - 16 * u - hop), Math.round(3 * u), Math.round(6 * u));
+        g.beginPath(); g.arc(fx + 1.5 * u, gy - 17.5 * u - hop, 1.7 * u, 0, Math.PI * 2); g.fill();
+        if (recent > 0 && st.tier >= 4 && i % 2) { g.fillStyle = i % 4 === 1 ? "#ffcf5a" : "#cfe8ff"; g.fillRect(Math.round(fx + 2 * u), Math.round(gy - 24 * u - hop), Math.max(1, Math.round(u)), Math.round(2 * u)); } // lighters and phones up
+      }
+    }
+    // the road
+    const rd = g.createLinearGradient(0, gy, 0, H); rd.addColorStop(0, mix("#3a3448", "#1a1824", k)); rd.addColorStop(1, mix("#24202e", "#0c0a12", k));
+    g.fillStyle = rd; g.fillRect(0, gy, W, H - gy);
+    g.fillStyle = "#c8c0d8"; g.fillRect(0, gy, W, Math.max(1, Math.round(u)));
+    g.fillStyle = "#ffd23a";
+    for (let wx = Math.floor((this.cam - this.anchorX / u) / 40) * 40; ; wx += 40) { const x = this.sx(wx); if (x > W) break; g.fillRect(Math.round(x), Math.round(gy + 9 * u), Math.round(18 * u), Math.max(1, Math.round(1.6 * u))); }
+    // oncoming traffic in the far lane: headlights going by
+    for (let i = 0; i < 3; i++) {
+      const per = 900, wx = ((i * 337 - this.time * 120) % per + per) % per + Math.floor(this.cam / per) * per - per * 0.3;
+      const x = this.sx(wx); if (x < -30 || x > W + 30) continue;
+      g.fillStyle = ["#3a5a8a", "#8a3a3a", "#5a5a5a"][i]; g.fillRect(Math.round(x), Math.round(gy - 1 * u), Math.round(20 * u), Math.round(6 * u)); g.fillRect(Math.round(x + 4 * u), Math.round(gy - 5 * u), Math.round(11 * u), Math.round(4 * u));
+      g.fillStyle = "#fff6c8"; g.fillRect(Math.round(x), Math.round(gy + 1 * u), Math.round(2 * u), Math.round(2 * u));
+      if (k > 0.4) { g.fillStyle = "rgba(255,246,200,0.12)"; g.beginPath(); g.moveTo(x, gy); g.lineTo(x - 60 * u, gy - 3 * u); g.lineTo(x - 60 * u, gy + 8 * u); g.fill(); }
+    }
+    // the buses (the far lane first)
+    for (const r of [...this.racers].sort((a, b) => b.lane - a.lane)) {
+      const [x, y] = this.vehicleAt(r);
+      const shakeX = r.stalled > 0 && !this.calm ? (Math.random() - 0.5) * 2 * u : 0;
+      drawBus(g, x + shakeX, y, s * 1.3, r.color || r.car?.color || "#ff4fd8", r.leg ? t : t * 0.1, k > 0.4);
+      if (r.leg && !this.calm && Math.random() < 0.5) this.particles.push({ x: x - 36 * u, y: y - 5 * u, vx: -30 - Math.random() * 20, vy: -6, life: 0.5, c: "rgba(200,190,220,0.5)", s: 2, screen: true });
+    }
+    // the weather
+    if (this.weather === "rain" && !this.calm) {
+      g.strokeStyle = "rgba(190,210,255,0.35)"; g.lineWidth = Math.max(1, u * 0.7); g.beginPath();
+      for (const d of this.drops) { const x = ((d.x * W - this.time * 60 * d.v) % W + W) % W, y = ((d.y + this.time * 1.4 * d.v) % 1) * H; g.moveTo(x, y); g.lineTo(x - 3 * u, y + 10 * u); }
+      g.stroke();
+      g.fillStyle = "rgba(255,214,140,0.06)"; g.fillRect(0, gy + 2 * u, W, 10 * u); // wet road shine
+    } else if (this.weather === "fog") {
+      for (let i = 0; i < 3; i++) { const y = gy - (30 + i * 22) * u; const fg = g.createLinearGradient(0, y - 14 * u, 0, y + 14 * u); fg.addColorStop(0, "rgba(200,180,230,0)"); fg.addColorStop(0.5, `rgba(200,180,230,${0.12 + 0.04 * Math.sin(this.time * 0.5 + i)})`); fg.addColorStop(1, "rgba(200,180,230,0)"); g.fillStyle = fg; g.fillRect(0, y - 14 * u, W, 28 * u); }
+    }
+  }
+  // the venue signs: what kind of gig, and where
+  drawStopsHi(hg, px) {
+    const u = this.u, gy = this.groundY();
+    for (const st of this.stops.slice(-8)) {
+      if (st.i < 0) continue;
+      const x = this.sx(st.wx) + 40 * u + [15, 15, 18, 22, 30, 35][st.tier] * 1.25 * u;
+      if (x < -60 || x > this.W + 60) continue;
+      const top = gy - 10 * u - [24, 26, 30, 38, 34, 50][st.tier] * 1.25 * u - px(14);
+      hg.font = `${px(9)}px "Bungee", sans-serif`;
+      const t1 = VENUE[st.tier], t2 = st.city.name, w = Math.max(hg.measureText(t1).width, hg.measureText(t2).width) + px(10);
+      hg.fillStyle = "rgba(11,6,24,0.85)"; hg.fillRect(x - w / 2, top - px(8), w, px(26));
+      hg.strokeStyle = NEON[st.tier % NEON.length]; hg.lineWidth = px(1.5); hg.strokeRect(x - w / 2, top - px(8), w, px(26));
+      hg.fillStyle = NEON[st.tier % NEON.length]; hg.fillText(t1, x, top);
+      hg.fillStyle = "#fff6e0"; hg.fillText(t2, x, top + px(11));
+    }
   }
   // ---- the finale: the encore. A stage under sweeping lights, your bus parked by it, a sea of lighters,
   // and the screen behind the stage showing your tour poster: every gig you played ----
@@ -161,22 +301,6 @@ export class TourScene extends WorldScene {
     });
     hg.globalAlpha = 1;
   }
-  // the map at night: darker, with the music cities lit up in neon
-  drawOverlay(g) {
-    const { W, H, u } = this;
-    g.fillStyle = "rgba(10,6,40,0.5)"; g.fillRect(-10, -10, W + 20, H + 20);
-    for (const c of CITIES) {
-      const [sx, sy] = this.toScreen(c.x, c.y);
-      if (sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40) continue;
-      const pulse = this.calm ? 1 : 0.75 + 0.25 * Math.sin(this.time * 2 + c.x);
-      const rad = 9 * u * pulse;
-      const gl = g.createRadialGradient(sx, sy, 0, sx, sy, rad);
-      gl.addColorStop(0, c.col); gl.addColorStop(1, "rgba(0,0,0,0)");
-      g.globalAlpha = 0.55; g.fillStyle = gl; g.fillRect(sx - rad, sy - rad, rad * 2, rad * 2); g.globalAlpha = 1;
-      g.fillStyle = "#fff6e0"; g.fillRect(Math.round(sx - u / 2), Math.round(sy - u / 2), Math.max(1, Math.round(u)), Math.max(1, Math.round(u)));
-    }
-  }
-  drawVehicle(g, px, r) { drawBusTop(g, px, "#f4f1ea", r.color || r.car?.color || "#ff4fd8"); }
   // the card is a gig ticket: a perforated stub down the right with a star on it
   drawCardMark(hg, w, h, col, px) {
     const x = w / 2 - px(26);

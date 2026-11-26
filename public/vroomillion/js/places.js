@@ -155,7 +155,13 @@ export class Places {
     const lobbyScene = place === "world" ? this.world : place === "drivein" ? this.drivein : place === "tour" ? this.tour : place === "stadium" ? this.stadium : place === "sleigh" ? this.sleigh : null;
     if (lobbyScene) {
       const w = lobbyScene;
-      if (w.W !== this.cv.width || w.H !== this.cv.height) w.resize(this.cv.width, this.cv.height, this.cv.height * 0.74);
+      // a side-on scene stands its ground just above the lobby's buttons, so the bus or the sleigh shows
+      let bottom = this.cv.height * 0.74;
+      if (w.sx && typeof document !== "undefined") {
+        const mb = document.querySelector(".screen.active .ml-bottom"), cr = this.cv.getBoundingClientRect();
+        if (mb && cr.height) bottom = Math.round(((mb.getBoundingClientRect().top - cr.top) * this.cv.height) / cr.height) - 2;
+      }
+      if (w.W !== this.cv.width || w.H !== this.cv.height || Math.abs((w.bottom || 0) - bottom) > 2) w.resize(this.cv.width, this.cv.height, bottom);
       w.lobbyTick(car);
       w.update(this.dt || 1 / 30);
       w.draw();

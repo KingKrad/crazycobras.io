@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26e",
+    date: "Nov 26, 2026",
+    title: "ON TOUR & CHRISTMAS, reimagined",
+    items: [
+      "ON TOUR is now a tour bus on a night highway: real cities' skylines, venues that grow from bar to festival, fans going wild, rain and fog, and a sunset that turns to night.",
+      "CHRISTMAS now flies Santa's sleigh over snowy rooftops: presents down chimneys, townsfolk waving, the northern lights, and a start at Santa's workshop.",
+      "Both have their own chiptune music that builds as your answers get rarer, and their own look for the race and results.",
+    ],
+  },
+  {
     id: "2026-11-26d",
     date: "Nov 26, 2026",
     title: "Easier to get going",

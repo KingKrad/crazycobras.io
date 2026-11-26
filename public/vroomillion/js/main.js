@@ -206,13 +206,13 @@ const THEMED = {
     info: "280+ PLACES PROMPTS · REAL WORLD MAP", card: "Name places · drive the real world map" },
   film: { name: "BOX OFFICE", screen: "boxoffice", ids: "bo", scene: () => driveInScene, go: "▶ ROLL THE TRAILER",
     info: "300+ MOVIES & TV PROMPTS · DRIVE-IN THEATRE", card: "Movies & TV · your answer plays at the drive-in" },
-  music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, go: "▶ START THE TOUR",
-    info: "380+ MUSIC PROMPTS · A WORLD TOUR BY BUS", card: "Music · every answer is a gig round the world" },
+  music: { name: "ON TOUR", screen: "ontour", ids: "ot", scene: () => tourScene, track: "tour", go: "▶ START THE TOUR",
+    info: "380+ MUSIC PROMPTS · A TOUR BUS ON THE NIGHT HIGHWAY", card: "Music · every answer is a gig round the world" },
   sport: { name: "STADIUM RUN", screen: "stadium", ids: "sr", scene: () => stadiumScene, go: "▶ ON YOUR MARKS",
     info: "150+ SPORTS PROMPTS · LAPS OF THE STADIUM", card: "Sports · every answer is a lap of the stadium" },
   // a limited-time event: open to UNLIMITED players (and admins) until it ends, not sold on its own.
   // Finish SLEIGH_RACES races in it and Santa's sleigh is yours.
-  xmas: { name: "CHRISTMAS", screen: "christmas", ids: "xm", scene: () => sleighScene, go: "▶ TAKE OFF", event: true,
+  xmas: { name: "CHRISTMAS", screen: "christmas", ids: "xm", scene: () => sleighScene, track: "xmas", go: "▶ TAKE OFF", event: true,
     ends: Date.parse("2027-01-02T10:00:00Z"), // the end of New Year's Day, even in Hawaii
     info: "45+ CHRISTMAS PROMPTS · SANTA'S ROUND THE WORLD", card: "Christmas trivia · fly Santa's sleigh round the world", tag: "LIMITED TIME" },
 };
@@ -1619,6 +1619,7 @@ function show(name) {
   for (const s of document.querySelectorAll(".screen")) s.classList.toggle("active", s.id === "s-" + name);
   $("title-art").classList.toggle("hidden", name !== "title");
   document.body.dataset.screen = name;
+  if (name !== "race" && name !== "results") document.body.dataset.theme = "";
   document.body.dataset.place = PLACE_OF[name] || "";
   if (PLACE_OF[name] === "grid" && !chaseScene.parked) { chaseScene.parked = true; chaseScene.speed = 0; chaseScene.todBase = clockPhase(); attractCar = null; attract(); }
   if (name !== "race") {
@@ -1654,6 +1655,9 @@ function show(name) {
   if (name === "modes") renderModes();
   if (name === "archive") renderArchive();
   if (name === "quests") renderQuests();
+  { const lob = THEMED_IDS.find((t) => THEMED[t].screen === name && THEMED[t].track);
+    if (lob) { audio.unlock(); audio.music.play(THEMED[lob].track); audio.music.level(1); }
+    else if (name !== "race" && name !== "results") audio.music.stop(); }
   questDot();
   if (name === "account") renderMe();
   // the tab bar lights up the section you're in
@@ -2560,6 +2564,8 @@ function startRace(setup) {
   race = { token, solo, setup, racers, round: 0, questions, daily, label, online: setup.online || null, crazy, geo, themed, unlNo, replay: setup.replay || 0 };
 
   scene = themed ? THEMED[themed].scene() : chaseScene; // races use the behind-the-car view (themed modes: their own)
+  if (THEMED[themed]?.track) { audio.music.play(THEMED[themed].track); audio.music.level(0); } else audio.music.stop();
+  document.body.dataset.theme = themed || ""; // the race and its results dress up as the mode (style.css)
   if (geo) { loadMap(); loadGazetteer(); }
   const fromLine = (chaseScene.parked || lineLaunch) && solo && !themed; // launched off the title screen's start line: same road, same sky
   lineLaunch = false;
@@ -2743,6 +2749,7 @@ async function runRace(token) {
       runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier };
       scene.racers[i].nitro = nitro;
       scene.launch(i, tier, nitro, dur / 1000);
+      musicBuild(tier);
       popGain(i, gain[i], tier, nitro, race.crazy);
       if (topFx >= 3 && !fxShown) { fxShown = true; rareMoment(topFx, race.crazy); }
       const sfx = r.car.electric ? audio.ev : r.car.reggae ? audio.reggae : audio.sfx; // an electric car fires lasers and plasma instead; ZIG'S WHIP is all reggae
@@ -3907,3 +3914,10 @@ function nextPresent() {
 }
 if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__vroomTest = { santaFly, givePresents, quests, nextPrize: (p) => { testPrize = p.car ? { car: carById(p.car) } : p; } };
 questDot();
+
+// a themed mode's music builds as the answers come: rarer answers add more of the band; a stall knocks it back
+function musicBuild(tier) {
+  if (!audio.music.playing) return;
+  const l = audio.music.lvl;
+  audio.music.level(tier >= 5 ? 4 : tier ? l + [0, 0.5, 0.75, 1, 1.5][tier] : l - 0.75);
+}

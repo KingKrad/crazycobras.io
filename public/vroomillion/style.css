@@ -1810,3 +1810,30 @@ body .screen.mode-lobby.active { min-height: calc(100dvh - var(--place-top, 180p
 .pay-card .pay-msg { order: 2; }
 .pay-card .pay-perks { order: 3; margin-top: 12px; }
 .pay-card > .note { order: 4; }
+
+/* ---- themed races: ON TOUR is a neon gig poster, CHRISTMAS a gift tag ---- */
+body[data-theme="music"] #q-card { background: linear-gradient(160deg, #1d0b2e, #3a0a4a); border-color: #ff4fd8; box-shadow: 0 0 0 3px #0b0618, 0 0 22px rgba(255, 79, 216, 0.55), inset 0 0 18px rgba(79, 209, 255, 0.18); }
+body[data-theme="music"] #q-card .q-kicker { color: #4fd1ff; text-shadow: 0 0 8px #4fd1ff; }
+body[data-theme="music"] #q-card .question { color: #ffe6fb; text-shadow: 0 0 8px #ff4fd8, 2px 2px 0 #000; }
+body[data-theme="music"] #answer { border-color: #4fd1ff; background: #0b0618; color: #ffe6fb; box-shadow: 0 0 14px rgba(79, 209, 255, 0.35); }
+body[data-theme="music"] #answer::placeholder { color: #7a5a9a; }
+body[data-theme="music"] #btn-go, body[data-theme="music"] #btn-next { background: #ff4fd8; border-color: #ffe6fb; box-shadow: 0 0 16px rgba(255, 79, 216, 0.7); }
+body[data-theme="music"] .hud, body[data-theme="music"] .round-box { border-color: #c070ff; background: rgba(29, 11, 46, 0.88); }
+body[data-theme="music"] #s-results .result-title { color: #ffe6fb; text-shadow: 0 0 10px #ff4fd8, 0 0 26px #c41a9c, 4px 4px 0 #1a0a40; }
+body[data-theme="music"] #s-results .final-card, body[data-theme="music"] #s-results .payout { border-color: #ff4fd8; box-shadow: 0 0 14px rgba(255, 79, 216, 0.35); }
+
+body[data-theme="xmas"] #q-card { background: linear-gradient(160deg, #0e2a1a, #12361f); border: 3px solid #ffd23a; box-shadow: 0 0 0 3px #4a0008, 0 0 18px rgba(255, 210, 58, 0.35); }
+body[data-theme="xmas"] #q-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: repeating-linear-gradient(90deg, #d42020 0 10px, #f4f4f4 10px 20px); }
+body[data-theme="xmas"] #q-card { position: relative; }
+body[data-theme="xmas"] #q-card .q-kicker { color: #ffd23a; }
+body[data-theme="xmas"] #q-card .question { color: #fff6ec; }
+body[data-theme="xmas"] #answer { border-color: #ffd23a; background: #081a10; color: #fff6ec; }
+body[data-theme="xmas"] #answer::placeholder { color: #5a7a64; }
+body[data-theme="xmas"] #btn-go, body[data-theme="xmas"] #btn-next { background: #c8202a; border-color: #ffd23a; }
+body[data-theme="xmas"] .hud, body[data-theme="xmas"] .round-box { border-color: #ffd23a; background: rgba(14, 42, 26, 0.88); }
+body[data-theme="xmas"] #s-results .result-title { color: #fff6f0; text-shadow: 0 0 6px #ff3b3b, 0 0 18px #c8202a, 4px 4px 0 #0e3a20; }
+body[data-theme="xmas"] #s-results .final-card, body[data-theme="xmas"] #s-results .payout { border-color: #ffd23a; background: linear-gradient(#0e2a1a, #081a10); }
+
+/* the lobbies: the go button in the mode's colours */
+#s-ontour .ml-go:not(.unlock-cta) { background: #ff4fd8; border-color: #ffe6fb; box-shadow: 0 0 18px rgba(255, 79, 216, 0.7); color: #fff; }
+#s-christmas .ml-go:not(.unlock-cta) { background: #c8202a; border-color: #ffd23a; color: #fff6e0; box-shadow: 0 0 16px rgba(255, 59, 59, 0.5); }
