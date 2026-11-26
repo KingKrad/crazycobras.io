@@ -831,13 +831,13 @@ function renderPaywall() {
   const step = $("pay-step");
   step.textContent = "";
   if (!account) {
-    step.append(trialOffer ? h("div", { class: "daily-line good", text: "LAUNCH OFFER: MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }) : null,
-      h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall));
+    step.append(...[trialOffer ? h("div", { class: "daily-line good", text: "LAUNCH OFFER: MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }) : null,
+      h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall)].filter((k) => k != null && k !== false));
   } else if (account.unlimited && !account.trialEndsAt) {
     step.append(h("div", { class: "daily-line good", text: `★ ${account.email.toUpperCase()} HAS UNLIMITED` }),
       h("button", { class: "btn big", type: "button", text: "RACE ▶", onclick: () => { audio.sfx.click(); show("leagues"); } }));
   } else {
-    step.append(
+    step.append(...[
       account.trialEndsAt && unlimitedNow() ? h("div", { class: "daily-line good", text: `★ YOUR FREE UNLIMITED ENDS IN ${trialLeft()}. KEEP IT FOREVER:` }) : null,
       h("div", { class: "step-label", text: "STEP 2 OF 2 · PAY" }),
       h("div", { class: "signed-in", text: `LOGGED IN AS ${account.email.toUpperCase()}` }),
@@ -845,7 +845,7 @@ function renderPaywall() {
         h("input", { type: "checkbox", id: "agree-no-refunds", onchange: (e) => { $("btn-buy").disabled = !e.target.checked; } }),
         h("span", {}, "I understand Unlimited starts right away and is non-refundable. I agree to the ", h("a", { href: "terms.html", text: "Terms" }), ".")),
       h("button", { class: "btn big", id: "btn-buy", type: "button", disabled: true, text: "UNLOCK UNLIMITED — $5", onclick: () => { audio.sfx.click(); buyUnlimited(); } }),
-      h("button", { class: "link", type: "button", text: "Not you? Log out", onclick: logOut }));
+      h("button", { class: "link", type: "button", text: "Not you? Log out", onclick: logOut })].filter((k) => k != null && k !== false));
   }
 }
 
@@ -1332,7 +1332,7 @@ async function adminPlayers(body, patch) {
     const confirmBox = h("input", { type: "email", placeholder: "type their email to confirm", "aria-label": "Type the email to confirm deleting", autocomplete: "off" });
     const refresh = (np, done) => { showPlayer({ ...p, ...np }, done); reload(); };
     const carNames = (ids) => ids.map((id) => carById(id)?.name || id).join(", ");
-    detail.append(
+    detail.append(...[
       h("div", { class: "admin-modal-head" },
         h("div", { class: "signed-in", text: p.email.toUpperCase() }),
         h("button", { class: "btn small", type: "button", text: "✕", "aria-label": "Close", onclick: close })),
@@ -1365,7 +1365,7 @@ async function adminPlayers(body, patch) {
         h("p", { class: "note", text: "Deletes the account, its sessions and its leaderboard scores. This can't be undone." }),
         confirmBox,
         h("button", { class: "btn small danger", type: "button", text: "DELETE ACCOUNT", onclick: () => act({ action: "delete-player", email: p.email, confirm: confirmBox.value }, "Account deleted.", () => { close(); reload(); }) })),
-      msg);
+      msg].filter((k) => k != null && k !== false));
     detail.querySelector("button")?.focus();
   }
 }
@@ -2449,6 +2449,8 @@ function startRace(setup) {
     label = "DAILY RACE";
   } else if (setup.replay) {
     label = `RACE #${setup.replay} · REPLAY`; // from the RACE ARCHIVE: not a new race
+  } else if (setup.mode === "versus") {
+    label = "2 PLAYERS"; // a same-screen race isn't one of your numbered Unlimited races
   } else {
     const n = racesRun() + 1;
     save.unlRaces = Math.max(save.unlRaces || 0, n);
@@ -3510,7 +3512,7 @@ function finish(token) {
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const dailyNext = race.daily && !paid ? nextDaily(save, dday()) : 0;
-  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
+  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : !race.solo ? "PLAY AGAIN" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   if (race.themed) { // a themed mode: its own $5 unlock, not UNLIMITED
