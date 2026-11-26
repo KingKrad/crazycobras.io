@@ -511,7 +511,7 @@ function renderDaily() {
   } else if (dailyLeft(save, today) > 0) {
     // the big daily button at the top already says it's waiting
   } else {
-    box.append(h("button", { class: "btn big unlock-cta", type: "button", text: "WANT MORE? GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }));
+    box.append(h("button", { class: "link", type: "button", text: "See how you did on today's leaderboard ›", onclick: () => { audio.sfx.click(); show("board"); } }));
   }
 }
 
@@ -527,7 +527,7 @@ function drawDailyHero(today) {
   const st = streakNow();
   const streak = st ? ` · ${st}-DAY STREAK` : "";
   const free = unlimitedNow() || FREE_PLAY;
-  btn.classList.toggle("done", !n);
+  btn.classList.toggle("done", !n && free);
   if (n) {
     btn.textContent = "▶ START TODAY'S RACE";
     $("daily-status").textContent = `TODAY'S DAILY RACE · FREE · 7 QUESTIONS${streak}`;
@@ -535,9 +535,11 @@ function drawDailyHero(today) {
   } else {
     const m = Object.values(done).find((v) => typeof v === "number" && v > 0);
     $("daily-status").textContent = `✓ DAILY DONE${m ? `: ${m.toLocaleString("en-US")} M` : ""} · NEXT ONE IN ${timeLeft()}${streak}`;
-    // Unlimited players race again from here; everyone else sees how they did
-    btn.textContent = free ? "▶ RACE AGAIN" : "SEE TODAY'S LEADERBOARD";
-    btn.onclick = free ? () => launchFromLine({ mode: "solo", crazy: !!save.crazy }) : () => { audio.sfx.click(); show("board"); };
+    // Unlimited players race again from here; everyone else can keep racing with Unlimited (the
+    // leaderboard is a link just below)
+    btn.textContent = free ? "▶ RACE AGAIN" : "▶ KEEP RACING — $5";
+    btn.classList.toggle("unlock-cta", !free);
+    btn.onclick = free ? () => launchFromLine({ mode: "solo", crazy: !!save.crazy }) : () => { audio.sfx.click(); openPaywall("used"); };
   }
   $("dr-daily").onclick = () => { closeDrawer(); if (n) launchFromLine({ mode: "solo", daily: n }); else { audio.sfx.click(); show("board"); } };
   const steps = $("first-steps");
@@ -837,6 +839,19 @@ async function logOut() {
   show("title");
 }
 
+// After a free player's race, once there's no free race left today: what to do next, right under the
+// distance, so it isn't buried under the answers. (A themed mode's race sells that mode instead.)
+const keepRacingShown = () => !FREE_PLAY && !unlimitedNow() && !!race && !race.themed && !race.online && !nextDaily(save, dday())
+  && !canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
+function keepRacingCard() {
+  if (!keepRacingShown()) return null;
+  return h("div", { class: "keep-racing" },
+    h("div", { class: "kr-kicker", text: "THAT WAS TODAY'S FREE RACE" }),
+    h("div", { class: "kr-line", text: "Want another? Go Unlimited and race as much as you like, every day." }),
+    h("button", { class: "btn big unlock-cta", type: "button", text: "KEEP RACING — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } }),
+    h("div", { class: "note", text: `ONE PAYMENT, YOURS FOREVER · OR COME BACK IN ${timeLeft()} FOR TOMORROW'S FREE RACE` }));
+}
+
 let paywallReason = "used"; // "used" (no free races left) or "mode" (a mode free players don't get)
 function openPaywall(reason) { paywallReason = reason; show("paywall"); }
 function renderPaywall() {
@@ -844,14 +859,22 @@ function renderPaywall() {
     ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited." : paywallReason === "event"
     ? "The CHRISTMAS mode is for Unlimited players, and Santa's sleigh with it. It closes after New Year's Day."
     : dailyLeft(save, dday()) > 0
-      ? "Unlimited races on top of the daily two, in every mode."
-      : `You've played today's daily race. A new one in ${timeLeft()}.`;
+      ? "Race as much as you like, on top of the free daily race."
+      : `Had fun? Keep racing right now. (Your next free race is in ${timeLeft()}.)`;
+  const perks = $("pay-perks");
+  if (perks) {
+    perks.textContent = "";
+    perks.append(...["Race as much as you like, every day", "Every race type: CLASSIC, GEARHEAD, HARD MODE and 2 players",
+      modeOpen("xmas") ? "The CHRISTMAS mode, and a shot at Santa's sleigh" : null, modeOpen("xmas") ? "Santa visits with presents twice as often" : null,
+      "Pay once, keep it forever, on every device"].filter(Boolean).map((t) => h("li", { text: t })));
+  }
   $("pay-msg").textContent = "";
   const step = $("pay-step");
   step.textContent = "";
   if (!account) {
     step.append(...[trialOffer ? h("div", { class: "daily-line good", text: "LAUNCH OFFER: MAKE A FREE ACCOUNT AND GET 24 HOURS OF UNLIMITED, FREE." }) : null,
-      h("div", { class: "step-label", text: "STEP 1 OF 2 · CREATE YOUR ACCOUNT" }), authForm("signup", renderPaywall)].filter((k) => k != null && k !== false));
+      h("div", { class: "step-label", text: "STEP 1 OF 2 · MAKE A FREE ACCOUNT (10 SECONDS)" }),
+      h("p", { class: "note", text: "So Unlimited is yours on every phone and computer. Then you pay." }), authForm("signup", renderPaywall)].filter((k) => k != null && k !== false));
   } else if (account.unlimited && !account.trialEndsAt) {
     step.append(h("div", { class: "daily-line good", text: `★ ${account.email.toUpperCase()} HAS UNLIMITED` }),
       h("button", { class: "btn big", type: "button", text: "RACE ▶", onclick: () => { audio.sfx.click(); show("leagues"); } }));
@@ -3550,6 +3573,7 @@ function finish(token) {
         h("div", { class: "hud-name", text: r.name }),
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
         race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
+    keepRacingCard(),
     race.arrival ? destResult(race.arrival) : null,
     race.themed === "xmas" && !sleighNow && !save.owned.includes(SLEIGH.id) && modeOpen("xmas") ? h("div", { class: "payout xm-progress" },
       h("div", { text: "SANTA'S SLEIGH" }),
@@ -3565,7 +3589,7 @@ function finish(token) {
       h("div", { class: "note", text: race.solo
         ? `${money(pay.base)} FOR ${Math.round(a.dist).toLocaleString("en-US")} M IN THE ${a.car.name.toUpperCase()} · ${money(pay.bonus)} NICHE BONUS`
         : `${money(pay.base)} RACE · ${money(pay.bonus)} NICHE BONUS` })),
-    FREE_PLAY || unlimitedNow() ? null : h("div", { class: "daily-next" },
+    FREE_PLAY || unlimitedNow() || keepRacingShown() ? null : h("div", { class: "daily-next" },
       h("div", { text: dailyLeft(save, dday()) > 0 ? "TODAY'S DAILY RACE IS STILL WAITING" : `NEW DAILY RACE IN ${timeLeft()}` }),
       h("button", { class: "btn big unlock-cta", type: "button", text: "GO UNLIMITED — $5", onclick: () => { audio.sfx.click(); openPaywall("used"); } })),
     h("div", { class: "log" },
@@ -3579,7 +3603,7 @@ function finish(token) {
   ].filter(Boolean));
   const paid = canRace(me(), dayKey(), { mode: race.solo ? "solo" : "versus", deck: save.deck });
   const dailyNext = race.daily && !paid ? nextDaily(save, dday()) : 0;
-  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : !race.solo ? "PLAY AGAIN" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
+  $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "KEEP RACING — $5" : !race.solo ? "PLAY AGAIN" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   if (race.themed && THEMED[race.themed].event) {
@@ -3638,7 +3662,12 @@ $("ico-garage").addEventListener("click", () => { audio.sfx.click(); show("garag
 $("ico-account").addEventListener("click", () => { audio.sfx.click(); show("account"); });
 $("ico-sound").addEventListener("click", () => $("btn-sound").click());
 // QUICK RACE: straight into the next race, in the mode and rules last used (settings are one link away)
-$("btn-1p").addEventListener("click", () => launchFromLine({ mode: "solo", crazy: !!save.crazy }));
+$("btn-1p").addEventListener("click", () => {
+  // no free race of this kind left, but today's daily race is still waiting: that's the free race, so play it
+  const n = nextDaily(save, dday());
+  if (!canRace(me(), dayKey(), { mode: "solo", deck: save.deck }) && n) return launchFromLine({ mode: "solo", daily: n });
+  launchFromLine({ mode: "solo", crazy: !!save.crazy });
+});
 $("btn-2p").addEventListener("click", () => { audio.sfx.click(); versusDeck = null; show("versus"); });
 $("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });

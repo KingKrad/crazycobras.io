@@ -1797,3 +1797,16 @@ body .screen.mode-lobby.active { min-height: calc(100dvh - var(--place-top, 180p
 /* short screens: the Christmas banner takes the race-settings link's place (it's in the menu too) */
 @media (max-height: 760px) { #s-title:has(.xmas-banner:not(.hidden)) .home-settings { display: none; } .xmas-banner { margin: 3px 0 0; padding: 2px 10px; } .xmas-banner b { font-size: 13px; } }
 .quest .q-claim { width: auto; flex: none; margin: 0; padding: 6px 14px; }
+/* after a free player's last free race: the next step, near the top of the results */
+.keep-racing { margin: 10px 0; padding: 14px 12px; text-align: center; background: linear-gradient(#2a1040, #160828); border: 3px solid #ffd23a; border-radius: 10px; box-shadow: 0 0 18px rgba(255, 210, 58, 0.25); }
+.kr-kicker { font-family: var(--font-title); font-size: 15px; color: #ffd23a; }
+.kr-line { margin: 6px 0 10px; font-size: 14px; color: #f0ecff; }
+.keep-racing .btn { width: 100%; }
+.keep-racing .note { margin-top: 8px; }
+/* the paywall: the price, then straight to the action (sign up, or pay), then what you get */
+.pay-card { display: flex; flex-direction: column; }
+.pay-card .pay-price { order: 0; }
+.pay-card .pay-step { order: 1; }
+.pay-card .pay-msg { order: 2; }
+.pay-card .pay-perks { order: 3; margin-top: 12px; }
+.pay-card > .note { order: 4; }

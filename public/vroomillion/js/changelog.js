@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26d",
+    date: "Nov 26, 2026",
+    title: "Easier to get going",
+    items: [
+      "QUICK RACE now plays your free daily race if you haven't had it yet.",
+      "After your free race, the results show what's next straight away: keep racing now, or come back tomorrow.",
+      "A simpler Unlimited screen: what you get, in plain words, with the button up top.",
+    ],
+  },
+  {
     id: "2026-11-26c",
     date: "Nov 26, 2026",
     title: "Santa's presents & QUESTS",
