@@ -8,7 +8,7 @@ import {
 } from "./logic.js";
 import * as audio from "./audio.js";
 import { Scene } from "./scene.js";
-import { ChaseScene } from "./chase.js";
+import { ChaseScene, setFestive } from "./chase.js";
 import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
 import { CHANGELOG } from "./changelog.js";
@@ -184,6 +184,7 @@ if (stored) persist(); // keeps the server copy and the backup up to date from t
 // ---------- scene loop ----------
 // Menus show a side-on banner; races use the behind-the-car road. Both draw on one canvas.
 const sideScene = new Scene($("scene"));
+setFestive(Date.now() < Date.parse("2027-01-02T10:00:00Z")); // CHRISTMAS: snow on the road (the same end as the event)
 const chaseScene = new ChaseScene($("scene"));
 let scene = chaseScene;
 const places = new Places($("scene"), chaseScene); // each menu screen is a place on the road
@@ -220,6 +221,9 @@ const SLEIGH_RACES = 5;
 const SLEIGH = EVENT_CARS.find((c) => c.id === "sleigh26");
 // an event mode is open until it ends; the others always are
 const modeOpen = (id) => !THEMED[id]?.ends || Date.now() < THEMED[id].ends;
+// CHRISTMAS: the whole game dresses up while the event is on (style.css body.xmas; snow on the road)
+const XMAS_ON = () => modeOpen("xmas");
+document.body.classList.toggle("xmas", XMAS_ON());
 const shownModes = () => Object.keys(THEMED).filter(modeOpen).sort((a, b) => (THEMED[b].event ? 1 : 0) - (THEMED[a].event ? 1 : 0)); // an event first
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)

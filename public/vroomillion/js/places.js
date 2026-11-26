@@ -107,6 +107,18 @@ export class Places {
     g.font = `${size}px ${FONT}`;
     g.textAlign = align;
     g.textBaseline = "middle";
+    // CHRISTMAS: no neon, solid red or green letters with a chunky drop shadow (like the title)
+    if (typeof document !== "undefined" && document.body.classList.contains("xmas")) {
+      const warm = /^#(f|e|d|c)[0-9a-f]{1}[0-7]/i.test(color) || /ff4fd8|ffd23a|ffb02e|ff/i.test(color.slice(0, 3));
+      const off = Math.max(2, size * 0.09);
+      g.lineJoin = "round"; g.lineWidth = Math.max(2, size * 0.16);
+      g.fillStyle = "#120808"; g.strokeStyle = "#120808";
+      g.strokeText(text, Math.round(x + off), Math.round(y + off)); g.fillText(text, Math.round(x + off), Math.round(y + off));
+      g.strokeStyle = warm ? "#7a0a12" : "#0b4a24"; g.strokeText(text, Math.round(x), Math.round(y));
+      g.fillStyle = warm ? "#e0202a" : "#22a04e"; g.fillText(text, Math.round(x), Math.round(y));
+      g.restore();
+      return;
+    }
     const on = !(Math.sin(this.t * 0.37) > 0.996 && Math.sin(this.t * 31) > 0); // a rare, quick flicker
     // a dark outline first, so the tubes read on a bright sky too
     g.lineJoin = "round";

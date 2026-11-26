@@ -114,6 +114,11 @@ const RARE_SKY = {
   5: skyOf({ sky: ["#05140f", "#0f5a3a", "#3fe08a", "#ffd23f"], tint: ["#ffc21a", 0.2], stars: 1, sun: -0.3, lamps: 1 }),
 };
 
+// CHRISTMAS (main.js sets it while the event is on): ordinary weather turns to snow (not the desert's
+// sand, the volcano's ash or the Moon)
+let FESTIVE = false;
+export const setFestive = (on) => { FESTIVE = !!on; };
+const fest = (w, zone) => (FESTIVE && (w === "clear" || w === "rain") && !["desert", "volcano", "moon"].includes(ZONES[zone]?.id) ? "snow" : w);
 const FOG = { clear: "#c8b8d8", fog: "#cfd5e2", rain: "#606a86", snow: "#e6ecf7", sand: "#e3a965", ash: "#5a3a30" };
 
 // Time of day keyframes along the race: sunrise → day → sunset → night (→ sunrise again on very long runs).
@@ -678,7 +683,7 @@ export class ChaseScene {
   resetWorld() {
     this.seed = Math.random() * 1000;
     const first = Math.floor(hash(this.seed) * BASE_ZONES);
-    this.zones = [{ zone: first, start: -Infinity, weather: "clear" }]; // the first stretch is always dry
+    this.zones = [{ zone: first, start: -Infinity, weather: fest("clear", first) }]; // the first stretch is always dry (or snowy, at Christmas)
     this.progress = 0;
     this.shown = 0; // the zone entry the camera is in
     this.fade = 1; // 0→1 crossfade of skyline into the camera's zone
@@ -844,19 +849,19 @@ export class ChaseScene {
   arrive(destId) {
     const zone = zoneIndex(DEST_ZONE[destId] || "city");
     const camSeg = Math.floor(this.camZ / SEG);
-    this.zones.push({ zone, start: camSeg + 45, weather: ZONES[zone].weather[0] });
+    this.zones.push({ zone, start: camSeg + 45, weather: fest(ZONES[zone].weather[0], zone) });
     this.arrival = { zone, t: 0 };
   }
 
   // A still of a destination, for the passport.
   preview(destId) {
     const zone = zoneIndex(DEST_ZONE[destId] || "city");
-    this.zones = [{ zone, start: -Infinity, weather: ZONES[zone].weather[0] }];
+    this.zones = [{ zone, start: -Infinity, weather: fest(ZONES[zone].weather[0], zone) }];
     this.shown = 0;
     this.prevZone = zone;
     this.fade = 1;
     this.arrival = { zone, t: 10 };
-    const w = ZONES[zone].weather[0];
+    const w = fest(ZONES[zone].weather[0], zone);
     for (const k of Object.keys(this.wx)) this.wx[k] = k === w ? 1 : 0;
     this.speed = 0.4;
     for (let i = 0; i < 40; i++) this.update(1 / 30);
@@ -1152,7 +1157,7 @@ export class ChaseScene {
       const zone = (this.zones[0].zone + n) % BASE_ZONES;
       const opts = ZONES[zone].weather;
       // new zones appear at the horizon and you drive into them
-      this.zones.push({ zone, start: Math.max(camSeg + DRAW - 4, prev.start + 40), weather: opts[Math.floor(hash(this.seed + n * 3.3) * opts.length)] });
+      this.zones.push({ zone, start: Math.max(camSeg + DRAW - 4, prev.start + 40), weather: fest(opts[Math.floor(hash(this.seed + n * 3.3) * opts.length)], zone) });
     }
     const here = this.zoneAt(camSeg + 3);
     if (here !== this.shown) {

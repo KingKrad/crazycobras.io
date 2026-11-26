@@ -1837,3 +1837,39 @@ body[data-theme="xmas"] #s-results .final-card, body[data-theme="xmas"] #s-resul
 /* the lobbies: the go button in the mode's colours */
 #s-ontour .ml-go:not(.unlock-cta) { background: #ff4fd8; border-color: #ffe6fb; box-shadow: 0 0 18px rgba(255, 79, 216, 0.7); color: #fff; }
 #s-christmas .ml-go:not(.unlock-cta) { background: #c8202a; border-color: #ffd23a; color: #fff6e0; box-shadow: 0 0 16px rgba(255, 59, 59, 0.5); }
+
+/* ---- CHRISTMAS: the whole game dressed up while the event is on (body.xmas, set by main.js) ---- */
+body.xmas { --cyan: #6ee38e; --pink: #ff4f4f; --red: #e0202a; --line: #1f5a3a; --panel: #10241c; --panel-2: #163a28; --dim: #b8d4c0; }
+/* the title: solid red VROOM and green ILLION, a chunky drop shadow, no neon */
+body.xmas .neon-sign .halo, body.xmas .neon-sign .core { display: none; }
+body.xmas .neon-sign .glow { filter: none; transform: translate(9px, 10px); }
+body.xmas .neon-sign .glow text { fill: #120808; stroke-width: 7; opacity: 1; }
+body.xmas .neon-sign .glow tspan { stroke: #120808; fill: #120808; }
+body.xmas .neon-sign .na { --c: #7a0a12; --g: #e0202a; }
+body.xmas .neon-sign .nb { --c: #0b4a24; --g: #22a04e; }
+body.xmas .neon-sign .tube tspan { fill: var(--g); stroke: var(--c); }
+body.xmas .neon-sign .tube text { stroke-width: 7; }
+body.xmas .neon-sign, body.xmas .neon-sign * { animation: none !important; }
+body.xmas .neon-sign .flick { opacity: 1 !important; }
+body.xmas .tagline { color: #fff6ec; text-shadow: 2px 2px 0 #7a0a12; }
+body.xmas .brand { color: #e0202a; text-shadow: 2px 2px 0 #2a0508; }
+body.xmas .brand span { color: #22a04e; text-shadow: 2px 2px 0 #052a14; }
+body.xmas .logo-a { color: #e0202a; text-shadow: 0.07em 0.07em 0 #2a0508; }
+body.xmas .logo-b { color: #22a04e; text-shadow: 0.07em 0.07em 0 #052a14; }
+/* the big button, the tab bar */
+body.xmas .btn.daily-hero:not(.done):not(.unlock-cta) { background: #e0202a; color: #fff6ec; border-color: #ffd23a; box-shadow: 0 0 0 3px #7a0a12, 0 0 24px rgba(224, 32, 42, 0.55); animation: none; }
+body.xmas .tabbar { background: #0a1a12; border-top-color: #1f5a3a; }
+body.xmas .tab.on { color: #ffd23a; background: linear-gradient(#163a28, #0a1a12); box-shadow: inset 0 3px 0 #e0202a; }
+body.xmas .home-tile { border-color: #1f5a3a; }
+/* snow over the menus (the race road has its own) */
+body.xmas::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  background-image: radial-gradient(2px 2px at 20px 30px, #fff, transparent 60%), radial-gradient(2px 2px at 120px 80px, #fff, transparent 60%), radial-gradient(3px 3px at 60px 150px, rgba(255,255,255,0.9), transparent 60%), radial-gradient(2px 2px at 170px 190px, #fff, transparent 60%), radial-gradient(1.5px 1.5px at 90px 220px, #fff, transparent 60%);
+  background-size: 200px 240px; opacity: 0.55; animation: xmas-snow 14s linear infinite; }
+body.xmas[data-screen="race"]::after, body.xmas[data-screen="christmas"]::after { display: none; }
+@keyframes xmas-snow { from { background-position: 0 0; } to { background-position: 40px 240px; } }
+@media (prefers-reduced-motion: reduce) { body.xmas::after { animation: none; opacity: 0.3; } }
+.mode-card.mc-xmas .mc-tag { white-space: nowrap; font-size: clamp(9px, 3.1vw, 13px); padding-left: 8px; padding-right: 8px; }
+@media (max-width: 360px) { .mode-card .mc-name { font-size: 20px; } }
+.mc-body { grid-template-columns: minmax(0, 1fr) auto; }
+.mode-card .mc-name { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 360px) { .mode-card.mc-xmas .mc-name { font-size: clamp(16px, 6.4vw, 22px); } }
