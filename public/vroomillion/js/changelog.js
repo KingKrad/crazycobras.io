@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26c",
+    date: "Nov 26, 2026",
+    title: "Santa's presents & QUESTS",
+    items: [
+      "Santa now flies over every few minutes, anywhere in the game, and drops a present. Tap it before it melts!",
+      "Presents hold cash (sometimes $10,000, very rarely a $50,000 jackpot) or, rarely, one of 4 Christmas cars you can only get from Santa.",
+      "New QUESTS tab: 3 daily quests for cash, Christmas quests that pay out presents, and big milestones with badges.",
+      "Unlimited players get Santa twice as often.",
+    ],
+  },
+  {
     id: "2026-11-26b",
     date: "Nov 26, 2026",
     title: "CHRISTMAS is here",

@@ -13,7 +13,7 @@ import { voxelModel, drawVoxel } from "./voxel.js";
 // which place each screen is
 export const PLACE_OF = {
   garage: "garage", board: "board", account: "booth", paywall: "booth", admin: "booth",
-  leagues: "grid", versus: "grid", modes: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard",
+  leagues: "grid", versus: "grid", modes: "grid", online: "grid", passport: "reststop", how: "billboard", updates: "billboard", quests: "billboard",
   worldtour: "world", // WORLD TOUR's home: the world map (js/world.js)
   boxoffice: "drivein", // BOX OFFICE's home: the drive-in (js/drivein.js)
   ontour: "tour", // ON TOUR's home: the night map (js/tour.js)
@@ -354,8 +354,10 @@ export class Places {
     face.addColorStop(0, "#2a1160"); face.addColorStop(1, "#c2185b");
     g.fillStyle = face; g.fillRect(bx, by, bw, bh);
     g.fillStyle = "#5a5a66"; g.fillRect(bx, by + bh + 6, bw, 4);
-    this.neon("HOW TO PLAY", W / 2, by + bh * 0.36, Math.round(clamp(W / 26, 12, 22)), "#ffd23a");
-    this.neon("RARER = FURTHER", W / 2, by + bh * 0.76, Math.round(clamp(W / 46, 8, 12)), "#7cf9ff", "center", 9);
+    // the billboard says which screen it's over
+    const [t1, t2] = { quests: ["QUESTS", "DO THEM, GET PAID"], updates: ["WHAT'S NEW", "FRESH OFF THE LINE"] }[typeof document !== "undefined" && document.body?.dataset.screen] || ["HOW TO PLAY", "RARER = FURTHER"];
+    this.neon(t1, W / 2, by + bh * 0.36, Math.round(clamp(W / 26, 12, 22)), "#ffd23a");
+    this.neon(t2, W / 2, by + bh * 0.76, Math.round(clamp(W / 46, 8, 12)), "#7cf9ff", "center", 9);
     this.drawSprite(this.side(car), W * 0.14, Math.round(top * 0.92) + 4, Math.min(W * 0.15, 90));
   }
 }

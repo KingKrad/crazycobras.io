@@ -17,6 +17,8 @@ import { WorldScene, loadMap } from "./world.js";
 import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
 import { SleighScene } from "./sleigh.js";
+import { flyover, presentCanvas } from "./presents.js";
+import { DAILY, XMAS, MILESTONES as QUEST_MILESTONES, questState, raceEvents, addEvents, progressOf, claimable } from "./quests.js";
 import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
@@ -215,7 +217,7 @@ const THEMED = {
     info: "45+ CHRISTMAS PROMPTS · SANTA'S ROUND THE WORLD", card: "Christmas trivia · fly Santa's sleigh round the world", tag: "LIMITED TIME" },
 };
 const SLEIGH_RACES = 5;
-const SLEIGH = EVENT_CARS.find((c) => c.event === "xmas");
+const SLEIGH = EVENT_CARS.find((c) => c.id === "sleigh26");
 // an event mode is open until it ends; the others always are
 const modeOpen = (id) => !THEMED[id]?.ends || Date.now() < THEMED[id].ends;
 const shownModes = () => Object.keys(THEMED).filter(modeOpen).sort((a, b) => (THEMED[b].event ? 1 : 0) - (THEMED[a].event ? 1 : 0)); // an event first
@@ -1628,9 +1630,11 @@ function show(name) {
   for (const t of THEMED_IDS) if (name === THEMED[t].screen) renderModeLobby(t);
   if (name === "modes") renderModes();
   if (name === "archive") renderArchive();
+  if (name === "quests") renderQuests();
+  questDot();
   if (name === "account") renderMe();
   // the tab bar lights up the section you're in
-  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", christmas: "modes", archive: "modes",
+  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", christmas: "modes", archive: "modes", quests: "quests",
     garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
   for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
@@ -2155,7 +2159,7 @@ function renderGarage() {
           : car.premium
             ? h("div", { class: "tag locked", text: "PREMIUM · SOMETIMES IN TODAY'S DEALS" })
             : car.event
-              ? h("button", { class: "tag locked", type: "button", text: `LIMITED · FINISH ${SLEIGH_RACES} CHRISTMAS RACES`, onclick: () => { audio.sfx.click(); show(THEMED[car.event].screen); } })
+              ? h("button", { class: "tag locked", type: "button", text: car.drop ? "LIMITED · ONLY IN SANTA'S PRESENTS" : `LIMITED · FINISH ${SLEIGH_RACES} CHRISTMAS RACES`, onclick: () => { audio.sfx.click(); show(THEMED[car.event].screen); } })
             : car.exclusive
               ? h("div", { class: "tag locked", text: "LOCKED · REACH VROOMILLION CITY" })
               : h("button", {
@@ -3522,6 +3526,13 @@ function finish(token) {
     save.xmasRaces = (save.xmasRaces || 0) + 1;
     if (save.xmasRaces >= SLEIGH_RACES) { save.owned.push(SLEIGH.id); save.car = SLEIGH.id; sleighNow = true; } // yours, and in it
   }
+  // QUESTS: what this race did (your own racer: online your seat, on one screen player 1)
+  {
+    const mine = race.online ? race.online.seat : 0, me = race.racers[mine];
+    const ev = raceEvents({ daily: !!race.daily, themed: !!race.themed, xmas: race.themed === "xmas", won: !race.solo && winner === mine, tiers: me.tiers, dist: me.dist });
+    if (sleighNow) ev.sleigh = 1;
+    questJustDone = questEvents(ev, false);
+  }
   persist();
 
   const happy = race.solo ? newBest || a.tiers.includes(5) : winner !== -1;
@@ -3591,6 +3602,7 @@ function finish(token) {
     drawRematch();
   } else { rematch = null; $("btn-redo").disabled = false; }
   show("results");
+  if (questJustDone.length) setTimeout(() => { if (current === "results") { overlay(`QUEST DONE: ${questJustDone[0].text.toUpperCase()}${questJustDone.length > 1 ? ` +${questJustDone.length - 1} MORE` : ""}`, "small"); setTimeout(() => overlay(""), 2600); } }, sleighNow ? 7000 : 2400);
   if (sleighNow) setTimeout(() => revealCar(SLEIGH, [], "★ CHRISTMAS '26 · YOU EARNED IT ★"), 900);
   if (archiveJustUnlocked) { // every CLASSIC prompt raced: the RACE ARCHIVE opens
     archiveJustUnlocked = false;
@@ -3702,3 +3714,167 @@ if (modeSession) {
 } else refreshAccount();
 // progress brought back from the server copy: redraw with it
 restoring.then((ok) => { if (ok && current !== "race") { renderCash(); show(current); } });
+
+
+// ---------- QUESTS (js/quests.js): daily, Christmas and milestone goals, on the QUESTS tab ----------
+let questJustDone = [];
+var questsReady = true; // (var: show() can run before this line, and then skips the quest dot)
+function questOpts() { return { unlimited: unlimitedNow() || !!account?.admin, xmas: modeOpen("xmas") }; }
+function quests() { return questState(save, dday(), questOpts()); }
+function shownMilestones(q) { return QUEST_MILESTONES.filter((m) => !m.xmas || modeOpen("xmas") || q.claimed.includes(m.id)); }
+function liveQuests(q) {
+  return [...q.daily.map((id) => DAILY.find((d) => d.id === id)).filter(Boolean), ...(modeOpen("xmas") ? XMAS : []), ...shownMilestones(q)];
+}
+// events in: ev -> count. Returns the quests that just got done.
+function questEvents(ev, save_ = true) {
+  const q = quests();
+  const done = addEvents(q, ev, { xmasOn: modeOpen("xmas") });
+  if (save_) persist();
+  questDot();
+  return done;
+}
+function questDot() {
+  if (!questsReady) return;
+  const q = quests();
+  const ready = liveQuests(q).some((x) => claimable(q, x, save) && !(x.unl && !questOpts().unlimited));
+  document.querySelector('#tabbar .tab[data-tab="quests"]')?.classList.toggle("dot", ready);
+}
+function claimQuest(quest) {
+  const q = quests();
+  if (!claimable(q, quest, save)) return;
+  q.claimed.push(quest.id);
+  if (quest.cash) { save.cash += quest.cash; renderCash(true); audio.sfx.cash(); overlay("+" + money(quest.cash), "ok"); setTimeout(() => overlay(""), 1400); }
+  if (quest.badge) save.badges = [...new Set([...(save.badges || []), quest.badge])];
+  persist();
+  if (quest.presents) givePresents(quest.presents, "★ QUEST REWARD ★");
+  renderQuests();
+  questDot();
+}
+const rewardText = (x) => [x.cash ? money(x.cash) : null, x.presents ? `${x.presents} PRESENT${x.presents > 1 ? "S" : ""}` : null, x.badge ? `"${x.badge}" BADGE` : null].filter(Boolean).join(" + ");
+function questCard(q, x) {
+  const p = progressOf(q, x, save), done = q.claimed.includes(x.id), ready = !done && p >= x.n;
+  const locked = x.unl && !questOpts().unlimited;
+  const fill = h("span", { class: "q-fill" });
+  fill.style.width = Math.round((p / x.n) * 100) + "%";
+  const el = h("div", { class: "quest" + (done ? " done" : ready ? " ready" : "") + (locked ? " locked" : "") },
+    h("div", { class: "q-text", text: x.text }),
+    h("div", { class: "q-bar" }, fill),
+    h("div", { class: "q-foot" },
+      h("span", { class: "q-n", text: `${p.toLocaleString("en-US")} / ${x.n.toLocaleString("en-US")}` }),
+      h("span", { class: "q-reward", text: rewardText(x) }),
+      done ? h("span", { class: "q-claimed", text: "✓ CLAIMED" })
+        : locked ? h("button", { class: "btn small q-claim", type: "button", text: "UNLIMITED", onclick: () => { audio.sfx.click(); openPaywall("event"); } })
+          : ready ? h("button", { class: "btn small buy q-claim", type: "button", text: "CLAIM", onclick: () => claimQuest(x) }) : null));
+  return el;
+}
+function renderQuests() {
+  const box = $("quests-list");
+  if (!box) return;
+  const q = quests();
+  box.textContent = "";
+  box.append(h("h3", { class: "class-title q-head", text: `DAILY QUESTS · NEW IN ${timeLeft()}` }), ...q.daily.map((id) => DAILY.find((d) => d.id === id)).filter(Boolean).map((x) => questCard(q, x)));
+  if (modeOpen("xmas")) {
+    const ends = new Date(THEMED.xmas.ends - 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+    box.append(h("h3", { class: "class-title q-head xm", text: `★ CHRISTMAS QUESTS · UNTIL ${ends}` }),
+      h("p", { class: "note", text: "Presents can hold cash or, rarely, a Christmas car you can only get from Santa. Santa also flies over now and then: tap his present before it melts." }),
+      ...XMAS.map((x) => questCard(q, x)));
+  }
+  const badges = save.badges || [];
+  box.append(h("h3", { class: "class-title q-head", text: "MILESTONES" }),
+    badges.length ? h("div", { class: "q-badges" }, ...badges.map((b) => h("span", { class: "q-badge", text: "★ " + b }))) : h("p", { class: "note", text: "Big one-time goals. Each one earns a badge." }),
+    ...shownMilestones(q).map((x) => questCard(q, x)));
+}
+
+// ---------- SANTA'S PRESENTS (the Christmas event): Santa flies over, anywhere in the game ----------
+// About every 3 minutes of play (twice as often with Unlimited), up to 10 a day (20 with Unlimited).
+// A present holds cash, mostly small, sometimes $10,000, very rarely $50,000, or (about 1 in 25) one of
+// the Christmas cars only presents give, while there's one you haven't got.
+const SANTA_KEY = SAVE_KEY + ".santa";
+let santaClock = (() => { try { return JSON.parse(localStorage.getItem(SANTA_KEY) || "{}") || {}; } catch { return {}; } })();
+const DROP_CARS = EVENT_CARS.filter((c) => c.drop);
+function santaToday() {
+  const d = dday();
+  if (!save.santa || typeof save.santa !== "object") save.santa = { opened: 0 };
+  if (save.santa.day !== d) { save.santa.day = d; save.santa.n = 0; }
+  return save.santa;
+}
+const santaCap = () => (unlimitedNow() ? 20 : 10);
+let presentBusy = false;
+const santaBlocked = () => current === "race" || current === "paywall" || presentBusy || document.body.classList.contains("finale-on") || document.body.classList.contains("launching")
+  || !!document.querySelector(".car-reveal, .gift-pop, .present-pop, .santa-present, .santa-sky, #pp-viewer, .drawer.open");
+setInterval(() => {
+  if (!modeOpen("xmas") || document.hidden || santaBlocked()) return;
+  const st = santaToday();
+  if (st.n >= santaCap()) return;
+  if (!santaClock.next) santaClock.next = st.opened || st.n ? 150 + Math.random() * 90 : 45; // the very first one comes soon
+  santaClock.acc = (santaClock.acc || 0) + (unlimitedNow() ? 2 : 1);
+  if (santaClock.acc >= santaClock.next) {
+    santaClock = { acc: 0, next: 150 + Math.random() * 90 };
+    st.n++;
+    persist();
+    santaFly();
+  }
+  try { localStorage.setItem(SANTA_KEY, JSON.stringify(santaClock)); } catch { /* private mode */ }
+}, 1000);
+function santaFly() {
+  const bells = () => [1568, 2093, 1760, 2349].forEach((f, i) => setTimeout(() => audio.sfx.tick?.(), i * 110));
+  bells();
+  const tabs = getComputedStyle(document.querySelector(".tabbar")).display !== "none";
+  flyover(spriteCanvas(SLEIGH, 2), {
+    reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
+    bottom: tabs ? (document.querySelector(".tabbar").offsetHeight || 64) + 24 : 30,
+    onDrop: () => audio.sfx.whoosh?.(2),
+    onCatch: () => { audio.sfx.click(); givePresents(1, "★ A PRESENT FROM SANTA ★"); },
+  });
+}
+let testPrize = null; // (local testing only: the next present's contents)
+function presentPrize() {
+  if (testPrize) { const p = testPrize; testPrize = null; return p; }
+  const left = DROP_CARS.filter((c) => !save.owned.includes(c.id));
+  if (left.length && Math.random() < 1 / 25) return { car: left[Math.floor(Math.random() * left.length)] };
+  const r = Math.random();
+  if (r < 0.02) return { cash: 50000, jackpot: true };
+  if (r < 0.17) return { cash: 10000 };
+  return { cash: 500 + Math.floor(Math.random() * 26) * 100 };
+}
+const presentQueue = [];
+function givePresents(n, kicker) { for (let k = 0; k < n; k++) presentQueue.push(kicker); nextPresent(); }
+function nextPresent() {
+  if (presentBusy || !presentQueue.length) return;
+  presentBusy = true;
+  const kicker = presentQueue.shift();
+  const gift = h("div", { class: "pr-gift" }, presentCanvas(["#c8202a", "#1f8a4c", "#2a5bd6", "#7a2fb5"][Math.floor(Math.random() * 4)], "#ffd23a", 7));
+  const prize = h("div", { class: "pr-prize" });
+  const done = () => { pop.remove(); presentBusy = false; setTimeout(nextPresent, 250); };
+  const btn = h("button", { class: "btn big", type: "button", text: "OPEN IT", onclick: () => open() });
+  const pop = h("div", { class: "present-pop", role: "dialog", "aria-modal": "true", "aria-label": "A present" },
+    h("div", { class: "pr-box" }, h("div", { class: "pr-kicker", text: kicker }), gift, prize, btn,
+      presentQueue.length ? h("div", { class: "note", text: `+${presentQueue.length} MORE TO OPEN` }) : null));
+  let opened = false;
+  function open() {
+    if (opened) return done();
+    opened = true;
+    const p = presentPrize();
+    santaToday().opened = (save.santa.opened || 0) + 1;
+    questEvents({ present: 1 }, false);
+    gift.classList.add("shake");
+    btn.disabled = true;
+    audio.sfx.drumroll?.(0.6, p.car ? 5 : p.jackpot ? 5 : 3);
+    if (p.car) save.owned.push(p.car.id);
+    else save.cash += p.cash;
+    persist();
+    setTimeout(() => {
+      gift.classList.remove("shake"); gift.classList.add("open");
+      if (p.car) { pop.remove(); revealCar(p.car, [], "★ FROM SANTA'S SACK ★"); const wait = setInterval(() => { if (!document.querySelector(".car-reveal")) { clearInterval(wait); presentBusy = false; nextPresent(); } }, 400); return; }
+      prize.append(...[h("div", { class: "pr-cash" + (p.jackpot ? " jackpot" : ""), text: "+" + money(p.cash) }), p.jackpot ? h("div", { class: "pr-jackpot", text: "JACKPOT!" }) : p.cash >= 10000 ? h("div", { class: "pr-jackpot small", text: "BIG ONE!" }) : null].filter(Boolean));
+      renderCash(true); audio.sfx.cash(); if (p.cash >= 10000) { audio.sfx.win(); scene.confetti?.(); }
+      btn.disabled = false; btn.textContent = presentQueue.length ? "NEXT PRESENT" : "NICE!";
+    }, 650);
+  }
+  pop.addEventListener("click", (e) => { if (e.target === pop && opened && !btn.disabled) done(); });
+  document.body.append(pop);
+  audio.sfx.ding?.();
+  btn.focus();
+}
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__vroomTest = { santaFly, givePresents, quests, nextPrize: (p) => { testPrize = p.car ? { car: carById(p.car) } : p; } };
+questDot();

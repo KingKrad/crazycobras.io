@@ -147,6 +147,11 @@ CARS.push(...PREMIUM);
 export const EVENT_CARS = [
   // finish 5 races in the CHRISTMAS mode (Christmas 2026): Santa's own sleigh, with its reindeer, and a
   // trail of sparkles. As fast as a middle class S car.
+  // and four only Santa's presents can drop (about 1 present in 25): drop: true
+  { ...C("candycane26", "CANDY CANE ROADSTER", "B", 0, 1, 2, "roadster", "#f4f4f4", "#d42020"), event: "xmas", drop: true, rarity: "LEGENDARY", fx: "sparkle", hiRes: true },
+  { ...C("gingerbug26", "GINGERBREAD BUG", "C", 0, 1, 2, "micro", "#b8732e", "#fff6ec"), event: "xmas", drop: true, rarity: "EPIC", fx: "sparkle", hiRes: true },
+  { ...C("plow26", "NORTH POLE SNOWPLOW", "C", 0, 1, 2, "van", "#f4f4f4", "#1f6a3a"), event: "xmas", drop: true, rarity: "EPIC", fx: "sparkle", hiRes: true },
+  { ...C("rudolph26", "RED-NOSED HOT HATCH", "A", 0, 1, 3, "hatch", "#8a5a32", "#d42020"), event: "xmas", drop: true, rarity: "LEGENDARY", fx: "sparkle", hiRes: true },
   { ...C("sleigh26", "CHRISTMAS '26 SANTA'S SLEIGH", "S", 0, 1, 4, "hyper", "#c8202a", "#ffd23a"), event: "xmas", rarity: "LEGENDARY", fx: "sparkle", hiRes: true },
 ];
 CARS.push(...EVENT_CARS);

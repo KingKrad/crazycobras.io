@@ -471,6 +471,92 @@ const HAND = {
   },
 };
 
+// ---- the Christmas '26 present cars: a hand-drawn car dressed up for Christmas ----
+// base: the car underneath (drawn in this car's colours); pad: room around it [left, top, right, bottom];
+// side/rear: the decorations, drawn over it (x, y in the base car's own coordinates)
+function dressed(base, pad, side, rear, rearTop = 0) {
+  return {
+    size: [HAND[base].size[0] + pad[0] + pad[2], HAND[base].size[1] + pad[1] + pad[3]],
+    side(g, car, frame) {
+      const b = canvas(...HAND[base].size), bg = b.getContext("2d");
+      HAND[base].side(bg, car, frame);
+      g.drawImage(b, pad[0], pad[1]);
+      g.save(); g.translate(pad[0], pad[1]); side(g, car, frame, bg); g.restore();
+    },
+    rear(car, frame) {
+      const r = handRear({ ...car, id: base }, frame);
+      const cv = canvas(r.width, r.height + rearTop), g = cv.getContext("2d");
+      g.drawImage(r, 0, rearTop);
+      g.save(); g.translate(0, rearTop); rear(g, car, frame, r.width, r.height); g.restore();
+      return crisp(cv);
+    },
+  };
+}
+// red stripes painted only over the car's own pixels, in a band (x0..x1, y0..y1), skipping the wheels
+function candyStripes(g, x0, y0, x1, y1, skip = []) {
+  g.save();
+  g.beginPath(); g.rect(x0, y0, x1 - x0, y1 - y0); g.clip();
+  g.globalCompositeOperation = "source-atop";
+  g.fillStyle = "#d42020";
+  for (let x = x0 - 20; x < x1 + 20; x += 6) {
+    if (skip.some(([a, b]) => x + 3 > a && x < b)) continue;
+    poly(g, [[x, y1], [x + 3, y1], [x + 3 + (y1 - y0), y0], [x + (y1 - y0), y0]], "#d42020");
+  }
+  g.restore();
+}
+const ANTLERS = (g, x, y, k = 1) => {
+  g.strokeStyle = "#c89a5a"; g.lineWidth = 1.3 * k;
+  g.beginPath();
+  for (const s of [-1, 1]) { g.moveTo(x + s * 2 * k, y); g.lineTo(x + s * 5 * k, y - 7 * k); g.moveTo(x + s * 3.6 * k, y - 4 * k); g.lineTo(x + s * 7 * k, y - 5 * k); g.moveTo(x + s * 4.6 * k, y - 6 * k); g.lineTo(x + s * 3 * k, y - 9 * k); }
+  g.stroke();
+};
+Object.assign(HAND, {
+  // CANDY CANE ROADSTER: a white roadster wrapped in red candy stripes, a giant candy cane behind the seat
+  candycane26: dressed("miata", [0, 9, 0, 0], (g) => {
+    candyStripes(g, 3, 8.4, 66, 14.4, [[8, 19], [50, 60]]);
+    g.strokeStyle = "#f4f4f4"; g.lineWidth = 2.4;
+    g.beginPath(); g.moveTo(18, 8); g.lineTo(18, -4); g.arc(14.5, -4, 3.5, 0, Math.PI, true); g.stroke();
+    g.strokeStyle = "#d42020"; g.lineWidth = 2.4; g.setLineDash([1.6, 1.6]);
+    g.beginPath(); g.moveTo(18, 8); g.lineTo(18, -4); g.arc(14.5, -4, 3.5, 0, Math.PI, true); g.stroke(); g.setLineDash([]);
+    disc(g, 45, 7.6, 1.6, "#1f8a4c"); disc(g, 47.6, 7.6, 1.6, "#1f8a4c"); disc(g, 46.3, 8, 1.1, "#d42020"); // holly on the hood
+  }, (g, car, frame, w, h) => {
+    candyStripes(g, 8, h - 19, w - 8, h - 10);
+    poly(g, [[33, 24], [40, 27.4], [47, 24], [47, 31], [40, 27.4], [33, 31]], "#d42020"); disc(g, 40, 27.4, 2.2, "#ffd23a"); // a big bow on the boot
+  }),
+  // GINGERBREAD BUG: a round little car baked out of gingerbread, with icing and gumdrops
+  gingerbug26: dressed("beetle", [0, 2, 0, 0], (g) => {
+    g.strokeStyle = "#fff6ec"; g.lineWidth = 1.2;
+    g.beginPath(); for (let x = 6; x <= 54; x += 1) g.lineTo(x, 13.6 + Math.sin(x * 1.2) * 0.9); g.stroke(); // icing squiggle
+    g.beginPath(); g.ellipse(30, 13, 25.6, 11.6, 0, Math.PI * 1.08, Math.PI * 1.92); g.stroke(); // icing on the roofline
+    for (const [x, y, c] of [[12, 7.4, "#d42020"], [21, 2.8, "#5dff8f"], [30, 1.4, "#ffd23a"], [39, 2.8, "#4fd1ff"], [48, 7.4, "#ff4fd8"]]) { disc(g, x, y, 1.6, c); disc(g, x - 0.5, y - 0.5, 0.5, "#ffffff"); }
+    for (const x of [24, 36]) disc(g, x, 15.6, 0.9, "#fff6ec"); // icing buttons
+  }, (g, car, frame, w, h) => {
+    g.strokeStyle = "#fff6ec"; g.lineWidth = 1.4;
+    g.beginPath(); for (let x = 13; x <= 67; x += 1) g.lineTo(x, 31 + Math.sin(x * 1.1) * 1); g.stroke();
+    for (const [x, y, c] of [[20, 14, "#d42020"], [30, 8, "#5dff8f"], [40, 6, "#ffd23a"], [50, 8, "#4fd1ff"], [60, 14, "#ff4fd8"]]) disc(g, x, y, 2.2, c);
+  }),
+  // NORTH POLE SNOWPLOW: a work van with a big striped plow blade full of snow, and a flashing light bar
+  plow26: dressed("mailvan", [0, 3, 12, 0], (g, car, frame) => {
+    rect(g, 18, -2.6, 20, 2.6, "#2a2c33"); rect(g, 19, -2.2, 8, 1.8, frame % 2 ? "#ff9a1f" : "#ffd23a"); rect(g, 29, -2.2, 8, 1.8, frame % 2 ? "#ffd23a" : "#ff9a1f");
+    rect(g, 70, 18, 4, 3, "#2a2c33"); // the plow's arm
+    poly(g, [[74, 11], [80, 9], [85, 13], [85, 28], [74, 28]], "#ffb02e");
+    for (let y = 12; y < 28; y += 4) poly(g, [[74, y], [85, y + 2], [85, y + 4], [74, y + 2]], "#1b1b1f");
+    oval(g, 75, 12, 4, 3, "#f4f8ff"); oval(g, 79, 9.6, 4, 2.4, "#ffffff"); oval(g, 83, 11.6, 2.6, 2, "#eef4ff"); // the snow it's pushing
+  }, (g, car, frame, w) => {
+    rect(g, w / 2 - 18, 2, 36, 4, "#2a2c33"); rect(g, w / 2 - 17, 2.6, 16, 2.6, frame % 2 ? "#ff9a1f" : "#ffd23a"); rect(g, w / 2 + 1, 2.6, 16, 2.6, frame % 2 ? "#ffd23a" : "#ff9a1f");
+    for (let x = 8; x < w - 8; x += 8) poly(g, [[x, 44], [x + 4, 44], [x + 8, 48], [x + 4, 48]], "#1b1b1f");
+  }),
+  // RED-NOSED HOT HATCH: a reindeer-brown hatch with antlers on the roof and a glowing red nose
+  rudolph26: dressed("gti", [0, 9, 4, 0], (g) => {
+    ANTLERS(g, 23, 3, 1); ANTLERS(g, 31, 2.6, 1);
+    disc(g, 67.6, 12.4, 2.6, "#ff2020"); disc(g, 67, 11.6, 0.9, "#ffb0b0"); // the nose
+    rect(g, 52, 6.6, 2.4, 0.8, "#111111"); rect(g, 52.6, 5.8, 0.6, 0.8, "#111111"); // eyelashes on the headlight side
+  }, (g, car, frame, w) => {
+    ANTLERS(g, w / 2 - 9, 6, 1.2); ANTLERS(g, w / 2 + 9, 6, 1.2);
+    disc(g, w / 2, 44, 3, "#f4ead8"); // a fluffy tail
+  }, 10),
+});
+
 export const handDrawn = (car) => !!HAND[car.id];
 export function handSide(car, frame) {
   const s = HAND[car.id];

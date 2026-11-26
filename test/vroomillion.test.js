@@ -472,3 +472,35 @@ test("the car collection: about 80 to earn, rarities, premium cars no faster tha
   }
   for (const c of CARS) assert.equal(new Set(paintsFor(c)).size, 4, c.id + " has 4 different paints");
 });
+
+test("quests: three daily quests a day, only ones the player can do, progress and claims", async () => {
+  const { DAILY, dealDaily, questState, raceEvents, addEvents, progressOf, claimable, MILESTONES } = await import("../public/vroomillion/js/quests.js");
+  const a = dealDaily("2026-12-01", { unlimited: false, xmas: false });
+  assert.equal(a.length, 3);
+  assert.deepEqual(a, dealDaily("2026-12-01", { unlimited: false, xmas: false }), "the same three all day");
+  for (const id of a) { const q = DAILY.find((d) => d.id === id); assert.ok(!q.unl && !q.xmas, id + " needs something a free player hasn't got"); }
+  const save = { races: 12, owned: ["rustbucket"] };
+  const q = questState(save, "2026-12-01", { unlimited: true, xmas: true });
+  const ev = raceEvents({ daily: true, themed: "xmas", xmas: true, won: false, tiers: [1, 3, 4, 0, 2, 5, 1], dist: 3200 });
+  assert.equal(ev.right, 6); assert.equal(ev.tier4, 2); assert.equal(ev.clean, 0); assert.equal(ev.far, 1); assert.equal(ev.xmcity, 6);
+  addEvents(q, ev, { xmasOn: true });
+  assert.equal(q.prog["x-races"], 1);
+  addEvents(q, { xmcity: 50 }, { xmasOn: true });
+  assert.equal(q.prog["x-cities"], 25, "progress stops at the goal");
+  const m10 = MILESTONES.find((m) => m.id === "m-10");
+  assert.equal(progressOf(q, m10, save), 10); assert.ok(claimable(q, m10, save));
+  q.claimed.push("m-10"); assert.ok(!claimable(q, m10, save));
+  // a new day: new daily quests, yesterday's progress on them gone, Christmas and milestones kept
+  q.prog[q.daily[0]] = 1;
+  const old = q.daily[0];
+  questState(save, "2026-12-02", { unlimited: true, xmas: true });
+  assert.ok(!save.quests.prog[old] || save.quests.daily.includes(old));
+  assert.equal(save.quests.prog["x-cities"], 25); assert.ok(save.quests.claimed.includes("m-10"));
+});
+
+test("the Christmas cars: event cars outside the garage collection, four from presents", async () => {
+  const { EVENT_CARS, COLLECTION, rarityOf } = await import("../public/vroomillion/js/cars.js");
+  assert.equal(EVENT_CARS.filter((c) => c.drop).length, 4);
+  assert.ok(EVENT_CARS.some((c) => c.id === "sleigh26" && !c.drop));
+  for (const c of EVENT_CARS) { assert.ok(!COLLECTION.includes(c), c.id); assert.ok(c.power > 1, c.id + " power"); assert.ok(rarityOf(c)); }
+});

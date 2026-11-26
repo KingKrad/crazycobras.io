@@ -1549,7 +1549,7 @@ body[data-screen="boxoffice"] .ml-head { margin-top: 0; }
 
 /* ---------- the tab bar: one tap to anywhere, on every screen but the race ---------- */
 :root { --tabbar-h: calc(62px + env(safe-area-inset-bottom)); }
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(6, 1fr);
   height: var(--tabbar-h); padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
   background: #0b0618; border-top: 3px solid #2a1f4a; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.5); }
 .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: inherit; cursor: pointer;
@@ -1740,9 +1740,60 @@ body[data-screen="christmas"] .screen.active#s-christmas { background: none; bor
 /* every mode's home fits the screen below the top bar (the map behind it fills the rest), so its start
    button is in view without scrolling, on desktop too */
 body .screen.mode-lobby.active { min-height: calc(100dvh - var(--place-top, 180px) - 14px) !important; }
-.xmas-banner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 6px 0 2px; padding: 8px 12px; font: inherit; cursor: pointer;
+.xmas-banner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 6px 0 2px; padding: 5px 12px; font: inherit; cursor: pointer;
   color: #fff6e0; background: repeating-linear-gradient(135deg, #c8202a 0 14px, #a8101c 14px 28px); border: 2px solid #ffd23a; border-radius: 8px; box-shadow: 3px 3px 0 #0e3a20; }
-.xmas-banner b { flex: none; white-space: nowrap; font-family: "Bungee", sans-serif; font-weight: 400; font-size: 15px; letter-spacing: 1px; text-shadow: 2px 2px 0 #4a0008; }
+.xmas-banner b { flex: none; white-space: nowrap; font-family: "Bungee", sans-serif; font-weight: 400; font-size: 14px; letter-spacing: 1px; text-shadow: 2px 2px 0 #4a0008; }
 .xmas-banner span { font-size: 12px; text-align: left; }
 .xmas-banner.hidden, .xmas-item.hidden { display: none; }
 @media (max-width: 360px) { .xmas-banner span { display: none; } }
+
+/* the QUESTS tab: a red dot when a reward is waiting */
+.tab { position: relative; }
+.tab.dot::after { content: ""; position: absolute; top: 7px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; background: #ff3b3b; box-shadow: 0 0 0 2px #0b0618, 0 0 6px #ff3b3b; }
+@media (max-width: 400px) { .tab { font-size: 9px; letter-spacing: 0; } .tab svg { width: 21px; height: 21px; } }
+@media (max-width: 340px) { .tab { font-size: 8px; } }
+/* QUESTS */
+.q-head.xm { color: #ff6b6b; }
+.quest { margin: 8px 0; padding: 10px 12px; background: #120a26; border: 2px solid #2a1f4a; border-radius: 8px; text-align: left; }
+.quest.ready { border-color: #ffd23a; box-shadow: 0 0 10px rgba(255, 210, 58, 0.35); }
+.quest.done { opacity: 0.6; }
+.quest.locked { opacity: 0.75; }
+.q-text { font-size: 14px; color: #f0ecff; }
+.q-bar { height: 8px; margin: 7px 0; background: #241a40; border-radius: 4px; overflow: hidden; }
+.q-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #5dff8f, #ffd23a); }
+.quest.done .q-fill { background: #8f86b0; }
+.q-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.q-n { font-size: 12px; color: #8f86b0; min-width: 52px; }
+.q-reward { flex: 1; font-size: 12px; color: #ffd23a; }
+.q-claimed { font-family: var(--font-title); font-size: 11px; color: #5dff8f; }
+.q-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.q-badge { padding: 3px 8px; font-family: var(--font-title); font-size: 11px; color: #120a26; background: #ffd23a; border-radius: 4px; }
+/* SANTA'S FLY-OVER and his presents */
+.santa-sky { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.santa-sleigh { position: absolute; left: 0; height: auto; image-rendering: pixelated; filter: drop-shadow(0 0 6px rgba(255, 246, 200, 0.6)); }
+.santa-present { position: fixed; top: 0; z-index: 41; width: 64px; padding: 0; background: none; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.santa-present canvas { width: 48px; height: 48px; image-rendering: pixelated; filter: drop-shadow(0 0 8px rgba(255, 210, 58, 0.8)); }
+.santa-present .chute { display: block; width: 56px; height: 26px; margin-bottom: -4px; border-radius: 28px 28px 4px 4px; background: repeating-linear-gradient(90deg, #f4f4f4 0 9px, #d42020 9px 18px); clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 40% 100%, 0 60%); }
+.santa-present.landed .chute { opacity: 0; transition: opacity 0.4s; }
+.santa-present.landed canvas { animation: present-bounce 0.9s ease-in-out infinite; }
+.santa-present.landed::after { content: "TAP!"; font-family: var(--font-title); font-size: 12px; color: #ffd23a; text-shadow: 2px 2px 0 #4a0008; }
+.santa-present.gone { opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+@keyframes present-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.present-pop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(4, 6, 20, 0.78); }
+.pr-box { width: min(360px, 100%); padding: 18px 16px; text-align: center; background: linear-gradient(#0e2a1a, #081a10); border: 3px solid #ffd23a; border-radius: 12px; box-shadow: 6px 6px 0 #4a0008; }
+.pr-kicker { font-family: var(--font-title); font-size: 14px; color: #ffd23a; margin-bottom: 10px; }
+.pr-gift canvas { width: 112px; height: 112px; image-rendering: pixelated; }
+.pr-gift.shake canvas { animation: present-shake 0.12s linear infinite; }
+.pr-gift.open canvas { animation: present-pop 0.4s ease-out forwards; }
+@keyframes present-shake { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes present-pop { to { transform: scale(1.4) translateY(-12px); opacity: 0.25; } }
+.pr-prize { min-height: 8px; }
+.pr-cash { font-family: var(--font-title); font-size: 34px; color: #5dff8f; text-shadow: 3px 3px 0 #0b0618; margin: -30px 0 6px; }
+.pr-cash.jackpot { color: #ffd23a; font-size: 40px; }
+.pr-jackpot { font-family: var(--font-title); font-size: 18px; color: #ff4fd8; margin-bottom: 10px; animation: present-bounce 0.7s infinite; }
+.pr-jackpot.small { font-size: 14px; color: #ffd23a; }
+.pr-box .btn { margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .santa-present.landed canvas, .pr-gift canvas, .pr-jackpot { animation: none !important; } }
+/* short screens: the Christmas banner takes the race-settings link's place (it's in the menu too) */
+@media (max-height: 760px) { #s-title:has(.xmas-banner:not(.hidden)) .home-settings { display: none; } .xmas-banner { margin: 3px 0 0; padding: 2px 10px; } .xmas-banner b { font-size: 13px; } }
+.quest .q-claim { width: auto; flex: none; margin: 0; padding: 6px 14px; }
