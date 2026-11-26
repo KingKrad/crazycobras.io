@@ -16,7 +16,7 @@ const byPrompt = new Map(FAMILIES.flatMap((f) => f.prompts.map((p) => [p, f])));
 export const familyOf = (prompt) => byPrompt.get(prompt) || null;
 
 // which families a mode draws from, and how the topics are counted there
-const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily", geo: "geo", film: "film", music: "music", sport: "sport" };
+const POOL = { classic: "main", car: "car", hard: "hard", daily: "daily", geo: "geo", film: "film", music: "music", sport: "sport", xmas: "xmas" };
 const topicOf = (f, pool) => (pool === "car" ? f.carTopic || f.topic : f[pool + "Topic"] || f.topic); // each mode its own topics
 // word games: rhymes, letters, prefixes, synonyms. One a race is fun; three is a spelling test.
 const WORD_GAME = /\b(rhymes? with|starts? with|begins? with|ends? (in|with)|contains?|spelled|sounds like a letter|letters?|a word that means|word that)\b/i;
@@ -32,7 +32,7 @@ export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
   const pool = POOL[mode] || "main";
   // WORLD TOUR, BOX OFFICE and ON TOUR: an easy track and a hard one. Mostly well-known prompts (level 1), plus one tricky
   // one somewhere in the second half.
-  if ((pool === "geo" || pool === "film" || pool === "music" || pool === "sport") && !opts.oneTrack && n > 1) {
+  if ((pool === "geo" || pool === "film" || pool === "music" || pool === "sport" || pool === "xmas") && !opts.oneTrack && n > 1) {
     const all = poolFamilies(mode, opts.families);
     const lv = (f) => f[pool + "Level"] || f.level; // a mode can play an older prompt at its own level
     const easy = pickRace(mode, seen, n - 1, rng, { ...opts, oneTrack: true, families: all.filter((f) => lv(f) === 1) });

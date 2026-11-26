@@ -142,6 +142,14 @@ export const PREMIUM = [
   { ...C("comet", "THE COMET", "S", 0, 1, 4, "hyper", "#22226a", "#ffffff"), premium: 499, rarity: "LEGENDARY", fx: "rainbow" },
 ];
 CARS.push(...PREMIUM);
+// EVENT cars: won in a limited-time mode, then never again. Like premium cars they don't count towards the
+// GARAGE %, and they only show in the garage while their event is on (or once they're yours).
+export const EVENT_CARS = [
+  // finish 5 races in the CHRISTMAS mode (Christmas 2026): Santa's own sleigh, with its reindeer, and a
+  // trail of sparkles. As fast as a middle class S car.
+  { ...C("sleigh26", "CHRISTMAS '26 SANTA'S SLEIGH", "S", 0, 1, 4, "hyper", "#c8202a", "#ffd23a"), event: "xmas", rarity: "LEGENDARY", fx: "sparkle", hiRes: true },
+];
+CARS.push(...EVENT_CARS);
 // today's premium car (UTC day), the same on every device and on the server
 export const premiumFor = (day) => PREMIUM[((Math.round((Date.parse(day + "T00:00:00Z") - Date.parse("2026-01-01T00:00:00Z")) / 86400000) % PREMIUM.length) + PREMIUM.length) % PREMIUM.length];
 
@@ -154,7 +162,7 @@ export function rarityOf(car) {
   return { D: "COMMON", C: car.price < 30000 ? "COMMON" : "RARE", B: "RARE", A: "EPIC", S: car.price < 2500000 ? "EPIC" : "LEGENDARY", X: "LEGENDARY" }[car.cls];
 }
 // the cars that count towards the garage collection: everything you can earn by playing
-export const COLLECTION = CARS.filter((c) => !c.giftOnly && !c.premium);
+export const COLLECTION = CARS.filter((c) => !c.giftOnly && !c.premium && !c.event);
 
 // PAINT: each car has its factory colour plus three more, unlocked by levelling it up
 const PAINTS = ["#d42d2d", "#1f4fc4", "#f2c230", "#1f8a4c", "#f4f4f4", "#1b1b1f", "#ff7a00", "#7a2fb5", "#3bd0ff", "#ff4fd8", "#c9ced6", "#2f5d50", "#8a5a2b", "#b6e61a"];
@@ -173,13 +181,13 @@ export const painted = (car, idx) => (idx > 0 && paintsFor(car)[idx] ? { ...car,
 // Power by class: the car really decides how far you get. Within a class, pricier cars sit higher.
 export const POWER_RANGE = { D: [1.0, 1.3], C: [1.45, 1.95], B: [2.1, 2.7], A: [2.9, 3.5], S: [3.7, 4.4], X: [4.7, 5.4] };
 for (const cls of Object.keys(POWER_RANGE)) {
-  const list = CARS.filter((c) => c.cls === cls && !c.exclusive && !c.giftOnly && !c.premium).sort((a, b) => a.price - b.price);
+  const list = CARS.filter((c) => c.cls === cls && !c.exclusive && !c.giftOnly && !c.premium && !c.event).sort((a, b) => a.price - b.price);
   const [lo, hi] = POWER_RANGE[cls];
   list.forEach((c, i) => { c.power = Math.round((lo + (list.length > 1 ? (hi - lo) * i / (list.length - 1) : 0)) * 100) / 100; });
 }
 CARS.find((c) => c.exclusive).power = 6.0;
-for (const p of PREMIUM) {
-  const list = CARS.filter((c) => c.cls === p.cls && !c.exclusive && !c.giftOnly && !c.premium).sort((a, b) => a.power - b.power);
+for (const p of [...PREMIUM, ...EVENT_CARS]) {
+  const list = CARS.filter((c) => c.cls === p.cls && !c.exclusive && !c.giftOnly && !c.premium && !c.event).sort((a, b) => a.power - b.power);
   p.power = list[Math.floor(list.length / 2)].power;
 }
 // Prices tuned so an average player buys a class S car (the Moon) after about 40 races.

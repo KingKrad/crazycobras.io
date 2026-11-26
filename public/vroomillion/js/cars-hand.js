@@ -393,6 +393,82 @@ const HAND = {
       roofCol: (car) => car.accent,
       extra: (g, car) => { rect(g, 7, 12, 66, 10, car.accent); rect(g, 14, 14, 52, 7, "#2a3a55"); disc(g, 40, 30, 5, car.accent); disc(g, 40, 30, 3.6, car.color); rect(g, 39.4, 26.4, 1.2, 7, car.accent); } },
   },
+  // CHRISTMAS '26 SANTA'S SLEIGH: a curly-fronted sleigh in the car's colour with gold scrollwork, Santa at
+  // the reins, a sack of presents behind him, and a reindeer (Rudolph, nose glowing) galloping in front.
+  sleigh26: {
+    size: [96, 34],
+    side(g, car, frame) {
+      const step = frame % 2;
+      // the second reindeer, behind
+      oval(g, 66, 15, 8, 3.6, "#5a3a1e");
+      rect(g, 60 + step * 2, 17, 1.6, 7, "#3a2412"); rect(g, 71 - step * 2, 17, 1.6, 7, "#3a2412");
+      rect(g, 72, 8.6, 2, 6, "#5a3a1e"); oval(g, 76, 8, 3.4, 2.2, "#5a3a1e");
+      // Rudolph, in front
+      rect(g, 74 + step * 3, 19, 1.8, 9 - step, "#5a3a1e"); rect(g, 86 - step * 3, 19, 1.8, 9 - step, "#5a3a1e"); // legs
+      rect(g, 76 - step * 2, 19, 1.8, 8, "#6e4628"); rect(g, 84 + step * 2, 19, 1.8, 8, "#6e4628");
+      oval(g, 80, 17, 9, 4.2, "#8a5a32"); oval(g, 80, 18.4, 7, 2, "#c89a66");                       // body and belly
+      oval(g, 71.6, 15, 2, 1.6, "#f4ead8");                                                          // tail
+      poly(g, [[86, 15], [88, 8], [91, 8], [89.6, 16]], "#8a5a32");                                   // neck
+      oval(g, 91, 7.4, 3.6, 2.4, "#8a5a32");                                                         // head
+      disc(g, 94.2, 7.8, 1.5, "#ff2020"); disc(g, 93.8, 7.3, 0.6, "#ffb0b0");                         // the red nose
+      disc(g, 90.6, 6.4, 0.6, "#111111");                                                            // eye
+      g.strokeStyle = "#e8d6a8"; g.lineWidth = 1;                                                    // antlers
+      g.beginPath(); g.moveTo(89.6, 5.4); g.lineTo(88, 1); g.moveTo(88.6, 3); g.lineTo(86, 1.6); g.moveTo(90.6, 5.2); g.lineTo(92, 1.2); g.moveTo(91.4, 3); g.lineTo(93.6, 2); g.stroke();
+      rect(g, 84, 13.6, 4, 1.4, "#c8202a"); disc(g, 85, 15.6, 0.9, "#ffd23a");                          // collar and bell
+      // reins
+      g.strokeStyle = "#6a3a1a"; g.lineWidth = 0.8;
+      g.beginPath(); g.moveTo(31, 12); g.quadraticCurveTo(55, 18, 86, 14.6); g.stroke();
+      // runners: a long silver blade, curling up at the front
+      rect(g, 3, 29.6, 46, 1.8, "#d8dde6"); rect(g, 3, 31, 46, 0.6, "#8a909a");
+      g.strokeStyle = "#d8dde6"; g.lineWidth = 1.8;
+      g.beginPath(); g.moveTo(48, 30.4); g.quadraticCurveTo(56, 30, 55, 23); g.quadraticCurveTo(54, 19.6, 51, 21.4); g.stroke();
+      for (const x of [9, 22, 36]) rect(g, x, 25, 1.6, 5, "#b4bac4");
+      // the sack of presents, behind Santa
+      oval(g, 11, 11, 7, 7, "#7a4a22"); oval(g, 9, 9, 3, 2.6, "#a86a34");
+      rect(g, 7, 2.6, 4.6, 4.6, "#5dff8f"); rect(g, 9, 2.6, 0.8, 4.6, "#c8202a");
+      rect(g, 12.6, 3.6, 4, 4, "#4fd1ff"); rect(g, 12.6, 5.2, 4, 0.8, "#ffd23a");
+      // Santa
+      rect(g, 19, 8, 11, 10, "#d42020");                         // coat
+      rect(g, 19, 13.6, 11, 1.6, "#1b1b1f"); rect(g, 23.4, 13.4, 2, 2, "#ffd23a"); // belt and buckle
+      oval(g, 27, 4.6, 3.2, 3, "#f2c8a0");                       // face
+      oval(g, 27.6, 7.4, 3.2, 2.8, "#f4f4f4");                   // beard
+      poly(g, [[23.4, 3.4], [30.6, 3.4], [26, -0.4], [22, 1.6]], "#d42020"); rect(g, 23, 3, 8, 1.6, "#f4f4f4"); // hat
+      disc(g, 21.6, 2, 1.4, "#f4f4f4");                          // bobble
+      rect(g, 29, 10.6, 3, 2, "#f4f4f4"); rect(g, 31, 10.6, 1.6, 2, "#1b1b1f"); // arm, mitten
+      // the sleigh's body: high at the back, low in the middle, a curl at the front
+      shaded(g, [[4, 27], [2.6, 15], [4, 9.4], [8, 8], [10.6, 11.6], [15, 16.6], [34, 16.6], [40, 13.6], [44, 9.6], [48, 10], [48.6, 13.6], [45, 21], [40, 27]], car.color, 8, 27);
+      g.strokeStyle = car.accent; g.lineWidth = 1.1;                // gold scrollwork
+      g.beginPath(); g.moveTo(4, 25.4); g.lineTo(39, 25.4); g.stroke();
+      g.beginPath(); g.moveTo(4.6, 15); g.quadraticCurveTo(5, 9.6, 8.6, 9.6); g.quadraticCurveTo(10, 12.4, 15.6, 18); g.lineTo(34, 18); g.quadraticCurveTo(40, 15, 44.6, 11.4); g.stroke();
+      disc(g, 46, 12.4, 1.8, car.accent); disc(g, 46, 12.4, 0.8, dark(car.color, 0.7));
+      disc(g, 12, 21.6, 2.4, car.accent); disc(g, 12, 21.6, 1.2, car.color);
+      disc(g, 30, 21.6, 2.4, car.accent); disc(g, 30, 21.6, 1.2, car.color);
+    },
+    rear(car, frame) {
+      const cv = canvas(80, 60), g = cv.getContext("2d");
+      const step = frame % 2;
+      // the reindeer ahead: their backs and antlers over the top
+      for (const [x, c] of [[28, "#5a3a1e"], [52, "#8a5a32"]]) {
+        oval(g, x, 14, 6, 4, c);
+        g.strokeStyle = "#e8d6a8"; g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(x - 2, 10); g.lineTo(x - 5, 3 + step); g.moveTo(x - 4, 6); g.lineTo(x - 8, 5); g.moveTo(x + 2, 10); g.lineTo(x + 5, 3 + step); g.moveTo(x + 4, 6); g.lineTo(x + 8, 5); g.stroke();
+      }
+      // the sack, Santa's back and his hat
+      oval(g, 24, 22, 10, 9, "#7a4a22"); rect(g, 17, 12, 6, 6, "#5dff8f"); rect(g, 26, 13, 5, 5, "#4fd1ff");
+      rect(g, 38, 16, 16, 12, "#d42020"); oval(g, 46, 14, 6, 4, "#f4f4f4");
+      poly(g, [[41, 12], [51, 12], [47, 4], [43, 6]], "#d42020"); rect(g, 40, 11, 12, 2, "#f4f4f4"); disc(g, 46.6, 4, 2, "#f4f4f4");
+      // the back of the sleigh: a tall curved panel with gold scrollwork
+      shaded(g, [[8, 50], [6, 30], [10, 24], [20, 26], [40, 28], [60, 26], [70, 24], [74, 30], [72, 50]], car.color, 24, 50);
+      g.strokeStyle = car.accent; g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(9, 31); g.quadraticCurveTo(20, 27.6, 40, 30); g.quadraticCurveTo(60, 27.6, 71, 31); g.stroke();
+      g.beginPath(); g.moveTo(10, 47); g.lineTo(70, 47); g.stroke();
+      for (const x of [18, 40, 62]) { disc(g, x, 39, 3.4, car.accent); disc(g, x, 39, 1.8, car.color); }
+      // runners
+      rect(g, 10, 50, 3, 5, "#b4bac4"); rect(g, 67, 50, 3, 5, "#b4bac4");
+      rect(g, 6, 54 + step * 0, 12, 2.4, "#d8dde6"); rect(g, 62, 54, 12, 2.4, "#d8dde6");
+      return crisp(cv);
+    },
+  },
 };
 
 export const handDrawn = (car) => !!HAND[car.id];

@@ -3,6 +3,17 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-26b",
+    date: "Nov 26, 2026",
+    title: "CHRISTMAS is here",
+    items: [
+      "New limited-time CHRISTMAS mode for Unlimited players: Christmas movies, songs, Santa and traditions from around the world.",
+      "Every answer is a delivery: Santa's sleigh flies to the world's famous cities on a snowy Christmas Eve map. Rarer answers fly further.",
+      "Finish 5 Christmas races to win the exclusive CHRISTMAS '26 SANTA'S SLEIGH. It's gone after New Year's Day.",
+      "Every mode's home screen now fits a computer screen, start button and all.",
+    ],
+  },
+  {
     id: "2026-11-26a",
     date: "Nov 26, 2026",
     title: "Polish and more right answers",

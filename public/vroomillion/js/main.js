@@ -1,4 +1,4 @@
-import { CARS, CLASSES, GIFT_CARS, carById, carSprite, painted, paintsFor, rarityOf, RARITIES, COLLECTION, PREMIUM, premiumFor, fairCar } from "./cars.js";
+import { CARS, CLASSES, GIFT_CARS, EVENT_CARS, carById, carSprite, painted, paintsFor, rarityOf, RARITIES, COLLECTION, PREMIUM, premiumFor, fairCar } from "./cars.js";
 import {
   TIERS, ROUNDS, ANSWER_SECONDS, buildIndex, judge, metresFor, applyFenderBender, effectTier, EQUAL_CAR, CRAZY_METRES, tossWinner, roundMetres,
   payout, soloPayout, exampleAnswer,
@@ -16,6 +16,7 @@ import { Places, PLACE_OF } from "./places.js";
 import { WorldScene, loadMap } from "./world.js";
 import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
+import { SleighScene } from "./sleigh.js";
 import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
@@ -194,6 +195,8 @@ const tourScene = new TourScene($("scene"));
 places.tour = tourScene;
 const stadiumScene = new StadiumScene($("scene"));
 places.stadium = stadiumScene;
+const sleighScene = new SleighScene($("scene"));
+places.sleigh = sleighScene;
 // THEMED MODES: each has its own home screen (a "place"), its own race scene and a $5 one-time unlock.
 // ids: the prefix of its home screen's elements (index.html), e.g. wt-go, wt-status.
 const THEMED = {
@@ -205,7 +208,17 @@ const THEMED = {
     info: "380+ MUSIC PROMPTS · A WORLD TOUR BY BUS", card: "Music · every answer is a gig round the world" },
   sport: { name: "STADIUM RUN", screen: "stadium", ids: "sr", scene: () => stadiumScene, go: "▶ ON YOUR MARKS",
     info: "150+ SPORTS PROMPTS · LAPS OF THE STADIUM", card: "Sports · every answer is a lap of the stadium" },
+  // a limited-time event: open to UNLIMITED players (and admins) until it ends, not sold on its own.
+  // Finish SLEIGH_RACES races in it and Santa's sleigh is yours.
+  xmas: { name: "CHRISTMAS", screen: "christmas", ids: "xm", scene: () => sleighScene, go: "▶ TAKE OFF", event: true,
+    ends: Date.parse("2027-01-02T10:00:00Z"), // the end of New Year's Day, even in Hawaii
+    info: "45+ CHRISTMAS PROMPTS · SANTA'S ROUND THE WORLD", card: "Christmas trivia · fly Santa's sleigh round the world", tag: "LIMITED TIME" },
 };
+const SLEIGH_RACES = 5;
+const SLEIGH = EVENT_CARS.find((c) => c.event === "xmas");
+// an event mode is open until it ends; the others always are
+const modeOpen = (id) => !THEMED[id]?.ends || Date.now() < THEMED[id].ends;
+const shownModes = () => Object.keys(THEMED).filter(modeOpen).sort((a, b) => (THEMED[b].event ? 1 : 0) - (THEMED[a].event ? 1 : 0)); // an event first
 const THEMED_IDS = Object.keys(THEMED);
 // the scene a themed race uses (the results screen keeps it too)
 const themedScene = () => (race && THEMED[race.themed] && (current === "race" || current === "results") ? THEMED[race.themed].scene() : null);
@@ -503,6 +516,9 @@ function renderDaily() {
 // The first and biggest button on the title screen: today's daily race, or (once it's played) how you
 // did and the leaderboard. New players also get three steps telling them exactly what to do.
 function drawDailyHero(today) {
+  // a limited-time event: a banner on the home screen and a line in the menu while it's on
+  $("btn-xmas").classList.toggle("hidden", !modeOpen("xmas"));
+  document.querySelector(".xmas-item")?.classList.toggle("hidden", !modeOpen("xmas"));
   const btn = $("btn-daily");
   const n = nextDaily(save, today);
   const done = dailyDone(save, today);
@@ -823,7 +839,8 @@ let paywallReason = "used"; // "used" (no free races left) or "mode" (a mode fre
 function openPaywall(reason) { paywallReason = reason; show("paywall"); }
 function renderPaywall() {
   $("pay-lead").textContent = paywallReason === "trial" ? "Your free day of Unlimited ends soon. Keep it forever, for one payment." : paywallReason === "mode"
-    ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited."
+    ? "2P VERSUS, GEARHEAD and HARD MODE are part of Unlimited." : paywallReason === "event"
+    ? "The CHRISTMAS mode is for Unlimited players, and Santa's sleigh with it. It closes after New Year's Day."
     : dailyLeft(save, dday()) > 0
       ? "Unlimited races on top of the daily two, in every mode."
       : `You've played today's daily race. A new one in ${timeLeft()}.`;
@@ -1356,7 +1373,7 @@ async function adminPlayers(body, patch) {
         })),
       h("div", { class: "step-label", text: "GAME MODES" }),
       h("div", { class: "admin-actions row" },
-        ...THEMED_IDS.map((id) => [id, THEMED[id].name]).map(([id, name]) => {
+        ...THEMED_IDS.filter((id) => !THEMED[id].event).map((id) => [id, THEMED[id].name]).map(([id, name]) => {
           const has = (p.modes || []).includes(id);
           return h("button", { class: "btn small" + (has ? " on" : ""), type: "button", text: `${has ? "TAKE BACK" : "GIFT"} ${name}`,
             onclick: () => act({ action: "gift-mode", email: p.email, mode: id, give: !has }, has ? "Taken back." : "Gifted! It unlocks next time they open the game logged in.", refresh) });
@@ -1613,7 +1630,7 @@ function show(name) {
   if (name === "archive") renderArchive();
   if (name === "account") renderMe();
   // the tab bar lights up the section you're in
-  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", archive: "modes",
+  const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", christmas: "modes", archive: "modes",
     garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
   for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
@@ -1972,10 +1989,10 @@ function renderLeagues() {
   const themed = $("themed-modes");
   if (themed) {
     themed.textContent = "";
-    themed.append(...THEMED_IDS.map((id) => h("button", { class: "themed-mode tm-" + id, type: "button", onclick: () => { audio.sfx.click(); show(THEMED[id].screen); } },
+    themed.append(...shownModes().map((id) => h("button", { class: "themed-mode tm-" + id, type: "button", onclick: () => { audio.sfx.click(); show(THEMED[id].screen); } },
       h("span", { class: "tm-name", text: THEMED[id].name }),
       h("span", { class: "tm-info", text: THEMED[id].card }),
-      h("span", { class: "tm-tag", text: ownsMode(id) ? "YOURS" : modeTrialLeft(id) ? "1 FREE RACE" : "$5" }))));
+      h("span", { class: "tm-tag", text: THEMED[id].event ? THEMED[id].tag : ownsMode(id) ? "YOURS" : modeTrialLeft(id) ? "1 FREE RACE" : "$5" }))));
   }
   const rules1p = $("rules-solo");
   rules1p.textContent = "";
@@ -2127,6 +2144,7 @@ function renderGarage() {
     for (const car of CARS.filter((c) => c.cls === cls).sort((a, b) => (a.premium ? 1 : 0) - (b.premium ? 1 : 0) || (a.price || 9e9) - (b.price || 9e9))) {
       const owned = save.owned.includes(car.id);
       if (car.giftOnly && !owned) continue; // only shows once an admin has gifted it
+      if (car.event && !owned && !modeOpen(car.event)) continue; // an event's car: gone once the event ends
       const equipped = save.car === car.id;
       const price = dealPrice(car);
       const afford = save.cash >= price;
@@ -2136,6 +2154,8 @@ function renderGarage() {
           ? h("button", { class: "btn small", type: "button", text: "DRIVE", onclick: () => { save.car = car.id; persist(); audio.sfx.lock(); renderGarage(); } })
           : car.premium
             ? h("div", { class: "tag locked", text: "PREMIUM · SOMETIMES IN TODAY'S DEALS" })
+            : car.event
+              ? h("button", { class: "tag locked", type: "button", text: `LIMITED · FINISH ${SLEIGH_RACES} CHRISTMAS RACES`, onclick: () => { audio.sfx.click(); show(THEMED[car.event].screen); } })
             : car.exclusive
               ? h("div", { class: "tag locked", text: "LOCKED · REACH VROOMILLION CITY" })
               : h("button", {
@@ -2143,7 +2163,7 @@ function renderGarage() {
                 "aria-label": `Buy ${car.name} for ${money(price)}`,
                 onclick: () => buy(car, price),
               });
-      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") + (car.giftOnly ? " gift" : "") + (car.premium ? " premium" : "") + " rar-" + RARITIES[rarityOf(car)] },
+      grid.append(h("div", { class: "car-card" + (owned ? " owned" : "") + (equipped ? " is-equipped" : "") + (car.giftOnly ? " gift" : "") + (car.premium ? " premium" : "") + (car.event ? " event" : "") + " rar-" + RARITIES[rarityOf(car)] },
         car.giftOnly ? h("div", { class: "tag gift-tag", text: "★ ADMIN GIFT · ONE OF A KIND" }) : rarityBadge(car),
         spriteCanvas(car, 4), h("div", { class: "car-name", text: car.name }), statLine(car), action,
         owned ? levelRow(car) : null));
@@ -2259,14 +2279,14 @@ const COMING = [
 function renderModes() {
   const box = $("mode-cards");
   box.textContent = "";
-  for (const id of THEMED_IDS) {
+  for (const id of shownModes()) {
     const m = THEMED[id];
     box.append(h("button", { class: "mode-card mc-" + id, type: "button", onclick: () => { audio.sfx.click(); show(m.screen); } },
       h("div", { class: "mc-view", "aria-hidden": "true" }),
       h("div", { class: "mc-body" },
         h("span", { class: "mc-name", text: m.name }),
         h("span", { class: "mc-line", text: m.card }),
-        h("span", { class: "mc-tag", text: ownsMode(id) ? "YOURS ▶" : modeTrialLeft(id) ? "1 FREE RACE ▶" : "$5 ▶" }))));
+        h("span", { class: "mc-tag", text: m.event ? (ownsMode(id) ? "LIMITED TIME ▶" : "UNLIMITED ▶") : ownsMode(id) ? "YOURS ▶" : modeTrialLeft(id) ? "1 FREE RACE ▶" : "$5 ▶" }))));
   }
   for (const c of COMING.filter((c) => !THEMED[c.id])) {
     box.append(h("div", { class: "mode-card soon", "aria-label": c.name + ", coming soon" },
@@ -2284,15 +2304,16 @@ function renderMe() {
 }
 
 // ---------- themed game modes ($5 each, one-time, on the account; admins get them all) ----------
-const ownsMode = (id) => !!account && (!!account.admin || (account.modes || []).includes(id));
+const ownsMode = (id) => !!account && (THEMED[id]?.event ? modeOpen(id) && (!!account.admin || unlimitedNow()) : !!account.admin || (account.modes || []).includes(id));
 // the free trial race: used if this save says so, or the server does (the account, or this browser's cookie),
 // so clearing the browser's storage doesn't hand out another one
 let serverTrials = new Set();
-const modeTrialLeft = (id) => !save.trials?.[id] && !serverTrials.has(id) && !(account?.trials || []).includes(id);
+const modeTrialLeft = (id) => !THEMED[id]?.event && !save.trials?.[id] && !serverTrials.has(id) && !(account?.trials || []).includes(id);
 const loadTrials = () => api("trial").then(({ body }) => { if (Array.isArray(body.used)) serverTrials = new Set(body.used); }).catch(() => {});
 loadTrials();
 function renderModeLobby(id) {
   const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
+  if (m.event) return renderEventLobby(id);
   const owned = ownsMode(id), trial = modeTrialLeft(id);
   const go = $m("go");
   $m("status").textContent = owned ? (account?.admin && !(account.modes || []).includes(id) ? "ADMIN · YOURS FREE" : "YOURS FOREVER · RACE AS MUCH AS YOU LIKE")
@@ -2304,10 +2325,35 @@ function renderModeLobby(id) {
   go.classList.toggle("unlock-cta", !owned && !trial);
   go.disabled = false;
 }
+// an event mode's home: who it's for, when it ends, and how far you are to its car
+function renderEventLobby(id) {
+  const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
+  const open = modeOpen(id), owned = ownsMode(id), go = $m("go");
+  const done = Math.min(SLEIGH_RACES, save.xmasRaces || 0), have = save.owned.includes(SLEIGH.id);
+  const ends = new Date(m.ends - 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+  $m("status").textContent = !open ? "CHRISTMAS IS OVER · SEE YOU NEXT YEAR"
+    : owned ? (have ? "THE SLEIGH IS YOURS · RACE AS MUCH AS YOU LIKE" : `${done} OF ${SLEIGH_RACES} RACES FOR SANTA'S SLEIGH`) + ` · OPEN UNTIL ${ends}`
+    : `FOR UNLIMITED PLAYERS · OPEN UNTIL ${ends}`;
+  $m("info").textContent = m.info;
+  $m("2p").classList.toggle("hidden", !owned);
+  go.textContent = !open ? "CLOSED" : owned ? m.go : "GET UNLIMITED";
+  go.classList.toggle("unlock-cta", open && !owned);
+  go.disabled = !open;
+  const prize = $m("prize");
+  if (prize) {
+    prize.textContent = "";
+    const cv = spriteCanvas(SLEIGH, 3);
+    prize.append(cv, h("div", { class: "xm-prize-text" },
+      h("div", { class: "xm-prize-name", text: SLEIGH.name }),
+      h("div", { class: "xm-prize-line", text: have ? "IN YOUR GARAGE" : `FINISH ${SLEIGH_RACES} CHRISTMAS RACES · GONE AFTER ${ends}` }),
+      h("div", { class: "xm-dots" }, ...Array.from({ length: SLEIGH_RACES }, (_, i) => h("span", { class: "xm-dot" + (have || i < done ? " on" : "") })))));
+  }
+}
 for (const id of THEMED_IDS) {
   const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
   $m("go").addEventListener("click", () => {
     audio.sfx.click();
+    if (m.event) { if (!modeOpen(id)) return; if (ownsMode(id)) startRace({ mode: "solo", deck: id }); else openPaywall("event"); return; }
     if (ownsMode(id) || modeTrialLeft(id)) { startRace({ mode: "solo", deck: id }); return; }
     buyMode(id, $m("agree-box").checked, $m("go"));
   });
@@ -2411,7 +2457,7 @@ function popGain(i, metres, tier, nitro, crazy = false) {
 function startRace(setup) {
   // WORLD TOUR: yours (bought, or an admin), or its one free race; otherwise its home screen sells it
   if (THEMED[setup.deck] && !setup.online) {
-    if (!setup.redo && !ownsMode(setup.deck) && !modeTrialLeft(setup.deck)) { show(THEMED[setup.deck].screen); return; }
+    if ((!setup.redo || THEMED[setup.deck].event) && !ownsMode(setup.deck) && !modeTrialLeft(setup.deck)) { show(THEMED[setup.deck].screen); return; }
     if (!setup.v2questions && !(setup.redo && setup.questions?.length)) return startRaceV2(setup);
   }
   if (!setup.online && !setup.v2questions && !(setup.redo && setup.questions?.length)) {
@@ -3470,6 +3516,12 @@ function finish(token) {
   });
   save.races++;
   save.cash += pay.total + streakBonus;
+  // CHRISTMAS: every race finished counts towards Santa's sleigh (while the event is on)
+  let sleighNow = false;
+  if (race.themed === "xmas" && modeOpen("xmas") && !save.owned.includes(SLEIGH.id)) {
+    save.xmasRaces = (save.xmasRaces || 0) + 1;
+    if (save.xmasRaces >= SLEIGH_RACES) { save.owned.push(SLEIGH.id); save.car = SLEIGH.id; sleighNow = true; } // yours, and in it
+  }
   persist();
 
   const happy = race.solo ? newBest || a.tiers.includes(5) : winner !== -1;
@@ -3488,6 +3540,10 @@ function finish(token) {
         h("div", { class: "dist", text: Math.round(r.dist).toLocaleString("en-US") + " M" }),
         race.solo ? h("div", { class: "note", text: newBest ? "PERSONAL BEST" : `BEST ${Math.round(save.best).toLocaleString("en-US")} M` }) : null))),
     race.arrival ? destResult(race.arrival) : null,
+    race.themed === "xmas" && !sleighNow && !save.owned.includes(SLEIGH.id) && modeOpen("xmas") ? h("div", { class: "payout xm-progress" },
+      h("div", { text: "SANTA'S SLEIGH" }),
+      h("div", { class: "xm-dots" }, ...Array.from({ length: SLEIGH_RACES }, (_, i) => h("span", { class: "xm-dot" + (i < save.xmasRaces ? " on" : "") }))),
+      h("div", { class: "note", text: `${save.xmasRaces} OF ${SLEIGH_RACES} CHRISTMAS RACES · ${SLEIGH_RACES - save.xmasRaces} MORE AND IT'S YOURS` })) : null,
     ...levelUps.map(levelUpCard),
     race.daily ? dailyBoardSlot(race.daily, a) : null,
     nextCarCard(),
@@ -3515,7 +3571,12 @@ function finish(token) {
   $("btn-again").textContent = dailyNext ? `DAILY RACE ${dailyNext}` : !paid ? "NEW RACE — $5" : !race.solo ? "PLAY AGAIN" : `RACE #${(racesRun() + 1).toLocaleString("en-US")}`;
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
-  if (race.themed) { // a themed mode: its own $5 unlock, not UNLIMITED
+  if (race.themed && THEMED[race.themed].event) {
+    const own = ownsMode(race.themed);
+    $("btn-again").textContent = own ? "▶ NEXT CHRISTMAS RACE" : "CHRISTMAS IS OVER";
+    $("btn-again").disabled = !own;
+    $("btn-redo").textContent = "REDO THIS RACE";
+  } else if (race.themed) { // a themed mode: its own $5 unlock, not UNLIMITED
     const own = ownsMode(race.themed), nm = THEMED[race.themed].name;
     $("btn-again").textContent = own ? "▶ NEXT " + nm : `UNLOCK ${nm} — $5`;
     $("btn-redo").textContent = own ? "REDO THIS RACE" : "REDO — UNLOCK FIRST";
@@ -3530,6 +3591,7 @@ function finish(token) {
     drawRematch();
   } else { rematch = null; $("btn-redo").disabled = false; }
   show("results");
+  if (sleighNow) setTimeout(() => revealCar(SLEIGH, [], "★ CHRISTMAS '26 · YOU EARNED IT ★"), 900);
   if (archiveJustUnlocked) { // every CLASSIC prompt raced: the RACE ARCHIVE opens
     archiveJustUnlocked = false;
     setTimeout(() => { overlay("EVERY RACE DONE! RACE ARCHIVE UNLOCKED", "ok"); audio.sfx.win(); scene.confetti?.(); setTimeout(() => overlay(""), 3200); }, 900);

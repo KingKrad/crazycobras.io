@@ -1558,9 +1558,9 @@ body[data-screen="boxoffice"] .ml-head { margin-top: 0; }
 .tab.on { color: #ffd23a; background: linear-gradient(#1a1036, #0b0618); box-shadow: inset 0 3px 0 #ffd23a; }
 .tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: -4px; }
 /* hidden mid-race and inside a game mode (its lobby has its own way back) */
-body[data-screen="race"] .tabbar, body[data-screen="worldtour"] .tabbar, body[data-screen="boxoffice"] .tabbar, body[data-screen="ontour"] .tabbar, body[data-screen="stadium"] .tabbar, body.launching .tabbar { display: none; }
-body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]):not([data-screen="ontour"]):not([data-screen="stadium"]) main { padding-bottom: calc(var(--tabbar-h) + 8px); }
-body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]):not([data-screen="ontour"]):not([data-screen="stadium"]) footer { padding-bottom: var(--tabbar-h); }
+body[data-screen="race"] .tabbar, body[data-screen="worldtour"] .tabbar, body[data-screen="boxoffice"] .tabbar, body[data-screen="ontour"] .tabbar, body[data-screen="stadium"] .tabbar, body[data-screen="christmas"] .tabbar, body.launching .tabbar { display: none; }
+body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]):not([data-screen="ontour"]):not([data-screen="stadium"]):not([data-screen="christmas"]) main { padding-bottom: calc(var(--tabbar-h) + 8px); }
+body:not([data-screen="race"]):not([data-screen="worldtour"]):not([data-screen="boxoffice"]):not([data-screen="ontour"]):not([data-screen="stadium"]):not([data-screen="christmas"]) footer { padding-bottom: var(--tabbar-h); }
 /* the old menu button and corner shortcuts: the tab bar does their job now (sound stays) */
 .menu-btn, #ico-garage, #ico-account { display: none !important; }
 #s-title .title-bottom { padding-bottom: calc(var(--tabbar-h) + 12px); }
@@ -1713,3 +1713,36 @@ body.finale-on #s-race .race-top, body.finale-on #s-race .race-mid, body.finale-
 }
 /* the answer box's hint fits a narrow phone with the keyboard up */
 @media (max-width: 360px) { body.kb #s-race #answer::placeholder { font-size: 10px; letter-spacing: 0; } }
+
+/* CHRISTMAS: a limited-time event mode (js/sleigh.js) */
+body[data-screen="christmas"] .stage { filter: none; }
+body[data-screen="christmas"] .screen.active#s-christmas { background: none; border: 0; box-shadow: none; max-width: 760px; min-height: calc(100dvh - 90px); display: flex; flex-direction: column; justify-content: space-between; padding: 4px 12px calc(18px + env(safe-area-inset-bottom)); animation: none; }
+.ml-name.xm { color: #fff6f0; text-shadow: 0 0 6px #ff3b3b, 0 0 18px #c8202a, 4px 4px 0 #0e3a20; -webkit-text-stroke: 2px #4a0008; }
+.ml-kicker.xm { margin: 0; font-family: "Bungee", sans-serif; font-size: 13px; letter-spacing: 2px; color: #ffd23a; text-shadow: 2px 2px 0 #0e3a20; }
+@media (max-width: 600px) { body[data-screen="christmas"] .ml-sub { display: none; } }
+.xm-prize { display: flex; align-items: center; gap: 12px; margin: 0 auto 8px; padding: 8px 14px; max-width: 460px; background: rgba(10, 30, 20, 0.82); border: 2px solid #ffd23a; border-radius: 10px; box-shadow: 4px 4px 0 #4a0008; }
+.xm-prize:empty { display: none; }
+.xm-prize canvas { flex: none; max-width: 42%; height: auto; }
+.xm-prize-text { min-width: 0; text-align: left; }
+.xm-prize-name { font-family: "Bungee", sans-serif; font-size: 13px; color: #ffd23a; line-height: 1.2; }
+.xm-prize-line { font-size: 11px; color: #e8f4ec; margin: 3px 0 5px; letter-spacing: 0.5px; }
+.xm-dots { display: flex; gap: 5px; justify-content: inherit; }
+.xm-progress .xm-dots { justify-content: center; margin: 6px 0; }
+.xm-dot { width: 14px; height: 14px; border-radius: 50%; background: #1d3a2a; border: 2px solid #5a7a64; }
+.xm-dot.on { background: #ff3b3b; border-color: #ffd23a; box-shadow: 0 0 6px #ff3b3b; }
+.mode-card.mc-xmas .mc-view { background-image: radial-gradient(circle at 80% 30%, #fff3c4 0 16px, rgba(255, 243, 196, 0.25) 17px 26px, transparent 27px), url("img/world.png"); background-position: 0 0, -900px -60px; background-size: auto, auto; filter: grayscale(0.55) brightness(0.8) contrast(1.1); animation: mc-pan-xm 70s linear infinite; }
+@keyframes mc-pan-xm { to { background-position: 0 0, -480px -60px; } }
+.mode-card.mc-xmas { border-color: #ffd23a; }
+.mode-card.mc-xmas .mc-tag { background: #c8202a; color: #fff6e0; }
+.themed-mode.tm-xmas .tm-tag { background: #c8202a; color: #fff6e0; }
+.car-card.event { border-color: #c8202a; box-shadow: 0 0 0 2px #ffd23a inset; }
+.car-card.event button.tag.locked { cursor: pointer; }
+/* every mode's home fits the screen below the top bar (the map behind it fills the rest), so its start
+   button is in view without scrolling, on desktop too */
+body .screen.mode-lobby.active { min-height: calc(100dvh - var(--place-top, 180px) - 14px) !important; }
+.xmas-banner { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 6px 0 2px; padding: 8px 12px; font: inherit; cursor: pointer;
+  color: #fff6e0; background: repeating-linear-gradient(135deg, #c8202a 0 14px, #a8101c 14px 28px); border: 2px solid #ffd23a; border-radius: 8px; box-shadow: 3px 3px 0 #0e3a20; }
+.xmas-banner b { flex: none; white-space: nowrap; font-family: "Bungee", sans-serif; font-weight: 400; font-size: 15px; letter-spacing: 1px; text-shadow: 2px 2px 0 #4a0008; }
+.xmas-banner span { font-size: 12px; text-align: left; }
+.xmas-banner.hidden, .xmas-item.hidden { display: none; }
+@media (max-width: 360px) { .xmas-banner span { display: none; } }

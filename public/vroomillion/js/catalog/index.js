@@ -43,9 +43,10 @@ import { GEO_EXTRA } from "./geoextra.js";
 import { FILM, FILM_JOIN } from "./film.js";
 import { MUSIC, MUSIC_JOIN } from "./music.js";
 import { SPORT, SPORT_JOIN } from "./sport.js";
+import { XMAS, XMAS_JOIN } from "./xmas.js";
 
 export const TOPICS = ["food", "drink", "animals", "places", "people", "music", "screen", "sports", "brands", "science", "objects", "wild"];
-export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28, W29, W30, GEO, GEO_EXTRA, FILM, MUSIC, SPORT];
+export const SOURCES = [EXISTING, CAR, W01, W02, W03, W04, W05, W06, W07, W08, W09, W10, W11, W12, W13, W14, W15, W16, W17, W18, W19, W20, W21, W22, W23, W24, W25, W26, W27, W28, W29, W30, GEO, GEO_EXTRA, FILM, MUSIC, SPORT, XMAS];
 
 export function parseCatalog(texts) {
   const fams = [];
@@ -64,7 +65,7 @@ export function parseCatalog(texts) {
       // "g:<topic>": its topic in WORLD TOUR (countries, cities, water...), where every family is a place
       // (in BOX OFFICE's "film" pool the same flag gives its topic there: directors, stars, TV...)
       const modeTopic = (fl.find((f) => f.startsWith("g:")) || "").slice(2) || null;
-      const modePool = (pools.match(/(^|\s)(film|music|sport)(\s|$)/) || [])[2]; // a themed mode's own family
+      const modePool = (pools.match(/(^|\s)(film|music|sport|xmas)(\s|$)/) || [])[2]; // a themed mode's own family
       // "=other/family" in flags: a twin of that family (same history key: having either uses up both)
       const twin = (fl.find((f) => f.startsWith("=")) || "").slice(1) || null;
       fams.push({
@@ -90,7 +91,7 @@ export const FAMILIES = parseCatalog(SOURCES);
   // and BOX OFFICE
   // and BOX OFFICE and ON TOUR ("topic:level": its topic there, and maybe an easier level, as those races
   // are mostly well-known prompts)
-  for (const [pool, JOIN] of [["film", FILM_JOIN], ["music", MUSIC_JOIN], ["sport", SPORT_JOIN]]) {
+  for (const [pool, JOIN] of [["film", FILM_JOIN], ["music", MUSIC_JOIN], ["sport", SPORT_JOIN], ["xmas", XMAS_JOIN]]) {
     const byKey = new Map(FAMILIES.filter((f) => JOIN[f.id]).map((f) => [f.key, JOIN[f.id]]));
     for (const f of FAMILIES) if (byKey.has(f.key) && !f.pools.includes(pool)) {
       const [topic, level] = byKey.get(f.key).split(":");

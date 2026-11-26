@@ -250,7 +250,7 @@ export class WorldScene {
       const vx = nx - r.x, vy = ny - r.y;
       if (Math.hypot(vx, vy) > 0.01) r.heading = Math.atan2(vy, vx) + Math.PI / 2;
       r.x = nx; r.y = ny;
-      r.alt = L.kind === "plane" ? Math.sin(Math.PI * p) : L.kind === "rocket" ? Math.sin(Math.PI * p) * 1.8 : 0;
+      r.alt = L.kind === "plane" || L.kind === "sleigh" ? Math.sin(Math.PI * p) : L.kind === "rocket" ? Math.sin(Math.PI * p) * 1.8 : 0;
       // a dotted trail behind
       if (!r.lastDot || Math.hypot(r.x - r.lastDot[0], r.y - r.lastDot[1]) * this.cam.z > 3 * this.u) { r.trail.push([r.x, r.y, L.kind]); r.lastDot = [r.x, r.y]; if (r.trail.length > 1400) r.trail.shift(); }
       if (L.kind === "rocket" && Math.random() < 0.6) this.particles.push({ wx: r.x, wy: r.y, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20, life: 0.6, c: Math.random() < 0.5 ? "#ffd23a" : "#ff4fd8", size: 2 });

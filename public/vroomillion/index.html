@@ -79,6 +79,7 @@
             <button class="home-tile" id="btn-2p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3v1h1v3H6v1H3V6H2V3h1zM10 2h3v1h1v3h-1v1h-3V6H9V3h1zM1 9h7v1h1v4H0v-4h1zM8 9h7v1h1v4H8z"/></svg><b>2 PLAYERS</b><span>On this screen</span></button>
             <button class="home-tile" id="btn-online" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H9l-3 3v-3H2zM4 5v1h8V5zM4 7v1h6V7z"/></svg><b>RACE A FRIEND</b><span>Send them a link</span></button>
           </div>
+          <button class="xmas-banner hidden" id="btn-xmas" type="button" data-go="christmas"><b>★ CHRISTMAS ★</b><span>Limited time · earn Santa's sleigh</span></button>
           <button class="home-settings" type="button" data-go="leagues">⚙ Race settings · mode, car and rules</button>
           <div class="daily" id="daily"></div>
           <div class="whats-new" id="whats-new"></div>
@@ -92,6 +93,7 @@
           <div class="drawer-list">
             <button class="drawer-item hot" id="dr-daily" type="button">▶ TODAY'S DAILY RACE</button>
             <button class="drawer-item" data-go="leagues" type="button">SOLO RACES<span>Any topic, any time</span></button>
+            <button class="drawer-item xmas-item hidden" data-go="christmas" type="button">★ CHRISTMAS<span>Limited time: earn Santa's sleigh</span></button>
             <button class="drawer-item" data-go="worldtour" type="button">WORLD TOUR<span>New! Name places, drive the world</span></button>
             <button class="drawer-item" data-go="boxoffice" type="button">BOX OFFICE<span>New! Movies &amp; TV at the drive-in</span></button>
             <button class="drawer-item" data-go="ontour" type="button">ON TOUR<span>New! Music: every answer is a gig</span></button>
@@ -227,6 +229,26 @@
             <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
             <button class="btn small hidden" id="ot-2p" type="button">2 PLAYERS</button>
             <span class="ml-info" id="ot-info"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen mode-lobby" id="s-christmas">
+        <!-- CHRISTMAS's home: the snowy night map fills the screen behind this (js/sleigh.js) -->
+        <div class="ml-head">
+          <p class="ml-kicker xm">★ LIMITED TIME ★</p>
+          <h2 class="ml-name xm">CHRISTMAS</h2>
+          <p class="ml-tag">Christmas trivia. Every answer is a delivery.</p>
+          <p class="ml-sub">Rarer answers, longer flights: Santa's sleigh calls at the world's famous cities… or rounds the whole world in one go.</p>
+        </div>
+        <div class="ml-bottom">
+          <div class="xm-prize" id="xm-prize"></div>
+          <p class="ml-status" id="xm-status"></p>
+          <button class="btn big ml-go" id="xm-go" type="button">▶ TAKE OFF</button>
+          <div class="ml-links">
+            <button class="btn small" data-go="modes" type="button">‹ GAME MODES</button>
+            <button class="btn small hidden" id="xm-2p" type="button">2 PLAYERS</button>
+            <span class="ml-info" id="xm-info"></span>
           </div>
         </div>
       </section>
