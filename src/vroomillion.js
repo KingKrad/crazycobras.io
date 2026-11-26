@@ -3,6 +3,7 @@
 import { json, currentUser, publicUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, isAdmin } from "./accounts.js";
 import { checkPendingCar } from "./premium.js";
 import { checkPendingMode } from "./modes.js";
+import { wasRevoked } from "./refunds.js";
 
 const PRODUCT = "vroomillion_unlimited";
 const PRICE_CENTS = 500;
@@ -40,7 +41,7 @@ export async function handleMe(request, env) {
   if (user.unlimited !== 1 && user.pending_session && env.STRIPE_SECRET_KEY && !(user.pending_checked_at > now - 60000)) {
     await env.DB.prepare("UPDATE users SET pending_checked_at = ? WHERE id = ?").bind(now, user.id).run();
     const res = await stripe(env, "checkout/sessions/" + user.pending_session, { method: "GET" });
-    if (res.ok && isPaid(res.body) && res.body.metadata?.user_id === user.id) {
+    if (res.ok && isPaid(res.body) && res.body.metadata?.user_id === user.id && !(await wasRevoked(env, res.body.payment_intent))) {
       await markPaid(env, user.id, user.pending_session);
       user.unlimited = 1;
     } else if (res.ok && res.body.status === "expired") {
@@ -123,7 +124,7 @@ export async function handleVerify(request, env) {
     console.error("stripe verify failed:", res.status, res.body?.error?.message);
     return json({ paid: false, error: "Couldn't check the payment. Try again later." }, 502);
   }
-  if (!isPaid(res.body)) return json({ paid: false });
+  if (!isPaid(res.body) || (await wasRevoked(env, res.body.payment_intent))) return json({ paid: false }); // refunded: no longer
 
   await ensureSchema(env.DB);
   const user = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(res.body.metadata.user_id || "").first();

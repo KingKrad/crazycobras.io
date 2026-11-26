@@ -4,6 +4,7 @@
 //   GET  /api/vroomillion/mode-verify?session_id=cs_...        -> { paid, mode }
 import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit, parseModes, isAdmin } from "./accounts.js";
 import { stripe } from "./premium.js";
+import { wasRevoked } from "./refunds.js";
 
 export const GAME_MODES = [
   { id: "geo", name: "WORLD TOUR", cents: 500 },
@@ -38,7 +39,7 @@ export async function checkPendingMode(env, user) {
   await env.DB.prepare("UPDATE users SET mode_checked_at = ? WHERE id = ?").bind(now, user.id).run();
   const res = await stripe(env, "checkout/sessions/" + user.pending_mode_session, { method: "GET" });
   const m = res.ok ? paidMode(res.body) : null;
-  if (m && res.body.metadata?.user_id === user.id) {
+  if (m && res.body.metadata?.user_id === user.id && !(await wasRevoked(env, res.body.payment_intent))) {
     await giveMode(env, user.id, m.id, user.pending_mode_session);
     user.modes = JSON.stringify([...new Set([...parseModes(user.modes), m.id])]);
   } else if (res.ok && res.body.status === "expired") {
@@ -103,7 +104,7 @@ export async function handleModeVerify(request, env) {
   if (res.status === 404) return json({ paid: false, error: "Receipt not found." }, 404);
   if (!res.ok) return json({ paid: false, error: "Couldn't check the payment. Try again later." }, 502);
   const m = paidMode(res.body);
-  if (!m) return json({ paid: false });
+  if (!m || (await wasRevoked(env, res.body.payment_intent))) return json({ paid: false }); // refunded: no longer
   await ensureSchema(env.DB);
   if (!(await giveMode(env, res.body.metadata.user_id || "", m.id, id))) return json({ paid: false, error: "That payment isn't linked to an account. Contact us with your receipt." }, 404);
   return json({ paid: true, mode: m.id });

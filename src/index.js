@@ -10,6 +10,8 @@ import { handleModeCheckout, handleModeVerify } from "./modes.js";
 import { handleOAuthStart, handleOAuthCallback } from "./oauth.js";
 import { handleRoundStats, handleReport } from "./stats.js";
 import { handleOnline } from "./online.js";
+import { sweepRefunds } from "./refunds.js";
+import { handleTrial } from "./trial.js";
 import { handleSignup, handleLogin, handleLogout, handleDeleteAccount, handleResetPassword, handleNewRecoveryCode, handleConfig, json } from "./accounts.js";
 
 // API routes for VROOMILLION. Everything else is a static file from public/.
@@ -38,6 +40,7 @@ const ROUTES = {
   "/api/vroomillion/round-stats": handleRoundStats,
   "/api/vroomillion/report": handleReport,
   "/api/vroomillion/online": handleOnline,
+  "/api/vroomillion/trial": handleTrial,
   "/api/vroomillion/signup": handleSignup,
   "/api/vroomillion/login": handleLogin,
   "/api/vroomillion/logout": handleLogout,
@@ -59,5 +62,9 @@ export default {
       console.error("unhandled:", String(e?.message ?? e));
       return json({ error: "Something went wrong." }, 500);
     }
+  },
+  // every 30 minutes (wrangler cron): refunds and chargebacks take back what was bought (src/refunds.js)
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sweepRefunds(env).catch((e) => console.error("refund sweep:", String(e?.message ?? e))));
   },
 };

@@ -2285,7 +2285,12 @@ function renderMe() {
 
 // ---------- themed game modes ($5 each, one-time, on the account; admins get them all) ----------
 const ownsMode = (id) => !!account && (!!account.admin || (account.modes || []).includes(id));
-const modeTrialLeft = (id) => !save.trials?.[id];
+// the free trial race: used if this save says so, or the server does (the account, or this browser's cookie),
+// so clearing the browser's storage doesn't hand out another one
+let serverTrials = new Set();
+const modeTrialLeft = (id) => !save.trials?.[id] && !serverTrials.has(id) && !(account?.trials || []).includes(id);
+const loadTrials = () => api("trial").then(({ body }) => { if (Array.isArray(body.used)) serverTrials = new Set(body.used); }).catch(() => {});
+loadTrials();
 function renderModeLobby(id) {
   const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
   const owned = ownsMode(id), trial = modeTrialLeft(id);
@@ -2507,7 +2512,11 @@ function startRace(setup) {
   $("mode-label").textContent = daily ? label : `${label} · ${modeName(deck)}` + (crazy ? " · CRAZY" : "") + (!solo && setup.equal ? " · EQUAL CARS" : "");
   $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : deck);
   // WORLD TOUR's one free race is used the moment it starts
-  if (themed && !ownsMode(themed)) { save.trials = { ...(save.trials || {}), [themed]: Date.now() }; persist(); }
+  if (themed && !ownsMode(themed)) {
+    save.trials = { ...(save.trials || {}), [themed]: Date.now() }; persist();
+    serverTrials.add(themed);
+    api("trial", { method: "POST", body: JSON.stringify({ mode: themed }) }).catch(() => {}); // remembered on the server too
+  }
   $("answer-zone").classList.add("hidden");
   $("btn-next").classList.add("hidden");
   $("q-card").classList.add("hidden"); // keep the 3-2-1 countdown visible

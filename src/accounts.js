@@ -152,7 +152,13 @@ export const inTrial = (u, now = Date.now(), env = null) => !!u && u.unlimited !
   && Number(u.created_at) < Date.parse(env?.TRIAL_OFFER_ENDS || TRIAL_OFFER_ENDS);
 // Unlimited right now: paid, admin, or still in the free first day
 export const hasUnlimited = (u, env) => !!u && (u.unlimited === 1 || isAdmin(u, env) || inTrial(u, Date.now(), env));
-export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email);
+// Sign-up doesn't prove someone owns an email, so an address on the list isn't enough on its own: the account
+// must have existed before ADMINS_PROVEN_BEFORE (accounts already in use when admins were set up), or its
+// owner must have proven the email by signing in with Google or Apple. A stranger who signs up with a listed
+// address that had no account yet doesn't become an admin.
+export const ADMINS_PROVEN_BEFORE = "2026-11-26T18:00:00Z";
+export const isAdmin = (u, env) => !!u && String(env?.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean).includes(u.email)
+  && (!!(u.google_sub || u.apple_sub) || Number(u.created_at) < Date.parse(env?.ADMINS_PROVEN_BEFORE || ADMINS_PROVEN_BEFORE));
 
 // freeResetAt: when an admin last gave this player their free races back (the game resets its count)
 // cars only an admin can give (public/vroomillion/js/cars.js GIFT_CARS), kept on the account as a JSON list
@@ -175,6 +181,7 @@ export const publicUser = (u, env) => ({
   gifts: parseGifts(u.gifts), // cars an admin gave this account
   cars: parseCars(u.cars), // premium cars bought on this account
   modes: parseModes(u.modes), // themed game modes bought on this account (admins get every one)
+  trials: (() => { try { const l = JSON.parse(u.trials || "[]"); return Array.isArray(l) ? l.filter((m) => GAME_MODE_IDS.includes(m)) : []; } catch { return []; } })(), // free trial races used
   freeResetAt: u.free_reset_at || 0,
   // leaderboard name (never the email) and daily-race streak, counted only while it's still alive
   nickname: u.nickname || "RACER " + String(u.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase(),

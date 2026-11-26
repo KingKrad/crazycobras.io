@@ -4,6 +4,7 @@
 //   POST /api/vroomillion/car-checkout { car, acceptNoRefunds } -> { url }
 //   GET  /api/vroomillion/car-verify?session_id=cs_...        -> { paid, car }
 import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underLimit } from "./accounts.js";
+import { wasRevoked } from "./refunds.js";
 
 export const PREMIUM_CARS = [
   { id: "disco", name: "DISCO DEVILLE", cents: 199 },
@@ -54,7 +55,7 @@ export async function checkPendingCar(env, user) {
   if (!user.pending_car_session || !env.STRIPE_SECRET_KEY || user.car_checked_at > now - 60000) return;
   await env.DB.prepare("UPDATE users SET car_checked_at = ? WHERE id = ?").bind(now, user.id).run();
   const res = await stripe(env, "checkout/sessions/" + user.pending_car_session, { method: "GET" });
-  const car = res.ok ? paidCar(res.body) : null;
+  const car = res.ok && !(await wasRevoked(env, res.body.payment_intent)) ? paidCar(res.body) : null; // (refunded: no longer)
   if (car && res.body.metadata?.user_id === user.id) {
     await giveCar(env, user.id, car.id, user.pending_car_session);
     user.cars = JSON.stringify([...new Set([...parseCars(user.cars), car.id])]);
@@ -120,7 +121,7 @@ export async function handleCarVerify(request, env) {
   const res = await stripe(env, "checkout/sessions/" + id, { method: "GET" });
   if (res.status === 404) return json({ paid: false, error: "Receipt not found." }, 404);
   if (!res.ok) return json({ paid: false, error: "Couldn't check the payment. Try again later." }, 502);
-  const car = paidCar(res.body);
+  const car = (await wasRevoked(env, res.body.payment_intent)) ? null : paidCar(res.body); // refunded: no longer
   if (!car) return json({ paid: false });
   await ensureSchema(env.DB);
   if (!(await giveCar(env, res.body.metadata.user_id || "", car.id, id))) return json({ paid: false, error: "That payment isn't linked to an account. Contact us with your receipt." }, 404);

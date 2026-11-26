@@ -22,5 +22,7 @@
   },
   // Workers AI, for the answer judge (src/judge.js); free daily allowance, capped in code
   "ai": { "binding": "AI" },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // refunds and chargebacks take back what was bought (src/refunds.js)
+  "triggers": { "crons": ["*/30 * * * *"] }
 }
