@@ -5,8 +5,9 @@
 //   accepted = a green light. Solo road races then play ONE continuous reveal (makeReveal): a flash and
 //              letterbox bars, the car launches and shifts up once per rarity tier (a gear callout, a
 //              camera kick, the tier ladder lighting up and the distance ticking up; the sky changes from
-//              3rd gear), ending on a road sign that drops in on chains. Tap to skip. Other races get the
-//              short version: the tach shifts up in the rig and the race's own reveal takes over.
+//              3rd gear), ending on a road sign that drops in on chains. Tap to skip. Every mode plays it:
+//              the themed worlds (without the road's sky), CRAZY MODE (its payouts on the sign), and 2 players
+//              and online 1v1, where each racer gets their own reveal in turn once both have answered.
 //   rejected = four red flashes, the needle drops, the engine stalls in a puff of smoke; the answer stays.
 // Only the show lives here: main.js (askAnswer and the round reveal) decides when, and pauses the clock.
 
@@ -150,7 +151,8 @@ export function makeRig(zone, { tiers, sfx = {}, scene = () => null, racer = 0 }
     rpm(0.28);
     setTimeout(() => rpm(last ? 0.86 : 1), reduce() ? 0 : 110);
   }
-  function showLadder(full = true) { ladder.classList.toggle("full", full); ladder.classList.add("show"); }
+  // plain: only the distance (CRAZY MODE, where the tier names don't apply)
+  function showLadder(full = true, plain = false) { ladder.classList.toggle("full", full); ladder.classList.toggle("plain", plain); ladder.classList.add("show"); }
   function finalTier(g) { ladder.querySelector(`[data-t="${g}"]`)?.classList.add("final"); }
   function setOdo(m) { odoVal.textContent = "+" + Math.round(m).toLocaleString("en-US") + " M"; }
   function hideLadder() { ladder.classList.remove("show"); }
@@ -348,9 +350,9 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       sparks.append(e); setTimeout(() => e.remove(), 1400);
     }
   }
-  function showSign(tier, answer, metres) {
-    const T = tiers[tier];
-    kicker.textContent = tier === 5 ? `★ ${T.rarity} ★` : T.rarity;
+  function showSign(tier, answer, metres, names = tiers, who = "") {
+    const T = names[tier];
+    kicker.textContent = (who ? who + " · " : "") + (tier === 5 ? `★ ${T.rarity} ★` : T.rarity);
     signTier.textContent = "";
     const word = tier === 5 ? T.short : T.name;
     [...word].forEach((ch, i) => { const sp = el("span", null, ch === " " ? " " : ch); sp.style.setProperty("--i", i); signTier.append(sp); });
@@ -370,18 +372,23 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
   let active = false, guard = 0;
 
   // tier: 1–5; metres: what the answer is worth; rig: the REV & SHIFT rig (already green);
-  // launch(): start the car's real run; onGear(g): the car's own shift (sound, backfire); alive(): still this race
-  async function play({ tier, answer, metres, rig, launch, onGear, alive = () => true }) {
+  // launch(): start the car's real run; onGear(g): the car's own shift (sound, backfire); alive(): still this race;
+  // who: the racer's name on the sign (2 players, online); labels: names for the tiers instead of TIERS
+  // (CRAZY MODE's payouts); hold: how long the sign stays up (ms); sky: the road's sky effects and speed
+  // lines (off in the themed worlds, which aren't a road)
+  async function play({ tier, answer, metres, rig, launch, onGear, alive = () => true, who = "", labels = null, hold = 0, sky = true }) {
     active = true; skipping = false;
     const sc = scene();
     const calm = reduce();
+    const names = labels || tiers;
+    const lines = (o) => { streaks.style.opacity = calm || !sky ? "0" : String(o); };
     const kick = () => { if (!calm) pulse(stageEl, "rs-kick"); };
     armed = performance.now() + 250;
     addEventListener("pointerdown", onTap, true);
     // quitting mid-reveal ends it at once
     guard = setInterval(() => { if (!alive()) { skipping = true; wake?.(); } }, 200);
     layer.classList.add("on");
-    fx.on = true; fx.sky = 0; startAmb();
+    fx.on = sky; fx.sky = 0; if (sky) startAmb();
     // the green light: a white flash, a punch-in and the letterbox bars
     pulse(flash, "go");
     stageEl.classList.add("rs-cine");
@@ -389,11 +396,11 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     await nap(650);
     stageEl.classList.remove("rs-punch");
     if (!alive()) return end();
-    rig?.showLadder(true);
+    rig?.showLadder(true, !!labels);
     rig?.setOdo(0);
     launch?.();
     if (!calm) pulse(stageEl, "rs-rumble");
-    streaks.style.opacity = calm ? "0" : "0.4";
+    lines(0.4);
     await nap(350);
     // one shift per tier: rarer answers get more gears
     let odo = 0;
@@ -411,17 +418,17 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       const hex = TIER_HEX[g];
       rig?.shiftTo(g, g === tier);
       tick(metres * tiers[g].metres / tiers[tier].metres);
-      if (g >= 3) { fx.sky = g; sc?.rare?.(g); }
+      if (g >= 3) { if (sky) fx.sky = g; sc?.rare?.(g); }
       if (!skipping) {
         callout.style.setProperty("--c", hex);
         calloutGear.textContent = ORD[g];
-        calloutTier.textContent = tiers[g].short;
+        calloutTier.textContent = names[g].short;
         pulse(callout, "run");
         kick();
       }
       if (onGear) onGear(g); else sfx.shift?.();
       await nap(110);
-      streaks.style.opacity = calm ? "0" : String(Math.min(1, 0.4 + g * 0.15));
+      lines(Math.min(1, 0.4 + g * 0.15));
       await nap(g === tier ? 820 : 680);
     }
     if (!alive()) return end();
@@ -434,7 +441,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     callout.classList.remove("run");
     streaks.style.opacity = "0";
     if (!calm) stageEl.classList.add("rs-freeze");
-    showSign(tier, answer, metres);
+    showSign(tier, answer, metres, names, who);
     pulse(flash, "go");
     skipHint.classList.add("on");
     setTimeout(() => { if (!active) return; kick(); spark(TIER_HEX[tier], tier * 6); sfx.tier?.(tier); }, calm ? 0 : 420);
@@ -443,7 +450,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       sfx.win?.();
       for (let i = 0; i < 4 && !skipping; i++) { spark(TIER_HEX[5], 16); await nap(360); }
     } else sfx.ding?.();
-    if (alive()) await nap(tier >= 4 ? 3400 : 2800);
+    if (alive()) await nap(hold || (tier >= 4 ? 3400 : 2800));
     end();
   }
   function end() {

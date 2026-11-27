@@ -1920,6 +1920,8 @@ body.kb .rs-ladder { display: none; }
 .rs-odo { display: none; margin: 3px 0 0; padding-top: 5px; border-top: 2px solid var(--line); text-align: right; font: 15px var(--font-title); color: #fff; text-shadow: 2px 2px 0 #000; }
 .rs-odo small { display: block; font: 8px var(--font-title); letter-spacing: 0.2em; color: #a99fd0; }
 .rs-ladder.full .rs-odo { display: block; }
+.rs-ladder.plain div { display: none; }
+.rs-ladder.plain .rs-odo { margin: 0; padding: 0; border: 0; }
 .rs-show { position: absolute; inset: 0; z-index: 4; pointer-events: none; visibility: hidden; }
 .rs-show.on { visibility: visible; }
 .rs-amb { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }

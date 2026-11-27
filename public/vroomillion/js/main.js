@@ -24,8 +24,8 @@ import { DAILY, XMAS, MILESTONES as QUEST_MILESTONES, questState, raceEvents, ad
 import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
 // loads in the background like the answer lists below instead of holding up the title screen.
-let pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies;
-const racepickLoaded = import("./racepick.js").catch(() => import("./racepick.js")).then((m) => ({ pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies } = m));
+let pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies, mergeSeen;
+const racepickLoaded = import("./racepick.js").catch(() => import("./racepick.js")).then((m) => ({ pickRace, dailyRace, famKey, familyOf, answerSlug, poolFamilies, mergeSeen } = m));
 
 // The built-in answer lists (the game's original prompts, now part of the catalog) are about 2 MB, so they load in the background while the title screen is up
 // instead of holding up the first screen. Races wait for them (usually long since done).
@@ -1881,9 +1881,9 @@ async function startRaceV2(setup) {
   overlay("");
   startRace({ ...setup, v2questions: v2Questions(picks) });
 }
-// online races: seven prompts fresh for both players (each one's history of families)
+// online races: seven prompts fresh for both players (each one's history of families, merged by racepick.js)
 const v2OnlinePrompts = (deck, otherSeen = [], avoid = []) =>
-  pickRace(deck, [...seenList(), ...otherSeen, ...avoid.map(famKeyOf)], ROUNDS, Math.random, { has: hasQ }).map((x) => x.prompt);
+  pickRace(deck, [...mergeSeen(seenList(), otherSeen), ...avoid.map(famKeyOf)], ROUNDS, Math.random, { has: hasQ }).map((x) => x.prompt);
 
 let accountSeen = null; // the account's list once synced, null when logged out
 const deviceSeen = () => (Array.isArray(save.seen) ? save.seen : []);
@@ -2541,6 +2541,21 @@ function shiftUp(i, g, tier, run) {
   shiftFx(i, g);
 }
 
+// CRAZY MODE's road signs: the payout, not the rarity (gear 5 is a jackpot, a top answer)
+let crazySignList = null;
+function crazySigns() {
+  return crazySignList ||= TIERS.map((t, g) => !g ? t : {
+    ...t,
+    ...[null,
+      { name: "LONG SHOT", short: "LONG SHOT", blurb: "Too rare to pay much in CRAZY MODE." },
+      { name: "NOT BAD", short: "NOT BAD", blurb: "A few people say that one." },
+      { name: "OK!", short: "OK!", blurb: "Plenty of people say that." },
+      { name: "NICE!", short: "NICE!", blurb: "Nearly everybody says that. Big payout!" },
+      { name: "JACKPOT!", short: "JACKPOT!", blurb: `One of the top ${CRAZY_TOP} answers!` }][g],
+    rarity: g === 5 ? `CRAZY MODE · TOP ${CRAZY_TOP} ANSWER` : "CRAZY MODE",
+  });
+}
+
 // A rare answer takes over the screen: the world relights in the rarity colour (chase.js rare()), and a
 // big word slams into the middle with a shockwave. ONE IN A VROOMILLION adds confetti and a fanfare.
 function rareMoment(tier, crazy = false) {
@@ -2609,7 +2624,9 @@ function startRace(setup) {
     return;
   }
   prefetchDeep(questions.map((q) => q.base || q.q)); // the long-tail answer lists, in the background
-  lastSetup = { ...setup, redo: false, questions };
+  // REDO replays these questions; NEW RACE / PLAY AGAIN picks fresh ones (the picked prompts are dropped,
+  // or the next race would be this one again)
+  lastSetup = { ...setup, redo: false, questions, v2questions: null };
   // a daily race counts as played once it starts; an Unlimited race gets the next number
   let label, unlNo = 0;
   if (setup.online) {
@@ -2791,9 +2808,14 @@ async function runRace(token) {
     const bumped = final.some((f) => f.bump);
     if (bumped) { await coinToss(winner); if (!alive()) return; }
 
-    // solo road races: REV & SHIFT's full reveal (the car shifts up a gear per tier, then the tier's road sign)
-    // takes the place of the answer card
-    const show = race.solo && !race.online && final[0]?.show && final[0].tier > 0;
+    // REV & SHIFT's full reveal (the car shifts up a gear per tier, then the tier's road sign) takes the
+    // place of the answer card, in every mode. Solo: once the green light has shown (a right answer typed
+    // in time). Two racers: always, one after the other (the lower tier first; a stall gets the red light).
+    const multi = race.racers.length > 1;
+    const show = multi || (!!final[0]?.show && final[0].tier > 0);
+    // the road re-launches the car a gear at a time; a themed world (a map, a drive-in, a stadium, a
+    // side-scroller) sets off once, on the top gear, so the trip doesn't give the tier away
+    const gearByGear = scene === chaseScene;
     // reveal: everything else fades, the answer slams into the middle and the car smashes through it
     if (!show) {
       $("answer-zone").classList.add("hidden");
@@ -2848,7 +2870,7 @@ async function runRace(token) {
       runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier, show };
       scene.racers[i].nitro = nitro;
       // the full reveal launches in 1st gear and builds up a gear at a time (shiftUp); the sign replaces the pop-ups
-      const first = show ? 1 : tier;
+      const first = show && gearByGear && tier > 0 ? 1 : tier;
       scene.launch(i, first, nitro, dur / 1000);
       musicBuild(first);
       if (!show) popGain(i, gain[i], tier, nitro, race.crazy);
@@ -2921,11 +2943,42 @@ async function runRace(token) {
     });
     if (show) {
       revealShow ||= makeReveal(document.querySelector(".stage"), { tiers: TIERS, sfx: audio.sfx, scene: () => scene });
-      await revealShow.play({
-        tier: final[0].tier, answer: final[0].display, metres: gain[0], rig: rigShow, alive,
-        launch: () => startRun(0),
-        onGear: (g) => shiftUp(0, g, final[0].tier, runs[0]),
-      });
+      const zone = $("answer-zone");
+      const fxOf = (i) => effectTier(final[i].tier, race.crazy, final[i].top);
+      const order = race.racers.map((_, i) => i).sort((a, b) => fxOf(a) - fxOf(b) || a - b);
+      for (const i of order) {
+        if (!alive()) break;
+        const fx = fxOf(i);
+        if (multi) {
+          // both have answered: this racer's answer goes onto the plate for their own reveal
+          zone.classList.remove("hidden");
+          zone.classList.add("rs-busy");
+          $("answer").blur();
+          if (!rigShow) { if (fx) startRun(i); continue; }
+          rigShow.stage(final[i].display || "NO ANSWER", false, true);
+          if (!fx) { await rigShow.reject(i); startRun(i); showBadge(i); await sleep(250); continue; }
+          await rigShow.green();
+          if (!alive()) break;
+        }
+        // a themed world plans the trip its own reveal would have (WORLD TOUR's flight, ON TOUR's next city)
+        if (!gearByGear) scene.planLeg?.({ ...smashCards[i], i });
+        await revealShow.play({
+          tier: fx, answer: final[i].display, metres: gain[i], rig: rigShow, alive,
+          who: multi ? race.racers[i].name.toUpperCase() : "",
+          labels: race.crazy ? crazySigns() : null,
+          hold: multi ? 1900 : 0,
+          sky: gearByGear,
+          launch: () => { if (gearByGear) startRun(i); },
+          onGear: (g) => {
+            if (gearByGear) return shiftUp(i, g, fx, runs[i]);
+            shiftFx(i, g);
+            musicBuild(g);
+            if (g === fx) startRun(i);
+          },
+        });
+        if (!runs[i]) startRun(i); // skipped or quit before the top gear
+        showBadge(i);
+      }
       rigShow?.hide();
       $("answer-zone").classList.remove("rs-busy");
       $("answer-zone").classList.add("hidden");
@@ -2935,8 +2988,8 @@ async function runRace(token) {
     document.body.classList.remove("smashing");
     if (!alive()) return;
     smashed = true;
-    // a card that never got hit still launches its car
-    race.racers.forEach((_, i) => { if (!runs[i] && final[i].tier > 0) startRun(i); });
+    // a card that never got hit still launches its car (after the full reveal, a stalled one coughs too)
+    race.racers.forEach((_, i) => { if (!runs[i] && (final[i].tier > 0 || show)) startRun(i); });
     if (bumped) {
       audio.sfx.bump();
       overlay("FENDER BENDER!", "small bad");
@@ -3252,31 +3305,24 @@ function askAnswer(r, i, token, index) {
     const rig = rigShow;
     rig.hide();
     let showing = false; // REV & SHIFT is playing: GO waits for it
-    const gears = (res) => Math.max(1, effectTier(res.tier, race.crazy, res.top));
-    // solo road races get the full reveal over the road (the round's reveal plays it after the green light)
-    const full = race.solo && !race.online && !race.crazy && !hidden && scene === chaseScene;
-    // a right answer: the show (a quick sweep for one on our list), then it counts
+    // a right answer: the staging (a quick sweep for one on our list) and the green light, then it counts.
+    // The round's reveal plays the rest (REV & SHIFT's full reveal, in every mode). Solo, it follows
+    // straight on with the rig still up; with two racers the rig steps aside (the gears would give the
+    // tier away) and each racer's reveal plays once both have answered.
     const win = (res, text, fast) => {
       showing = true;
       pause();
       say("", "");
-      if (full) {
-        if (fast) rig.stage(text, hidden, true);
-        rig.green().then(() => {
-          showing = false;
-          resume();
-          if (finished || token !== raceToken) return rig.hide();
-          zone.classList.add("rs-busy");
-          input.blur();
-          lockIn({ ...res, show: true }, true);
-        });
-        return;
-      }
-      (fast ? rig.quick(text, gears(res), race.crazy, hidden) : rig.accept(gears(res), race.crazy)).then(() => {
+      if (fast) rig.stage(text, hidden, true);
+      rig.green().then(async () => {
+        if (!race.solo) await sleep(320); // the green light, seen
         showing = false;
         resume();
-        if (finished || token !== raceToken) return;
-        lockIn(res);
+        if (finished || token !== raceToken) return rig.hide();
+        if (!race.solo) return lockIn({ ...res, show: true });
+        zone.classList.add("rs-busy");
+        input.blur();
+        lockIn({ ...res, show: true }, true);
       });
     };
     const end = (keepRig = false) => {
@@ -3897,7 +3943,7 @@ $("btn-again").addEventListener("click", () => {
   if (rematch) { clearTimeout(rematch.poll); rematch = null; online = null; return show("online"); }
   if (!lastSetup) return;
   const next = lastSetup.daily && !unlimitedNow() && !FREE_PLAY ? nextDaily(save, dday()) : 0;
-  startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false });
+  startRace(next ? { mode: "solo", daily: next } : { ...lastSetup, daily: 0, redo: false, replay: 0, v2questions: null });
 });
 $("btn-redo").addEventListener("click", () => {
   if (rematch) return rematchGo();

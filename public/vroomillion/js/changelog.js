@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-27f",
+    date: "Nov 27, 2026",
+    title: "Rev & Shift everywhere",
+    items: [
+      "The Rev & Shift reveal now plays in every mode: WORLD TOUR, BOX OFFICE, ON TOUR, STADIUM RUN, CHRISTMAS and CRAZY MODE (its signs show the payout).",
+      "2 players and online 1v1: once you've both answered, each of you gets your own reveal with your name on the sign, rarest last.",
+      "No more repeated prompts: NEW RACE no longer replays the race you just did, the themed modes use every prompt before one comes back, and online races skip what either of you played lately.",
+    ],
+  },
+  {
     id: "2026-11-27e",
     date: "Nov 27, 2026",
     title: "Millions more answers",

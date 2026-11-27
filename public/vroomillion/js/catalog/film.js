@@ -185,7 +185,7 @@ ffran/theincredibles | 2 | film | g:characters | Name a character from The Incre
 ffran/findingnemo | 2 | film | g:characters | Name a Finding Nemo character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q15885268. } UNION { ?i wdt:P8345 wd:Q15885268. } UNION { ?w wdt:P179 wd:Q15885268; wdt:P674 ?i. ?v wdt:P179 wd:Q15885268; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 ffran/thegodfather | 2 | film | g:characters | Name a character from The Godfather | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q3225260. } UNION { ?i wdt:P8345 wd:Q3225260. } UNION { ?w wdt:P179 wd:Q3225260; wdt:P674 ?i. ?v wdt:P179 wd:Q3225260; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 ffran/thechroniclesofnarnia | 2 | film | g:characters | Name a character from The Chronicles of Narnia | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1211909. } UNION { ?i wdt:P8345 wd:Q1211909. } UNION { ?w wdt:P179 wd:Q1211909; wdt:P674 ?i. ?v wdt:P179 wd:Q1211909; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
-ffran/disneyprincess | 2 | film | g:characters | Name a Disney Princess character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1140303. } UNION { ?i wdt:P8345 wd:Q1140303. } UNION { ?w wdt:P179 wd:Q1140303; wdt:P674 ?i. ?v wdt:P179 wd:Q1140303; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
+ffran/disneyprincess | 2 | film | g:characters =character/disney | Name a Disney Princess character | autotop=12 max=800 min=1 minans=8 w:{ ?i wdt:P1441 wd:Q1140303. } UNION { ?i wdt:P8345 wd:Q1140303. } UNION { ?w wdt:P179 wd:Q1140303; wdt:P674 ?i. ?v wdt:P179 wd:Q1140303; wdt:P674 ?i. FILTER(?w != ?v) } ?i wdt:P31/wdt:P279* wd:Q95074. |
 # screen
 // tv
 fnet/netflix | 1 | film | g:tv | Name a Netflix show | autotop=12 max=800 min=2 minans=10 w:?i wdt:P449 wd:Q907311. ?i wdt:P31/wdt:P279? wd:Q5398426. |
@@ -210,7 +210,7 @@ ftvg/atvdrama | 1 | film | g:tv | Name a TV drama | autotop=12 max=800 min=8 min
 // studio
 fstudio/dreamworksanimation | 1 | film | g:studio | Name a DreamWorks movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q500088. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/studioghibli | 2 | film | g:studio | Name a Studio Ghibli movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q182950. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fstudio/marvelstudios | 1 | film | g:studio | Name a Marvel Studios movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q367466. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fstudio/marvelstudios | 1 | film | g:studio =movie/superhero | Name a Marvel Studios movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q367466. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/illumination | 2 | film | g:studio | Name an Illumination movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q1189512. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fstudio/waltdisneypictures | 2 | film | g:studio | Name a Disney movie | autotop=12 max=800 min=1 minans=8 w:?i wdt:P272 wd:Q191224. ?i wdt:P31/wdt:P279* wd:Q11424. |
 # screen
@@ -227,7 +227,7 @@ ftv/2020 | 2 | film | g:era | Name a 2020s TV show | autotop=12 max=800 min=15 m
 // genre
 fgenre/asciencefictionmovie | 1 | film | g:genre | Name a science fiction movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q471839. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fgenre/awestern | 1 | film | g:genre | Name a western | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q172980. ?i wdt:P31/wdt:P279* wd:Q11424. |
-fgenre/acrimemovie | 1 | film | g:genre | Name a crime movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q959790. ?i wdt:P31/wdt:P279* wd:Q11424. |
+fgenre/acrimemovie | 1 | film | g:genre =movie/heist | Name a crime movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q959790. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fgenre/athriller | 2 | film | g:genre | Name a thriller | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q2484376. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fgenre/adisastermovie | 2 | film | g:genre | Name a disaster movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q846544. ?i wdt:P31/wdt:P279* wd:Q11424. |
 fgenre/aspymovie | 2 | film | g:genre | Name a spy movie | autotop=12 max=800 min=8 minans=15 w:?i wdt:P136 wd:Q2297927. ?i wdt:P31/wdt:P279* wd:Q11424. |

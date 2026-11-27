@@ -12,4 +12,5 @@ the player opens ALL UPDATES.
 ## Daily race order
 The daily races are fixed in `public/vroomillion/js/catalog/daily-order.js`. After adding daily prompts
 (and `node tools/build-catalog.mjs`), run `node tools/daily-order.mjs`: it appends new races at the end and
-never changes existing ones, so a day that's been played keeps its prompts.
+never changes a day that's been played. Only on days nobody has played yet, it swaps out a prompt whose twin
+(same question, other words) came up on an earlier day, so the daily never asks the same thing twice.

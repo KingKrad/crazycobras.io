@@ -149,7 +149,7 @@ gmountc/mexico | 2 | geo | g:peaks | Name a mountain in Mexico | geo autotop=12 
 gmountc/canada | 2 | geo | g:peaks | Name a mountain in Canada | geo autotop=12 max=800 min=3 minans=10 w:{ ?i wdt:P31 wd:Q8502. } UNION { ?i wdt:P31 wd:Q207326. } ?i wdt:P17 wd:Q16. FILTER NOT EXISTS { ?i wdt:P576 [] } |
 gmountc/switzerland | 2 | geo | g:peaks | Name a mountain in Switzerland | geo autotop=12 max=800 min=3 minans=10 w:{ ?i wdt:P31 wd:Q8502. } UNION { ?i wdt:P31 wd:Q207326. } ?i wdt:P17 wd:Q39. FILTER NOT EXISTS { ?i wdt:P576 [] } |
 gpeak/range | 1 | geo | g:peaks | Name a mountain range | geo autotop=12 max=800 min=30 minans=20 w:?i wdt:P31/wdt:P279* wd:Q46831. FILTER NOT EXISTS { ?i wdt:P576 [] } |
-gpeak/mountain | 1 | geo | g:peaks | Name a famous mountain | geo autotop=12 max=800 min=50 minans=20 w:{ ?i wdt:P31 wd:Q8502. } UNION { ?i wdt:P31 wd:Q207326. } FILTER NOT EXISTS { ?i wdt:P576 [] } |
+gpeak/mountain | 1 | geo | g:peaks =nature/mountain | Name a famous mountain | geo autotop=12 max=800 min=50 minans=20 w:{ ?i wdt:P31 wd:Q8502. } UNION { ?i wdt:P31 wd:Q207326. } FILTER NOT EXISTS { ?i wdt:P576 [] } |
 # places
 // islands
 gislc/france | 2 | geo | g:islands | Name an island that belongs to France | geo autotop=12 max=800 min=3 minans=8 w:?i wdt:P31/wdt:P279* wd:Q23442. ?i wdt:P17 wd:Q142. FILTER NOT EXISTS { ?i wdt:P576 [] } |

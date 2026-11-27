@@ -305,7 +305,7 @@ test("hand-picked top answers fix Wikidata-built prompts", () => {
 });
 
 // ---------- prompt families, groups, topics ----------
-import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies, isWordGame } from "../public/vroomillion/js/racepick.js";
+import { pickRace, dailyRace, dailyLayout, famKey, familyOf, poolFamilies, isWordGame, mergeSeen } from "../public/vroomillion/js/racepick.js";
 import { FAMILIES, TOPICS } from "../public/vroomillion/js/catalog/index.js";
 import { QUESTIONS as ALL_Q } from "../public/vroomillion/js/data.js";
 
@@ -322,12 +322,15 @@ test("catalog: every family has a known topic, level and pool, and no prompt is 
   }
 });
 
-test("catalog: a twin points at a real family in the same pools (so 'never similar' holds across Unlimited and daily)", () => {
+test("catalog: a twin points at a real family in its pools (so 'never similar' holds across Unlimited and daily)", () => {
   const byId = new Map(FAMILIES.map((f) => [f.id, f]));
   for (const f of FAMILIES.filter((x) => x.key !== x.id)) {
     const main = byId.get(f.key);
     assert.ok(main, `${f.id} is a twin of unknown ${f.key}`);
-    assert.deepEqual([...f.pools].sort(), [...main.pools].sort(), `${f.id} and ${f.key} must share pools`);
+    assert.equal(main.key, main.id, `${f.id}: twin of ${f.key}, itself a twin (point at the first one)`);
+    // a themed mode's own wording of a prompt (BOX OFFICE's 'Name a Marvel Studios movie') may twin one
+    // that's in more pools ('Name a Marvel movie': CLASSIC and BOX OFFICE): having either uses up both
+    assert.ok(f.pools.every((p) => main.pools.includes(p)), `${f.id} (${f.pools}) must be in ${f.key}'s pools (${main.pools})`);
   }
 });
 
@@ -359,6 +362,34 @@ test("races: no family twice, no group twice, at most one single, seven topics w
   assert.equal(new Set(race.map((x) => x.family.topic)).size, 7);
 });
 
+test("races: the themed modes play every fresh prompt (any level) before one comes back", () => {
+  for (const mode of ["geo", "film", "music", "sport", "xmas"]) {
+    const keys = new Set(poolFamilies(mode).map(famKey));
+    let seen = [];
+    for (let r = 0; r + 1 <= Math.floor(keys.size / 7); r++) {
+      const race = pickRace(mode, seen, 7, Math.random);
+      assert.equal(race.length, 7, mode);
+      for (const x of race) {
+        assert.ok(!seen.includes(famKey(x.family)), `${mode} race ${r + 1} repeats ${x.prompt} while fresh ones are left`);
+        seen = [...seen, famKey(x.family)];
+      }
+      assert.ok(race.filter((x) => x.tricky).length <= 1, mode + ": one tricky one at most");
+    }
+    // used up: still seven, oldest first
+    assert.equal(pickRace(mode, [...keys], 7, Math.random).length, 7, mode);
+  }
+});
+
+test("online: two histories merge by how long ago EITHER player had a family", () => {
+  // the host has just had x then y; the friend had a, b, then c. Oldest first, by prompts played since.
+  assert.deepEqual(mergeSeen(["x", "y"], ["a", "b", "c"]), ["a", "x", "b", "y", "c"]);
+  assert.deepEqual(mergeSeen(["a", "b"], ["b", "a"]), ["a", "b"], "a family both had counts once, as recent as its latest");
+  // the pool used up between them: the host's just-played prompt doesn't come straight back
+  const fams = parseTiny(), keys = fams.map(famKey);
+  const race = pickRace("classic", mergeSeen([keys[0]], [keys[1], keys[2], keys[3]]), 1, () => 0, { families: fams });
+  assert.notEqual(famKey(race[0].family), keys[0]);
+});
+
 test("races: once everything is used, the oldest-seen families come back first", () => {
   const fams = parseTiny();
   const seen = fams.map((f) => famKey(f)); // all seen, first ones oldest
@@ -380,11 +411,17 @@ test("daily race: the same seven for everyone on a day, different the next day, 
 test("daily order: fixed, every daily family at most once, seven groups a race, new families laid out", async () => {
   const { DAILY_START, DAILY_ORDER } = await import("../public/vroomillion/js/catalog/daily-order.js");
   const byId = new Map(FAMILIES.map((f) => [f.id, f]));
-  const seen = new Set();
+  const seen = new Set(), asked = new Map();
   for (const line of DAILY_ORDER) {
     const ids = line.split(",");
     assert.equal(ids.length, 7, line);
     for (const id of ids) { assert.ok(!seen.has(id), "twice: " + id); seen.add(id); }
+    // never the same question twice either (twins share a history key; tools/daily-order.mjs swaps them)
+    for (const id of ids.filter((x) => byId.has(x))) {
+      const k = famKey(byId.get(id));
+      assert.ok(!asked.has(k), `${id} asks ${asked.get(k)}'s question again`);
+      asked.set(k, id);
+    }
     const fams = ids.map((id) => byId.get(id)).filter(Boolean);
     assert.equal(new Set(fams.map((f) => f.group)).size, fams.length, line);
     if (DAILY_ORDER.indexOf(line) >= 2) assert.ok(fams.filter(isWordGame).length <= 1, "two word games: " + line);
@@ -392,7 +429,8 @@ test("daily order: fixed, every daily family at most once, seven groups a race, 
   // nearly every listed family still exists, and nearly every daily family is listed (run tools/daily-order.mjs)
   assert.ok([...seen].filter((id) => !byId.has(id)).length < 20);
   // (word games beyond one a race wait for more prompts)
-  assert.ok(poolFamilies("daily").filter((f) => !seen.has(f.id) && !isWordGame(f)).length < 50, "run node tools/daily-order.mjs");
+  // (and a twin of a listed family stays out: it would ask that question again)
+  assert.ok(poolFamilies("daily").filter((f) => !seen.has(f.id) && !asked.has(famKey(f)) && !isWordGame(f)).length < 50, "run node tools/daily-order.mjs");
   // the start day gets the first line
   assert.deepEqual(dailyRace(DAILY_START).map((x) => x.family.id), DAILY_ORDER[0].split(","));
 });
