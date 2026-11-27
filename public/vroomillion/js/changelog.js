@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-27c",
+    date: "Nov 27, 2026",
+    title: "Millions more answers",
+    items: [
+      "About 3 million answers from Wikidata now count instantly: obscure TV shows, films, songs, athletes, places and more.",
+      "Song and movie prompts about named artists and actors (Billy Joel, Bad Bunny, Denzel Washington...) know their whole catalogues, so deep cuts score big.",
+      "Those prompts are back in Unlimited races, and ON TOUR has way more to pick from.",
+    ],
+  },
+  {
     id: "2026-11-27b",
     date: "Nov 27, 2026",
     title: "Rev & Shift, and the crowd",

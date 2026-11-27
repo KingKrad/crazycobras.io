@@ -412,7 +412,9 @@ test("answer files: five tiers, the obvious answers in TRAFFIC, no 'not this' no
     const d = JSON.parse(fs.readFileSync(new URL(f, dir), "utf8"));
     assert.equal(d.a.length, 5, f);
     assert.ok(d.a[0].length >= 5, f + ": TRAFFIC");
-    for (const t of d.a) for (const e of t) assert.ok(!/ no$/.test(e) || /^(oh|uh|dr\.?) no$/.test(e), `${f}: ${e}`);
+    // hand-written notes only: lists built from Wikidata (live) have real titles such as "Check Yes or No"
+    const hand = d.live ? [d.a[0]] : d.a;
+    for (const t of hand) for (const e of t) assert.ok(!/ no$/.test(e) || /^(oh|uh|dr\.?) no$/.test(e), `${f}: ${e}`);
   }
 });
 
