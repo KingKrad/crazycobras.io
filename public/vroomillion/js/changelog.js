@@ -17,10 +17,9 @@ export const CHANGELOG = [
   {
     id: "2026-11-27a",
     date: "Nov 27, 2026",
-    title: "Way bigger answer lists",
+    title: "The whole dictionary",
     items: [
       "Word games now know the whole dictionary: every real word that rhymes, starts with or ends in the letters counts, and rarer words go further.",
-      "Thousands more answers for lists built from Wikidata: obscure TV shows, songs, films and more count instantly.",
       "Unlimited races now pick prompts that have big answer lists, so fewer real answers get turned away.",
     ],
   },
