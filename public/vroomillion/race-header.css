@@ -1,0 +1,32 @@
+/* The race header: one compact pill (round pips, ROUND X OF 7, the mode) instead of a full-width strip. */
+#s-race .round-box {
+  flex-direction: row;
+  align-items: center;
+  justify-self: center;
+  align-self: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 6px 12px;
+  background: rgba(11, 6, 24, 0.82);
+  border: 2px solid var(--line);
+  box-shadow: 0 0 0 2px #000, 0 4px 0 rgba(0, 0, 0, 0.45);
+}
+#s-race .round-box .pips { gap: 3px; }
+#s-race .round-box .pip { width: 10px; height: 10px; background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.22); }
+#s-race .round-box .pip.done { background: var(--green); border-color: var(--green); }
+#s-race .round-box .pip.on { background: var(--yellow); border-color: #fff; box-shadow: 0 0 8px var(--yellow); animation: pip-pulse 1.2s ease-in-out infinite; }
+@keyframes pip-pulse { 50% { box-shadow: 0 0 2px var(--yellow); opacity: 0.75; } }
+#s-race .round-label { font-size: 10px; letter-spacing: 0.08em; color: #fff; white-space: nowrap; }
+#s-race .mode-tag { padding: 0 0 0 10px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; }
+#s-race .mode-tag.mode-daily { background: none; color: var(--cyan); }
+#s-race .mode-tag:empty { display: none; }
+@media (max-width: 380px) { #s-race .round-box { gap: 7px; padding: 5px 9px; } #s-race .round-box .pip { width: 8px; height: 8px; } }
+@media (prefers-reduced-motion: reduce) { #s-race .round-box .pip.on { animation: none; } }
+
+html[data-season="xmas"] #s-race .round-box { background: rgba(5, 20, 11, 0.86); border-color: #ffd23a; box-shadow: 0 0 0 2px #4a0008, 0 4px 0 rgba(0, 0, 0, 0.45); }
+html[data-season="xmas"] #s-race .mode-tag { border-left-color: rgba(255, 210, 58, 0.5); }
+html[data-season="xmas"] #s-race .mode-tag.mode-daily { color: #7dffb0; }
+body[data-theme="xmas"] #s-race .round-box, body[data-theme="music"] #s-race .round-box { width: fit-content; }
+html[data-season="xmas"] #s-race .hud { background: none; border-color: transparent; }
+html[data-season="xmas"] #s-race .hud-card { border-color: #ffd23a; background: rgba(14, 42, 26, 0.88); }

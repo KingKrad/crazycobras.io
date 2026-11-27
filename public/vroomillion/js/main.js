@@ -19,6 +19,7 @@ import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
 import { SleighScene } from "./sleigh.js";
 import { flyover, presentCanvas } from "./presents.js";
+import { makeRig } from "./revshift.js";
 import { DAILY, XMAS, MILESTONES as QUEST_MILESTONES, questState, raceEvents, addEvents, progressOf, claimable } from "./quests.js";
 import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
@@ -3102,7 +3103,8 @@ async function lookupOnline(index, value, k) {
   if (settled) onlineSeen.set(k, hit);
   return hit;
 }
-const CHECK_WAIT_MS = 6000; // the longest GO waits on the live Wikidata check (the race clock still ends it sooner)
+const CHECK_WAIT_MS = 8000; // the longest GO waits on the live Wikidata check (the clock is paused meanwhile)
+let rigShow = null; // REV & SHIFT (js/revshift.js), made once
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
 function onlineTier(hit) {
   const [t2, t3] = Array.isArray(hit.tiers) ? hit.tiers : [70, 25];
@@ -3146,9 +3148,38 @@ function askAnswer(r, i, token, index) {
     const t0 = performance.now();
     let lastTick = 99;
     let finished = false;
+    // the clock stops while REV & SHIFT shows a check (at most CHECK_WAIT_MS each time), so a slow
+    // server never costs the player time
+    let pausedMs = 0, pauseFrom = 0;
+    const pause = () => { if (!pauseFrom) pauseFrom = performance.now(); $("ring-fg").parentNode.parentNode.classList.add("paused"); };
+    const resume = () => {
+      if (pauseFrom) pausedMs += Math.min(performance.now() - pauseFrom, CHECK_WAIT_MS);
+      pauseFrom = 0;
+      $("ring-fg").parentNode.parentNode.classList.remove("paused");
+    };
+    const elapsed = (now) => now - t0 - pausedMs - (pauseFrom ? Math.min(now - pauseFrom, CHECK_WAIT_MS) : 0);
+    rigShow ||= makeRig(zone, { tiers: TIERS, sfx: audio.sfx });
+    const rig = rigShow;
+    rig.hide();
+    let showing = false; // REV & SHIFT is playing: GO waits for it
+    const gears = (res) => Math.max(1, effectTier(res.tier, race.crazy, res.top));
+    // a right answer: the show (a quick sweep for one on our list), then it counts
+    const win = (res, text, fast) => {
+      showing = true;
+      pause();
+      say("", "");
+      (fast ? rig.quick(text, gears(res), race.crazy, hidden) : rig.accept(gears(res), race.crazy)).then(() => {
+        showing = false;
+        resume();
+        if (finished || token !== raceToken) return;
+        lockIn(res);
+      });
+    };
     const end = () => {
       if (finished) return;
       finished = true;
+      resume();
+      rig.hide();
       cancelAnimationFrame(raf);
       input.removeEventListener("keydown", onKey);
       input.removeEventListener("input", onInput);
@@ -3183,38 +3214,48 @@ function askAnswer(r, i, token, index) {
     const submit = (timedOut = false) => {
       if (finished) return;
       if (token !== raceToken) { end(); return resolve(stalled); }
+      if (showing && !timedOut) return;
       const value = input.value;
-      if (suggestion && normalize(value) === suggestion.key) return lockIn(suggestion);
+      if (suggestion && normalize(value) === suggestion.key) return timedOut ? lockIn(suggestion) : win(suggestion, suggestion.display, true);
       suggestion = null;
       const res = judge(index, value);
       if (res.tier > 0 && res.corrected && !timedOut) return offer(res);
-      if (res.tier > 0) return lockIn(res);
+      if (res.tier > 0) return timedOut ? lockIn(res) : win(res, value, true);
       if (timedOut) {
         end();
         input.value = "";
         return resolve(stalled);
       }
       // Not on our list: ask the online check (usually already started while they typed) and give one
-      // verdict. CHECKING… shows meanwhile; it waits up to 6 s for Wikidata, or until the
-      // clock runs out, so there's never a wrong-then-right flip. A late "yes" is still remembered for the
-      // next time someone tries it.
+      // verdict. REV & SHIFT stages meanwhile with the clock paused, for up to 8 s, so there's never a
+      // wrong-then-right flip. A late "yes" is still remembered for the next time someone tries it.
       if (index.prompt && value.trim().length >= 3) {
         const same = (a) => normalize(a).replace(/ /g, "");
         const asFound = (hit) => ({ tier: onlineTier(hit), display: hit.label, key: normalize(hit.label), online: true });
-        const verdict = (hit) => {
-          if (hit) return same(hit.label) === same(value) ? lockIn(asFound(hit)) : offer({ ...asFound(hit), corrected: true });
-          return reject(value);
+        // staged: the rig is already showing (a real check); otherwise it was known at once
+        const verdict = (hit, staged) => {
+          if (hit && same(hit.label) === same(value)) return staged ? win(asFound(hit), value, false) : win(asFound(hit), value, true);
+          if (staged) rig.hide();
+          if (hit) return offer({ ...asFound(hit), corrected: true });
+          if (!staged) return reject(value, true);
+          // a red light and a stall, then the answer stays in the box to fix
+          showing = true;
+          rig.reject().then(() => { showing = false; resume(); if (!finished && token === raceToken) reject(value, true); });
         };
-        if (onlineKnown(index, value)) return verdict(onlineSeen.get(index.prompt + "|" + normalize(value)));
+        if (onlineKnown(index, value)) return verdict(onlineSeen.get(index.prompt + "|" + normalize(value)), false);
         if (checking) return;
         checking = true;
-        say("CHECKING…", "checking");
+        pause();
+        rig.stage(value, hidden);
+        const slow = setTimeout(() => { if (checking && !finished) say("CHECKING THE RULEBOOK…", "checking"); }, 3500);
         Promise.race([checkOnline(index, value), new Promise((r) => setTimeout(() => r(null), CHECK_WAIT_MS))]).then((hit) => {
           checking = false;
+          clearTimeout(slow);
           if (finished || token !== raceToken) return;
-          // they've started typing something new meanwhile: a "no" doesn't wipe it
-          if (!hit && normalize(input.value) !== normalize(value)) return reject(value, true);
-          verdict(hit);
+          if (feedback.classList.contains("checking")) say("", "");
+          if (!hit) return verdict(null, true);
+          resume();
+          verdict(hit, true);
         });
         return;
       }
@@ -3230,6 +3271,7 @@ function askAnswer(r, i, token, index) {
       else say(hidden ? "NOT ON THE LIST — TRY AGAIN!" : `"${value.trim().toUpperCase().slice(0, 24)}" ISN'T ON THE LIST — TRY AGAIN!`, "bad");
       if (!keepInput) input.value = "";
       input.focus({ preventScroll: true });
+      if (keepInput && normalize(input.value) === normalize(value)) input.select(); // quick to fix a typo
     };
     const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
     const onGo = () => submit();
@@ -3272,7 +3314,7 @@ function askAnswer(r, i, token, index) {
     let raf = 0;
     const tick = (now) => {
       if (token !== raceToken) { end(); return resolve(stalled); }
-      const left = ANSWER_SECONDS - (now - t0) / 1000;
+      const left = ANSWER_SECONDS - elapsed(now) / 1000;
       const frac = Math.max(0, left / ANSWER_SECONDS);
       fill.style.transform = `scaleX(${frac})`;
       fill.classList.toggle("low", left < 6);

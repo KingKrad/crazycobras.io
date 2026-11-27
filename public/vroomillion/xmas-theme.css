@@ -101,6 +101,5 @@ html[data-season="xmas"] body #q-card .question { color: #fff6ec; }
 html[data-season="xmas"] body #answer { border-color: #ffd23a; background: #081a10; color: #fff6ec; }
 html[data-season="xmas"] body #answer::placeholder { color: #5a7a64; }
 html[data-season="xmas"] #s-race .btn.go, html[data-season="xmas"] body #btn-next { background: #c8202a; border-color: #ffd23a; }
-html[data-season="xmas"] body .hud, html[data-season="xmas"] body .round-box { border-color: #ffd23a; background: rgba(14, 42, 26, 0.88); }
 
 @media (prefers-reduced-motion: reduce) { html[data-season="xmas"] .tabbar::before { animation: none; } }
