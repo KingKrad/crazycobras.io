@@ -673,7 +673,7 @@ export class ChaseScene {
     this.carBottom = Math.round(carBottom);
     // canvas px per sprite px for the nearest car: about 15% of the width, a quarter to two fifths
     // smaller than before, so you see more road around it
-    this.carPx = Math.max(1, (w * 0.15) / 40);
+    this.carPx = Math.max(1, (w * (w > h * 1.25 ? 0.11 : 0.15)) / 40);
     if (same) return;
     this.canvas.width = w;
     this.canvas.height = h;
@@ -1755,7 +1755,8 @@ export class ChaseScene {
     const { W, H, canvas: cv, tod } = this, hz = this.horizon;
     if (!W || hz <= 0 || hz >= H) return;
     const rain = this.wx.rain || 0, night = tod.lamps || 0;
-    const wet = clamp(0.08 + rain * 0.32 + night * 0.07, 0, 0.42);
+    const soft = (this.cssPx || 1) >= 1.75 ? 0.45 : 1;
+    const wet = clamp(0.08 + rain * 0.32 + night * 0.07, 0, 0.42) * soft;
     g.save();
     g.imageSmoothingEnabled = false;
     // 1. the world above the horizon, mirrored softly into the road
@@ -1771,7 +1772,7 @@ export class ChaseScene {
       const b = r.box;
       if (!b || b.w < 4) continue;
       g.save();
-      g.globalAlpha = 0.18 + wet * 0.45;
+      g.globalAlpha = (0.18 + wet * 0.45) * soft;
       g.beginPath(); g.rect(b.x - 2, b.y, b.w + 4, b.h * 0.65); g.clip();
       g.translate(0, b.y * 2); g.scale(1, -1);
       g.drawImage(cv, b.x - 2, b.y - b.h, b.w + 4, b.h, b.x - 2, b.y - b.h, b.w + 4, b.h);
@@ -1809,7 +1810,7 @@ export class ChaseScene {
           bg.clearRect(0, 0, bw, bh); bg.drawImage(cv, 0, 0, bw, bh);
           bl.dataset.fresh = "1";
         }
-        g.save(); g.globalCompositeOperation = "screen"; g.globalAlpha = 0.2 + night * 0.1; g.imageSmoothingEnabled = true;
+        g.save(); g.globalCompositeOperation = "screen"; g.globalAlpha = (0.2 + night * 0.1) * soft; g.imageSmoothingEnabled = true;
         g.drawImage(bl, 0, 0, W, H); g.restore();
       }
       // 5. speed: the frame zooms a touch at the edges while you fly
@@ -2628,7 +2629,10 @@ export class ChaseScene {
         g.beginPath();
         g.rect(0, 0, this.W, Math.min(...lights.map((o) => o.bottom - o.h * 0.92))); // beams shine ahead, never over the cars
         g.clip();
-        g.fillStyle = `rgba(255,244,200,${(0.14 * amt).toFixed(3)})`;
+        const beam = g.createLinearGradient(0, nearY, 0, farY);
+        beam.addColorStop(0, `rgba(255,244,200,${(0.14 * amt * ((this.cssPx || 1) >= 1.75 ? 0.6 : 1)).toFixed(3)})`);
+        beam.addColorStop(1, "rgba(255,244,200,0)");
+        g.fillStyle = beam;
         g.beginPath();
         g.moveTo(cx - w * 0.42, nearY);
         g.lineTo(cx + w * 0.42, nearY);

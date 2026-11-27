@@ -1,0 +1,21 @@
+.rs-rig { grid-template-columns: 1fr auto 1fr; }
+.rs-rig > .rs-tree { justify-self: start; }
+.rs-rig > .rs-tach { justify-self: end; }
+.rs-plate { min-width: 132px; }
+.rs-plate b { max-width: 220px; text-overflow: clip; }
+.rs-sub { flex-wrap: wrap; justify-content: center; white-space: normal; max-width: 300px; row-gap: 2px; }
+.rs-sub span { overflow-wrap: anywhere; }
+@keyframes rs-flash { 0% { opacity: 0.4; } 100% { opacity: 0; } }
+
+@media (min-width: 1100px) and (min-height: 680px) {
+  body:not([data-screen="title"]):not([data-screen="race"]) main, .topbar, .tabbar, footer, #s-title .title-bottom { zoom: 1.25; }
+  #s-race .race-top, #s-race .q-card, #s-race .race-dock { zoom: 1.25; }
+  .rs-sign, .rs-callout b, .rs-callout small { zoom: 1.35; }
+  #s-race .q-kicker { font-size: 10px; }
+  #s-race .q-lead, #s-race .turn, #s-race .feedback, #s-race .btn.nitro, #s-title .daily-status { font-size: 11px; }
+  #s-race .answer-row { grid-template-columns: 178px minmax(0, 1fr) 84px 84px; }
+  #s-race .answer-row .ring { justify-self: end; }
+  #s-race #btn-go, #s-race #btn-nitro { width: 84px; padding-left: 0; padding-right: 0; }
+  #s-race #btn-next { width: auto; min-width: 280px; margin-left: auto; margin-right: auto; display: block; }
+  .scanlines { opacity: 0.45; }
+}

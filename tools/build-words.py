@@ -8,8 +8,8 @@
 #   Rhymes come from the CMU Pronouncing Dictionary; "means" prompts from WordNet's synonyms.
 #
 #   tiers: the hand-written answers keep theirs (TRAFFIC is always the hand-picked obvious answers, and
-#   ONE IN A VROOMILLION stays hand-picked). A dictionary word is CRUISING if it's common (Zipf >= 4),
-#   FAST LANE if it's everyday (>= 3), DEEP CUT otherwise.
+#   ONE IN A VROOMILLION stays hand-picked). A dictionary word is CRUISING if it's common (Zipf >= 3.8),
+#   FAST LANE if it's everyday (>= 2.6), DEEP CUT otherwise.
 #
 # Needs: pip install wordfreq pronouncing nltk, and the WordNet data (nltk's corpora/wordnet) in NLTK_DATA.
 #   NLTK_DATA=/path/to/nltk_data python3 tools/build-words.py            every word prompt
@@ -121,7 +121,7 @@ PATTERNS = [
 
 def tier_of(w):
     z = zipf(w)
-    return 2 if z >= 4 else 3 if z >= 3 else 4
+    return 2 if z >= 3.8 else 3 if z >= 2.6 else 4
 
 def main():
     from_norm = lambda s: re.sub(r"[^a-z0-9]+", "", s.lower())

@@ -80,7 +80,7 @@ export function makeRig(zone, { tiers, sfx = {}, scene = () => null, racer = 0 }
     sweeps = 0; minSweeps = quick ? 1 : 2;
     let stopWanted = false, release;
     sweepDone = { stop: () => { stopWanted = true; }, done: new Promise((r) => { release = r; }) };
-    const shown = hiddenText ? "• • • •" : String(text).toUpperCase().slice(0, 22);
+    const shown = hiddenText ? "• • • •" : String(text).toUpperCase().slice(0, 40);
     plateText.textContent = shown;
     plate.className = "rs-plate"; plate.style.removeProperty("--pc");
     gear.textContent = "N"; gear.style.removeProperty("--gc");
@@ -88,6 +88,8 @@ export function makeRig(zone, { tiers, sfx = {}, scene = () => null, racer = 0 }
     odoVal.textContent = "+0 M";
     clear(); rpm(0.1);
     rig.classList.add("show");
+    plateText.style.fontSize = "";
+    for (let px = 17; plateText.scrollWidth > plateText.clientWidth && px > 9; px--) plateText.style.fontSize = px - 1 + "px";
     if (!hiddenText) fly(shown);
     void plate.offsetWidth; plate.classList.add("land");
     sfx.lock?.();
@@ -356,7 +358,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     [...word].forEach((ch, i) => { const sp = el("span", null, ch === " " ? " " : ch); sp.style.setProperty("--i", i); signTier.append(sp); });
     blurb.textContent = T.blurb;
     sub.textContent = "";
-    sub.append(el("span", null, `“${String(answer).toUpperCase().slice(0, 18)}”`), el("i", null, `+${Math.round(metres).toLocaleString("en-US")} M`));
+    sub.append(el("span", null, `“${String(answer).toUpperCase().slice(0, 40)}”`), el("i", null, `+${Math.round(metres).toLocaleString("en-US")} M`));
     // hang it just under the prompt card (its chains go up behind the card)
     const card = document.querySelector("#q-card:not(.hidden)")?.getBoundingClientRect();
     const box = stageEl.getBoundingClientRect();
@@ -382,11 +384,11 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     guard = setInterval(() => { if (!alive()) { skipping = true; wake?.(); } }, 200);
     layer.classList.add("on");
     fx.on = true; fx.sky = 0; startAmb();
-    // the green light: a white flash, a punch-in and the letterbox bars
-    pulse(flash, "go");
+    const big = tier >= 3;
+    if (big) pulse(flash, "go");
     stageEl.classList.add("rs-cine");
-    if (!calm) stageEl.classList.add("rs-punch");
-    await nap(650);
+    if (!calm && big) stageEl.classList.add("rs-punch");
+    await nap(big ? 650 : 150);
     stageEl.classList.remove("rs-punch");
     if (!alive()) return end();
     rig?.showLadder(true);
@@ -394,11 +396,11 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     launch?.();
     if (!calm) pulse(stageEl, "rs-rumble");
     streaks.style.opacity = calm ? "0" : "0.4";
-    await nap(350);
+    await nap(big ? 350 : 120);
     // one shift per tier: rarer answers get more gears
     let odo = 0;
     const tick = (to) => {
-      const from = odo, t0 = performance.now(), ms = skipping ? 0 : 450;
+      const from = odo, t0 = performance.now(), ms = skipping ? 0 : big ? 450 : 250;
       odo = to;
       const step = (now) => {
         const k = ms ? Math.min(1, (now - t0) / ms) : 1;
@@ -412,7 +414,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       rig?.shiftTo(g, g === tier);
       tick(metres * tiers[g].metres / tiers[tier].metres);
       if (g >= 3) { fx.sky = g; sc?.rare?.(g); }
-      if (!skipping) {
+      if (!skipping && big) {
         callout.style.setProperty("--c", hex);
         calloutGear.textContent = ORD[g];
         calloutTier.textContent = tiers[g].short;
@@ -422,7 +424,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       if (onGear) onGear(g); else sfx.shift?.();
       await nap(110);
       streaks.style.opacity = calm ? "0" : String(Math.min(1, 0.4 + g * 0.15));
-      await nap(g === tier ? 820 : 680);
+      await nap(big ? (g === tier ? 820 : 680) : (g === tier ? 420 : 260));
     }
     if (!alive()) return end();
     // the stamp: the sign drops in on its chains
@@ -435,7 +437,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
     streaks.style.opacity = "0";
     if (!calm) stageEl.classList.add("rs-freeze");
     showSign(tier, answer, metres);
-    pulse(flash, "go");
+    if (big) pulse(flash, "go");
     skipHint.classList.add("on");
     setTimeout(() => { if (!active) return; kick(); spark(TIER_HEX[tier], tier * 6); sfx.tier?.(tier); }, calm ? 0 : 420);
     if (tier === 5) {
@@ -443,7 +445,7 @@ export function makeReveal(stageEl, { tiers, sfx = {}, scene = () => null }) {
       sfx.win?.();
       for (let i = 0; i < 4 && !skipping; i++) { spark(TIER_HEX[5], 16); await nap(360); }
     } else sfx.ding?.();
-    if (alive()) await nap(tier >= 4 ? 3400 : 2800);
+    if (alive()) await nap(tier >= 4 ? 3400 : big ? 2800 : 1600);
     end();
   }
   function end() {

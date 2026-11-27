@@ -238,6 +238,7 @@ function modifierCap(index, key, res) {
 
 // Returns { tier, display, key, corrected }. tier 0 means the answer isn't on the list.
 // corrected is true when a typo was snapped to the nearest real answer.
+const GENERIC_MODS = new Set("a an the my your our big small little tiny huge giant large cute old young baby new wild stray pet good bad nice fat thin tall short long red orange yellow green blue purple pink black white brown grey gray dark light bright fluffy furry soft hard hot cold real fake best favorite favourite front rear back left right top bottom upper lower inner outer side main super very really mini".split(" "));
 export function judge(index, raw) {
   const key = normalize(raw);
   if (!key) return { tier: 0, display: "", key: "" };
@@ -267,7 +268,14 @@ export function judge(index, raw) {
       const tail = ws.slice(i).join(" ");
       if (tail.length < 2) continue;
       const hit = lookup(index, tail, false);
-      if (hit) return { ...hit, key: normalize(hit.display), display: String(raw).trim().replace(/\s+/g, " ").slice(0, 40) };
+      if (hit) {
+        // a specific kind ("bernese mountain dog") scores a tier rarer than the plain answer, up to RARE;
+        // generic words (big, baby, black) and keyboard mash ("zzz dog") don't count
+        const extra = ws.slice(0, i).filter((w) => !GENERIC_MODS.has(w));
+        const specific = extra.length && extra.length <= 3 && extra.every((w) => /^[a-z]{3,}$/.test(w) && /[aeiouy]/.test(w) && !/(.)\1\1/.test(w));
+        const tier = specific && hit.tier <= 2 ? hit.tier + 1 : hit.tier;
+        return { ...hit, tier, key: normalize(hit.display), display: String(raw).trim().replace(/\s+/g, " ").slice(0, 40) };
+      }
     }
   }
   // The long tail (deep.js): every matching thing on Wikidata. Exact names only, never autocorrected to,

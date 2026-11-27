@@ -3256,12 +3256,13 @@ function askAnswer(r, i, token, index) {
     // solo road races get the full reveal over the road (the round's reveal plays it after the green light)
     const full = race.solo && !race.online && !race.crazy && !hidden && scene === chaseScene;
     // a right answer: the show (a quick sweep for one on our list), then it counts
-    const win = (res, text, fast) => {
+    const win = (res0, text, fast) => {
       showing = true;
       pause();
       say("", "");
+      if (full && fast) rig.stage(text, hidden, true);
+      crowdTier(index.prompt, res0, race.crazy).then((res) => {
       if (full) {
-        if (fast) rig.stage(text, hidden, true);
         rig.green().then(() => {
           showing = false;
           resume();
@@ -3277,6 +3278,7 @@ function askAnswer(r, i, token, index) {
         resume();
         if (finished || token !== raceToken) return;
         lockIn(res);
+      });
       });
     };
     const end = (keepRig = false) => {
@@ -3441,6 +3443,20 @@ function askAnswer(r, i, token, index) {
 }
 
 const AUTO_NEXT_MS = 3000;
+const CROWD_MIN_PLAYS = 50;
+async function crowdTier(prompt, res, crazy) {
+  if (!prompt || crazy || !res || !(res.tier >= 1 && res.tier <= 4)) return res;
+  try {
+    const qs = new URLSearchParams({ prompt, answer: String(res.display || "").toLowerCase().slice(0, 40) });
+    const r = await fetch("/api/vroomillion/crowd?" + qs, { signal: AbortSignal.timeout(1200) });
+    if (!r.ok) return res;
+    const d = await r.json();
+    if (!(d.plays >= CROWD_MIN_PLAYS)) return res;
+    const p = Number(d.mine) || 0;
+    const tier = p >= 8 ? 1 : p >= 3 ? 2 : p >= 1 ? 3 : 4;
+    return tier === res.tier ? res : { ...res, tier, crowd: p };
+  } catch { return res; }
+}
 // THE CROWD: a prompt's most given answers, as a share of everyone who played it, and how many gave yours
 async function showCrowd(prompt, answer, token) {
   const box = h("div", { class: "crowd" });

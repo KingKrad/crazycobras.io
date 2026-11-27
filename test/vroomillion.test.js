@@ -160,6 +160,15 @@ test("payout rewards winning and niche answers", () => {
 
 const q = (text) => buildIndex(QUESTIONS.find((x) => x.q === text));
 
+test("a specific kind in front of an answer scores a tier rarer, generic words and mash don't", () => {
+  const idx = new Map([["dog", { tier: 1, display: "dog" }], ["poodle", { tier: 3, display: "poodle" }]]);
+  assert.equal(judge(idx, "bernese mountain dog").tier, 2);
+  assert.equal(judge(idx, "big black dog").tier, 1);
+  assert.equal(judge(idx, "zzz dog").tier, 1);
+  assert.equal(judge(idx, "qq dog").tier, 1);
+  assert.equal(judge(idx, "french poodle").tier, 3, "never past RARE");
+});
+
 test("extra words in front of a real answer still count", () => {
   const parts = q("Name a part of a car");
   assert.equal(judge(parts, "air intake").tier, 2);
