@@ -112,6 +112,34 @@ if (args.includes("--deep-mul")) {
   process.exit(0);
 }
 
+// --deep-catalog: the same long tail for the prompt catalog's Wikidata prompts (their answers files carry
+// the rule, "live"): every matching item however obscure, up to 40,000, so they count instantly without the
+// live check. Only written when it adds to what the answers file already has. --only "q1;q2" for some.
+if (args.includes("--deep-catalog")) {
+  fs.mkdirSync(DEEP_DIR, { recursive: true });
+  const ANS = new URL("../public/vroomillion/answers/", import.meta.url);
+  const only = args.includes("--only") ? new Set(args[args.indexOf("--only") + 1].split(";")) : null;
+  const part = args.includes("--part") ? args[args.indexOf("--part") + 1].split("/").map(Number) : null;
+  const files = fs.readdirSync(ANS).filter((f) => f.endsWith(".json")).sort().filter((f, i) => !part || i % part[1] === part[0] - 1);
+  for (const f of files) {
+    const d = JSON.parse(fs.readFileSync(new URL(f, ANS), "utf8"));
+    if (!d.live || (only && !only.has(d.q))) continue;
+    const file = new URL(deepSlug(d.q) + ".json", DEEP_DIR);
+    if (fs.existsSync(file) && !args.includes("--force")) continue;
+    const have = d.a.flat().length;
+    let items;
+    try { items = await fetchPrompt(d.q, { where: d.live.where, exclude: d.live.exclude || undefined, taxa: d.live.taxa, min: 0, max: 40000 }); } catch (e) { console.log("!! failed:", d.q, e.message); continue; }
+    if (items.partial) { console.log("!! partial, not written:", d.q); continue; }
+    const a = items.filter((x) => x.forms.length).map((x) => [x.forms.join("|"), x.n]);
+    if (a.length <= have) { console.log(`-- nothing new: ${d.q} (${a.length} vs ${have})`); continue; }
+    fs.writeFileSync(file, JSON.stringify({ q: d.q, tiers: d.live.tiers || [70, 25], a }));
+    console.log(`${d.q}: ${a.length} deep answers (list has ${have})`);
+    await sleep(600);
+  }
+  if (!part) deepIndex();
+  process.exit(0);
+}
+
 if (args.includes("--deep")) {
   fs.mkdirSync(DEEP_DIR, { recursive: true });
   const { PROMPTS } = await import("./prompt-sources.mjs");

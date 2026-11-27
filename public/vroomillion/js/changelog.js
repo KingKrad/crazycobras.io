@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-27a",
+    date: "Nov 27, 2026",
+    title: "Way bigger answer lists",
+    items: [
+      "Word games now know the whole dictionary: every real word that rhymes, starts with or ends in the letters counts, and rarer words go further.",
+      "Thousands more answers for lists built from Wikidata: obscure TV shows, songs, films and more count instantly.",
+      "Unlimited races now pick prompts that have big answer lists, so fewer real answers get turned away.",
+    ],
+  },
+  {
     id: "2026-11-26j",
     date: "Nov 26, 2026",
     title: "Fairer answer checks, smoother menus",
