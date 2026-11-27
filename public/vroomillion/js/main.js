@@ -11,7 +11,6 @@ import { Scene } from "./scene.js";
 import { ChaseScene, setFestive } from "./chase.js";
 import { shareCard, saveShareCard, drawShareCard } from "./share.js";
 import { prefetchDeep, deepAnswers } from "./deep.js";
-import { CHANGELOG } from "./changelog.js";
 import { applySeason, toggleXmasLook, xmasLookLabel, xmasLookOn } from "./theme.js";
 import { Places, PLACE_OF } from "./places.js";
 import { WorldScene, loadMap } from "./world.js";
@@ -1617,48 +1616,26 @@ async function buyUnlimited() {
   btn.disabled = false;
 }
 
-// WHAT'S NEW: the latest update (and the admin's announcement) on the ME screen, every update on its own
-// screen. Something you haven't seen puts a dot on the ME tab until you open it.
-const LOG_SEEN_KEY = "vroomillion.log-seen";
+// The admin's announcement on the ME screen. A new one puts a dot on the ME tab until you open it.
 const ME_SEEN_KEY = "vroomillion.me-seen";
-const newsKey = () => (CHANGELOG[0]?.id || "") + "|" + (announcementText || "");
+const newsKey = () => announcementText || "";
 function renderMeNews(opened = false) {
   const box = $("me-news");
   box.textContent = "";
   if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
-  renderWhatsNew();
   if (opened) try { localStorage.setItem(ME_SEEN_KEY, newsKey()); } catch {}
   let seen = null;
   try { seen = localStorage.getItem(ME_SEEN_KEY); } catch {}
-  document.querySelector('.tab[data-tab="account"]')?.classList.toggle("has-dot", seen !== newsKey());
-}
-function logItems(entry) { return h("ul", { class: "log-items" }, ...entry.items.map((t) => h("li", { text: t }))); }
-function renderWhatsNew() {
-  const box = $("whats-new");
-  const latest = CHANGELOG[0];
-  box.textContent = "";
-  if (!latest) return;
-  let seen = null;
-  try { seen = localStorage.getItem(LOG_SEEN_KEY); } catch {}
-  // one short line on the title screen; it opens the full list
-  box.append(h("button", { class: "news-line", type: "button", "data-go": "updates" },
-    seen !== latest.id ? h("span", { class: "soon-tag", text: "NEW" }) : h("span", { class: "news-k", text: "UPDATE" }),
-    " ", latest.title.toUpperCase(), " ›"));
+  document.querySelector('.tab[data-tab="account"]')?.classList.toggle("has-dot", !!newsKey() && seen !== newsKey());
 }
 renderMeNews();
-function renderUpdates() {
-  const list = $("updates-list");
-  list.textContent = "";
-  for (const e of CHANGELOG) list.append(h("div", { class: "log-entry" }, h("p", { class: "log-head" }, h("span", { class: "log-date", text: e.date })), h("p", { class: "log-title", text: e.title }), logItems(e)));
-  try { if (CHANGELOG[0]) localStorage.setItem(LOG_SEEN_KEY, CHANGELOG[0].id); } catch {}
-}
 
 // ---------- auto-update ----------
 // Each deploy writes its version to version.json (tools/stamp.mjs). When a newer one is out, the page
 // reloads itself to pick it up: right away on menu screens, or as soon as the player is back on one
 // (never mid-race, in an online room, or while filling in a form). Progress is saved first.
 const BUILD = "dev";
-const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "updates", "leagues", "worldtour", "modes"]);
+const SAFE_TO_RELOAD = new Set(["title", "how", "garage", "passport", "board", "leagues", "worldtour", "modes"]);
 let updateReady = null;
 function reloadForUpdate() {
   if (!updateReady || !SAFE_TO_RELOAD.has(current) || online) return;
@@ -1705,7 +1682,6 @@ function show(name) {
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
   if (updateReady) setTimeout(reloadForUpdate, 300);
-  if (name === "updates") renderUpdates();
   if (name === "leagues") renderLeagues();
   if (name === "paywall") renderPaywall();
   if (name === "account") renderAccount();
@@ -1727,7 +1703,7 @@ function show(name) {
   if (name === "account") { renderMe(); renderMeNews(true); }
   // the tab bar lights up the section you're in
   const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", christmas: "modes", archive: "modes", quests: "quests",
-    garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
+    garage: "garage", board: "board", passport: "board", account: "account", how: "account", admin: "account", paywall: "account" };
   for (const b of document.querySelectorAll("#tabbar .tab")) b.classList.toggle("on", b.dataset.tab === TAB_OF[name]);
   if (name === "title" || name === "leagues") versusDeck = null; // the plain 2P screen next time
   window.scrollTo({ top: 0 });
@@ -2393,7 +2369,7 @@ function renderModes() {
         h("span", { class: "mc-tag", text: "COMING SOON" }))));
   }
 }
-// ME: your account, plus how to play, updates, sound and (admins) the admin panel
+// ME: your account, plus how to play, sound and (admins) the admin panel
 function renderMe() {
   $("me-sound").textContent = save.muted ? "SOUND: OFF" : "SOUND: ON";
   $("me-xmas").textContent = xmasLookLabel();
