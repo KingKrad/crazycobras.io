@@ -3,6 +3,18 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-27b",
+    date: "Nov 27, 2026",
+    title: "Rev & Shift, and the crowd",
+    items: [
+      "Checking an answer is now a drag-strip start: amber lights while it's checked (the clock waits), then green and a gear shift for every rarity tier, or a red-light stall.",
+      "After each round, see what the crowd said: the most popular answers and how many people gave yours.",
+      "CHRISTMAS is open to everyone: one free race a day, and every one counts toward Santa's sleigh.",
+      "A cleaner home screen: 2 players, racing a friend and solo settings live under MODES; news is on ME.",
+      "Solo rounds move on by themselves after a few seconds (tap the card to stay).",
+    ],
+  },
+  {
     id: "2026-11-27a",
     date: "Nov 27, 2026",
     title: "Way bigger answer lists",

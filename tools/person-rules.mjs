@@ -73,7 +73,8 @@ async function ruleFor(f) {
   return { rule: `min=0 minans=10 nocheck w:${where}`, size: rows.length, ok: `${ok}/${top.length}`, qs };
 }
 
-const todo = FAMILIES.filter((f) => open.has(f.id) && f.prompts.some((p) => RX.test(p)));
+// one prompt only: a rule covers every prompt of its family, and a second wording might name someone else
+const todo = FAMILIES.filter((f) => open.has(f.id) && f.prompts.length === 1 && RX.test(f.prompts[0]));
 console.log(todo.length, "families");
 const found = new Map();
 for (const f of todo) {
