@@ -28,7 +28,7 @@
       <button class="brand" id="btn-home" type="button" aria-label="Back to title">VROOM<span>ILLION</span></button>
       <div class="topbar-right">
         <div class="cash" id="cash" aria-live="polite">$0</div>
-        <button class="icon-btn" id="btn-sound" type="button" aria-pressed="true">SND ON</button>
+        <button class="icon-btn snd-ico" id="btn-sound" type="button" aria-pressed="true" aria-label="Sound on" title="Sound"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="spk" d="M2 6h3l4-3v10l-4-3H2z"/><path class="wave" d="M11 5h1v6h-1zM13 3h1v10h-1z"/><path class="mute" d="M11 5l4 6h-1.4L10 5zM15 5l-4 6H9.6L13.6 5z"/></svg></button>
       </div>
     </header>
 
@@ -62,7 +62,7 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h12v2H2z"/></svg><span>MENU</span>
         </button>
         <div class="corner-icons">
-          <button class="corner-btn" id="ico-sound" type="button" aria-label="Sound on" title="Sound">
+          <button class="corner-btn snd-ico" id="ico-sound" type="button" aria-label="Sound on" title="Sound">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path class="spk" d="M2 6h3l4-3v10l-4-3H2z"/><path class="wave" d="M11 5h1v6h-1zM13 3h1v10h-1z"/><path class="mute" d="M11 5l4 6h-1.4L10 5zM15 5l-4 6H9.6L13.6 5z"/></svg>
           </button>
           <button class="corner-btn" id="ico-garage" type="button" aria-label="Garage" title="Garage">
@@ -78,14 +78,9 @@
           <button class="btn big daily-hero" id="btn-daily" type="button">▶ PLAY TODAY'S DAILY RACE</button>
           <div class="home-tiles">
             <button class="home-tile" id="btn-1p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg><b>QUICK RACE</b><span>Straight into a race</span></button>
-            <button class="home-tile tile-modes" type="button" data-go="modes"><i class="tile-new">NEW</i><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg><b>GAME MODES</b><span>World Tour &amp; more</span></button>
-            <button class="home-tile" id="btn-2p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3v1h1v3H6v1H3V6H2V3h1zM10 2h3v1h1v3h-1v1h-3V6H9V3h1zM1 9h7v1h1v4H0v-4h1zM8 9h7v1h1v4H8z"/></svg><b>2 PLAYERS</b><span>On this screen</span></button>
-            <button class="home-tile" id="btn-online" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H9l-3 3v-3H2zM4 5v1h8V5zM4 7v1h6V7z"/></svg><b>RACE A FRIEND</b><span>Send them a link</span></button>
           </div>
           <button class="xmas-banner hidden" id="btn-xmas" type="button" data-go="christmas"><b>★ CHRISTMAS ★</b><span>Limited time · earn Santa's sleigh</span></button>
-          <button class="home-settings" type="button" data-go="leagues">⚙ Race settings · mode, car and rules</button>
           <div class="daily" id="daily"></div>
-          <div class="whats-new" id="whats-new"></div>
         </div>
         <!-- the slide-out menu: every screen, with clear labels -->
         <div class="drawer-shade hidden" id="drawer-shade"></div>
@@ -125,7 +120,7 @@
       <section class="screen" id="s-updates">
         <h2>WHAT'S NEW</h2>
         <div id="updates-list"></div>
-        <button class="btn" data-go="title" type="button">BACK</button>
+        <button class="btn" data-go="account" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-how">
@@ -148,7 +143,7 @@
           <li><b>REDO THIS RACE</b> on the results screen replays the same prompts.</li>
         </ul>
         <div class="tiers" id="tier-legend"></div>
-        <button class="btn" data-go="title" type="button">BACK</button>
+        <button class="btn" data-go="account" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-leagues">
@@ -156,7 +151,6 @@
         <!-- the start button first: the settings below are for when you want them -->
         <div class="menu row">
           <button class="btn big" id="btn-start-1p" type="button">START RACE</button>
-          <button class="btn" data-go="title" type="button">BACK</button>
         </div>
         <p class="note">Seven prompts a race. Go as far as you can. Your best: <span id="best-solo">—</span></p>
         <h3 class="sub-title">RACE SETTINGS</h3>
@@ -169,6 +163,7 @@
         <div class="daily-races" id="daily-solo"></div>
         <p class="note" id="daily-note"></p>
         <button class="btn small board-btn" data-go="board" type="button">TODAY'S LEADERBOARD</button>
+        <button class="btn" data-go="modes" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-archive">
@@ -181,6 +176,11 @@
       <section class="screen" id="s-modes">
         <h2>GAME MODES</h2>
         <p class="note">Each mode is its own world, with its own prompts. Tap one to see it.</p>
+        <div class="home-tiles modes-play">
+            <button class="home-tile" type="button" data-go="leagues"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h10l1 3v3h-1.5v-1h-9v1H2V9zM4.2 7l-.6 2h8.8l-.6-2zM4 12.5a1.2 1.2 0 1 0 2.4 0zM9.6 12.5a1.2 1.2 0 1 0 2.4 0z"/></svg><b>SOLO RACES</b><span>Topics, car and rules</span></button>
+            <button class="home-tile" id="btn-2p" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h3v1h1v3H6v1H3V6H2V3h1zM10 2h3v1h1v3h-1v1h-3V6H9V3h1zM1 9h7v1h1v4H0v-4h1zM8 9h7v1h1v4H8z"/></svg><b>2 PLAYERS</b><span>On this screen</span></button>
+            <button class="home-tile" id="btn-online" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H9l-3 3v-3H2zM4 5v1h8V5zM4 7v1h6V7z"/></svg><b>RACE A FRIEND</b><span>Send them a link</span></button>
+        </div>
         <div class="mode-cards" id="mode-cards"></div>
         <button class="btn" data-go="title" type="button">BACK</button>
       </section>
@@ -317,7 +317,7 @@
         </div>
         <div class="menu row">
           <button class="btn big" id="btn-start-2p" type="button">START RACE</button>
-          <button class="btn" data-go="title" type="button">BACK</button>
+          <button class="btn" data-go="modes" type="button">BACK</button>
         </div>
       </section>
 
@@ -332,7 +332,7 @@
         <h2>ONLINE 1V1</h2>
         <p class="note">Race a friend, each on your own phone or computer.</p>
         <div class="online-box" id="online-box"></div>
-        <button class="btn" data-go="title" type="button">BACK</button>
+        <button class="btn" data-go="modes" type="button">BACK</button>
       </section>
 
       <section class="screen" id="s-board">
@@ -352,6 +352,8 @@
 
       <section class="screen" id="s-account">
         <h2>ACCOUNT</h2>
+        <div class="me-news" id="me-news"></div>
+        <div class="whats-new" id="whats-new"></div>
         <div class="account-box" id="account-box"></div>
         <div class="me-more">
           <button class="btn small" type="button" data-go="how">HOW TO PLAY</button>
@@ -387,7 +389,7 @@
             <span class="mode-tag" id="mode-label"></span>
           </div>
           <div class="race-buttons">
-            <button class="icon-btn" id="btn-sound-race" type="button" aria-pressed="true">SND</button>
+            <button class="icon-btn snd-ico" id="btn-sound-race" type="button" aria-pressed="true" aria-label="Sound on" title="Sound"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="spk" d="M2 6h3l4-3v10l-4-3H2z"/><path class="wave" d="M11 5h1v6h-1zM13 3h1v10h-1z"/><path class="mute" d="M11 5l4 6h-1.4L10 5zM15 5l-4 6H9.6L13.6 5z"/></svg></button>
             <button class="icon-btn" id="btn-quit" type="button">QUIT</button>
           </div>
         </div>

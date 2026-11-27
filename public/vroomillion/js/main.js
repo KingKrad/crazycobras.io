@@ -498,14 +498,13 @@ function renderCash(animate) {
 }
 
 function renderSound() {
-  for (const id of ["btn-sound", "btn-sound-race"]) {
+  // one speaker icon everywhere (crossed out when muted)
+  for (const id of ["btn-sound", "btn-sound-race", "ico-sound"]) {
     const b = $(id);
-    b.textContent = save.muted ? "SND OFF" : "SND ON";
+    b.classList.toggle("muted", !!save.muted);
     b.setAttribute("aria-pressed", String(!save.muted));
+    b.setAttribute("aria-label", save.muted ? "Sound off. Turn it on" : "Sound on. Turn it off");
   }
-  const ico = $("ico-sound");
-  ico.classList.toggle("muted", !!save.muted);
-  ico.setAttribute("aria-label", save.muted ? "Sound off. Turn it on" : "Sound on. Turn it off");
 }
 
 // ---------- daily free run + unlimited ----------
@@ -522,7 +521,6 @@ function renderDaily() {
   box.textContent = "";
   // admins get a shortcut to the admin screen right on the title screen (phones included)
   $("btn-admin-title")?.classList.toggle("hidden", !account?.admin);
-  if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
   const nextCar = nextCarCard();
   $("drawer-next").textContent = "";
   if (nextCar) $("drawer-next").append(nextCar);
@@ -1246,7 +1244,7 @@ let trialOffer = false; // the launch offer: 24 hours of Unlimited for new accou
 let signInWith = {}; // { google: bool, apple: bool }: which "Continue with..." buttons the server has set up
 api("config").then(({ body }) => {
   announcementText = body.announcement || null;
-  if (current === "title") renderDaily();
+  renderMeNews();
   signInWith = body.signIn || {};
   trialOffer = body.trialOffer === true;
   if (current === "paywall") renderPaywall();
@@ -1619,8 +1617,21 @@ async function buyUnlimited() {
   btn.disabled = false;
 }
 
-// WHAT'S NEW: the latest update on the title screen, every update on its own screen
+// WHAT'S NEW: the latest update (and the admin's announcement) on the ME screen, every update on its own
+// screen. Something you haven't seen puts a dot on the ME tab until you open it.
 const LOG_SEEN_KEY = "vroomillion.log-seen";
+const ME_SEEN_KEY = "vroomillion.me-seen";
+const newsKey = () => (CHANGELOG[0]?.id || "") + "|" + (announcementText || "");
+function renderMeNews(opened = false) {
+  const box = $("me-news");
+  box.textContent = "";
+  if (announcementText) box.append(h("div", { class: "announcement", role: "note", text: announcementText }));
+  renderWhatsNew();
+  if (opened) try { localStorage.setItem(ME_SEEN_KEY, newsKey()); } catch {}
+  let seen = null;
+  try { seen = localStorage.getItem(ME_SEEN_KEY); } catch {}
+  document.querySelector('.tab[data-tab="account"]')?.classList.toggle("has-dot", seen !== newsKey());
+}
 function logItems(entry) { return h("ul", { class: "log-items" }, ...entry.items.map((t) => h("li", { text: t }))); }
 function renderWhatsNew() {
   const box = $("whats-new");
@@ -1634,6 +1645,7 @@ function renderWhatsNew() {
     seen !== latest.id ? h("span", { class: "soon-tag", text: "NEW" }) : h("span", { class: "news-k", text: "UPDATE" }),
     " ", latest.title.toUpperCase(), " ›"));
 }
+renderMeNews();
 function renderUpdates() {
   const list = $("updates-list");
   list.textContent = "";
@@ -1692,7 +1704,6 @@ function show(name) {
       ? `BEST ${Math.round(save.best).toLocaleString("en-US")} M · RACES ${save.races} · TURBOS ${save.deep} · VROOMILLIONS ${save.vrooms}`
       : "NEW DRIVER. YOUR '92 RUSTBUCKET AWAITS.";
   }
-  if (name === "title") renderWhatsNew();
   if (updateReady) setTimeout(reloadForUpdate, 300);
   if (name === "updates") renderUpdates();
   if (name === "leagues") renderLeagues();
@@ -1713,7 +1724,7 @@ function show(name) {
     if (lob) { audio.unlock(); audio.music.play(THEMED[lob].track); audio.music.level(1); }
     else if (name !== "race" && name !== "results") audio.music.stop(); }
   questDot();
-  if (name === "account") renderMe();
+  if (name === "account") { renderMe(); renderMeNews(true); }
   // the tab bar lights up the section you're in
   const TAB_OF = { title: "title", modes: "modes", leagues: "modes", versus: "modes", online: "modes", worldtour: "modes", boxoffice: "modes", ontour: "modes", stadium: "modes", christmas: "modes", archive: "modes", quests: "quests",
     garage: "garage", board: "board", passport: "board", account: "account", how: "account", updates: "account", admin: "account", paywall: "account" };
@@ -3747,12 +3758,15 @@ function finish(token) {
 }
 
 // ---------- wiring ----------
-// Long screens had BACK only at the very bottom. Give every menu screen a BACK button at the top too.
+// One BACK per screen, at the top (long screens had it only at the very bottom). The tab bar's own
+// screens (MODES, GARAGE, QUESTS, RANKS, ME) need none: the tab bar is right there.
+const TAB_ROOTS = new Set(["s-modes", "s-garage", "s-quests", "s-board", "s-account"]);
 for (const sec of document.querySelectorAll(".screen")) {
   if (["s-title", "s-race", "s-results"].includes(sec.id)) continue;
-  const bottom = [...sec.querySelectorAll("button[data-go]")].reverse().find((b) => /BACK/.test(b.textContent));
-  if (!bottom) continue;
-  sec.prepend(h("button", { class: "btn small top-back", type: "button", "data-go": bottom.dataset.go, text: "◀ BACK" }));
+  const backs = [...sec.querySelectorAll("button[data-go]")].filter((b) => /^\s*BACK\s*$/.test(b.textContent));
+  if (!backs.length) continue;
+  backs.forEach((b) => b.classList.add("bottom-back"));
+  if (!TAB_ROOTS.has(sec.id)) sec.prepend(h("button", { class: "btn small top-back", type: "button", "data-go": backs[backs.length - 1].dataset.go, text: "◀ BACK" }));
 }
 // Browsers only allow sound after the first tap or key press.
 const firstTouch = () => audio.unlock();

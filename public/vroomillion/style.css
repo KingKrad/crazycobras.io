@@ -1370,10 +1370,12 @@ body[data-screen="title"] .tagline { font-size: clamp(8px, 2.2vw, 13px); color: 
 .corner-btn svg { width: 18px; height: 18px; fill: currentColor; shape-rendering: crispEdges; }
 .menu-btn { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 12px; z-index: 5; }
 .corner-icons { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; z-index: 5; display: grid; gap: 8px; }
-#ico-sound .mute { display: none; }
-#ico-sound.muted .wave { display: none; }
-#ico-sound.muted .mute { display: block; }
-#ico-sound.muted { color: var(--dim); }
+.snd-ico .mute { display: none; }
+.snd-ico.muted .wave { display: none; }
+.snd-ico.muted .mute { display: block; }
+.snd-ico.muted { color: var(--dim); }
+.icon-btn.snd-ico { display: grid; place-items: center; min-width: 40px; }
+.icon-btn.snd-ico svg { width: 18px; height: 18px; fill: currentColor; display: block; }
 
 /* the slide-out menu */
 .drawer-shade { position: fixed; inset: 0; z-index: 20; background: rgba(4, 2, 14, 0.6); }
@@ -1915,3 +1917,26 @@ html[data-season="xmas"] .rs-rig, html[data-season="xmas"] .rs-ladder { backgrou
 @media (prefers-reduced-motion: reduce) { .rs-plate.land, .rs-plate.good, .rs-plate.bad, .rs-ladder div.final { animation: none; } .rs-needle { transition: none; } }
 .admin-approve { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .admin-actions.row .admin-approve .btn.small { width: auto; padding-left: 8px; padding-right: 8px; }
+
+/* ---------- tidier menus (review notes) ---------- */
+/* menus fade and slide in smoothly (the stepped animation stays for the race) */
+body:not([data-screen="race"]) .screen.active { animation: screen-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+/* one BACK per screen: the one at the top (the tab bar's own screens need none) */
+.screen .bottom-back { display: none; }
+/* home: the daily race, QUICK RACE and the event banner */
+#s-title .home-tiles { grid-template-columns: 1fr; }
+#s-title .home-tile { grid-auto-flow: column; justify-content: center; align-items: center; gap: 10px; }
+#s-title .home-tile span { display: none; }
+/* MODES: solo, 2 players and a friend first, then the themed worlds */
+.modes-play { grid-template-columns: repeat(3, 1fr); margin: 0 0 14px; }
+@media (max-width: 420px) { .modes-play .home-tile span { display: none; } }
+/* ME: news and the announcement; a dot on the ME tab until you've seen them */
+.me-news:empty { display: none; }
+.me-news .announcement { margin: 0 0 10px; }
+#s-account .whats-new { margin: 0 auto 14px; }
+.tab { position: relative; }
+.tab.has-dot::after { content: ""; position: absolute; top: 7px; left: calc(50% + 9px); width: 9px; height: 9px; border-radius: 50%; background: #ff3b5c; box-shadow: 0 0 0 2px #0b0618, 0 0 8px #ff3b5c; }
+/* wide screens: the tab bar as wide as the menus, not the whole window */
+@media (min-width: 900px) {
+  .tabbar { left: 50%; right: auto; width: min(780px, 100vw); transform: translateX(-50%); border-left: 3px solid #2a1f4a; border-right: 3px solid #2a1f4a; }
+}
