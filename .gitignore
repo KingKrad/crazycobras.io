@@ -9,3 +9,4 @@ tools/.gen*.js
 tools/.gtest.js
 media/
 tools/.induced.json
+tools/.person-rules.json

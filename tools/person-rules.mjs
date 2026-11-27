@@ -27,16 +27,26 @@ for (const f of fs.readdirSync(CAT).filter((x) => /^w\d+\.js$/.test(x))) {
   }
 }
 
-const names = (s) => s.split(/\s*,\s*|\s+or\s+|\s+and\s+|\s*&\s*/).map((x) => x.trim()).filter(Boolean);
+// "Lana Del Rey, Lorde or Halsey": split on commas and "or" only ("Simon & Garfunkel", "Brooks & Dunn" are one act)
+const names = (s) => s.split(/\s*,\s*(?:or\s+)?|\s+or\s+/).map((x) => x.trim()).filter(Boolean);
 
-// a name -> the best-known person or band/group Wikidata finds for it
-async function who(name) {
-  const rows = await sparql(`SELECT ?i ?s ?h WHERE {
-    SERVICE wikibase:mwapi { bd:serviceParam wikibase:api "EntitySearch"; wikibase:endpoint "www.wikidata.org"; mwapi:search ${JSON.stringify(name)}; mwapi:language "en"; mwapi:limit "8". ?i wikibase:apiOutputItem mwapi:item. }
+// a name -> the act Wikidata finds for it that actually has this kind of work (songs or albums performed by
+// it, films it's in or directed), an exact name first, then the best known. "KISS" is then the band, not
+// Henry Kissinger, and "Sugar Ray" the band, not the boxer.
+const HAS_WORK = {
+  song: "?w wdt:P175 ?i. ?w wdt:P31 ?wt. VALUES ?wt { wd:Q7366 wd:Q134556 wd:Q105543609 wd:Q2188189 }",
+  album: "?w wdt:P175 ?i. ?w wdt:P31/wdt:P279* wd:Q482994.",
+  movie: "{ ?w wdt:P161 ?i. } UNION { ?w wdt:P57 ?i. } ?w wdt:P31/wdt:P279* wd:Q11424.",
+};
+HAS_WORK.film = HAS_WORK.movie;
+async function who(name, kind) {
+  const rows = await sparql(`SELECT ?i ?s ?exact WHERE {
+    SERVICE wikibase:mwapi { bd:serviceParam wikibase:api "EntitySearch"; wikibase:endpoint "www.wikidata.org"; mwapi:search ${JSON.stringify(name)}; mwapi:language "en"; mwapi:limit "12". ?i wikibase:apiOutputItem mwapi:item. }
     ?i wikibase:sitelinks ?s.
-    BIND(EXISTS { ?i wdt:P31 wd:Q5 } AS ?h)
-    FILTER(EXISTS { ?i wdt:P31 wd:Q5 } || EXISTS { ?i wdt:P31/wdt:P279* wd:Q2088357 } || EXISTS { ?i wdt:P31/wdt:P279* wd:Q215380 })
-  } ORDER BY DESC(?s) LIMIT 1`);
+    FILTER EXISTS { ${HAS_WORK[kind]} }
+    OPTIONAL { ?i rdfs:label|skos:altLabel ?m. FILTER(lang(?m) IN ("en", "mul") && LCASE(STR(?m)) = LCASE(${JSON.stringify(name)})) }
+    BIND(BOUND(?m) AS ?exact)
+  } ORDER BY DESC(?exact) DESC(?s) LIMIT 1`);
   return rows[0] ? rows[0].i.value.split("/").pop() : null;
 }
 
@@ -53,8 +63,8 @@ async function ruleFor(f) {
   if (!/[A-Z]/.test(who_)) return { skip: "no names" };
   const qs = [];
   for (const n of names(who_)) {
-    const q = await who(n);
-    if (!q) return { skip: `no person or group for "${n}"` };
+    const q = await who(n, kind);
+    if (!q) return { skip: `no act with ${kind}s on Wikidata for "${n}"` };
     qs.push(q);
     await sleep(300);
   }
