@@ -784,6 +784,19 @@ export class ChaseScene {
     if (tier === 5 || nitro) this.warp = Math.max(this.warp, tier === 5 ? 1.6 : 0.9);
   }
 
+  // REV & SHIFT's red light: the engine stalls on the line in a puff of black smoke (no run, no cheer)
+  stall(i) {
+    const r = this.racers[i];
+    if (!r?.box) return;
+    const { x, y, w } = r.box;
+    const u = this.u;
+    r.sputterT = 0.9;
+    if (!this.calm) this.shake = Math.max(this.shake, 0.3);
+    for (let k = 0; k < 16; k++) {
+      this.particles.push({ x: x + w * 0.2 + Math.random() * w * 0.6, y: y - 4 * u, vx: (Math.random() - 0.5) * 30 * u, vy: (-10 - Math.random() * 20) * u, life: 1.2, size: 3 * u, grow: 5 * u, color: k % 3 ? "#2b2633" : "#5a5466", g: 0 });
+    }
+  }
+
   // A backfire on a gear shift: the flame flares and spits sparks.
   // The big moment for a rare answer (tier 3 FAST LANE, 4 TURBO, 5 ONE IN A VROOMILLION): the world tints
   // and relights in the rarity colour, time slows and the camera pushes in. Reduced motion keeps the colour.

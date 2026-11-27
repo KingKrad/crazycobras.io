@@ -19,7 +19,7 @@ import { DriveInScene } from "./drivein.js";
 import { TourScene } from "./tour.js";
 import { SleighScene } from "./sleigh.js";
 import { flyover, presentCanvas } from "./presents.js";
-import { makeRig } from "./revshift.js";
+import { makeRig, makeReveal } from "./revshift.js";
 import { DAILY, XMAS, MILESTONES as QUEST_MILESTONES, questState, raceEvents, addEvents, progressOf, claimable } from "./quests.js";
 import { StadiumScene } from "./stadium.js";
 // The prompt catalog (racepick.js and js/catalog, about 760 KB) is only needed to pick a race, so it
@@ -2517,6 +2517,30 @@ function hudCard(r, i) {
     h("div", { class: "hud-foot" }, r.elTier, r.elNitro));
 }
 
+// A gear shift on a launch: the shift sound, and a backfire on Fast Lane and up (some cars on every shift)
+function shiftFx(i, tier) {
+  const r = race.racers[i];
+  (r.car.reggae ? audio.reggae : audio.sfx).shift();
+  if (r.car.v12) { scene.backfire(i); audio.v12.pop(tier); } // NICO'S CRAZY CAR crackles on every shift
+  else if (r.car.reggae) { scene.backfire(i); audio.reggae.pop(tier); } // ZIG'S WHIP: an echoing rimshot on every shift
+  else if (r.car.megaFire) { scene.backfire(i); audio.audi.pop(tier); } // AUDI 5000: a fireball on every shift
+  else if (tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
+}
+// REV & SHIFT's full reveal, gear g of tier: the car re-launches a gear up, so the fire, sparks and sky
+// build with every shift instead of giving the tier away at the green light
+function shiftUp(i, g, tier, run) {
+  const r = race.racers[i];
+  if (g >= 2) {
+    const left = run ? Math.max(0.6, (run.dur - (performance.now() - run.t0)) / 1000) : 2;
+    const banners = scene.banners?.length;
+    scene.launch(i, g, r.useNitro, left);
+    if (g < tier && scene.banners && scene.banners.length > banners) scene.banners.pop(); // one roadside banner per answer
+    musicBuild(g);
+    if (g >= 2) (r.car.electric ? audio.ev : r.car.reggae ? audio.reggae : audio.sfx).whoosh?.(g);
+  }
+  shiftFx(i, g);
+}
+
 // A rare answer takes over the screen: the world relights in the rarity colour (chase.js rare()), and a
 // big word slams into the middle with a shockwave. ONE IN A VROOMILLION adds confetti and a fanfare.
 function rareMoment(tier, crazy = false) {
@@ -2767,11 +2791,16 @@ async function runRace(token) {
     const bumped = final.some((f) => f.bump);
     if (bumped) { await coinToss(winner); if (!alive()) return; }
 
+    // solo road races: REV & SHIFT's full reveal (the car shifts up a gear per tier, then the tier's road sign)
+    // takes the place of the answer card
+    const show = race.solo && !race.online && final[0]?.show && final[0].tier > 0;
     // reveal: everything else fades, the answer slams into the middle and the car smashes through it
-    $("answer-zone").classList.add("hidden");
-    $("q-hint").classList.add("hidden");
-    $("q-card").classList.add("hidden");
-    document.body.classList.add("smashing");
+    if (!show) {
+      $("answer-zone").classList.add("hidden");
+      $("q-hint").classList.add("hidden");
+      $("q-card").classList.add("hidden");
+      document.body.classList.add("smashing");
+    }
     const smashCards = final.map((res, i) => {
       const r = race.racers[i];
       const m = roundMetres(res, r.power, r.useNitro, race.crazy);
@@ -2816,15 +2845,17 @@ async function runRace(token) {
       const tier = effectTier(final[i].tier, race.crazy, final[i].top); // the size of the effects: the payout, not the rarity, in CRAZY MODE
       const nitro = r.useNitro && tier > 0;
       const dur = BOOST_MS[tier] + (nitro ? 300 : 0);
-      runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier };
+      runs[i] = { t0: performance.now(), dur, b0: scene.racers[i].boost || 0, peak: (gain[i] / 1500) * 3, gears: 2 + tier, gear: 0, tier, show };
       scene.racers[i].nitro = nitro;
-      scene.launch(i, tier, nitro, dur / 1000);
-      musicBuild(tier);
-      popGain(i, gain[i], tier, nitro, race.crazy);
-      if (topFx >= 3 && !fxShown) { fxShown = true; rareMoment(topFx, race.crazy); }
+      // the full reveal launches in 1st gear and builds up a gear at a time (shiftUp); the sign replaces the pop-ups
+      const first = show ? 1 : tier;
+      scene.launch(i, first, nitro, dur / 1000);
+      musicBuild(first);
+      if (!show) popGain(i, gain[i], tier, nitro, race.crazy);
+      if (topFx >= 3 && !fxShown && !show) { fxShown = true; rareMoment(topFx, race.crazy); }
       const sfx = r.car.electric ? audio.ev : r.car.reggae ? audio.reggae : audio.sfx; // an electric car fires lasers and plasma instead; ZIG'S WHIP is all reggae
-      sfx.launch(tier);
-      if (tier >= 2) sfx.whoosh(tier);
+      sfx.launch(first);
+      if (first >= 2) sfx.whoosh(first);
       if (tier === 0) sfx.sputter();
       if (nitro) sfx.nitro();
       if (r.car.rocket) { audio.rocket.roar(tier); if (nitro) audio.rocket.surge(); } // the Hondeezy's booster
@@ -2868,15 +2899,11 @@ async function runRace(token) {
           top = Math.max(top, b);
           setText(r.elDist, Math.round(r.dist).toLocaleString("en-US") + " M");
           setText(r.elSpeed, (r.car.unlimited && !race.daily && !race.online ? "∞" : Math.round(40 + Math.min(4.5, b) * 85 * Math.min(r.power, 12))) + " KM/H");
-          // climb through the gears; Fast Lane and up backfire on each shift
+          // climb through the gears; Fast Lane and up backfire on each shift (the full reveal shifts on its own beat)
           const g = Math.min(R.gears - 1, Math.floor(e * R.gears));
-          if (g > R.gear && b > 0.3) {
+          if (g > R.gear && b > 0.3 && !R.show) {
             R.gear = g;
-            (r.car.reggae ? audio.reggae : audio.sfx).shift();
-            if (r.car.v12) { scene.backfire(i); audio.v12.pop(R.tier); } // NICO'S CRAZY CAR crackles on every shift
-            else if (r.car.reggae) { scene.backfire(i); audio.reggae.pop(R.tier); }
-            else if (r.car.megaFire) { scene.backfire(i); audio.audi.pop(R.tier); } // AUDI 5000: a fireball on every shift // ZIG'S WHIP: an echoing rimshot on every shift
-            else if (R.tier >= 3) { scene.backfire(i); (r.car.electric ? audio.ev : audio.sfx).backfire(); }
+            shiftFx(i, R.tier);
           }
           if (k < 1) audio.engineSet(Math.max(scene.speed * 0.6, (R.tier > 0 ? 0.35 + 0.65 * ((e * R.gears) % 1) : 0.2) * Math.min(1, b + 0.3)));
         });
@@ -2892,7 +2919,18 @@ async function runRace(token) {
       };
       requestAnimationFrame(step);
     });
-    await scene.smash(smashCards);
+    if (show) {
+      revealShow ||= makeReveal(document.querySelector(".stage"), { tiers: TIERS, sfx: audio.sfx, scene: () => scene });
+      await revealShow.play({
+        tier: final[0].tier, answer: final[0].display, metres: gain[0], rig: rigShow, alive,
+        launch: () => startRun(0),
+        onGear: (g) => shiftUp(0, g, final[0].tier, runs[0]),
+      });
+      rigShow?.hide();
+      $("answer-zone").classList.remove("rs-busy");
+      $("answer-zone").classList.add("hidden");
+      $("q-hint").classList.add("hidden");
+    } else await scene.smash(smashCards);
     final.forEach((_, i) => showBadge(i));
     document.body.classList.remove("smashing");
     if (!alive()) return;
@@ -3150,6 +3188,7 @@ async function lookupOnline(index, value, k) {
 }
 const CHECK_WAIT_MS = 8000; // the longest GO waits on the live Wikidata check (the clock is paused meanwhile)
 let rigShow = null; // REV & SHIFT (js/revshift.js), made once
+let revealShow = null; // its full reveal over the road (solo road races), made once
 // An answer the game turned away, for the admin screen's MISSED list (counted without any player ID)
 function reportMissed(prompt, value) {
   if (!prompt || value.trim().length < 3) return;
@@ -3209,16 +3248,30 @@ function askAnswer(r, i, token, index) {
       $("ring-fg").parentNode.parentNode.classList.remove("paused");
     };
     const elapsed = (now) => now - t0 - pausedMs - (pauseFrom ? Math.min(now - pauseFrom, CHECK_WAIT_MS) : 0);
-    rigShow ||= makeRig(zone, { tiers: TIERS, sfx: audio.sfx });
+    rigShow ||= makeRig(zone, { tiers: TIERS, sfx: audio.sfx, scene: () => scene });
     const rig = rigShow;
     rig.hide();
     let showing = false; // REV & SHIFT is playing: GO waits for it
     const gears = (res) => Math.max(1, effectTier(res.tier, race.crazy, res.top));
+    // solo road races get the full reveal over the road (the round's reveal plays it after the green light)
+    const full = race.solo && !race.online && !race.crazy && !hidden && scene === chaseScene;
     // a right answer: the show (a quick sweep for one on our list), then it counts
     const win = (res, text, fast) => {
       showing = true;
       pause();
       say("", "");
+      if (full) {
+        if (fast) rig.stage(text, hidden, true);
+        rig.green().then(() => {
+          showing = false;
+          resume();
+          if (finished || token !== raceToken) return rig.hide();
+          zone.classList.add("rs-busy");
+          input.blur();
+          lockIn({ ...res, show: true }, true);
+        });
+        return;
+      }
       (fast ? rig.quick(text, gears(res), race.crazy, hidden) : rig.accept(gears(res), race.crazy)).then(() => {
         showing = false;
         resume();
@@ -3226,11 +3279,11 @@ function askAnswer(r, i, token, index) {
         lockIn(res);
       });
     };
-    const end = () => {
+    const end = (keepRig = false) => {
       if (finished) return;
       finished = true;
       resume();
-      rig.hide();
+      if (!keepRig) rig.hide();
       cancelAnimationFrame(raf);
       input.removeEventListener("keydown", onKey);
       input.removeEventListener("input", onInput);
@@ -3244,8 +3297,8 @@ function askAnswer(r, i, token, index) {
       void feedback.offsetWidth;
       feedback.classList.add("pop");
     };
-    const lockIn = (res) => {
-      end();
+    const lockIn = (res, keepRig = false) => {
+      end(keepRig);
       audio.sfx.lock();
       input.value = "";
       resolve(res);
@@ -3286,13 +3339,13 @@ function askAnswer(r, i, token, index) {
         // staged: the rig is already showing (a real check); otherwise it was known at once
         const verdict = (hit, staged) => {
           if (hit && same(hit.label) === same(value)) return staged ? win(asFound(hit), value, false) : win(asFound(hit), value, true);
-          if (staged) rig.hide();
+          if (staged && hit) rig.hide(); // a near miss: offer the fix (a plain miss keeps the rig up for the red light)
           if (hit) return offer({ ...asFound(hit), corrected: true });
           reportMissed(index.prompt, value);
           if (!staged) return reject(value, true);
           // a red light and a stall, then the answer stays in the box to fix
           showing = true;
-          rig.reject().then(() => { showing = false; resume(); if (!finished && token === raceToken) reject(value, true); });
+          rig.reject(i).then(() => { showing = false; resume(); if (!finished && token === raceToken) reject(value, true); });
         };
         if (onlineKnown(index, value)) return verdict(onlineSeen.get(index.prompt + "|" + normalize(value)), false);
         if (checking) return;
@@ -3832,8 +3885,8 @@ $("btn-1p").addEventListener("click", () => {
   if (!canRace(me(), dayKey(), { mode: "solo", deck: save.deck }) && n) return launchFromLine({ mode: "solo", daily: n });
   launchFromLine({ mode: "solo", crazy: !!save.crazy });
 });
-$("btn-2p").addEventListener("click", () => { audio.sfx.click(); versusDeck = null; show("versus"); });
-$("btn-online").addEventListener("click", () => { audio.sfx.click(); show("online"); });
+for (const b of document.querySelectorAll('#btn-2p, [data-act="2p"]')) b.addEventListener("click", () => { audio.sfx.click(); versusDeck = null; show("versus"); });
+for (const b of document.querySelectorAll('#btn-online, [data-act="online"]')) b.addEventListener("click", () => { audio.sfx.click(); show("online"); });
 $("btn-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
 $("btn-passport").addEventListener("click", () => { audio.sfx.click(); show("passport"); });
 $("btn-results-garage").addEventListener("click", () => { audio.sfx.click(); show("garage"); });
