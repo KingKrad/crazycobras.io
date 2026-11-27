@@ -4,6 +4,7 @@ import { json, currentUser, ensureSchema, readForm, siteOrigin, clientIp, underL
 import { ensureDailySchema, utcDay, cleanNickname } from "./daily.js";
 import { parseCars } from "./premium.js";
 import { ensureStatsSchema } from "./stats.js";
+import { cleanAnswer } from "./check.js";
 
 const KINDS = new Set(["solo-classic", "solo-car", "solo-hard", "versus"]);
 const day = (ms = Date.now()) => new Date(ms).toISOString().slice(0, 10); // UTC
@@ -108,6 +109,8 @@ const perDay = (stamps, days) => {
 //   prompts                           most played, most stalled, best answers per prompt
 //   prompt { prompt }                 one prompt's tiers and most common answers
 //   reports { status? } | resolve-report { id, status }
+//   missed { status? }                answers players tried that weren't on the lists, most tried first
+//   approve-answer { prompt, answer, tier, label? } | dismiss-missed { prompt, answer } | unapprove { prompt, answer }
 //   get-settings | set-announcement { text }
 export async function handleAdmin(request, env) {
   const { stop } = await adminGuard(request, env);
@@ -229,6 +232,34 @@ export async function handleAdmin(request, env) {
     const list = await all("SELECT id, at, prompt, answer, tier, reason, note, status FROM reports WHERE status = ? ORDER BY at DESC LIMIT 100", status);
     const counts = await all("SELECT status, COUNT(*) AS n FROM reports GROUP BY status");
     return json({ reports: list, counts: Object.fromEntries(counts.map((c) => [c.status, c.n])) });
+  }
+  if (action === "missed") {
+    const status = ["open", "approved", "dismissed"].includes(body.status) ? body.status : "open";
+    // open: tried at least twice (a one-off is usually a typo or junk)
+    const list = await all(`SELECT prompt, answer, n, last_at FROM missed WHERE status = ?${status === "open" ? " AND n >= 2" : ""} ORDER BY n DESC, last_at DESC LIMIT 150`, status);
+    const counts = await all("SELECT status, COUNT(*) AS n FROM missed WHERE status != 'open' OR n >= 2 GROUP BY status");
+    return json({ missed: list, counts: Object.fromEntries(counts.map((c) => [c.status, c.n])) });
+  }
+  if (action === "approve-answer") {
+    const prompt = String(body.prompt || "").slice(0, 120);
+    const answer = cleanAnswer(body.answer).toLowerCase();
+    const tier = Number(body.tier);
+    if (!prompt || answer.length < 2 || !(tier >= 1 && tier <= 4)) return json({ error: "Bad request." }, 400);
+    const label = cleanAnswer(body.label || answer).toLowerCase() || answer;
+    await db.batch([
+      db.prepare("INSERT OR REPLACE INTO approved (prompt, answer, label, tier, at) VALUES (?, ?, ?, ?, ?)").bind(prompt, answer, label, tier, now),
+      db.prepare("UPDATE missed SET status = 'approved' WHERE prompt = ? AND answer = ?").bind(prompt, answer),
+      db.prepare("UPDATE reports SET status = 'fixed' WHERE prompt = ? AND lower(answer) = ? AND reason = 'should-count' AND status = 'open'").bind(prompt, answer),
+    ]);
+    return json({ ok: true });
+  }
+  if (action === "dismiss-missed" || action === "unapprove") {
+    const prompt = String(body.prompt || "").slice(0, 120);
+    const answer = cleanAnswer(body.answer).toLowerCase();
+    if (!prompt || !answer) return json({ error: "Bad request." }, 400);
+    if (action === "unapprove") await db.prepare("DELETE FROM approved WHERE prompt = ? AND answer = ?").bind(prompt, answer).run();
+    await db.prepare("UPDATE missed SET status = ? WHERE prompt = ? AND answer = ?").bind(action === "unapprove" ? "open" : "dismissed", prompt, answer).run();
+    return json({ ok: true });
   }
   if (action === "resolve-report") {
     const id = Number(body.id);

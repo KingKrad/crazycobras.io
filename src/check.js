@@ -5,8 +5,9 @@
 import { CLASSES, BLOCK } from "./answer-classes.js";
 import { CATALOG_CLASSES } from "./catalog-classes.js";
 import { json, readForm, clientIp } from "./accounts.js";
+import { approvedAnswer } from "./stats.js";
 
-const BLOCK_RE = new RegExp(BLOCK + "|\\b(pussy|shit|fuck\\w*|bitch|cunt|whore|slut|nigg\\w*)\\b", "i"); // (Wikidata names a few things rudely)
+export const BLOCK_RE = new RegExp(BLOCK + "|\\b(pussy|shit|fuck\\w*|bitch|cunt|whore|slut|nigg\\w*)\\b", "i"); // (Wikidata names a few things rudely)
 const WDQS = "https://query.wikidata.org/sparql";
 
 export const cleanAnswer = (s) => String(s ?? "")
@@ -41,6 +42,8 @@ export async function handleCheck(request, env, fetchImpl = fetch) {
   const prompt = String(body?.prompt ?? "");
   const cls = CLASSES[prompt] || CATALOG_CLASSES[prompt];
   const answer = cleanAnswer(body?.answer);
+  // answers the admin approved from the MISSED list count for any prompt (never cached: approving is instant)
+  if (answer.length >= 3) { const ok = await approvedAnswer(env, prompt, answer); if (ok) return json(ok); }
   if (!cls || answer.length < 3 || !/\p{L}/u.test(answer) || BLOCK_RE.test(answer)) return json({ found: false });
 
   const cacheKey = new Request(`https://answer-check.invalid/${encodeURIComponent(body.prompt)}/${encodeURIComponent(answer.toLowerCase())}`);

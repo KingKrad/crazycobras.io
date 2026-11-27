@@ -4,7 +4,11 @@
 //     Nothing about who played; answers are only counted when they were accepted (on a list), so
 //     no free text a player typed is ever stored.
 //   POST /api/vroomillion/report { prompt, answer, tier, reason, note }  "report this answer"
+//   POST /api/vroomillion/missed { prompt, answer }  an answer the game turned away (a red light)
+//     counted per prompt without any player ID, so the admin screen can show what players try most
+//     that isn't on the lists; approving one (table approved) makes it count from then on.
 import { json, ensureSchema, readForm, siteOrigin, clientIp, underLimit, currentUser } from "./accounts.js";
+import { cleanAnswer, BLOCK_RE } from "./check.js";
 
 export const REPORT_REASONS = ["too-common", "too-rare", "should-count", "should-not-count", "other"];
 
@@ -23,6 +27,13 @@ export async function ensureStatsSchema(db) {
       tier INTEGER NOT NULL, reason TEXT NOT NULL, note TEXT, status TEXT NOT NULL DEFAULT 'open', user_id TEXT)`),
     db.prepare("CREATE INDEX IF NOT EXISTS reports_status ON reports (status, at)"),
     db.prepare("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)"),
+    db.prepare(`CREATE TABLE IF NOT EXISTS missed (
+      prompt TEXT NOT NULL, answer TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, first_at INTEGER NOT NULL, last_at INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'open', PRIMARY KEY (prompt, answer))`),
+    db.prepare("CREATE INDEX IF NOT EXISTS missed_open ON missed (status, n)"),
+    db.prepare(`CREATE TABLE IF NOT EXISTS approved (
+      prompt TEXT NOT NULL, answer TEXT NOT NULL, label TEXT NOT NULL, tier INTEGER NOT NULL, at INTEGER NOT NULL,
+      PRIMARY KEY (prompt, answer))`),
   ]);
 }
 
@@ -79,5 +90,32 @@ export async function announcement(env) {
     await ensureStatsSchema(env.DB);
     const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'announcement'").first();
     return row?.value || null;
+  } catch { return null; }
+}
+
+// an answer the game turned away: counted (no player ID) for the admin screen's MISSED list
+export async function handleMissed(request, env) {
+  if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  if (!env.DB) return json({ ok: false }, 503);
+  if (!siteOrigin(request, env).ok) return json({ error: "Bad request." }, 403);
+  if (!(await underLimit(env, "missed-ip", clientIp(request, env), 60, 600))) return json({ ok: false }, 429);
+  const body = await readForm(request, 600);
+  const prompt = text(body.prompt, 120);
+  const answer = cleanAnswer(body.answer).toLowerCase();
+  if (!prompt || answer.length < 3 || !/\p{L}/u.test(answer) || BLOCK_RE.test(answer)) return json({ ok: true });
+  await ensureStatsSchema(env.DB);
+  const now = Date.now();
+  await env.DB.prepare(`INSERT INTO missed (prompt, answer, n, first_at, last_at) VALUES (?, ?, 1, ?, ?)
+    ON CONFLICT (prompt, answer) DO UPDATE SET n = n + 1, last_at = excluded.last_at`).bind(prompt, answer, now, now).run();
+  return json({ ok: true });
+}
+
+// an answer the admin approved for a prompt: { found, label, tier } or null
+export async function approvedAnswer(env, prompt, answer) {
+  if (!env.DB) return null;
+  try {
+    await ensureStatsSchema(env.DB);
+    const row = await env.DB.prepare("SELECT label, tier FROM approved WHERE prompt = ? AND answer = ?").bind(prompt, answer.toLowerCase()).first();
+    return row ? { found: true, label: row.label, tier: row.tier, approved: true } : null;
   } catch { return null; }
 }

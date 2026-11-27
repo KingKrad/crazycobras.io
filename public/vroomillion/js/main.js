@@ -1254,7 +1254,7 @@ api("config").then(({ body }) => {
 }).catch(() => {});
 
 // ---------- the admin screen: Overview, Players, Daily, Prompts, Reports, Settings ----------
-const ADMIN_TABS = [["overview", "OVERVIEW"], ["players", "PLAYERS"], ["daily", "DAILY"], ["prompts", "PROMPTS"], ["reports", "REPORTS"], ["settings", "SETTINGS"]];
+const ADMIN_TABS = [["overview", "OVERVIEW"], ["players", "PLAYERS"], ["daily", "DAILY"], ["prompts", "PROMPTS"], ["missed", "MISSED"], ["reports", "REPORTS"], ["settings", "SETTINGS"]];
 let adminTab = "overview";
 const fmtDay = (d) => d.slice(5).replace("-", "/");
 const fmtDate = (t) => (t ? new Date(t).toISOString().slice(0, 10) : "—");
@@ -1292,7 +1292,7 @@ function renderAdmin() {
   box.append(tabs, body);
   const fail = (e) => { body.textContent = ""; body.append(h("p", { class: "pay-msg bad", text: e.message === "offline" ? "The admin screen needs the live site." : e.message })); };
   body.append(h("p", { class: "note", text: "Loading…" }));
-  ({ overview: adminOverview, players: adminPlayers, daily: adminDaily, prompts: adminPrompts, reports: adminReports, settings: adminSettings })[adminTab](body).catch(fail);
+  ({ overview: adminOverview, players: adminPlayers, daily: adminDaily, prompts: adminPrompts, missed: adminMissed, reports: adminReports, settings: adminSettings })[adminTab](body).catch(fail);
 }
 
 async function adminOverview(body) {
@@ -1501,6 +1501,31 @@ async function adminPrompts(body) {
     h("p", { class: "note", text: "Tap a prompt for its most common answers. Counted anonymously; only accepted answers are stored." }));
 }
 
+// approve an answer for a prompt at a tier: it counts from the next check on (the admin's own pick of tier)
+const approveButtons = (prompt, answer, done, msg) => h("span", { class: "admin-approve" },
+  h("span", { class: "note", text: "COUNTS AS " }),
+  ...[1, 2, 3, 4].map((t) => h("button", { class: "btn small", type: "button", text: TIERS[t].short, title: `Approve as ${TIERS[t].name}`,
+    onclick: async () => { msg.textContent = "…"; try { await adminCall({ action: "approve-answer", prompt, answer, tier: t }); done(); } catch (e) { msg.textContent = e.message; } } })));
+async function adminMissed(body, status = "open") {
+  const out = await adminCall({ action: "missed", status });
+  body.textContent = "";
+  body.append(h("div", { class: "admin-tabs small" }, ...["open", "approved", "dismissed"].map((st) =>
+    h("button", { class: "admin-tab" + (st === status ? " on" : ""), type: "button", text: `${st.toUpperCase()} (${out.counts[st] || 0})`, onclick: () => adminMissed(body, st) }))),
+    h("p", { class: "note", text: "Answers players tried that weren't on the lists (red lights), most tried first; open ones were tried at least twice. Approving one makes it count from the next check on, at the tier you pick. Counted without any player ID." }));
+  if (!out.missed.length) { body.append(h("p", { class: "note", text: "Nothing here yet." })); return; }
+  for (const m of out.missed) {
+    const msg = h("span", { class: "note" });
+    const redo = () => adminMissed(body, status);
+    const act = (action) => async () => { msg.textContent = "…"; try { await adminCall({ action, prompt: m.prompt, answer: m.answer }); redo(); } catch (e) { msg.textContent = e.message; } };
+    body.append(h("div", { class: "board-box report" },
+      h("div", { class: "board-title", text: m.prompt.toUpperCase() }),
+      h("div", { text: `"${m.answer}" · tried ${m.n} time${m.n === 1 ? "" : "s"} · last ${fmtDate(m.last_at)}` }),
+      h("div", { class: "admin-actions row" },
+        status !== "approved" ? approveButtons(m.prompt, m.answer, redo, msg) : h("button", { class: "btn small", type: "button", text: "UNDO APPROVAL", onclick: act("unapprove") }),
+        status === "open" ? h("button", { class: "btn small", type: "button", text: "DISMISS", onclick: act("dismiss-missed") }) : null, msg)));
+  }
+}
+
 const REASON_TEXT = { "too-common": "should be rarer", "too-rare": "should be more common", "should-count": "should count", "should-not-count": "shouldn't count", other: "other" };
 async function adminReports(body, status = "open") {
   const out = await adminCall({ action: "reports", status });
@@ -1517,6 +1542,7 @@ async function adminReports(body, status = "open") {
       r.note ? h("div", { class: "note", text: `"${r.note}"` }) : null,
       h("div", { class: "note", text: fmtDate(r.at) }),
       h("div", { class: "admin-actions row" },
+        r.reason === "should-count" && status === "open" && r.answer ? approveButtons(r.prompt, r.answer, () => adminReports(body, status), msg) : null,
         status !== "fixed" ? h("button", { class: "btn small", type: "button", text: "MARK FIXED", onclick: set("fixed") }) : null,
         status !== "dismissed" ? h("button", { class: "btn small", type: "button", text: "DISMISS", onclick: set("dismissed") }) : null,
         status !== "open" ? h("button", { class: "btn small", type: "button", text: "REOPEN", onclick: set("open") }) : null, msg)));
@@ -3105,8 +3131,14 @@ async function lookupOnline(index, value, k) {
 }
 const CHECK_WAIT_MS = 8000; // the longest GO waits on the live Wikidata check (the clock is paused meanwhile)
 let rigShow = null; // REV & SHIFT (js/revshift.js), made once
+// An answer the game turned away, for the admin screen's MISSED list (counted without any player ID)
+function reportMissed(prompt, value) {
+  if (!prompt || value.trim().length < 3) return;
+  fetch("/api/vroomillion/missed", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt, answer: value.trim().slice(0, 60) }), keepalive: true }).catch(() => {});
+}
 // Found online = not on our lists = rare. Never a One in a Vroomillion (those are hand-picked).
 function onlineTier(hit) {
+  if (Number.isInteger(hit.tier) && hit.tier >= 1 && hit.tier <= 4) return hit.tier; // approved on the admin screen
   const [t2, t3] = Array.isArray(hit.tiers) ? hit.tiers : [70, 25];
   return hit.n >= t2 ? 2 : hit.n >= t3 ? 3 : 4;
 }
@@ -3237,6 +3269,7 @@ function askAnswer(r, i, token, index) {
           if (hit && same(hit.label) === same(value)) return staged ? win(asFound(hit), value, false) : win(asFound(hit), value, true);
           if (staged) rig.hide();
           if (hit) return offer({ ...asFound(hit), corrected: true });
+          reportMissed(index.prompt, value);
           if (!staged) return reject(value, true);
           // a red light and a stall, then the answer stays in the box to fix
           showing = true;

@@ -8,7 +8,7 @@ import { handleProgress } from "./progress.js";
 import { handleCarCheckout, handleCarVerify } from "./premium.js";
 import { handleModeCheckout, handleModeVerify } from "./modes.js";
 import { handleOAuthStart, handleOAuthCallback } from "./oauth.js";
-import { handleRoundStats, handleReport } from "./stats.js";
+import { handleRoundStats, handleReport, handleMissed } from "./stats.js";
 import { handleOnline } from "./online.js";
 import { sweepRefunds } from "./refunds.js";
 import { handleTrial } from "./trial.js";
@@ -39,6 +39,7 @@ const ROUTES = {
   "/api/vroomillion/oauth-apple-cb": (r, e) => handleOAuthCallback(r, e, "apple"),
   "/api/vroomillion/round-stats": handleRoundStats,
   "/api/vroomillion/report": handleReport,
+  "/api/vroomillion/missed": handleMissed,
   "/api/vroomillion/online": handleOnline,
   "/api/vroomillion/trial": handleTrial,
   "/api/vroomillion/signup": handleSignup,

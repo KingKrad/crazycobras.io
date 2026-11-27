@@ -948,3 +948,27 @@ test("free trial races are remembered on the server: on the account and in a coo
   assert.equal((await worker.fetch(post("trial", { mode: "nope" }, { cookie }), env())).status, 400);
 });
 
+
+// ---------- MISSED answers: logged without a player ID, approved on the admin screen ----------
+test("a turned-away answer is counted, and once approved it counts for that prompt at the chosen tier", async () => {
+  const q = "Name a sound in the city";
+  for (let k = 0; k < 2; k++) assert.equal((await worker.fetch(post("missed", { prompt: q, answer: "Jackhammer!" }), env())).status, 200);
+  await worker.fetch(post("missed", { prompt: q, answer: "shit" }), env()); // rude: never stored
+  await worker.fetch(post("missed", { prompt: q, answer: "zz" }), env()); // too short
+  const rows = db.sql.prepare("SELECT prompt, answer, n FROM missed").all();
+  assert.deepEqual(rows.map((r) => [r.answer, r.n]), [["jackhammer", 2]]);
+  const before = await (await worker.fetch(post("check", { prompt: q, answer: "jackhammer" }), env())).json();
+  assert.equal(before.found, false);
+
+  await signup("boss@example.com");
+  const boss = await worker.fetch(post("login", { email: "boss@example.com", password: "hunter2hunter2" }), adminEnv());
+  const cookie = cookieOf(boss);
+  const list = await (await worker.fetch(post("admin", { action: "missed" }, { cookie }), adminEnv())).json();
+  assert.deepEqual(list.missed.map((m) => [m.answer, m.n]), [["jackhammer", 2]]);
+  assert.equal((await worker.fetch(post("admin", { action: "approve-answer", prompt: q, answer: "jackhammer", tier: 3 }, { cookie }), adminEnv())).status, 200);
+  const after = await (await worker.fetch(post("check", { prompt: q, answer: "Jackhammer" }), env())).json();
+  assert.deepEqual([after.found, after.label, after.tier], [true, "jackhammer", 3]);
+  assert.equal(db.sql.prepare("SELECT status FROM missed").get().status, "approved");
+  await worker.fetch(post("admin", { action: "unapprove", prompt: q, answer: "jackhammer" }, { cookie }), adminEnv());
+  assert.equal((await (await worker.fetch(post("check", { prompt: q, answer: "jackhammer" }), env())).json()).found, false);
+});

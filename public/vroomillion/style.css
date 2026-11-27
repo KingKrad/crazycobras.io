@@ -1913,3 +1913,5 @@ body.kb .rs-tach { width: 52px; height: 38px; }
 body.kb .rs-ladder { display: none; }
 html[data-season="xmas"] .rs-rig, html[data-season="xmas"] .rs-ladder { background: rgba(5, 20, 11, 0.92); border-color: #ffd23a; }
 @media (prefers-reduced-motion: reduce) { .rs-plate.land, .rs-plate.good, .rs-plate.bad, .rs-ladder div.final { animation: none; } .rs-needle { transition: none; } }
+.admin-approve { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.admin-actions.row .admin-approve .btn.small { width: auto; padding-left: 8px; padding-right: 8px; }
