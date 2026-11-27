@@ -3,6 +3,16 @@
 // id: unique, newest first (date plus a letter if there's more than one that day).
 export const CHANGELOG = [
   {
+    id: "2026-11-27c",
+    date: "Nov 27, 2026",
+    title: "Road signs and the four buttons",
+    items: [
+      "A right answer is now one big reveal: green light, your car shifts up a gear for every rarity tier while the distance ticks up and the sky changes, then a road sign drops in on its chains. The rarer the answer, the fancier the sign. Tap to skip.",
+      "A wrong answer now really shows its red light and stall before you try again.",
+      "QUICK RACE, GAME MODES, 2 PLAYERS and RACE A FRIEND are back on the home screen.",
+    ],
+  },
+  {
     id: "2026-11-27b",
     date: "Nov 27, 2026",
     title: "Rev & Shift, and the crowd",
