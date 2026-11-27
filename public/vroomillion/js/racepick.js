@@ -7,6 +7,7 @@
 // The history is a list of family ids ("F:<id>"), oldest first.
 import { FAMILIES, TOPICS } from "./catalog/index.js";
 import { DAILY_START, DAILY_ORDER } from "./catalog/daily-order.js";
+import { RETIRED } from "./catalog/retired.js";
 
 export const FAM_PREFIX = "F:";
 // the answers for prompts added with the new catalog live one file per prompt: answers/<slug>.json
@@ -25,7 +26,13 @@ export const isWordGame = (f) => {
   if (!wordCache.has(f.id)) wordCache.set(f.id, f.prompts.some((p) => WORD_GAME.test(p)));
   return wordCache.get(f.id);
 };
-export const poolFamilies = (mode, fams = FAMILIES) => fams.filter((f) => f.pools.includes(POOL[mode] || "main"));
+// Unlimited skips retired families (only a short hand-written list can check them: tools/retire.mjs);
+// the daily races and CHRISTMAS keep every prompt
+const KEEPS_ALL = new Set(["daily", "xmas"]);
+export const poolFamilies = (mode, fams = FAMILIES) => {
+  const pool = POOL[mode] || "main";
+  return fams.filter((f) => f.pools.includes(pool) && (KEEPS_ALL.has(pool) || !RETIRED.has(f.id)));
+};
 
 // seen: the history list; returns families in play order, each with the prompt text to ask
 export function pickRace(mode, seen, n = 7, rng = Math.random, opts = {}) {
