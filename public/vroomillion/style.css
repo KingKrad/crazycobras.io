@@ -1940,3 +1940,15 @@ body:not([data-screen="race"]) .screen.active { animation: screen-in 0.18s cubic
 @media (min-width: 900px) {
   .tabbar { left: 50%; right: auto; width: min(780px, 100vw); transform: translateX(-50%); border-left: 3px solid #2a1f4a; border-right: 3px solid #2a1f4a; }
 }
+
+/* THE CROWD: the most given answers after each round */
+.crowd { margin-top: 10px; padding: 8px 10px; background: rgba(0, 0, 0, 0.45); border: 2px solid var(--line); text-align: left; }
+.crowd-head { font: 9px var(--font-title); letter-spacing: 0.1em; color: var(--yellow); margin-bottom: 6px; }
+.crowd-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.crowd-list li { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--dim); }
+.crowd-list li.you { color: #fff; font-weight: 700; }
+.crowd-list li.you .crowd-a::before { content: "▶ "; color: var(--yellow); }
+.crowd-a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crowd-p { flex: none; color: var(--cyan); }
+.crowd-you { margin-top: 6px; font-size: 9px; color: #fff; }
+body.kb .crowd { display: none; }

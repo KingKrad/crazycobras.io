@@ -972,3 +972,18 @@ test("a turned-away answer is counted, and once approved it counts for that prom
   await worker.fetch(post("admin", { action: "unapprove", prompt: q, answer: "jackhammer" }, { cookie }), adminEnv());
   assert.equal((await (await worker.fetch(post("check", { prompt: q, answer: "jackhammer" }), env())).json()).found, false);
 });
+
+test("THE CROWD: a prompt's top answers as a share of its plays, once it's been played enough", async () => {
+  const q = "Name a fruit";
+  const send = (answer, tier) => worker.fetch(post("round-stats", { rounds: [{ prompt: q, answer, tier }] }), env());
+  for (let k = 0; k < 19; k++) await send(k < 10 ? "apple" : k < 15 ? "banana" : "durian", k < 15 ? 1 : 3);
+  const early = await (await worker.fetch(get("crowd?prompt=" + encodeURIComponent(q) + "&answer=durian"), env())).json();
+  assert.deepEqual(early.top, []); // 19 plays: not yet
+  await send("", 0); // a stall counts as a play
+  const d = await (await worker.fetch(get("crowd?prompt=" + encodeURIComponent(q) + "&answer=Durian"), env())).json();
+  assert.equal(d.plays, 20);
+  assert.deepEqual(d.top.map((t) => [t.answer, t.pct]), [["apple", 50], ["banana", 25], ["durian", 20]]);
+  assert.equal(d.mine, 20);
+  const none = await (await worker.fetch(get("crowd?prompt=" + encodeURIComponent(q) + "&answer=jabuticaba"), env())).json();
+  assert.equal(none.mine, 0);
+});

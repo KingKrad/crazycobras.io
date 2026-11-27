@@ -4,6 +4,8 @@
 //     Nothing about who played; answers are only counted when they were accepted (on a list), so
 //     no free text a player typed is ever stored.
 //   POST /api/vroomillion/report { prompt, answer, tier, reason, note }  "report this answer"
+//   GET  /api/vroomillion/crowd?prompt=..&answer=..  what the crowd said: a prompt's top 5 accepted answers
+//     as a share of the rounds played (once it's been played 20 times), and how many gave your answer
 //   POST /api/vroomillion/missed { prompt, answer }  an answer the game turned away (a red light)
 //     counted per prompt without any player ID, so the admin screen can show what players try most
 //     that isn't on the lists; approving one (table approved) makes it count from then on.
@@ -118,4 +120,33 @@ export async function approvedAnswer(env, prompt, answer) {
     const row = await env.DB.prepare("SELECT label, tier FROM approved WHERE prompt = ? AND answer = ?").bind(prompt, answer.toLowerCase()).first();
     return row ? { found: true, label: row.label, tier: row.tier, approved: true } : null;
   } catch { return null; }
+}
+
+export const CROWD_MIN_PLAYS = 20;
+export async function handleCrowd(request, env) {
+  if (request.method !== "GET") return json({ error: "Method not allowed." }, 405);
+  const url = new URL(request.url);
+  const prompt = text(url.searchParams.get("prompt") || "", 120);
+  const answer = text(url.searchParams.get("answer") || "", 40).toLowerCase();
+  if (!prompt) return json({ error: "Bad request." }, 400);
+  const cacheKey = new Request(`https://crowd.invalid/${encodeURIComponent(prompt)}/${encodeURIComponent(answer)}`);
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const hit = cache && (await cache.match(cacheKey));
+  if (hit) return hit;
+  let out = { plays: 0, top: [], mine: null };
+  if (env.DB) {
+    await ensureStatsSchema(env.DB);
+    const st = await env.DB.prepare("SELECT plays FROM prompt_stats WHERE prompt = ?").bind(prompt).first();
+    const plays = st?.plays || 0;
+    if (plays >= CROWD_MIN_PLAYS) {
+      const top = (await env.DB.prepare("SELECT answer, n FROM answer_stats WHERE prompt = ? ORDER BY n DESC LIMIT 5").bind(prompt).all()).results || [];
+      const pct = (n) => Math.round((n / plays) * 1000) / 10;
+      const mine = answer ? await env.DB.prepare("SELECT n FROM answer_stats WHERE prompt = ? AND answer = ?").bind(prompt, answer).first() : null;
+      out = { plays, top: top.map((r) => ({ answer: r.answer, pct: pct(r.n) })), mine: answer ? pct(mine?.n || 0) : null };
+    }
+  }
+  const res = json(out);
+  res.headers.set("Cache-Control", "public, max-age=300");
+  if (cache) await cache.put(cacheKey, res.clone());
+  return res;
 }

@@ -2382,7 +2382,7 @@ function renderModes() {
       h("div", { class: "mc-body" },
         h("span", { class: "mc-name", text: m.name }),
         h("span", { class: "mc-line", text: m.card }),
-        h("span", { class: "mc-tag", text: m.event ? (ownsMode(id) ? "LIMITED TIME ▶" : "UNLIMITED ▶") : ownsMode(id) ? "YOURS ▶" : modeTrialLeft(id) ? "1 FREE RACE ▶" : "$5 ▶" }))));
+        h("span", { class: "mc-tag", text: m.event ? (ownsMode(id) ? "LIMITED TIME ▶" : eventFreeLeft(id) ? "FREE TODAY ▶" : "UNLIMITED ▶") : ownsMode(id) ? "YOURS ▶" : modeTrialLeft(id) ? "1 FREE RACE ▶" : "$5 ▶" }))));
   }
   for (const c of COMING.filter((c) => !THEMED[c.id])) {
     box.append(h("div", { class: "mode-card soon", "aria-label": c.name + ", coming soon" },
@@ -2405,7 +2405,9 @@ const ownsMode = (id) => !!account && (THEMED[id]?.event ? modeOpen(id) && (!!ac
 // the free trial race: used if this save says so, or the server does (the account, or this browser's cookie),
 // so clearing the browser's storage doesn't hand out another one
 let serverTrials = new Set();
-const modeTrialLeft = (id) => !THEMED[id]?.event && !save.trials?.[id] && !serverTrials.has(id) && !(account?.trials || []).includes(id);
+const modeTrialLeft = (id) => !THEMED[id]?.event ? !save.trials?.[id] && !serverTrials.has(id) && !(account?.trials || []).includes(id) : eventFreeLeft(id);
+// an event mode (CHRISTMAS) for everyone else: one free race a day while it's on, and it counts toward its car
+const eventFreeLeft = (id) => !!THEMED[id]?.event && modeOpen(id) && !ownsMode(id) && save.eventFree?.[id] !== dday();
 const loadTrials = () => api("trial").then(({ body }) => { if (Array.isArray(body.used)) serverTrials = new Set(body.used); }).catch(() => {});
 loadTrials();
 function renderModeLobby(id) {
@@ -2430,11 +2432,12 @@ function renderEventLobby(id) {
   const ends = new Date(m.ends - 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
   $m("status").textContent = !open ? "CHRISTMAS IS OVER · SEE YOU NEXT YEAR"
     : owned ? (have ? "THE SLEIGH IS YOURS · RACE AS MUCH AS YOU LIKE" : `${done} OF ${SLEIGH_RACES} RACES FOR SANTA'S SLEIGH`) + ` · OPEN UNTIL ${ends}`
-    : `FOR UNLIMITED PLAYERS · OPEN UNTIL ${ends}`;
+    : eventFreeLeft(id) ? `1 FREE RACE A DAY · ${done} OF ${SLEIGH_RACES} FOR THE SLEIGH · UNTIL ${ends}`
+    : `TODAY'S FREE RACE IS DONE · BACK TOMORROW, OR RACE ALL YOU LIKE WITH UNLIMITED`;
   $m("info").textContent = m.info;
   $m("2p").classList.toggle("hidden", !owned);
-  go.textContent = !open ? "CLOSED" : owned ? m.go : "GET UNLIMITED";
-  go.classList.toggle("unlock-cta", open && !owned);
+  go.textContent = !open ? "CLOSED" : owned ? m.go : eventFreeLeft(id) ? "▶ TODAY'S FREE RACE" : "GET UNLIMITED";
+  go.classList.toggle("unlock-cta", open && !owned && !eventFreeLeft(id));
   go.disabled = !open;
   const prize = $m("prize");
   if (prize) {
@@ -2450,7 +2453,7 @@ for (const id of THEMED_IDS) {
   const m = THEMED[id], $m = (k) => $(m.ids + "-" + k);
   $m("go").addEventListener("click", () => {
     audio.sfx.click();
-    if (m.event) { if (!modeOpen(id)) return; if (ownsMode(id)) startRace({ mode: "solo", deck: id }); else openPaywall("event"); return; }
+    if (m.event) { if (!modeOpen(id)) return; if (ownsMode(id) || eventFreeLeft(id)) startRace({ mode: "solo", deck: id }); else openPaywall("event"); return; }
     if (ownsMode(id) || modeTrialLeft(id)) { startRace({ mode: "solo", deck: id }); return; }
     buyMode(id, $m("agree-box").checked, $m("go"));
   });
@@ -2658,8 +2661,9 @@ function startRace(setup) {
   $("q-kicker").textContent = "GET READY";
   $("mode-label").textContent = daily ? label : `${label} · ${modeName(deck)}` + (crazy ? " · CRAZY" : "") + (!solo && setup.equal ? " · EQUAL CARS" : "");
   $("mode-label").className = "mode-tag mode-" + (daily ? "daily" : deck);
-  // WORLD TOUR's one free race is used the moment it starts
-  if (themed && !ownsMode(themed)) {
+  // WORLD TOUR's one free race is used the moment it starts (CHRISTMAS: today's free race)
+  if (themed && !ownsMode(themed) && THEMED[themed].event) { save.eventFree = { ...(save.eventFree || {}), [themed]: dday() }; persist(); }
+  else if (themed && !ownsMode(themed)) {
     save.trials = { ...(save.trials || {}), [themed]: Date.now() }; persist();
     serverTrials.add(themed);
     api("trial", { method: "POST", body: JSON.stringify({ mode: themed }) }).catch(() => {}); // remembered on the server too
@@ -2932,7 +2936,11 @@ async function runRace(token) {
         ? "THAT'S AS NICHE AS IT GETS."
         : `A RARE ONE HERE: ${exampleAnswer(q, 4).toUpperCase()}`);
 
-    await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token);
+    // what the crowd said (once a prompt has been played enough), under the answers
+    const mine = race.online ? race.online.seat : 0;
+    showCrowd(q.q, final[mine]?.tier > 0 ? final[mine].display : "", token);
+    // solo: on to the next round by itself after a few seconds (tap NEXT to go now, or the card to stay)
+    await waitNext(round === rounds - 1 ? "FINISH ▶" : "NEXT ▶", token, race.solo && !race.online ? AUTO_NEXT_MS : 0);
     if (!alive()) return;
   }
   await arrive(token);
@@ -3379,13 +3387,43 @@ function askAnswer(r, i, token, index) {
   });
 }
 
-function waitNext(label, token) {
+const AUTO_NEXT_MS = 3000;
+// THE CROWD: a prompt's most given answers, as a share of everyone who played it, and how many gave yours
+async function showCrowd(prompt, answer, token) {
+  const box = h("div", { class: "crowd" });
+  $("q-card").querySelector(".crowd")?.remove();
+  try {
+    const qs = new URLSearchParams({ prompt, ...(answer ? { answer: answer.toLowerCase().slice(0, 40) } : {}) });
+    const res = await fetch("/api/vroomillion/crowd?" + qs, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return;
+    const d = await res.json();
+    if (token !== raceToken || !Array.isArray(d.top) || !d.top.length) return;
+    const you = answer && normalize(answer);
+    box.append(h("div", { class: "crowd-head", text: "THE CROWD SAID" }),
+      h("ol", { class: "crowd-list" }, ...d.top.map((t) => h("li", { class: normalize(t.answer) === you ? "you" : "" },
+        h("span", { class: "crowd-a", text: t.answer.toUpperCase() }), h("span", { class: "crowd-p", text: t.pct + "%" })))),
+      answer ? h("div", { class: "crowd-you", text: d.mine ? `${d.mine}% SAID "${answer.toUpperCase().slice(0, 22)}"` : `NOBODY ELSE HAS SAID "${answer.toUpperCase().slice(0, 22)}" YET` }) : null);
+    $("q-card").append(box);
+    requestAnimationFrame(fitCard);
+  } catch { /* offline: no crowd */ }
+}
+
+// auto: go on by itself after this many ms (a countdown on the button); a tap on the card stays put
+function waitNext(label, token, auto = 0) {
   return new Promise((resolve) => {
     const btn = $("btn-next");
-    btn.textContent = label;
+    let left = auto ? Math.ceil(auto / 1000) : 0;
+    const draw = () => { btn.textContent = left > 0 ? `${label} ${left}` : label; };
+    draw();
     btn.classList.remove("hidden");
     btn.focus({ preventScroll: true });
+    let autoTimer = auto ? setInterval(() => { left--; if (left <= 0) go(); else draw(); }, 1000) : 0;
+    const stay = () => { clearInterval(autoTimer); autoTimer = 0; left = 0; draw(); };
+    $("q-card").addEventListener("pointerdown", stay, { once: true });
     const go = () => {
+      clearInterval(autoTimer);
+      $("q-card").removeEventListener("pointerdown", stay);
+      $("q-card").querySelector(".crowd")?.remove();
       btn.removeEventListener("click", go);
       btn.classList.add("hidden");
       audio.sfx.click();
@@ -3393,7 +3431,8 @@ function waitNext(label, token) {
     };
     btn.addEventListener("click", go);
     const poll = setInterval(() => {
-      if (token !== raceToken) { clearInterval(poll); btn.removeEventListener("click", go); btn.classList.add("hidden"); resolve(); }
+      if (token !== raceToken) { clearInterval(poll); clearInterval(autoTimer); $("q-card").querySelector(".crowd")?.remove(); btn.removeEventListener("click", go); btn.classList.add("hidden"); resolve(); }
+      else if (btn.classList.contains("hidden")) clearInterval(poll);
     }, 200);
     btn.addEventListener("click", () => clearInterval(poll), { once: true });
   });
@@ -3729,9 +3768,9 @@ function finish(token) {
   $("btn-again").disabled = false;
   $("btn-redo").textContent = paid ? "REDO THIS RACE" : "REDO — $5";
   if (race.themed && THEMED[race.themed].event) {
-    const own = ownsMode(race.themed);
-    $("btn-again").textContent = own ? "▶ NEXT CHRISTMAS RACE" : "CHRISTMAS IS OVER";
-    $("btn-again").disabled = !own;
+    const own = ownsMode(race.themed), open = modeOpen(race.themed);
+    $("btn-again").textContent = own ? "▶ NEXT CHRISTMAS RACE" : !open ? "CHRISTMAS IS OVER" : "MORE CHRISTMAS RACES — UNLIMITED";
+    $("btn-again").disabled = !own && !open;
     $("btn-redo").textContent = "REDO THIS RACE";
   } else if (race.themed) { // a themed mode: its own $5 unlock, not UNLIMITED
     const own = ownsMode(race.themed), nm = THEMED[race.themed].name;
